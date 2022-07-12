@@ -1,0 +1,20 @@
+#Page {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+  }
+  
+  #scenarioTitle {
+    float: left;
+    padding-left: 15px;
+    font-size: 20px;
+  }
+  
+  .shiftTextLeft {
+    margin-left: 0px;
+  }
+  
+  .shiftTextRight {
+    margin-left: 240px;
+  }
