@@ -1,7 +1,7 @@
 import './Header.css';
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import logo from "../../assets/pareto-logo-2.png";
+import logo from "../../assets/pareto-logo.png";
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import MenuItem from '@mui/material/MenuItem';
