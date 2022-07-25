@@ -18,7 +18,7 @@ const createWindow = () => {
         // }
     })
 
-    mainWindow.webContents.openDevTools()
+    //mainWindow.webContents.openDevTools()
     
     mainWindow.loadURL(uiURL)
     mainWindow.on('ready-to-show', () => {
@@ -78,7 +78,7 @@ app.whenReady().then(() => {
     let uiProcess = startUI()
 
     // Start Window 
-    var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=50) => {
+    var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=15) => {
         let noTrails = 0
         axios.get(url).then(() => {
             console.log(`${appName} is ready at ${url}!`)

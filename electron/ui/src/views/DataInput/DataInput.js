@@ -6,12 +6,12 @@ import Box from '@mui/material/Box';
 export default function DataInput(props) {
   const scenario = props.scenario
    useEffect(()=>{
-       console.log('curr scenario',scenario)
+      //  console.log('curr scenario',scenario)
    }, [scenario]);
   
   return ( 
     <Box>
-      data input
+      {JSON.stringify(scenario.data_input[props.category])}
     </Box>
   );
 

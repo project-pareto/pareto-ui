@@ -7,36 +7,121 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { Routes, Route } from "react-router-dom";
 import Header from 'components/Header/Header'; 
-import Sidebar from 'components/Sidebar/Sidebar'
-import DataInput from 'views/DataInput/DataInput';
+import ProcessToolbar from 'components/ProcessToolbar/ProcessToolbar'
 import HomePage from 'views/HomePage/HomePage';
+import { fetchScenarios } from './services/sidebar.service'
+import {useEffect, useState} from 'react';   
+import { updateScenario } from 'services/app.service'
+
 
 function App() {
   
-  const [open, setOpenSidebar] = React.useState(true);
-  const [scenarioData, setScenarioData] = React.useState(null);
+  const [ scenarioData, setScenarioData ] = useState(null);
+  const [ scenarios, setScenarios ] = useState([]); 
+  const [ section, setSection ] = useState(0)
+  const [ category, setCategory ] = useState(null)
+  const [ scenarioIndex, setScenarioIndex ] = useState(null)
 
-  const handleSidebarOpen = () => {
-    setOpenSidebar(true);
-    console.log('open = '+open)
-  };
+  useEffect(()=>{
+    fetchScenarios()
+    .then(response => response.json())
+    .then((data)=>{
+      console.log('setscenarios: ',data.data)
+      setScenarios(data.data)
+    });
+}, []);
 
-  const handleSidebarClose = () => {
-    setOpenSidebar(false);
-    console.log('open = '+open)
-  };
 
   const handleScenarioSelection = (data) => {
-    setScenarioData(data);
+    setScenarioData(scenarios[data.target.value]);
+    setScenarioIndex(data.target.value)
+    setSection(0);
+    setCategory(null)
   };
+
+  const handleNewScenario = (data) => {
+    const temp = [...scenarios]
+    temp.push(data)
+    setScenarios(temp)
+    setScenarioData(data)
+    setScenarioIndex(temp.length-1)
+    setSection(0);
+    setCategory(null)    
+  }
+
+  const handleScenarioUpdate = (updatedScenario) => {
+    const temp = [...scenarios]
+    scenarios[scenarioIndex] = updatedScenario
+    setScenarios(temp)
+    setScenarioData(updatedScenario)
+    console.log('new scenario: ')
+    console.log(updatedScenario)
+    updateScenario({'updatedScenario': updatedScenario, 'index': scenarioIndex})
+    .then(response => response.json())
+    .then((data) => {
+      console.log('updated scenarios on backend')
+    }).catch(e => {
+      console.log('error on scenario update')
+      console.log(e)
+    })
+  }
+
+  const handleSetSelection = (section) => {
+    if(section === 2) {
+      setCategory("v_F_Overview_dict")
+    } else {
+      setCategory(null)
+    }
+    setSection(section)
+ }
+
+ const handleSetCategory = (category) => {
+  setCategory(category)
+ }
+
+  const handleEditScenarioName = (newName) => {
+    const tempScenario = {...scenarioData}
+    tempScenario.name = newName
+    const tempScenarios = [...scenarios]
+    tempScenarios[scenarioIndex] = tempScenario
+    setScenarios(tempScenarios)
+    setScenarioData(tempScenario)
+    updateScenario({'updatedScenario': tempScenario, 'index': scenarioIndex})
+    .then(response => response.json())
+    .then((data) => {
+      console.log('updated scenarios on backend')
+    }).catch(e => {
+      console.log('error on scenario update')
+      console.log(e)
+    })
+  }
 
   return (
     <div className="App">  
-      <Header/>
-      <Sidebar open={open} handleOpen={handleSidebarOpen} handleClose={handleSidebarClose} handleSelection={handleScenarioSelection}></Sidebar>
+      <Header 
+        scenarios={scenarios} 
+        index={scenarioIndex} 
+        scenarioData={scenarioData} 
+        handleNewScenario={handleNewScenario} 
+        handleSelection={handleScenarioSelection}/>
+      <ProcessToolbar 
+        handleSelection={handleSetSelection} 
+        selected={section} 
+        scenario={scenarioData}>
+      </ProcessToolbar>
       <Routes> 
-        <Route path="/" element={<HomePage scenario={scenarioData} shiftRight={open}/>} />
-        {/* <Route path="/DataInput" element={<DataInput scenario={scenarioData} shiftRight={open}/>} /> */}
+        <Route 
+          path="/" 
+          element={
+            <HomePage 
+            updateScenario={handleScenarioUpdate} 
+            handleEditScenarioName={handleEditScenarioName} 
+            scenario={scenarioData} 
+            section={section} 
+            category={category} 
+            handleSetCategory={handleSetCategory} 
+            />} 
+        />
       </Routes> 
     </div> 
   );

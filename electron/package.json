@@ -1,5 +1,5 @@
 {
-  "name": "nawi",
+  "name": "pareto",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -7,7 +7,7 @@
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Abdelrahman Elbashandy",
+  "author": "Michael Pesce",
   "license": "ISC",
   "devDependencies": {
     "electron": "^18.2.3"
