@@ -38,7 +38,7 @@ export default function ScenarioPage(props) {
         <p style={props.selected === 1 ? styles.textSelected : null}>Optimization Setup</p>
       </Grid>
       <Grid item xs={2}>
-        <IconButton sx={{marginTop:'5px'}} disabled={Object.keys(props.scenario.results).length !== 0 ? false : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => props.handleSelection(2)}>
+        <IconButton sx={{marginTop:'5px'}} disabled={props.scenario ? Object.keys(props.scenario.results).length !== 0 ? false : true : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => props.handleSelection(2)}>
             <PieChartIcon fontSize="large"></PieChartIcon>
         </IconButton>
         <p style={props.selected === 2 ? styles.textSelected : null}>Model Results</p>
