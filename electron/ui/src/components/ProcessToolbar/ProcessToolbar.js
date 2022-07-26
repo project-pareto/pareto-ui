@@ -23,7 +23,7 @@ export default function ProcessToolbar(props) {
     },
    }
   return ( 
-    <Box sx={{position: 'sticky', top:'75px', backgroundColor:"white", zIndex:'1'}}>
+    <Box sx={{position: 'sticky', top:'65px', backgroundColor:"white", zIndex:'1'}}>
       <Grid container>
       <Grid item xs={1.5} >
         <IconButton aria-label="data_input" sx={{marginTop:'5px'}} style={props.selected === 0 ? styles.iconSelected : null} onClick={() => props.handleSelection(0)}>

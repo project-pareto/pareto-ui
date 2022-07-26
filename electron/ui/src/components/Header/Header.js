@@ -4,10 +4,11 @@ import {useEffect, useState} from 'react';
 import logo from "../../assets/pareto-logo.png";
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { fetchScenarios, uploadExcelSheet } from '../../services/sidebar.service'
+import Select from '@mui/material/Select';
+import {  uploadExcelSheet } from '../../services/sidebar.service'
 
  
 
@@ -39,19 +40,19 @@ export default function Header(props) {
             </div>
           </a>
           <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>
-          <FormControl sx={{ m: 1, minWidth: 200 }}>
+          <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
           <Select
             value={props.index === null ? "" : props.index}
             onChange={props.handleSelection}
-            // displayEmpty
+            sx={{color:'#0b89b9', fontWeight: "bold"}}
           >
               {props.scenarios.map((scenario, index) => 
               (
                   <MenuItem key={index} value={index}>{scenario.name}</MenuItem>
               ))}
-            </Select>
+          </Select>
           </FormControl>
-          <Button id='user-name'  component="label" startIcon={<AddIcon />}>
+          <Button id='user-name' sx={{color: "#0b89b9"}} component="label" startIcon={<AddCircleIcon />}>
             Create New Scenario
               <input
                 type="file"

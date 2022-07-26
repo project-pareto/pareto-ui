@@ -37,7 +37,7 @@ function App() {
     setScenarioData(scenarios[data.target.value]);
     setScenarioIndex(data.target.value)
     setSection(0);
-    setCategory(null)
+    setCategory("ProductionPads")
   };
 
   const handleNewScenario = (data) => {
@@ -47,7 +47,7 @@ function App() {
     setScenarioData(data)
     setScenarioIndex(temp.length-1)
     setSection(0);
-    setCategory(null)    
+    setCategory("ProductionPads")    
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
@@ -70,6 +70,8 @@ function App() {
   const handleSetSelection = (section) => {
     if(section === 2) {
       setCategory("v_F_Overview_dict")
+    } else if(section === 0) {
+      setCategory("ProductionPads")
     } else {
       setCategory(null)
     }
