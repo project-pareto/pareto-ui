@@ -120,7 +120,7 @@ export default function HomePage(props) {
       <Grid item xs={4}>
       <div>
         <b id='scenarioTitle' >
-        {scenario ? <p>{scenario.name}<IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}}><EditIcon fontSize='inherit'></EditIcon></IconButton></p> :  "Please select or create a scenario"}
+        {scenario ? <p>{scenario.name}<IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}}><EditIcon fontSize='inherit'></EditIcon></IconButton></p> :  <p>Please select or create a scenario</p>}
       </b> 
       </div>
       </Grid>

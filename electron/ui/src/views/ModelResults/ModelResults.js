@@ -14,7 +14,8 @@ export default function ModelResults(props) {
    }, [scenario]);
   
   return ( 
-    <Box>
+    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+      <h3>{props.category}</h3>
       {Object.keys(props.scenario.results).length !== 0 ? 
       <>
       <Table style={{border:"1px solid #ddd"}} size='small'>
