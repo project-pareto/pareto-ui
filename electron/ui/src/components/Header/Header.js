@@ -50,8 +50,8 @@ export default function Header(props) {
         
         <div className="titlebar">
           <a href="/">
-            <div id="nawi_logo">
-              <img src={logo} alt="NAWI logo"/>
+            <div id="pareto_logo">
+              <img src={logo} alt="Pareto Logo"/>
             </div>
           </a>
           <p style={{color:'#565656', fontSize: '20px'}}>Scenario</p>

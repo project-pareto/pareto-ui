@@ -26,19 +26,19 @@ export default function ScenarioPage(props) {
     <Box sx={{position: 'sticky', top:'75px', backgroundColor:"white", zIndex:'1'}}>
       <Grid container>
       <Grid item xs={2} >
-        <IconButton sx={{marginTop:'5px'}} style={props.selected === 0 ? styles.iconSelected : null} onClick={() => props.handleSelection(0)}>
+        <IconButton aria-label="data_input" sx={{marginTop:'5px'}} style={props.selected === 0 ? styles.iconSelected : null} onClick={() => props.handleSelection(0)}>
             <InputIcon fontSize="large"></InputIcon>
         </IconButton>
         <p style={props.selected === 0 ? styles.textSelected : null}>Data Input</p>
       </Grid>
       <Grid item xs={2}>
-        <IconButton sx={{marginTop:'5px'}} disabled={props.scenario ? false : true} style={props.selected === 1 ? styles.iconSelected : null} onClick={() => props.handleSelection(1)}>
+        <IconButton aria-label="optimization" sx={{marginTop:'5px'}} disabled={props.scenario ? false : true} style={props.selected === 1 ? styles.iconSelected : null} onClick={() => props.handleSelection(1)}>
             <SettingsIcon fontSize="large"></SettingsIcon>
         </IconButton>
         <p style={props.selected === 1 ? styles.textSelected : null}>Optimization Setup</p>
       </Grid>
       <Grid item xs={2}>
-        <IconButton sx={{marginTop:'5px'}} disabled={props.scenario ? Object.keys(props.scenario.results).length !== 0 ? false : true : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => props.handleSelection(2)}>
+        <IconButton aria-label="results" sx={{marginTop:'5px'}} disabled={props.scenario ? Object.keys(props.scenario.results).length !== 0 ? false : true : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => props.handleSelection(2)}>
             <PieChartIcon fontSize="large"></PieChartIcon>
         </IconButton>
         <p style={props.selected === 2 ? styles.textSelected : null}>Model Results</p>
@@ -46,7 +46,7 @@ export default function ScenarioPage(props) {
       <Grid item xs={6}>
         
       </Grid>
-      <Divider></Divider>
+      <Divider aria-label="bottom_divider"></Divider>
       </Grid>
       </Box>
   );

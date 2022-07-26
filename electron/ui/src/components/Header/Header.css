@@ -28,7 +28,7 @@ hr {
   align-items: center;
 }
 
-#nawi_logo {
+#pareto_logo {
   display: flex;
   align-items: center;
   height: 70px;
@@ -36,7 +36,7 @@ hr {
   padding: 0 10px 0 10px;
 }
 
-#nawi_logo img {
+#pareto_logo img {
   height: 60px;
 }
 
