@@ -131,7 +131,6 @@ dmypy.json
 node_modules
 
 # backend data stuff
-excelsheets/
 example_results_dict.json
 scenarios.json
 scenarios2.json

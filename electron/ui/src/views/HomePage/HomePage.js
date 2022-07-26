@@ -63,7 +63,7 @@ export default function HomePage(props) {
 
    const handleRunModel = () => {
     console.log('running model')
-      runModel()
+      runModel({"id": scenario.id})
       .then(response => response.json())
       .then((data)=> {
         console.log('run model successful: ')

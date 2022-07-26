@@ -8,7 +8,6 @@ export const fetchScenarios = () => {
 }; 
 
 export const uploadExcelSheet = (data) => {
-    console.log('sending data: ',data)
     return fetch('http://localhost:8001/upload', {
         method: 'POST', 
         mode: 'cors',

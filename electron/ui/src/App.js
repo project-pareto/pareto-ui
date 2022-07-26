@@ -56,7 +56,7 @@ function App() {
     setScenarioData(updatedScenario)
     console.log('new scenario: ')
     console.log(updatedScenario)
-    updateScenario({'updatedScenario': updatedScenario, 'index': scenarioIndex})
+    updateScenario({'updatedScenarios': temp})
     .then(response => response.json())
     .then((data) => {
       console.log('updated scenarios on backend')
@@ -86,7 +86,7 @@ function App() {
     tempScenarios[scenarioIndex] = tempScenario
     setScenarios(tempScenarios)
     setScenarioData(tempScenario)
-    updateScenario({'updatedScenario': tempScenario, 'index': scenarioIndex})
+    updateScenario({'updatedScenarios': tempScenarios})
     .then(response => response.json())
     .then((data) => {
       console.log('updated scenarios on backend')
