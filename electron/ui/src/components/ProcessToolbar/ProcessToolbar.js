@@ -8,7 +8,7 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import Divider from '@mui/material/Divider';
 
 
-export default function ScenarioPage(props) {
+export default function ProcessToolbar(props) {
 
     const styles = {
     iconSelected: {

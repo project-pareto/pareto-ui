@@ -26,12 +26,13 @@ export default function Sidebar(props) {
         PaperProps={{
             sx: {
             width: 240,
-            marginTop: '188px'
+            marginTop: '188px',
+            paddingBottom: '188px'
             }
         }}
         open={props.open}
       >
-        <Box sx={{ overflow: 'auto' }}>
+        <Box sx={{ overflow: 'auto', overflowX: 'hidden'}}>
             <List aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
             {props.scenario  ? 
             Object.entries(props.section === 0 ? props.scenario.data_input : props.section === 1 ? props.scenario.optimization : props.scenario.results).map( ([key, value]) => ( 

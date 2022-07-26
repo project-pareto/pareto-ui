@@ -7,6 +7,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { Routes, Route } from "react-router-dom";
 import Header from 'components/Header/Header'; 
+import Bottombar from 'components/Bottombar/Bottombar'; 
 import ProcessToolbar from 'components/ProcessToolbar/ProcessToolbar'
 import HomePage from 'views/HomePage/HomePage';
 import { fetchScenarios } from './services/sidebar.service'
@@ -123,6 +124,7 @@ function App() {
             />} 
         />
       </Routes> 
+      <Bottombar handleSelection={handleSetSelection} section={section} scenario={scenarioData}></Bottombar>
     </div> 
   );
   

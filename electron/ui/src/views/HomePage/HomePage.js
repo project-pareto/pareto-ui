@@ -42,6 +42,7 @@ export default function HomePage(props) {
     },
     shiftTextRight: {
       paddingLeft: '240px',
+      pb: 7
       // paddingTop: '184px'
     },
     titleDivider: {
