@@ -54,7 +54,7 @@ async def run_model(request: Request):
         results_dict = run_strategic_model(input_file=excel_path)
     except:
         print('unable to find and run given excel sheet')
-        results_dict = json.load(open('../data/example_results_dict2.json'))
+        results_dict = json.load(open('../data/example_results_dict.json'))
 
     return results_dict
 

@@ -15,7 +15,7 @@ from pareto.utilities.results import generate_report, PrintValues, OutputUnits, 
 from pareto.case_studies.toy_case_study import create_model as create_toy_model
 from importlib import resources
 
-def run_strategic_model(input_file = "../data/excelsheets/small_strategic_case_study.xlsx", output_file = "../data/outputs/model_output.xlsx", objective = 'reuse'):
+def run_strategic_model(input_file, output_file = "../data/outputs/model_output.xlsx", objective = 'reuse'):
 
     start_time = datetime.datetime.now()
 

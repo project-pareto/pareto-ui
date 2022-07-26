@@ -11,23 +11,7 @@ import { fetchScenarios, uploadExcelSheet } from '../../services/sidebar.service
 
  
 
-export default function Header(props) {
-
-    const [ scenario, setScenario ] = useState([]) 
-
-    const handleScenarioChange = (index) => {
-      setScenario(props.scenarios[index]);
-    }
-
-  //   useEffect(()=>{
-  //     console.log('scenarios changed b')
-  //     console.log(props.scenarios[props.index])
-  //     console.log('scenariodata')
-  //     console.log(props.scenarioData)
-  //     console.log('props index')
-  //     console.log(props.index)
-  // });
-  
+export default function Header(props) {  
 
     const handleFileUpload = (e) => {
       console.log('handle file upload')
@@ -54,7 +38,7 @@ export default function Header(props) {
               <img src={logo} alt="Pareto Logo"/>
             </div>
           </a>
-          <p style={{color:'#565656', fontSize: '20px'}}>Scenario</p>
+          <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>
           <FormControl sx={{ m: 1, minWidth: 200 }}>
           <Select
             value={props.index === null ? "" : props.index}
@@ -63,7 +47,7 @@ export default function Header(props) {
           >
               {props.scenarios.map((scenario, index) => 
               (
-                  <MenuItem key={index} onClick={() => handleScenarioChange(index)} value={index}>{scenario.name}</MenuItem>
+                  <MenuItem key={index} value={index}>{scenario.name}</MenuItem>
               ))}
             </Select>
           </FormControl>
