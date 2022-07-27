@@ -5,11 +5,12 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Header from 'components/Header/Header'; 
 import Bottombar from 'components/Bottombar/Bottombar'; 
 import ProcessToolbar from 'components/ProcessToolbar/ProcessToolbar'
 import HomePage from 'views/HomePage/HomePage';
+import ScenarioList from 'views/ScenarioList/ScenarioList';
 import { fetchScenarios } from './services/sidebar.service'
 import {useEffect, useState} from 'react';   
 import { updateScenario } from 'services/app.service'
@@ -22,6 +23,7 @@ function App() {
   const [ section, setSection ] = useState(0)
   const [ category, setCategory ] = useState(null)
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
+  let navigate = useNavigate();
 
   useEffect(()=>{
     fetchScenarios()
@@ -32,10 +34,18 @@ function App() {
     });
 }, []);
 
+  const navigateHome = () => {
+    setScenarioData(null)
+    setSection(0)
+    setCategory(null)
+    setScenarioIndex(null)
+    navigate('/', {replace: true})
+  }
 
-  const handleScenarioSelection = (data) => {
-    setScenarioData(scenarios[data.target.value]);
-    setScenarioIndex(data.target.value)
+  const handleScenarioSelection = (scenario) => {
+    navigate('/scenario', {replace: true})
+    setScenarioData(scenarios[scenario]);
+    setScenarioIndex(scenario)
     setSection(0);
     setCategory("ProductionPads")
   };
@@ -43,11 +53,7 @@ function App() {
   const handleNewScenario = (data) => {
     const temp = [...scenarios]
     temp.push(data)
-    setScenarios(temp)
-    setScenarioData(data)
-    setScenarioIndex(temp.length-1)
-    setSection(0);
-    setCategory("ProductionPads")    
+    setScenarios(temp)   
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
@@ -105,16 +111,23 @@ function App() {
         scenarios={scenarios} 
         index={scenarioIndex} 
         scenarioData={scenarioData} 
-        handleNewScenario={handleNewScenario} 
-        handleSelection={handleScenarioSelection}/>
-      <ProcessToolbar 
-        handleSelection={handleSetSelection} 
-        selected={section} 
-        scenario={scenarioData}>
-      </ProcessToolbar>
+        handleSelection={handleScenarioSelection}
+        navigateHome={navigateHome}/>
+        
       <Routes> 
         <Route 
           path="/" 
+          element={
+            <ScenarioList
+            handleNewScenario={handleNewScenario} 
+            handleEditScenarioName={handleEditScenarioName} 
+            handleSelection={handleScenarioSelection}
+            section={section} 
+            scenarios={scenarios} 
+            />} 
+        />
+        <Route 
+          path="/scenario" 
           element={
             <HomePage 
             updateScenario={handleScenarioUpdate} 
@@ -123,10 +136,10 @@ function App() {
             section={section} 
             category={category} 
             handleSetCategory={handleSetCategory} 
+            handleSetSelection={handleSetSelection} 
             />} 
         />
       </Routes> 
-      <Bottombar handleSelection={handleSetSelection} section={section} scenario={scenarioData}></Bottombar>
     </div> 
   );
   

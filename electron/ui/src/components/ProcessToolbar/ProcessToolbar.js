@@ -16,39 +16,43 @@ export default function ProcessToolbar(props) {
         color: 'white'
     },
     textSelected: {
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        margin:'0'
     },
+    textUnselected: {
+      margin:'0'
+  },
     shiftTextRight: {
       paddingLeft: '240px'
     },
    }
   return ( 
-    <Box sx={{position: 'sticky', top:'65px', backgroundColor:"white", zIndex:'1'}}>
+    <Box sx={{position: 'sticky', top:'71px', backgroundColor:"white", zIndex:'1'}}>
       <Grid container>
       <Grid item xs={1.5} >
         <IconButton aria-label="data_input" sx={{marginTop:'5px'}} style={props.selected === 0 ? styles.iconSelected : null} onClick={() => props.handleSelection(0)}>
             <InputIcon fontSize="large"></InputIcon>
         </IconButton>
-        <p style={props.selected === 0 ? styles.textSelected : null}>Data Input</p>
+        <p style={props.selected === 0 ? styles.textSelected : styles.textUnselected}>Data Input</p>
       </Grid>
       <Grid item xs={1.5}>
         <IconButton aria-label="optimization" sx={{marginTop:'5px'}} disabled={props.scenario ? false : true} style={props.selected === 1 ? styles.iconSelected : null} onClick={() => props.handleSelection(1)}>
             <SettingsIcon fontSize="large"></SettingsIcon>
         </IconButton>
-        <p style={props.selected === 1 ? styles.textSelected : null}>Optimization Setup</p>
+        <p style={props.selected === 1 ? styles.textSelected : styles.textUnselected}>Optimization Setup</p>
       </Grid>
       <Grid item xs={1.5}>
         <IconButton aria-label="results" sx={{marginTop:'5px'}} disabled={props.scenario ? Object.keys(props.scenario.results).length !== 0 ? false : true : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => props.handleSelection(2)}>
             <PieChartIcon fontSize="large"></PieChartIcon>
         </IconButton>
-        <p style={props.selected === 2 ? styles.textSelected : null}>Model Results</p>
+        <p style={props.selected === 2 ? styles.textSelected : styles.textUnselected}>Model Results</p>
       </Grid>
       <Grid item xs={7.5}>
         
       </Grid>
       <Divider aria-label="bottom_divider"></Divider>
       </Grid>
-      </Box>
+    </Box>
   );
 
 }

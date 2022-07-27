@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid';
 import {  } from "react-router-dom";
 import Button from '@mui/material/Button';
 import ProcessToolbar from '../../components/ProcessToolbar/ProcessToolbar'
+import Bottombar from '../../components/Bottombar/Bottombar'; 
 import DataInput from '../DataInput/DataInput'
 import Optimization from '../Optimization/Optimization'
 import ModelResults from '../ModelResults/ModelResults'
@@ -22,7 +23,6 @@ export default function HomePage(props) {
   const scenario = props.scenario
   const [ openEditName, setOpenEditName ] = useState(false)
   const [ name, setName ] = useState('')
-  const [ resultsReady, setResultsReady] = useState(false)
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
@@ -92,6 +92,11 @@ export default function HomePage(props) {
   return (
     <>
     <Sidebar handleSetCategory={props.handleSetCategory} scenario={scenario} section={props.section} category={props.category}></Sidebar>
+    <ProcessToolbar 
+        handleSelection={props.handleSetSelection} 
+        selected={props.section} 
+        scenario={scenario}>
+      </ProcessToolbar>
     <Grid container spacing={1} sx={styles.shiftTextRight}>
       <Grid item xs={4} ></Grid>
       <Modal
@@ -133,6 +138,8 @@ export default function HomePage(props) {
       {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario}></ModelResults> : null}
       </Grid>
     </Grid>
+    <Bottombar handleSelection={props.handleSetSelection} section={props.section} scenario={scenario
+    }></Bottombar>
     </>
   );
 
