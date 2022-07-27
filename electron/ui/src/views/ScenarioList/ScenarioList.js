@@ -97,7 +97,7 @@ const handleFileUpload = (e) => {
                 </TableCell>
                 <TableCell onClick={() => props.handleSelection(index)} sx={styles.bodyCell}>{row.date}</TableCell>
                 <TableCell onClick={() => props.handleSelection(index)} sx={styles.bodyCell}>{Object.keys(row.results).length !== 0 ? "Optimized" : "Draft"}</TableCell>
-                <TableCell sx={styles.bodyCell}><IconButton><DeleteIcon fontSize="small"/></IconButton><IconButton><ContentCopyIcon fontSize="small"/></IconButton></TableCell>
+                <TableCell sx={styles.bodyCell}><IconButton onClick={() => props.deleteScenario(index)}><DeleteIcon fontSize="small"/></IconButton><IconButton><ContentCopyIcon fontSize="small"/></IconButton></TableCell>
                 </TableRow>
             ))}
             </TableBody>

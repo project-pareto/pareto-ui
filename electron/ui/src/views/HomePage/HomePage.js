@@ -134,12 +134,11 @@ export default function HomePage(props) {
       </Grid>
       <Grid item xs={12}>
       {(scenario && props.section===0) ? <DataInput category={props.category} scenario={scenario}></DataInput> : null}
-      {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario} handleRunModel={handleRunModel}></Optimization> : null}
+      {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario}></Optimization> : null}
       {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario}></ModelResults> : null}
       </Grid>
     </Grid>
-    <Bottombar handleSelection={props.handleSetSelection} section={props.section} scenario={scenario
-    }></Bottombar>
+    <Bottombar handleSelection={props.handleSetSelection} section={props.section} scenario={scenario} handleRunModel={handleRunModel}></Bottombar>
     </>
   );
 

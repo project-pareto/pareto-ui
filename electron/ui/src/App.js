@@ -5,15 +5,14 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Header from 'components/Header/Header'; 
-import Bottombar from 'components/Bottombar/Bottombar'; 
-import ProcessToolbar from 'components/ProcessToolbar/ProcessToolbar'
 import HomePage from 'views/HomePage/HomePage';
 import ScenarioList from 'views/ScenarioList/ScenarioList';
 import { fetchScenarios } from './services/sidebar.service'
 import {useEffect, useState} from 'react';   
 import { updateScenario } from 'services/app.service'
+import { deleteScenario } from 'services/scenariolist.service'
 
 
 function App() {
@@ -105,6 +104,19 @@ function App() {
     })
   }
 
+  const handleDeleteScenario = (index) => {
+    console.log('deleting scenario: ',index)
+    deleteScenario({'id': index})
+    .then(response => response.json())
+    .then((data) => {
+      console.log('deleted scenario')
+      setScenarios(data.data)
+    }).catch(e => {
+      console.log('error on scenario update')
+      console.log(e)
+    })
+  }
+
   return (
     <div className="App">  
       <Header 
@@ -124,6 +136,7 @@ function App() {
             handleSelection={handleScenarioSelection}
             section={section} 
             scenarios={scenarios} 
+            deleteScenario={handleDeleteScenario}
             />} 
         />
         <Route 
@@ -138,6 +151,10 @@ function App() {
             handleSetCategory={handleSetCategory} 
             handleSetSelection={handleSetSelection} 
             />} 
+        />
+        <Route
+          path="*" 
+          element={<Navigate replace to="/" />}
         />
       </Routes> 
     </div> 

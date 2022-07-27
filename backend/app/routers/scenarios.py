@@ -46,6 +46,14 @@ async def upload(file: UploadFile = File(...)):
 
     return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
 
+@router.post("/delete_scenario")
+async def delete_scenario(request: Request):
+    data = await request.json()
+    
+    scenario_handler.delete_scenario(data['id'])
+
+    return {'data' : scenario_handler.get_list()}
+    
 @router.post("/run_model")
 async def run_model(request: Request):
     data = await request.json()

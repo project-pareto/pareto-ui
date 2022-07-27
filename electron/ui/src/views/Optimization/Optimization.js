@@ -11,9 +11,10 @@ export default function Optimization(props) {
   
   return ( 
     <Box>
-      <Button onClick={props.handleRunModel}>
+      {/* <Button onClick={props.handleRunModel}>
         run model
-      </Button>      
+      </Button>       */}
+      optimization
     </Box>
   );
 
