@@ -42,8 +42,7 @@ const startServer = () => {
             "--host",
             "127.0.0.1",
             "--port",
-            process.env.API_PORT,
-            "--reload"
+            process.env.API_PORT
         ],
         {
             cwd: '../backend/app'
@@ -76,10 +75,10 @@ app.whenReady().then(() => {
 
     let serverProcess = startServer()
     let uiProcess = startUI()
-
+    let noTrails = 0
     // Start Window 
     var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=15) => {
-        let noTrails = 0
+        
         axios.get(url).then(() => {
             console.log(`${appName} is ready at ${url}!`)
             if (successFn) {
@@ -88,7 +87,7 @@ app.whenReady().then(() => {
         })
         .catch(async () => {
             console.log(`Waiting to be able to connect ${appName} at ${url}...`)
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await new Promise(resolve => setTimeout(resolve, 2000))
             noTrails += 1
             if (noTrails < maxTrials) {
                 startUp(url, appName, spawnedProcess, successFn, maxTrials)

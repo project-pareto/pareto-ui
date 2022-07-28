@@ -10,10 +10,12 @@
   "author": "Michael Pesce",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^18.2.3"
+    "electron": "^18.2.3",
+    "electron-builder": "^23.1.0"
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "electron-is-dev": "^2.0.0"
   }
 }
