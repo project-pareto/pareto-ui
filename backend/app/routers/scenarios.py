@@ -57,9 +57,10 @@ async def delete_scenario(request: Request):
 @router.post("/run_model")
 async def run_model(request: Request):
     data = await request.json()
+    print("running model on : \n{}".format(data))
     try:
         excel_path = "{}{}.xlsx".format(scenario_handler.excelsheets_path,data['id'])
-        results_dict = run_strategic_model(input_file=excel_path)
+        results_dict = run_strategic_model(input_file=excel_path, objective=data['objective'])
     except:
         print('unable to find and run given excel sheet')
         results_dict = json.load(open('../data/example_results_dict.json'))

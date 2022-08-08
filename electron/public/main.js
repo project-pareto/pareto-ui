@@ -43,10 +43,11 @@ const startServer = () => {
       backendProcess = spawn("uvicorn", 
         [
             "main:app",
+            "--reload",
             "--host",
             "127.0.0.1",
             "--port",
-            PY_PORT
+            PY_PORT,
         ],
         {
             cwd: '../backend/app'

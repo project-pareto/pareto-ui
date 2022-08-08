@@ -18,8 +18,6 @@ import TextField from '@mui/material/TextField';
 
 
 export default function HomePage(props) {
-  // // let params = useParams()
-  // const [ category, setCategory ] = useState(null)
   const scenario = props.scenario
   const [ openEditName, setOpenEditName ] = useState(false)
   const [ name, setName ] = useState('')
@@ -64,7 +62,7 @@ export default function HomePage(props) {
 
    const handleRunModel = () => {
     console.log('running model')
-      runModel({"id": scenario.id})
+      runModel({"id": scenario.id, 'objective':scenario.optimization.objective})
       .then(response => response.json())
       .then((data)=> {
         console.log('run model successful: ')
@@ -134,7 +132,7 @@ export default function HomePage(props) {
       </Grid>
       <Grid item xs={12}>
       {(scenario && props.section===0) ? <DataInput category={props.category} scenario={scenario}></DataInput> : null}
-      {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario}></Optimization> : null}
+      {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario} updateScenario={props.updateScenario}></Optimization> : null}
       {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario}></ModelResults> : null}
       </Grid>
     </Grid>
