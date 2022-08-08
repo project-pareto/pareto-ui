@@ -33,6 +33,8 @@
   "scripts": {
     "start": "react-scripts start",
     "electron-start": "concurrently -k \"cross-env BROWSER=none react-scripts start\" \"wait-on http://localhost:3000 && npx electron .\"",
+    "app-start": "concurrently -k \"cross-env npm run start-backend\" \"react-scripts start\"",
+    "start-backend": "cd ../backend/app && uvicorn main:app --reload --host 0.0.0.0 --port 8001",
     "start-nob": "BROWSER=none npm start",
     "build": "react-scripts build",
     "test": "react-scripts test",
