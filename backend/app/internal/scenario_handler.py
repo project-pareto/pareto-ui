@@ -53,7 +53,7 @@ class ScenarioHandler:
         # create scenario object
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
-        return_object = {"name": filename, "id": len(self.scenario_list), "date": date,"data_input": df_sets, "optimization": {}, "results": {}}
+        return_object = {"name": filename, "id": len(self.scenario_list), "date": date,"data_input": df_sets, "optimization": {"objective":"reuse"}, "results": {}}
         for key in return_object['data_input']:
             return_object['data_input'][key] = return_object['data_input'][key].tolist()
 

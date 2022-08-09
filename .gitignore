@@ -17,6 +17,7 @@ eggs/
 lib/
 lib64/
 parts/
+py_dist/
 sdist/
 var/
 wheels/
@@ -136,3 +137,5 @@ scenarios.json
 scenarios2.json
 strategic_optimization_results_test.xlsx
 model_output.xlsx
+
+**/.DS_Store

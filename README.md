@@ -23,16 +23,20 @@ See the [NPM install page](https://docs.npmjs.com/downloading-and-installing-nod
 ```console
 cd <pareto-ui-path>/electron
 npm install
-
-cd <pareto-ui-path>/electron/ui
-npm install
 ```
 
 ### Run UI
 
 ```console
 cd <pareto-ui-path>/electron
-npm start
+npm app-start
+```
+
+### Run UI with electron
+
+```console
+cd <pareto-ui-path>/electron
+npm electron-start
 ```
 
 ## Windows instructions
