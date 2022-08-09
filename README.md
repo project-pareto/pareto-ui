@@ -44,6 +44,5 @@ npm electron-start
 The JS spawning doesn't work on Windows, so in order to start the app there you need to start things by hand using the following commands:
 
 0. Turn off default browser opening with `$Env:Browser="none"`
-1. From the repo root: `cd backend/app` and run `uvicorn main:app --host 127.0.0.1 --port 8000 --reload &`
-2. Next `cd ../../electron/ui` and run `npm start &`. 
-3. Finally: `cd ..` (now in 'electron' subdir) and run `npm start`
+1. From the repo root: `cd backend/app` and run `uvicorn main:app --host 127.0.0.1 --port 8001 --reload &`
+2. Next `cd ../../electron` and run `npm run electron-start`. 
