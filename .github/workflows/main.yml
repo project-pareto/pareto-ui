@@ -57,15 +57,15 @@ jobs:
         working-directory: electron
         run: npm start &
 
-      # - name: Cypress e2e tests
-      #   working-directory: electron
-      #   run: npx cypress run
+      - name: Cypress e2e tests
+        working-directory: electron
+        run: npx cypress run
 
-      # - name: Upload artifact for screenshots & videos
-      #   uses: actions/upload-artifact@v3
-      #   if: always()
-      #   with:
-      #       name: cypress_results
-      #       path: |
-      #         electron/cypress/screenshots/
-      #         electron/cypress/videos/
+      - name: Upload artifact for screenshots & videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+            name: cypress_results
+            path: |
+              electron/cypress/screenshots/
+              electron/cypress/videos/
