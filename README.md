@@ -3,46 +3,48 @@ User Interface for the PARETO project
 
 ## Getting started (developer)
 
-### Install Python
+### Prerequisites
 
-The Python code, and the PIP requirements, are in the `backend/` folder.
+The following steps assume that:
 
+1. `conda` is already installed and configured
+2. This repository (i.e. the WaterTAP UI repository, https://github.com/watertap-org/watertap-ui) has been cloned locally and the working directory is set to the root of the repository
+
+### 1. Creating the Conda environment
+
+Run the following command to create and activate a new Conda environment named `pareto-ui-env`:
+
+```sh
+conda env create --file environment.yml && conda activate pareto-ui-env
 ```
-cd <pareto-ui-path>/backend
-pip install -r requirements.txt
-idaes get-extensions
+
+This will install the correct runtime versions of both the backend (Python) and frontend (JavaScript/NodeJS/Electron) portions of the UI, as well as the backend (Python) dependencies.
+
+### 2. Install the IDAES solver dependencies
+
+```sh
+idaes get-extensions --verbose
 ```
 
-### Install Javascript
+### 3. Install Javascript dependencies
 
 Prerequisites: Node Package Manager (npm)
 
-See the [NPM install page](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) for installation and the [NPM upgrade page](https://docs.npmjs.com/try-the-latest-stable-version-of-npm) for upgrading to the latest version.
-See the [NPM install page](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) for installation and the [NPM upgrade page](https://docs.npmjs.com/try-the-latest-stable-version-of-npm) for upgrading to the latest version.
-
 ```console
 cd <pareto-ui-path>/electron
-npm install
+npm clean-install
 ```
 
-### Run UI
+### Run UI in browser
 
 ```console
 cd <pareto-ui-path>/electron
-npm app-start
+npm run app-start
 ```
 
 ### Run UI with electron
 
 ```console
 cd <pareto-ui-path>/electron
-npm electron-start
+npm run electron-start
 ```
-
-## Windows instructions
-
-The JS spawning doesn't work on Windows, so in order to start the app there you need to start things by hand using the following commands:
-
-0. Turn off default browser opening with `$Env:Browser="none"`
-1. From the repo root: `cd backend/app` and run `uvicorn main:app --host 127.0.0.1 --port 8001 --reload &`
-2. Next `cd ../../electron` and run `npm run electron-start`. 

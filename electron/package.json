@@ -34,10 +34,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "electron-start": "concurrently -k \"cross-env BROWSER=none react-scripts start\" \"wait-on http://localhost:3000 && npx electron .\"",
+    "electron-start": "concurrently -k \"npm run start-backend\" \"npm run start-nob\" \"npx electron .\"",
     "app-start": "concurrently -k \"cross-env npm run start-backend\" \"react-scripts start\"",
+    "app-start-nob": "concurrently -k \"npm run start-backend\" \"npm run start-nob\"",
     "start-backend": "cd ../backend/app && uvicorn main:app --reload --host 0.0.0.0 --port 8001",
-    "start-nob": "BROWSER=none npm start",
+    "start-nob": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "dist:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/main.js",
