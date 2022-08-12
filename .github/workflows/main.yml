@@ -16,8 +16,8 @@ jobs:
   Run-App-and-Test:
 
   name: E2E testing (${{ matrix.os }})
-
-    runs-on: ${{ matrix.os-version }}
+  
+  runs-on: ${{ matrix.os-version }}
 
     strategy:
       fail-fast: false
