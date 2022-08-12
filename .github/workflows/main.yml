@@ -13,11 +13,10 @@ defaults:
     shell: bash -l {0}
 
 jobs:
-  Run-App-and-Test:
+  component_e2e_testing:
+    name: E2E testing (${{ matrix.os }})
 
-  name: E2E testing (${{ matrix.os }})
-  
-  runs-on: ${{ matrix.os-version }}
+    runs-on: ${{ matrix.os-version }}
 
     strategy:
       fail-fast: false
@@ -37,9 +36,8 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: environment.yml
-          activate-environment: watertap-ui-env
+          activate-environment: pareto-ui-env
 
-      # install node packages using a clean install for a deterministic, repeatable build
       - name: Install JS dependencies
         run: |
           npm --prefix electron clean-install
@@ -47,12 +45,8 @@ jobs:
       - name: get idaes extensions
         run: idaes get-extensions
 
-      - name: run component tests
-        working-directory: ./electron
-        run: npm test
-
       - name: run backend server
-        run: uvicorn --app-dir backend/app main:app --reload --host 0.0.0.0 --port 8001 &
+        run: uvicorn --app-dir backend/app main:app --reload --host 0.0.0.0 --port 8001 & sleep 30
 
       - name: run frontend
         run: npm --prefix electron start &
@@ -61,7 +55,7 @@ jobs:
         working-directory: electron
         timeout-minutes: 15
         run: "$(npm bin)"/cypress run
-
+        
       - name: Upload artifact for screenshots & videos
         uses: actions/upload-artifact@v3
         if: always()
