@@ -41,7 +41,6 @@ jobs:
       - name: Install JS dependencies
         run: |
           npm --prefix electron clean-install
-
       - name: get idaes extensions
         run: idaes get-extensions
 
@@ -54,8 +53,9 @@ jobs:
       - name: Cypress e2e tests
         working-directory: electron
         timeout-minutes: 15
-        run: "$(npm bin)"/cypress run
-        
+        run: |
+          echo "$(npm bin)"
+          "$(npm bin)"/cypress run
       - name: Upload artifact for screenshots & videos
         uses: actions/upload-artifact@v3
         if: always()
