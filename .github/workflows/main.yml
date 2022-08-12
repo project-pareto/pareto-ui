@@ -54,7 +54,6 @@ jobs:
         working-directory: electron
         timeout-minutes: 15
         run: |
-          echo "$(npm bin)"
           "$(npm bin)"/cypress run
       - name: Upload artifact for screenshots & videos
         uses: actions/upload-artifact@v3
