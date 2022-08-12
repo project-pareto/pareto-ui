@@ -44,6 +44,9 @@ jobs:
       - name: get idaes extensions
         run: idaes get-extensions
 
+      - name: run component tests
+        run: npm --prefix electron test
+
       - name: run backend server
         run: uvicorn --app-dir backend/app main:app --reload --host 0.0.0.0 --port 8001 & sleep 30
 
