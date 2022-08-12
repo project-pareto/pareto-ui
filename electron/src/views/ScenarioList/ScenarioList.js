@@ -45,6 +45,7 @@ const handleFileUpload = (e) => {
     },
     newButton: {
         backgroundColor: '#0884b4',
+        borderRadius: '8px', 
         '&:hover': {
             backgroundColor: '#0884b4',
             opacity: 0.9
