@@ -69,6 +69,7 @@ export default function HomePage(props) {
         console.log(data)
         scenario["results"] = data
         props.updateScenario(scenario)
+        props.handleSetSelection(2)
       })
       .catch(e => {
         console.log('error on model run')

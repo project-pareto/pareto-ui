@@ -12,7 +12,7 @@ export default function DataInput(props) {
   return ( 
     <Box style={{backgroundColor:'white'}} sx={{overflow: "hidden",textOverflow: "ellipsis", m:3, padding:2, boxShadow:3}}>
       <h3>{props.category}</h3>
-      {JSON.stringify(scenario.data_input[props.category])}
+      {JSON.stringify(scenario.data_input.df_sets[props.category])}
     </Box>
   );
 
