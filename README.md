@@ -8,7 +8,7 @@ User Interface for the PARETO project
 The following steps assume that:
 
 1. `conda` is already installed and configured
-2. This repository (i.e. the WaterTAP UI repository, https://github.com/watertap-org/watertap-ui) has been cloned locally and the working directory is set to the root of the repository
+2. This repository (i.e. the Pareto UI repository, https://github.com/project-pareto/pareto-ui) has been cloned locally and the working directory is set to the root of the repository
 
 ### 1. Creating the Conda environment
 
