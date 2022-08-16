@@ -1,7 +1,7 @@
 import json
 import os
 import datetime
-
+import logging
 from pareto.strategic_water_management.strategic_produced_water_optimization import (
     create_model,
     Objectives,
@@ -15,22 +15,29 @@ from pareto.utilities.results import generate_report, PrintValues, OutputUnits, 
 from pareto.case_studies.toy_case_study import create_model as create_toy_model
 from importlib import resources
 
-def run_strategic_model(input_file, output_file = "../data/outputs/model_output.xlsx", objective = 'reuse'):
+_log = logging.getLogger(__name__)
+_h = logging.StreamHandler()
+_h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+_log.addHandler(_h)
+# for debugging, force level
+_log.setLevel(logging.DEBUG)
+
+def run_strategic_model(input_file, output_file = "../data/outputs/PARETO_report.xlsx", objective = 'reuse'):
 
     start_time = datetime.datetime.now()
 
     # import set and parameter lists
-    print('importing json data')
+    _log.info(f"importing json data")
     f = open('../data/pareto_data.json')
     data = json.load(f)
     set_list = data['set_list']
     parameter_list = data['parameter_list']
     f.close()
 
-    print('getting data from excel sheet')
+    _log.info(f"getting data from excel sheet")
     [df_sets, df_parameters] = get_data(input_file, set_list, parameter_list)
 
-    print('creating model')
+    _log.info(f"creating model")
     strategic_model = create_model(
         df_sets,
         df_parameters,
@@ -51,7 +58,7 @@ def run_strategic_model(input_file, output_file = "../data/outputs/model_output.
         "water_quality": True,
     }
 
-    print('solving model')
+    _log.info(f"solving model")
     solve_model(model=strategic_model, options=options)
 
     print("\nConverting to Output Units and Displaying Solution\n" + "-" * 60)
@@ -73,6 +80,6 @@ def run_strategic_model(input_file, output_file = "../data/outputs/model_output.
     # [sets_reports, parameters_report] = get_data(fname, set_list, parameter_list)
     
     total_time = datetime.datetime.now() - start_time
-    print('total process took {} seconds'.format(total_time.seconds))
+    _log.info(f"total process took {total_time.seconds} seconds")
 
     return results_dict

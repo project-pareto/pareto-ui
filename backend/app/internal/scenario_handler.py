@@ -65,9 +65,6 @@ class ScenarioHandler:
                     new_value.append({'key':k, 'value': v})
             df_parameters[key] = new_value
 
-        with open('../data/parameter_df.txt', 'w') as f:
-            f.write(str(df_parameters))
-
         # convert pandas series into lists
         for key in df_sets:
             df_sets[key] = df_sets[key].tolist()

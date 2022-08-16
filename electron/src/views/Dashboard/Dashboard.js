@@ -1,4 +1,4 @@
-import './HomePage.css';
+import './Dashboard.css';
 import {useEffect, useState} from 'react';   
 import Grid from '@mui/material/Grid';
 import {  } from "react-router-dom";
@@ -17,7 +17,7 @@ import TextField from '@mui/material/TextField';
 
 
 
-export default function HomePage(props) {
+export default function Dashboard(props) {
   const scenario = props.scenario
   const [ openEditName, setOpenEditName ] = useState(false)
   const [ name, setName ] = useState('')

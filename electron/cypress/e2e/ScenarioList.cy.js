@@ -1,5 +1,5 @@
-describe('homepage', () => {
-    it('test that homepage loads properly', () => {
+describe('scenario list', () => {
+    it('test that scenario list loads properly', () => {
         //load webpage
         cy.visit('/')
 

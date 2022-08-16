@@ -3,6 +3,7 @@ import os
 import aiofiles
 import json
 import time
+import logging
 from fastapi import Body, Request, APIRouter, HTTPException, File, UploadFile
 from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
@@ -14,6 +15,12 @@ from app.internal.scenario_handler import (
     scenario_handler,
 )
 
+_log = logging.getLogger(__name__)
+_h = logging.StreamHandler()
+_h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+_log.addHandler(_h)
+# for debugging, force level
+_log.setLevel(logging.DEBUG)
 
 router = APIRouter(
     prefix="",
@@ -57,12 +64,12 @@ async def delete_scenario(request: Request):
 @router.post("/run_model")
 async def run_model(request: Request):
     data = await request.json()
-    print("running model on : \n{}".format(data))
+    _log.info(f"running model on : \n{data}")
     try:
         excel_path = "{}{}.xlsx".format(scenario_handler.excelsheets_path,data['id'])
         results_dict = run_strategic_model(input_file=excel_path, objective=data['objective'])
     except:
-        print('unable to find and run given excel sheet')
+        _log.info(f"unable to find and run given excel sheet")
         results_dict = json.load(open('../data/example_results_dict.json'))
 
     return results_dict

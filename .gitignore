@@ -137,6 +137,8 @@ scenarios.json
 scenarios2.json
 strategic_optimization_results_test.xlsx
 model_output.xlsx
+small_strategic_case_study.xlsx
+PARETO_report.xlsx 
 
 .DS_Store
 

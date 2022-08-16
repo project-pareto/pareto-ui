@@ -7,7 +7,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Header from 'components/Header/Header'; 
-import HomePage from 'views/HomePage/HomePage';
+import Dashboard from 'views/Dashboard/Dashboard';
 import ScenarioList from 'views/ScenarioList/ScenarioList';
 import { fetchScenarios } from './services/sidebar.service'
 import {useEffect, useState} from 'react';   
@@ -142,7 +142,7 @@ function App() {
         <Route 
           path="/scenario" 
           element={
-            <HomePage 
+            <Dashboard 
             updateScenario={handleScenarioUpdate} 
             handleEditScenarioName={handleEditScenarioName} 
             scenario={scenarioData} 
