@@ -1,0 +1,68 @@
+name: App Tests
+
+on:
+  push:
+    branches:
+      - main
+      - rel_*
+  pull_request:
+
+defaults:
+  run:
+    # -l: use login shell (required when using Conda)
+    shell: bash -l {0}
+
+jobs:
+  component_e2e_testing:
+    name: E2E testing (${{ matrix.os }})
+
+    runs-on: ${{ matrix.os-version }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - linux
+          - win64
+          # - macos
+        include:
+          - os: linux
+            os-version: ubuntu-latest
+          - os: win64
+            os-version: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: environment.yml
+          activate-environment: pareto-ui-env
+
+      - name: Install JS dependencies
+        run: |
+          npm --prefix electron clean-install
+      - name: get idaes extensions
+        run: idaes get-extensions
+
+      - name: run component tests
+        run: npm --prefix electron test
+
+      - name: run backend server
+        run: uvicorn --app-dir backend/app main:app --reload --host 0.0.0.0 --port 8001 & sleep 30
+
+      - name: run frontend
+        run: npm --prefix electron start &
+
+      - name: Cypress e2e tests
+        working-directory: electron
+        timeout-minutes: 15
+        run: |
+          "$(npm bin)"/cypress run
+      - name: Upload artifact for screenshots & videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+            name: cypress_results-${{ matrix.os }}
+            path: |
+              electron/cypress/screenshots/
+              electron/cypress/videos/

@@ -17,6 +17,7 @@ eggs/
 lib/
 lib64/
 parts/
+py_dist/
 sdist/
 var/
 wheels/
@@ -127,3 +128,19 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+node_modules
+
+# backend data stuff
+example_results_dict.json
+scenarios.json
+scenarios2.json
+strategic_optimization_results_test.xlsx
+model_output.xlsx
+small_strategic_case_study.xlsx
+PARETO_report.xlsx 
+
+.DS_Store
+
+videos/
+screenshots/
