@@ -22,6 +22,7 @@ export default function Sidebar(props) {
           width: drawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+          [`& .MuiBox-root`]: {marginBottom: '60px' },
         }}
         PaperProps={{
             sx: {

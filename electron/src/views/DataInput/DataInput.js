@@ -25,15 +25,13 @@ export default function DataInput(props) {
     });
 
     return (cells.map( (value, index) => {
-      return <TableCell style={index === 0 ? {backgroundColor: "#f4f4f4", border:"1px solid #ddd"} : {border:"1px solid #ddd"}}>{value}</TableCell>
+      return <TableCell key={index} style={index === 0 ? {backgroundColor: "#f4f4f4", border:"1px solid #ddd"} : {border:"1px solid #ddd"}}>{value}</TableCell>
     }))
   }
 
    const renderRows = () => {
-    console.log('inside render rows')
     const rows = []
     let len = props.scenario.data_input.df_parameters[props.category][Object.keys(props.scenario.data_input.df_parameters[props.category])[0]].length
-    console.log("length is",len)
     for (let i = 0; i < len; i++) {
       rows.push(renderRow(i))
     }
@@ -63,9 +61,10 @@ export default function DataInput(props) {
         <Grid item xs={6}>
           <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
             <IconButton aria-label="filter">
-              <FilterListIcon></FilterListIcon>
+              <FilterListIcon fontSize="small"></FilterListIcon>
+              Filter
             </IconButton>
-            <p>Filter</p>
+            
           </Box>
         </Grid>
       </Grid>
