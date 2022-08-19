@@ -4,7 +4,7 @@ import io
 import os
 import datetime
 import math
-from pareto.utilities.get_data import get_data
+from .get_data import get_data
 
 _log = logging.getLogger(__name__)
 _h = logging.StreamHandler()
@@ -49,7 +49,8 @@ class ScenarioHandler:
         f.close()
 
         # read in data from uploaded excel sheet
-        [df_sets, df_parameters] = get_data(output_path, set_list, parameter_list)
+        [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
+        del frontend_parameters['Units']
 
         # convert tuple keys into dictionary values - necessary for javascript interpretation
         for key in df_parameters:
@@ -72,7 +73,7 @@ class ScenarioHandler:
         # create scenario object
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
-        return_object = {"name": filename, "id": len(self.scenario_list), "date": date,"data_input": {"df_sets": df_sets, "df_parameters": df_parameters}, "optimization": {"objective":"reuse"}, "results": {}}
+        return_object = {"name": filename, "id": len(self.scenario_list), "date": date,"data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, "optimization": {"objective":"reuse"}, "results": {}}
 
         # update json containing scenarios
         self.scenario_list.append(return_object)

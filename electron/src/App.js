@@ -46,7 +46,7 @@ function App() {
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
     setSection(0);
-    setCategory("ProductionPads")
+    setCategory("PNA")
   };
 
   const handleNewScenario = (data) => {
@@ -76,7 +76,7 @@ function App() {
     if(section === 2) {
       setCategory("v_F_Overview_dict")
     } else if(section === 0) {
-      setCategory("ProductionPads")
+      setCategory("PNA")
     } else {
       setCategory(null)
     }
