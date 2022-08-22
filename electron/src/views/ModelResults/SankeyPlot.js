@@ -5,7 +5,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import sankey_data from './Sankey_data.json'
+import sankey_data from './Sankey_data.json';
 import Plot from 'react-plotly.js';
 
 
