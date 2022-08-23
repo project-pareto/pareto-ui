@@ -7,6 +7,8 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import scenarios
+import uvicorn
+import multiprocessing
 
 app = FastAPI()
 
@@ -23,3 +25,7 @@ app.include_router(scenarios.router)
 @app.get("/")
 async def root():
     return {"message": "Hello Pareto"}
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)

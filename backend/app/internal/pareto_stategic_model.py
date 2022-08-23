@@ -2,7 +2,7 @@ import json
 import os
 import datetime
 import logging
-from pareto.strategic_water_management.strategic_produced_water_optimization import (
+from app.internal.pareto.strategic_water_management.strategic_produced_water_optimization import (
     create_model,
     Objectives,
     solve_model,
@@ -11,10 +11,8 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     IncludeNodeCapacity,
 )
 # from .get_data import get_data
-from pareto.utilities.get_data import get_data, set_consistency_check, od_matrix
-from pareto.utilities.results import generate_report, PrintValues, OutputUnits, plot_sankey
-from pareto.case_studies.toy_case_study import create_model as create_toy_model
-from importlib import resources
+from app.internal.pareto.utilities.get_data import get_data
+from app.internal.pareto.utilities.results import generate_report, PrintValues, OutputUnits
 
 _log = logging.getLogger(__name__)
 _h = logging.StreamHandler()

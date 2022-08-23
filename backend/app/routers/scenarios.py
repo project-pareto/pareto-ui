@@ -1,6 +1,6 @@
 import io
 import os
-import aiofiles
+# import aiofiles
 import json
 import time
 import logging
@@ -8,6 +8,7 @@ from fastapi import Body, Request, APIRouter, HTTPException, File, UploadFile
 from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional
+import app.internal.aiofiles as aiofiles
 
 from pareto.utilities.get_data import get_data
 from app.internal.pareto_stategic_model import run_strategic_model
