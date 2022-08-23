@@ -1,4 +1,5 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, protocol } = require('electron')
+
 const path = require('path')
 require('dotenv').config()
 
@@ -27,7 +28,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      webSecurity: false,
     }
   })
   win.webContents.openDevTools()
@@ -40,37 +42,38 @@ function createWindow() {
 
 const startServer = () => {
     if (isDev) {
-      backendProcess = spawn("uvicorn", 
-        [
-            "main:app",
-            "--reload",
-            "--host",
-            "127.0.0.1",
-            "--port",
-            PY_PORT,
-        ],
-        {
-            cwd: '../backend/app'
-        }
+
+      // backendProcess = spawn("uvicorn", 
+      //   [
+      //       "main:app",
+      //       "--reload",
+      //       "--host",
+      //       "127.0.0.1",
+      //       "--port",
+      //       PY_PORT,
+      //   ],
+      //   {
+      //       cwd: '../backend/app'
+      //   }
+    // );
+    backendProcess = execFile(
+      path.join(__dirname, "../py_dist/main/main"),
+      [
+        "--host",
+        PY_HOST,
+        "--port",
+        PY_PORT,
+        "--log-level",
+        PY_LOG_LEVEL,
+      ]
     );
 
-    // this starts the server but API responses are blank
-    // could be due to directories?
-
-    // backendProcess = spawn("python", [
-    //     "../backend/app/run_server.py",
-    //     "--host",
-    //     PY_HOST,
-    //     "--port",
-    //     PY_PORT,
-    //     "--log-level",
-    //     PY_LOG_LEVEL
-    //   ]);
-
-      console.log("Python process started in dev mode");
+      console.log("Started in dev mode");
     } else {
+      console.log("__dirname is : ")
+      console.log(__dirname)
       backendProcess = execFile(
-        path.join(__dirname, "../../py_dist/run_server/run_server"),
+        path.join(__dirname, "../py_dist/main/main"),
         [
           "--host",
           PY_HOST,
@@ -88,6 +91,10 @@ const startServer = () => {
 
 app.whenReady().then(() => {
     // Entry point
+    protocol.registerFileProtocol('file', (request, callback) => {
+      const pathname = request.url.replace('file:///', '');
+      callback(pathname);
+    });
 
     let serverProcess = startServer()
     // let uiProcess = startUI()

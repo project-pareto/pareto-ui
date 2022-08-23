@@ -51,8 +51,11 @@ async def upload(file: UploadFile = File(...)):
     async with aiofiles.open(output_path, 'wb') as out_file:
         content = await file.read()  # async read
         await out_file.write(content) 
-
-    return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
+    try:
+        return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
+        
+    except Exception as e:
+        return {"error" : str(e)}
 
 @router.post("/delete_scenario")
 async def delete_scenario(request: Request):
