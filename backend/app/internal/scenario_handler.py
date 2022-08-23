@@ -4,7 +4,7 @@ import io
 import os
 import datetime
 import math
-from .get_data import get_data
+from .get_data import get_data, get_input_lists
 
 _log = logging.getLogger(__name__)
 _h = logging.StreamHandler()
@@ -54,11 +54,13 @@ class ScenarioHandler:
         _log.info(f"Uploading excel sheet: {filename}")
 
         # get default set and parameter lists
-        f = open(self.pareto_data_path,'r')
-        data = json.load(f)
-        set_list = data['set_list']
-        parameter_list = data['parameter_list']
-        f.close()
+        # f = open(self.pareto_data_path,'r')
+        # data = json.load(f)
+        # set_list = data['set_list']
+        # parameter_list = data['parameter_list']
+        # f.close()
+
+        [set_list, parameter_list] = get_input_lists()
 
         # read in data from uploaded excel sheet
         [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
