@@ -10,6 +10,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     PipelineCapacity,
     IncludeNodeCapacity,
 )
+# from .get_data import get_data
 from pareto.utilities.get_data import get_data, set_consistency_check, od_matrix
 from pareto.utilities.results import generate_report, PrintValues, OutputUnits, plot_sankey
 from pareto.case_studies.toy_case_study import create_model as create_toy_model

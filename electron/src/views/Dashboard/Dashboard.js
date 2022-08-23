@@ -90,13 +90,16 @@ export default function Dashboard(props) {
 
   return (
     <>
-    <Sidebar handleSetCategory={props.handleSetCategory} scenario={scenario} section={props.section} category={props.category}></Sidebar>
     <ProcessToolbar 
         handleSelection={props.handleSetSelection} 
         selected={props.section} 
         scenario={scenario}>
       </ProcessToolbar>
-    <Grid container spacing={1} sx={styles.shiftTextRight}>
+      {props.section !== 1 && 
+        <Sidebar handleSetCategory={props.handleSetCategory} scenario={scenario} section={props.section} category={props.category}></Sidebar>
+      }
+      
+    <Grid container spacing={1} sx={props.section !== 1 && styles.shiftTextRight}>
       <Grid item xs={4} ></Grid>
       <Modal
           open={openEditName}
