@@ -17,9 +17,21 @@ _log.setLevel(logging.DEBUG)
 class ScenarioHandler:
     def __init__(self) -> None:
         self.scenario_list = []
-        self.pareto_data_path = "../data/pareto_data.json"
-        self.scenarios_path = "../data/scenarios.json"
-        self.excelsheets_path = "../data/excelsheets/"
+        self.data_directory_path = "data/"
+        self.pareto_data_path = os.path.join(self.data_directory_path, "pareto_data.json")
+        self.scenarios_path = os.path.join(self.data_directory_path, "scenarios.json")
+        self.excelsheets_path = os.path.join(self.data_directory_path, "excelsheets/")
+        self.outputs_path = os.path.join(self.data_directory_path, "outputs/")
+        if not os.path.exists(self.data_directory_path):
+            _log.info(f"in: {os.getcwd()}")
+            _log.info(f"making directory: {self.data_directory_path}")
+            os.makedirs(self.data_directory_path) 
+        if not os.path.exists(self.excelsheets_path):
+            _log.info(f"making directory: {self.excelsheets_path}")
+            os.makedirs(self.excelsheets_path) 
+        if not os.path.exists(self.outputs_path):
+            _log.info(f"making directory: {self.outputs_path}")
+            os.makedirs(self.outputs_path) 
         self.retrieve_scenarios()
 
     def retrieve_scenarios(self):

@@ -21,13 +21,13 @@ _log.addHandler(_h)
 # for debugging, force level
 _log.setLevel(logging.DEBUG)
 
-def run_strategic_model(input_file, output_file = "../data/outputs/PARETO_report.xlsx", objective = 'reuse'):
+def run_strategic_model(input_file, output_file = "data/outputs/PARETO_report.xlsx", objective = 'reuse'):
 
     start_time = datetime.datetime.now()
 
     # import set and parameter lists
     _log.info(f"importing json data")
-    f = open('../data/pareto_data.json')
+    f = open('data/pareto_data.json')
     data = json.load(f)
     set_list = data['set_list']
     parameter_list = data['parameter_list']
