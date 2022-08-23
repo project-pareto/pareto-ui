@@ -1,4 +1,10 @@
 const { app, BrowserWindow, protocol } = require('electron')
+const log = require('electron-log');
+
+log.transports.file.resolvePath = () => path.join(__dirname, '/logsmain.log');
+log.transports.file.level = "info";
+
+exports.log = (entry) => log.info(entry)
 
 const path = require('path')
 require('dotenv').config()
@@ -67,11 +73,13 @@ const startServer = () => {
         PY_LOG_LEVEL,
       ]
     );
-
+      log.info("Started in dev mode");
       console.log("Started in dev mode");
     } else {
       console.log("__dirname is : ")
       console.log(__dirname)
+      log.info("__dirname is : ")
+      log.info(__dirname)
       backendProcess = execFile(
         path.join(__dirname, "../py_dist/main/main"),
         [
@@ -83,6 +91,7 @@ const startServer = () => {
           PY_LOG_LEVEL,
         ]
       );
+      log.info("Python process started in built mode");
       console.log("Python process started in built mode");
     }
     return backendProcess;
@@ -110,6 +119,7 @@ app.whenReady().then(() => {
         })
         .catch(async () => {
             console.log(`Waiting to be able to connect ${appName} at ${url}...`)
+            log.info(`Waiting to be able to connect ${appName} at ${url}...`)
             await new Promise(resolve => setTimeout(resolve, 2000))
             noTrails += 1
             if (noTrails < maxTrials) {
@@ -117,6 +127,7 @@ app.whenReady().then(() => {
             }
             else {
                 console.error(`Exceeded maximum trials to connect to ${appName}`)
+                log.info(`Exceeded maximum trials to connect to ${appName}`)
                 spawnedProcess.kill('SIGINT')
             }
         });
