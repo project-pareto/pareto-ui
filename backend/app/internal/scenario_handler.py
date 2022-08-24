@@ -7,11 +7,11 @@ import math
 from .get_data import get_data, get_input_lists
 
 _log = logging.getLogger(__name__)
-logging.basicConfig(filename="backend_logs.log",
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+# logging.basicConfig(filename="backend_logs.log",
+#                     filemode='a',
+#                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+#                     datefmt='%H:%M:%S',
+#                     level=logging.DEBUG)
 _h = logging.StreamHandler()
 _h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 _log.addHandler(_h)
@@ -28,8 +28,17 @@ class ScenarioHandler:
         self.scenarios_path = os.path.join(self.data_directory_path, "scenarios.json")
         self.excelsheets_path = os.path.join(self.data_directory_path, "excelsheets/")
         self.outputs_path = os.path.join(self.data_directory_path, "outputs/")
+        _log.info(f"app directory: {os.path.dirname(os.path.abspath(__file__))}")
+        _log.info(f"currently operating in directory: {os.getcwd()}")
+        try:
+            _log.info(f"changing to app directroy")
+            app_dir = os.path.dirname(os.path.abspath(__file__))
+            app_dir = app_dir.split('ParetoUI')[0]
+            _log.info(f"new directory: {app_dir}")
+            os.chdir(app_dir)
+        except Exception as e:
+            _log.info(f"unable to change to app directroy: {e}")
         if not os.path.exists(self.data_directory_path):
-            _log.info(f"in: {os.getcwd()}")
             _log.info(f"making directory: {self.data_directory_path}")
             os.makedirs(self.data_directory_path) 
         if not os.path.exists(self.excelsheets_path):

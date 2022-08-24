@@ -13,11 +13,11 @@ import multiprocessing
 
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.DEBUG)
-logging.basicConfig(filename="backend_logs.log",
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+# logging.basicConfig(filename="backend_logs.log",
+#                     filemode='a',
+#                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+#                     datefmt='%H:%M:%S',
+#                     level=logging.DEBUG)
 _h = logging.StreamHandler()
 _h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 _log.addHandler(_h)
