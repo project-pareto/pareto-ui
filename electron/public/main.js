@@ -62,7 +62,7 @@ const startServer = () => {
             cwd: '../backend/app'
         }
     );
-    // backendProcess = execFile(
+    // backendProcess = spawn(
     //   path.join(__dirname, "../py_dist/main/main"),
     //   [
     //     ">> mainjslogs.log"
@@ -71,18 +71,40 @@ const startServer = () => {
       log.info("Python Started in dev mode");
       console.log("Python Started in dev mode");
     } else {
-      console.log("__dirname is : ")
-      console.log(__dirname)
-      log.info("__dirname is : ")
-      log.info(__dirname)
-      backendProcess = execFile(
-        path.join(__dirname, "../py_dist/main/main"),
-        [
-          ">> mainjslogs.log"
-        ]
-      );
-      log.info("Python process started in built mode");
-      console.log("Python process started in built mode");
+      console.log("spawning backend from : "+__dirname)
+      log.info("spawning backend from : "+__dirname)
+      try {
+        backendProcess = spawn(
+          path.join(__dirname, "../py_dist/main/main"),
+          [
+            ">> mainjslogs.log"
+          ]
+        );
+        var scriptOutput = "";
+        backendProcess.stdout.setEncoding('utf8');
+        backendProcess.stdout.on('data', function(data) {
+            console.log('stdout: ' + data);
+            log.info('stdout: ' + data);
+            data=data.toString();
+            scriptOutput+=data;
+        });
+
+        backendProcess.stderr.setEncoding('utf8');
+        backendProcess.stderr.on('data', function(data) {
+            console.log('stderr: ' + data);
+            log.info('stderr: ' + data);
+            data=data.toString();
+            scriptOutput+=data;
+        });
+        log.info("Python process started in built mode");
+        console.log("Python process started in built mode");
+      } catch (error) {
+        log.info("unable to start python process in build mode: ");
+        log.info(error)
+        console.log("unable to start python process in build mode: ");
+        console.log(error)
+      }
+      
     }
     return backendProcess;
 }
@@ -103,6 +125,7 @@ app.whenReady().then(() => {
         
         axios.get(url).then(() => {
             console.log(`${appName} is ready at ${url}!`)
+            log.info(`${appName} is ready at ${url}!`)
             if (successFn) {
                 successFn()
             }
