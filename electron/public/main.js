@@ -1,5 +1,7 @@
 const { app, BrowserWindow, protocol } = require('electron')
 const log = require('electron-log');
+const Store = require("electron-store")
+const storage = new Store();
 
 log.transports.file.resolvePath = () => path.join(__dirname, '/logsmain.log');
 log.transports.file.level = "info";
@@ -25,13 +27,31 @@ const uiURL = `http://localhost:${UI_PORT}`
 
 require('@electron/remote/main').initialize()
 
+function getWindowSettings () {
+  const default_bounds = [800, 600]
+
+  const size = storage.get('win-size');
+
+  if (size) return size;
+  else {
+    storage.set("win-size", default_bounds);
+    return default_bounds;
+  }
+}
+
+function saveBounds (bounds) {
+  storage.set("win-size", bounds)
+}
 
 
 function createWindow() {
+  const bounds = getWindowSettings();
+  console.log('bounds:',bounds)
+
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: bounds[0],
+    height: bounds[1],
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -42,6 +62,11 @@ function createWindow() {
     win.webContents.openDevTools()
   } 
   
+  console.log("storing user preferences in: ",app.getPath('userData'));
+
+  // save size of window when resized
+  win.on("resized", () => saveBounds(win.getSize()));
+
   win.loadURL(
     isDev
       ? 'http://localhost:3000'
