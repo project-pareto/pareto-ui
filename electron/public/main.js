@@ -49,27 +49,27 @@ function createWindow() {
 const startServer = () => {
     if (isDev) {
 
-      // backendProcess = spawn("uvicorn", 
-      //   [
-      //       "main:app",
-      //       "--reload",
-      //       "--host",
-      //       "127.0.0.1",
-      //       "--port",
-      //       PY_PORT,
-      //   ],
-      //   {
-      //       cwd: '../backend/app'
-      //   }
-    // );
-    backendProcess = execFile(
-      path.join(__dirname, "../py_dist/main/main"),
-      [
-        ">> mainjslogs.log"
-      ]
+      backendProcess = spawn("uvicorn", 
+        [
+            "main:app",
+            "--reload",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            PY_PORT,
+        ],
+        {
+            cwd: '../backend/app'
+        }
     );
-      log.info("Started in dev mode");
-      console.log("Started in dev mode");
+    // backendProcess = execFile(
+    //   path.join(__dirname, "../py_dist/main/main"),
+    //   [
+    //     ">> mainjslogs.log"
+    //   ]
+    // );
+      log.info("Python Started in dev mode");
+      console.log("Python Started in dev mode");
     } else {
       console.log("__dirname is : ")
       console.log(__dirname)
@@ -94,18 +94,6 @@ app.whenReady().then(() => {
       const pathname = request.url.replace('file:///', '');
       callback(pathname);
     });
-    // protocol.interceptFileProtocol('file', (request, callback) => {
-    //   log.info("registering protocol for");
-    //   log.info(url);
-    //   const url = request.url.substring(7)    /* all urls start with 'file://' */
-    //   callback({ path: path.normalize(`${__dirname}/${url}`) })
-    // }, (err) => {
-    //   if (err) {
-    //     console.error('Failed to register protocol')
-    //     log.error("Failed to register protocol");
-    //     log.error(error);
-    //   }
-    // })
 
     let serverProcess = startServer()
     // let uiProcess = startUI()
