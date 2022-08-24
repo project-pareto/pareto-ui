@@ -7,6 +7,11 @@ import math
 from .get_data import get_data, get_input_lists
 
 _log = logging.getLogger(__name__)
+logging.basicConfig(filename="backend_logs.log",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 _h = logging.StreamHandler()
 _h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 _log.addHandler(_h)
@@ -16,6 +21,7 @@ _log.setLevel(logging.DEBUG)
 
 class ScenarioHandler:
     def __init__(self) -> None:
+        _log.info(f"initializing scenario handler")
         self.scenario_list = []
         self.data_directory_path = "data/"
         self.pareto_data_path = os.path.join(self.data_directory_path, "pareto_data.json")

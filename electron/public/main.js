@@ -65,12 +65,7 @@ const startServer = () => {
     backendProcess = execFile(
       path.join(__dirname, "../py_dist/main/main"),
       [
-        "--host",
-        PY_HOST,
-        "--port",
-        PY_PORT,
-        "--log-level",
-        PY_LOG_LEVEL,
+        ">> mainjslogs.log"
       ]
     );
       log.info("Started in dev mode");
@@ -83,12 +78,7 @@ const startServer = () => {
       backendProcess = execFile(
         path.join(__dirname, "../py_dist/main/main"),
         [
-          "--host",
-          PY_HOST,
-          "--port",
-          PY_PORT,
-          "--log-level",
-          PY_LOG_LEVEL,
+          ">> mainjslogs.log"
         ]
       );
       log.info("Python process started in built mode");
@@ -104,6 +94,18 @@ app.whenReady().then(() => {
       const pathname = request.url.replace('file:///', '');
       callback(pathname);
     });
+    // protocol.interceptFileProtocol('file', (request, callback) => {
+    //   log.info("registering protocol for");
+    //   log.info(url);
+    //   const url = request.url.substring(7)    /* all urls start with 'file://' */
+    //   callback({ path: path.normalize(`${__dirname}/${url}`) })
+    // }, (err) => {
+    //   if (err) {
+    //     console.error('Failed to register protocol')
+    //     log.error("Failed to register protocol");
+    //     log.error(error);
+    //   }
+    // })
 
     let serverProcess = startServer()
     // let uiProcess = startUI()

@@ -53,7 +53,7 @@ async def upload(file: UploadFile = File(...)):
         await out_file.write(content) 
     try:
         return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
-        
+
     except Exception as e:
         return {"error" : str(e)}
 
