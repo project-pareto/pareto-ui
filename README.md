@@ -48,3 +48,10 @@ npm run app-start
 cd <pareto-ui-path>/electron
 npm run electron-start
 ```
+
+### Build Production app for MacOS
+
+```console
+cd <pareto-ui-path>/electron
+npm run dist:mac
+```
