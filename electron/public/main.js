@@ -38,7 +38,10 @@ function createWindow() {
       webSecurity: false,
     }
   })
-  win.webContents.openDevTools()
+  if (isDev) {
+    win.webContents.openDevTools()
+  } 
+  
   win.loadURL(
     isDev
       ? 'http://localhost:3000'
