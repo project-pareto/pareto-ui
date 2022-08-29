@@ -57,11 +57,11 @@ function App() {
 
   const handleScenarioUpdate = (updatedScenario) => {
     const temp = [...scenarios]
-    scenarios[scenarioIndex] = updatedScenario
+    temp[scenarioIndex] = {...updatedScenario}
     setScenarios(temp)
-    setScenarioData(updatedScenario)
+    setScenarioData({...updatedScenario})
     console.log('new scenario: ')
-    console.log(updatedScenario)
+    console.log({...updatedScenario})
     updateScenario({'updatedScenarios': temp})
     .then(response => response.json())
     .then((data) => {

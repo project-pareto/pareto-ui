@@ -1,4 +1,13 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, protocol } = require('electron')
+const log = require('electron-log');
+const Store = require("electron-store")
+const storage = new Store();
+
+log.transports.file.resolvePath = () => path.join(__dirname, '/logsmain.log');
+log.transports.file.level = "info";
+
+exports.log = (entry) => log.info(entry)
+
 const path = require('path')
 require('dotenv').config()
 
@@ -18,19 +27,46 @@ const uiURL = `http://localhost:${UI_PORT}`
 
 require('@electron/remote/main').initialize()
 
+function getWindowSettings () {
+  const default_bounds = [800, 600]
+
+  const size = storage.get('win-size');
+
+  if (size) return size;
+  else {
+    storage.set("win-size", default_bounds);
+    return default_bounds;
+  }
+}
+
+function saveBounds (bounds) {
+  storage.set("win-size", bounds)
+}
 
 
 function createWindow() {
+  const bounds = getWindowSettings();
+  console.log('bounds:',bounds)
+
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: bounds[0],
+    height: bounds[1],
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      webSecurity: false,
     }
   })
-  win.webContents.openDevTools()
+  if (isDev) {
+    win.webContents.openDevTools()
+  } 
+  
+  console.log("storing user preferences in: ",app.getPath('userData'));
+
+  // save size of window when resized
+  win.on("resized", () => saveBounds(win.getSize()));
+
   win.loadURL(
     isDev
       ? 'http://localhost:3000'
@@ -40,6 +76,7 @@ function createWindow() {
 
 const startServer = () => {
     if (isDev) {
+
       backendProcess = spawn("uvicorn", 
         [
             "main:app",
@@ -53,34 +90,49 @@ const startServer = () => {
             cwd: '../backend/app'
         }
     );
-
-    // this starts the server but API responses are blank
-    // could be due to directories?
-
-    // backendProcess = spawn("python", [
-    //     "../backend/app/run_server.py",
-    //     "--host",
-    //     PY_HOST,
-    //     "--port",
-    //     PY_PORT,
-    //     "--log-level",
-    //     PY_LOG_LEVEL
-    //   ]);
-
-      console.log("Python process started in dev mode");
+    // backendProcess = spawn(
+    //   path.join(__dirname, "../py_dist/main/main"),
+    //   [
+    //     ">> mainjslogs.log"
+    //   ]
+    // );
+      log.info("Python Started in dev mode");
+      console.log("Python Started in dev mode");
     } else {
-      backendProcess = execFile(
-        path.join(__dirname, "../../py_dist/run_server/run_server"),
-        [
-          "--host",
-          PY_HOST,
-          "--port",
-          PY_PORT,
-          "--log-level",
-          PY_LOG_LEVEL,
-        ]
-      );
-      console.log("Python process started in built mode");
+      console.log("spawning backend from : "+__dirname)
+      log.info("spawning backend from : "+__dirname)
+      try {
+        backendProcess = spawn(
+          path.join(__dirname, "../py_dist/main/main"),
+          [
+            ">> mainjslogs.log"
+          ]
+        );
+        var scriptOutput = "";
+        backendProcess.stdout.setEncoding('utf8');
+        backendProcess.stdout.on('data', function(data) {
+            console.log('stdout: ' + data);
+            log.info('stdout: ' + data);
+            data=data.toString();
+            scriptOutput+=data;
+        });
+
+        backendProcess.stderr.setEncoding('utf8');
+        backendProcess.stderr.on('data', function(data) {
+            console.log('stderr: ' + data);
+            log.info('stderr: ' + data);
+            data=data.toString();
+            scriptOutput+=data;
+        });
+        log.info("Python process started in built mode");
+        console.log("Python process started in built mode");
+      } catch (error) {
+        log.info("unable to start python process in build mode: ");
+        log.info(error)
+        console.log("unable to start python process in build mode: ");
+        console.log(error)
+      }
+      
     }
     return backendProcess;
 }
@@ -88,6 +140,10 @@ const startServer = () => {
 
 app.whenReady().then(() => {
     // Entry point
+    protocol.registerFileProtocol('file', (request, callback) => {
+      const pathname = request.url.replace('file:///', '');
+      callback(pathname);
+    });
 
     let serverProcess = startServer()
     // let uiProcess = startUI()
@@ -97,12 +153,14 @@ app.whenReady().then(() => {
         
         axios.get(url).then(() => {
             console.log(`${appName} is ready at ${url}!`)
+            log.info(`${appName} is ready at ${url}!`)
             if (successFn) {
                 successFn()
             }
         })
         .catch(async () => {
             console.log(`Waiting to be able to connect ${appName} at ${url}...`)
+            log.info(`Waiting to be able to connect ${appName} at ${url}...`)
             await new Promise(resolve => setTimeout(resolve, 2000))
             noTrails += 1
             if (noTrails < maxTrials) {
@@ -110,6 +168,7 @@ app.whenReady().then(() => {
             }
             else {
                 console.error(`Exceeded maximum trials to connect to ${appName}`)
+                log.info(`Exceeded maximum trials to connect to ${appName}`)
                 spawnedProcess.kill('SIGINT')
             }
         });

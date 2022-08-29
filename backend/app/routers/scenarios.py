@@ -1,6 +1,6 @@
 import io
 import os
-import aiofiles
+# import aiofiles
 import json
 import time
 import logging
@@ -8,6 +8,7 @@ from fastapi import Body, Request, APIRouter, HTTPException, File, UploadFile
 from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional
+import app.internal.aiofiles as aiofiles
 
 from pareto.utilities.get_data import get_data
 from app.internal.pareto_stategic_model import run_strategic_model
@@ -50,8 +51,11 @@ async def upload(file: UploadFile = File(...)):
     async with aiofiles.open(output_path, 'wb') as out_file:
         content = await file.read()  # async read
         await out_file.write(content) 
+    try:
+        return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
 
-    return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
+    except Exception as e:
+        return {"error" : str(e)}
 
 @router.post("/delete_scenario")
 async def delete_scenario(request: Request):
