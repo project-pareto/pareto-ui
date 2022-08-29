@@ -23,7 +23,7 @@ class ScenarioHandler:
     def __init__(self) -> None:
         _log.info(f"initializing scenario handler")
         self.scenario_list = []
-        self.data_directory_path = "data/"
+        self.data_directory_path = "ParetoUI_Data/"
         self.pareto_data_path = os.path.join(self.data_directory_path, "pareto_data.json")
         self.scenarios_path = os.path.join(self.data_directory_path, "scenarios.json")
         self.excelsheets_path = os.path.join(self.data_directory_path, "excelsheets/")
@@ -31,11 +31,11 @@ class ScenarioHandler:
         _log.info(f"app directory: {os.path.dirname(os.path.abspath(__file__))}")
         _log.info(f"currently operating in directory: {os.getcwd()}")
         try:
-            _log.info(f"changing to app directroy")
-            app_dir = os.path.dirname(os.path.abspath(__file__))
-            app_dir = app_dir.split('ParetoUI')[0]
-            _log.info(f"new directory: {app_dir}")
-            os.chdir(app_dir)
+            _log.info(f"changing to home directroy")
+            home_dir = os.path.expanduser("~")
+            # app_dir = app_dir.split('ParetoUI')[0]
+            _log.info(f"new directory: {home_dir}")
+            os.chdir(home_dir)
         except Exception as e:
             _log.info(f"unable to change to app directroy: {e}")
         if not os.path.exists(self.data_directory_path):
