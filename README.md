@@ -35,6 +35,14 @@ cd <pareto-ui-path>/electron
 npm clean-install
 ```
 
+## Running the UI
+
+### Ensure that the `pareto-ui-env` Conda environment is active
+
+```console
+conda activate pareto-ui-env
+```
+
 ### Run UI in browser
 
 ```console
@@ -49,7 +57,7 @@ cd <pareto-ui-path>/electron
 npm run electron-start
 ```
 
-### Build Production app for MacOS
+### Build Production app for MacOS (Experimental)
 
 ```console
 cd <pareto-ui-path>/electron
