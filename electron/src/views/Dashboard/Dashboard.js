@@ -63,17 +63,24 @@ export default function Dashboard(props) {
    const handleRunModel = () => {
     console.log('running model')
       runModel({"id": scenario.id, 'objective':scenario.optimization.objective})
-      .then(response => response.json())
-      .then((data)=> {
-        console.log('run model successful: ')
-        console.log(data)
-        scenario["results"] = data
-        props.updateScenario(scenario)
-        props.handleSetSelection(2)
+      .then(r =>  r.json().then(data => ({status: r.status, body: data})))
+      .then((response) => {
+        let responseCode = response.status
+        let data = response.body
+        if(responseCode === 200) {
+          console.log('run model successful: ')
+          console.log(data)
+          scenario["results"] = data
+          props.updateScenario(scenario)
+          props.handleSetSelection(2)
+        }
+        else if(responseCode === 500) {
+          console.error('error on model run: ',data.detail)
+        }
+
       })
       .catch(e => {
-        console.log('error on model run')
-        console.log(e)
+        console.error('error on model run: ',e)
       })
    }
 

@@ -93,9 +93,18 @@
       "public/**/*"
     ],
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "default",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "category": "utilities",
-      "type": "development"
+      "type": "development",
+      "icon": "./public/pareto-ico-ico"
     },
     "win": {
       "target": "portable",
