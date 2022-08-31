@@ -178,6 +178,11 @@ app.whenReady().then(() => {
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
+
+    app.on('quit', () => {
+      console.log('shutting down backend server')
+      serverProcess.kill()
+  })
 })
 
 // For windows & linux platforms
