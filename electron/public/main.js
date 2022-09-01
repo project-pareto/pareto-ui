@@ -182,12 +182,12 @@ app.whenReady().then(() => {
       const pathname = request.url.replace('file:///', '');
       callback(pathname);
     });
-
+    let serverProcess
     let installationProcess = installExtensions()
     installationProcess.on('exit', code => {
       console.log('installation exit code is', code)
       console.log('starting server')
-      let serverProcess = startServer()
+      serverProcess = startServer()
 
       // let uiProcess = startUI()
       let noTrails = 0
@@ -228,7 +228,7 @@ app.whenReady().then(() => {
     app.on('quit', () => {
       console.log('shutting down backend server')
       serverProcess.kill()
-  })
+    })
 })
 
 // For windows & linux platforms
