@@ -74,38 +74,76 @@ function createWindow() {
   )
 }
 
+const installExtensions = () => {
+
+    try{
+    installationProcess = spawn(
+      path.join(__dirname, "../../backend/app/dist/main/main"),
+      [
+        "install"
+      ]
+    );
+
+    log.info("installation started");
+    console.log("installation started");
+
+      var scriptOutput = "";
+      installationProcess.stdout.setEncoding('utf8');
+      installationProcess.stdout.on('data', function(data) {
+          console.log('stdout: ' + data);
+          log.info('stdout: ' + data);
+          data=data.toString();
+          scriptOutput+=data;
+      });
+
+      installationProcess.stderr.setEncoding('utf8');
+      installationProcess.stderr.on('data', function(data) {
+          console.log('stderr: ' + data);
+          log.info('stderr: ' + data);
+          data=data.toString();
+          scriptOutput+=data;
+      });
+    } catch (error) {
+      log.info("unable to get extensions: ",error);
+      console.error("unable to get extensions: ",error);
+    }
+    return installationProcess;
+  }
+  
+
 const startServer = () => {
     if (isDev) {
 
-      backendProcess = spawn("uvicorn", 
+      // backendProcess = spawn("uvicorn", 
+      //   [
+      //       "main:app",
+      //       "--reload",
+      //       "--host",
+      //       "127.0.0.1",
+      //       "--port",
+      //       PY_PORT,
+      //   ],
+      //   {
+      //       cwd: '../backend/app'
+      //   }
+      // );
+
+      backendProcess = spawn(
+        path.join(__dirname, "../../backend/app/dist/main/main"),
         [
-            "main:app",
-            "--reload",
-            "--host",
-            "127.0.0.1",
-            "--port",
-            PY_PORT,
-        ],
-        {
-            cwd: '../backend/app'
-        }
-    );
-    // backendProcess = spawn(
-    //   path.join(__dirname, "../py_dist/main/main"),
-    //   [
-    //     ">> mainjslogs.log"
-    //   ]
-    // );
+          ""
+        ]
+      );
+
       log.info("Python Started in dev mode");
       console.log("Python Started in dev mode");
+
     } else {
-      console.log("spawning backend from : "+__dirname)
-      log.info("spawning backend from : "+__dirname)
       try {
         backendProcess = spawn(
           path.join(__dirname, "../py_dist/main/main"),
           [
-            ">> mainjslogs.log"
+            "install"
           ]
         );
         var scriptOutput = "";
@@ -129,8 +167,8 @@ const startServer = () => {
       } catch (error) {
         log.info("unable to start python process in build mode: ");
         log.info(error)
-        console.log("unable to start python process in build mode: ");
-        console.log(error)
+        console.error("unable to start python process in build mode: ");
+        console.error(error)
       }
       
     }
@@ -145,35 +183,43 @@ app.whenReady().then(() => {
       callback(pathname);
     });
 
-    let serverProcess = startServer()
-    // let uiProcess = startUI()
-    let noTrails = 0
-    // Start Window 
-    var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=15) => {
-        
-        axios.get(url).then(() => {
-            console.log(`${appName} is ready at ${url}!`)
-            log.info(`${appName} is ready at ${url}!`)
-            if (successFn) {
-                successFn()
-            }
-        })
-        .catch(async () => {
-            console.log(`Waiting to be able to connect ${appName} at ${url}...`)
-            log.info(`Waiting to be able to connect ${appName} at ${url}...`)
-            await new Promise(resolve => setTimeout(resolve, 2000))
-            noTrails += 1
-            if (noTrails < maxTrials) {
-                startUp(url, appName, spawnedProcess, successFn, maxTrials)
-            }
-            else {
-                console.error(`Exceeded maximum trials to connect to ${appName}`)
-                log.info(`Exceeded maximum trials to connect to ${appName}`)
-                spawnedProcess.kill('SIGINT')
-            }
-        });
-    };
-    startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
+    let installationProcess = installExtensions()
+    installationProcess.on('exit', code => {
+      console.log('installation exit code is', code)
+      console.log('starting server')
+      let serverProcess = startServer()
+
+      // let uiProcess = startUI()
+      let noTrails = 0
+      // Start Window 
+      var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=15) => {
+          
+          axios.get(url).then(() => {
+              console.log(`${appName} is ready at ${url}!`)
+              log.info(`${appName} is ready at ${url}!`)
+              if (successFn) {
+                  successFn()
+              }
+          })
+          .catch(async () => {
+              console.log(`Waiting to be able to connect ${appName} at ${url}...`)
+              log.info(`Waiting to be able to connect ${appName} at ${url}...`)
+              await new Promise(resolve => setTimeout(resolve, 5000))
+              noTrails += 1
+              if (noTrails < maxTrials) {
+                  startUp(url, appName, spawnedProcess, successFn, maxTrials)
+              }
+              else {
+                  console.error(`Exceeded maximum trials to connect to ${appName}`)
+                  log.info(`Exceeded maximum trials to connect to ${appName}`)
+                  spawnedProcess.kill('SIGINT')
+              }
+          });
+      };
+      startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
+    })
+    
+    
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()

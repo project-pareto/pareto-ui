@@ -97,14 +97,13 @@
         {
           "target": "default",
           "arch": [
-            "x64",
             "arm64"
           ]
         }
       ],
       "category": "utilities",
       "type": "development",
-      "icon": "./public/pareto-ico-ico"
+      "icon": "./public/pareto-ico.ico"
     },
     "win": {
       "target": "portable",
