@@ -78,7 +78,7 @@ const installExtensions = () => {
 
     try{
     installationProcess = spawn(
-      path.join(__dirname, "../../backend/app/dist/main/main"),
+      path.join(__dirname, "../py_dist/main/main"),
       [
         "install"
       ]
@@ -114,26 +114,26 @@ const installExtensions = () => {
 const startServer = () => {
     if (isDev) {
 
-      // backendProcess = spawn("uvicorn", 
-      //   [
-      //       "main:app",
-      //       "--reload",
-      //       "--host",
-      //       "127.0.0.1",
-      //       "--port",
-      //       PY_PORT,
-      //   ],
-      //   {
-      //       cwd: '../backend/app'
-      //   }
-      // );
-
-      backendProcess = spawn(
-        path.join(__dirname, "../../backend/app/dist/main/main"),
+      backendProcess = spawn("uvicorn", 
         [
-          ""
-        ]
+            "main:app",
+            "--reload",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            PY_PORT,
+        ],
+        {
+            cwd: '../backend/app'
+        }
       );
+
+      // backendProcess = spawn(
+      //   path.join(__dirname, "../py_dist/main/main"),
+      //   [
+      //     ""
+      //   ]
+      // );
 
       log.info("Python Started in dev mode");
       console.log("Python Started in dev mode");
@@ -143,7 +143,7 @@ const startServer = () => {
         backendProcess = spawn(
           path.join(__dirname, "../py_dist/main/main"),
           [
-            "install"
+            ""
           ]
         );
         var scriptOutput = "";
