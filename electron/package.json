@@ -48,7 +48,7 @@
     "start-nob": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "dist:mac": "npm run build-backend && npm run build && electron-builder -m -c.extraMetadata.main=build/main.js",
+    "dist:mac": "npm run build-backend && npm run build && npm run electron-build",
     "build-backend": "cd ../backend/app && pyinstaller -y --clean --distpath ../../electron/py_dist main.spec",
     "remove-previous-backend-build": "rm -r py_dist/*",
     "remove-previous-dist": "rm -r dist/*",
@@ -84,7 +84,8 @@
       "build/**/*",
       "node_modules/**/*",
       "package.json",
-      "backend/**/*"
+      "backend/**/*",
+      "images/**/*"
     ],
     "directories": {
       "buildResources": "assets"
@@ -107,7 +108,7 @@
     },
     "win": {
       "target": "portable",
-      "icon": "./src/assets/pareto-logo-2.png"
+      "icon": "./src/images/pareto-logo-2.png"
     },
     "linux": {
       "target": "deb",

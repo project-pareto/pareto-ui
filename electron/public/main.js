@@ -58,9 +58,9 @@ function createWindow() {
       webSecurity: false,
     }
   })
-  if (isDev) {
+  // if (isDev) {
     win.webContents.openDevTools()
-  } 
+  // } 
   
   console.log("storing user preferences in: ",app.getPath('userData'));
 
@@ -217,6 +217,11 @@ app.whenReady().then(() => {
           });
       };
       startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
+      app.on('quit', () => {
+        console.log('shutting down backend server')
+        log.info('shutting down backend server')
+        serverProcess.kill()
+      })
     })
     
     
@@ -225,10 +230,7 @@ app.whenReady().then(() => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 
-    app.on('quit', () => {
-      console.log('shutting down backend server')
-      serverProcess.kill()
-    })
+
 })
 
 // For windows & linux platforms

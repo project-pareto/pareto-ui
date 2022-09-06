@@ -1,7 +1,7 @@
 import './Header.css';
 import React from 'react';
 import {useEffect, useState} from 'react';   
-// import logo from "../../assets/pareto-logo-3.png";
+import logo from "../../assets/pareto-logo.png";
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -12,7 +12,6 @@ import Select from '@mui/material/Select';
  
 
 export default function Header(props) {  
-
     const handleScenarioSelection = (event) => {
       props.handleSelection(event.target.value)
     }
@@ -22,7 +21,7 @@ export default function Header(props) {
         <div className="titlebar">
           <a style={{cursor:"pointer"}} onClick={props.navigateHome}>
             <div id="pareto_logo">
-              <img src="pareto-logo.png" alt="Pareto Logo"/>
+              <img src={logo} alt="Pareto Logo"/>
             </div>
           </a>
         {props.scenarioData ? 
