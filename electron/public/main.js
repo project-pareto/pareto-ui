@@ -178,10 +178,10 @@ const startServer = () => {
 
 app.whenReady().then(() => {
     // Entry point
-    protocol.registerFileProtocol('file', (request, callback) => {
-      const pathname = request.url.replace('file:///', '');
-      callback(pathname);
-    });
+    // protocol.registerFileProtocol('file', (request, callback) => {
+    //   const pathname = request.url.replace('file:///', '');
+    //   callback(pathname);
+    // });
     let serverProcess
     let installationProcess = installExtensions()
     installationProcess.on('exit', code => {
