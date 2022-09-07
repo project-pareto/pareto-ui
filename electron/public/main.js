@@ -58,9 +58,9 @@ function createWindow() {
       webSecurity: false,
     }
   })
-  // if (isDev) {
+  if (isDev) {
     win.webContents.openDevTools()
-  // } 
+  } 
   
   console.log("storing user preferences in: ",app.getPath('userData'));
 
@@ -90,7 +90,7 @@ const installExtensions = () => {
       var scriptOutput = "";
       installationProcess.stdout.setEncoding('utf8');
       installationProcess.stdout.on('data', function(data) {
-          console.log('stdout: ' + data);
+          // console.log('stdout: ' + data);
           log.info('stdout: ' + data);
           data=data.toString();
           scriptOutput+=data;
@@ -98,7 +98,7 @@ const installExtensions = () => {
 
       installationProcess.stderr.setEncoding('utf8');
       installationProcess.stderr.on('data', function(data) {
-          console.log('stderr: ' + data);
+          // console.log('stderr: ' + data);
           log.info('stderr: ' + data);
           data=data.toString();
           scriptOutput+=data;
@@ -149,7 +149,7 @@ const startServer = () => {
         var scriptOutput = "";
         backendProcess.stdout.setEncoding('utf8');
         backendProcess.stdout.on('data', function(data) {
-            console.log('stdout: ' + data);
+            // console.log('stdout: ' + data);
             log.info('stdout: ' + data);
             data=data.toString();
             scriptOutput+=data;
@@ -157,7 +157,7 @@ const startServer = () => {
 
         backendProcess.stderr.setEncoding('utf8');
         backendProcess.stderr.on('data', function(data) {
-            console.log('stderr: ' + data);
+            // console.log('stderr: ' + data);
             log.info('stderr: ' + data);
             data=data.toString();
             scriptOutput+=data;
@@ -185,14 +185,16 @@ app.whenReady().then(() => {
     let serverProcess
     let installationProcess = installExtensions()
     installationProcess.on('exit', code => {
+      log.info('installation exit code is', code)
       console.log('installation exit code is', code)
+      log.info('starting server')
       console.log('starting server')
       serverProcess = startServer()
 
       // let uiProcess = startUI()
       let noTrails = 0
       // Start Window 
-      var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=15) => {
+      var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=5) => {
           
           axios.get(url).then(() => {
               console.log(`${appName} is ready at ${url}!`)
@@ -204,7 +206,7 @@ app.whenReady().then(() => {
           .catch(async () => {
               console.log(`Waiting to be able to connect ${appName} at ${url}...`)
               log.info(`Waiting to be able to connect ${appName} at ${url}...`)
-              await new Promise(resolve => setTimeout(resolve, 5000))
+              await new Promise(resolve => setTimeout(resolve, 10000))
               noTrails += 1
               if (noTrails < maxTrials) {
                   startUp(url, appName, spawnedProcess, successFn, maxTrials)

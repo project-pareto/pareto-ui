@@ -10,6 +10,11 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=[
+    'idaes.commands',
+    'idaes.util.download_bin',
+    'idaes.config',
+    'idaes.logger',
+    'idaes.commands.util.download_bin',
     'pyomo.contrib.ampl_function_demo.plugins',
     'pyomo.contrib.appsi.plugins',
     'pyomo.contrib.community_detection.plugins',

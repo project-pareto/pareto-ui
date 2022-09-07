@@ -4,6 +4,8 @@ import logging
 import subprocess
 from subprocess import CalledProcessError
 import certifi
+from idaes.util.download_bin import download_binaries
+from idaes.config import default_binary_release
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -58,17 +60,14 @@ def get_extensions():
     try:
         if(sys.platform == "darwin"):
             _log.info('mac')
-            # _log.info('trying to pip install idaes first')
-            # _log.info(subprocess.check_output([sys.executable, "-m", "pip", "install", 'idaes-pse']))
-            # _log.info(f'trying to download extensions from {home_dir}/Downloads')
-            # _log.info(subprocess.check_output(['which', 'idaes']))
-            _log.info(subprocess.check_output(['idaes', 'get-extensions','--url',f'file://{home_dir}/Downloads'], stderr=subprocess_error))
-            # return_code = os.system(f'idaes get-extensions --url file://{home_dir}/Downloads')
-            # _log.info(f'return code : {return_code}')
+            _log.info('trying to use idaes commands directly')
+            download_binaries(url=f'file://{home_dir}/Downloads')
+            _log.info(f'extensions have been gotten')
         else:
             _log.info('not mac')
             _log.info(f'trying to download extensions from web')
-            _log.info(subprocess.check_output(['idaes', 'get-extensions'], stderr=subprocess_error))
+            _download_binaries(release=default_binary_release)
+            _log.info(f'extensions have been gotten')
         _log.info('successfully installed idaes extensions')
     except CalledProcessError as e:
         _log.error(f'unable to install extensions, calledprocesserror: {e.output}')
@@ -85,23 +84,23 @@ def check__for_extensions():
     home_dir = os.path.expanduser("~")
     idaes_dir = os.path.join(home_dir, ".idaes/")
     if os.path.exists(idaes_dir):
-        return True
+        return False
     else:
         return False
 
 if __name__ == '__main__':
     if('i' in sys.argv or 'install' in sys.argv):
-        _log.info('check for idaes installers')
-        if check__for_extensions():
-            _log.info('found installers - ready to start backend')
+        # _log.info('check for idaes installers')
+        # if check__for_extensions():
+        #     _log.info('found installers - ready to start backend')
+        # else:
+        _log.info('running get_extensions()')
+        if get_extensions():
+            _log.info('SUCCESS: idaes extensions installed')
+            sys.exit(0)
         else:
-            _log.info('installers not found, running get_extensions()')
-            if get_extensions():
-                _log.info('SUCCESS: idaes extensions installed')
-                sys.exit(0)
-            else:
-                _log.error('unable to install idaes extensions :(')
-                sys.exit(1)
+            _log.error('unable to install idaes extensions :(')
+            sys.exit(1)
 
     else:
         _log.info(f"\nstarting app!!")
