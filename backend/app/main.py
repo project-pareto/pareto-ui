@@ -4,6 +4,7 @@ import logging
 import subprocess
 from subprocess import CalledProcessError
 import certifi
+import idaes.logger as idaeslog
 from idaes.util.download_bin import download_binaries
 from idaes.config import default_binary_release
 
@@ -20,7 +21,7 @@ _log = logging.getLogger(__name__)
 
 _h = logging.StreamHandler()
 _h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-_f = logging.FileHandler('backendlogs.log')
+_f = logging.FileHandler('paretoui-backendlogs.log')
 _f.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 _log.addHandler(_h)
 _log.addHandler(_f)
