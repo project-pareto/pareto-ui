@@ -69,14 +69,7 @@
       "public/**/*"
     ],
     "mac": {
-      "target": [
-        {
-          "target": "default",
-          "arch": [
-            "arm64"
-          ]
-        }
-      ],
+      "target": "dmg",
       "gatekeeperAssess": false,
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.inherit.plist",
