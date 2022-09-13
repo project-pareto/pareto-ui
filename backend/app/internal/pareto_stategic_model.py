@@ -10,10 +10,10 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     PipelineCapacity,
     IncludeNodeCapacity,
 )
-from pareto.utilities.get_data import get_data, set_consistency_check, od_matrix
-from pareto.utilities.results import generate_report, PrintValues, OutputUnits, plot_sankey
-from pareto.case_studies.toy_case_study import create_model as create_toy_model
-from importlib import resources
+# from .get_data import get_data
+from pareto.utilities.get_data import get_data
+from pareto.utilities.results import generate_report, PrintValues, OutputUnits
+from .get_data import get_input_lists
 
 _log = logging.getLogger(__name__)
 _h = logging.StreamHandler()
@@ -22,17 +22,19 @@ _log.addHandler(_h)
 # for debugging, force level
 _log.setLevel(logging.DEBUG)
 
-def run_strategic_model(input_file, output_file = "../data/outputs/PARETO_report.xlsx", objective = 'reuse'):
 
+def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_report.xlsx", objective = 'reuse'):
     start_time = datetime.datetime.now()
 
     # import set and parameter lists
-    _log.info(f"importing json data")
-    f = open('../data/pareto_data.json')
-    data = json.load(f)
-    set_list = data['set_list']
-    parameter_list = data['parameter_list']
-    f.close()
+    # _log.info(f"importing json data")
+    # f = open('data/pareto_data.json')
+    # data = json.load(f)
+    # set_list = data['set_list']
+    # parameter_list = data['parameter_list']
+    # f.close()
+
+    [set_list, parameter_list] = get_input_lists()
 
     _log.info(f"getting data from excel sheet")
     [df_sets, df_parameters] = get_data(input_file, set_list, parameter_list)

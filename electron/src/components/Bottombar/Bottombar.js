@@ -26,7 +26,7 @@ export default function Bottombar(props) {
   return ( 
     <Box sx={{ width: 500 }}>
       <CssBaseline />
-      <Paper sx={{ position: 'fixed', bottom: 0, left: '240px', right: 0, height: '60px' }} elevation={3}>
+      <Paper sx={{ position: 'fixed', bottom: 0, left: '0px', right: 0, height: '60px', zIndex: 1500 }} elevation={3}>
           {props.scenario ? 
             <Grid container sx={{marginTop: '10px'}}>
                 <Grid item xs={6}>

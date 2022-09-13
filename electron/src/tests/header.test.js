@@ -20,7 +20,6 @@ test('test header', () => {
             handleSelection={mockFunction}
             /> )
 
-    expect(screen.getByRole('link', {  name: /Pareto logo/i})).toBeInTheDocument();
     expect(screen.getByRole('img', {  name: /Pareto logo/i})).toBeInTheDocument();
     expect(screen.getByRole('button', {  name: /case study 2/i})).toBeInTheDocument();
     expect(screen.getByRole('button', {  name: /View Scenario List/i})).toBeInTheDocument();

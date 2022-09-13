@@ -22,6 +22,7 @@ export default function Sidebar(props) {
           width: drawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+          [`& .MuiBox-root`]: {marginBottom: '60px' },
         }}
         PaperProps={{
             sx: {
@@ -35,7 +36,7 @@ export default function Sidebar(props) {
         <Box sx={{ overflow: 'auto', overflowX: 'hidden'}}>
             <List aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
             {props.scenario  ? 
-            Object.entries(props.section === 0 ? props.scenario.data_input.df_sets : props.section === 1 ? props.scenario.optimization : props.scenario.results).map( ([key, value]) => ( 
+            Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results).map( ([key, value]) => ( 
               <>
               <ListItem key={key} disablePadding>
                   <ListItemButton selected={props.category===key} onClick={() => props.handleSetCategory(key)} key={key}>

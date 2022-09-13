@@ -20,9 +20,14 @@
     "cypress": "^10.4.0",
     "dotenv": "^16.0.1",
     "electron-is-dev": "^2.0.0",
+    "electron-log": "^4.4.8",
+    "electron-store": "^8.1.0",
+    "jest-canvas-mock": "^2.4.0",
     "jointjs": "^3.5.5",
+    "plotly.js": "^2.14.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
+    "react-plotly.js": "^2.5.1",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "wait-on": "^6.0.1",
@@ -35,13 +40,18 @@
   "scripts": {
     "start": "react-scripts start",
     "electron-start": "concurrently -k \"npm run start-backend\" \"npm run start-nob\" \"wait-on http://127.0.0.1:3000 && npx electron .\"",
+    "electron-start2": "concurrently -k \"npm run start-nob\" \" npx electron .\"",
+    "electron-build": "npm run remove-previous-dist && electron-builder -m -c.extraMetadata.main=build/main.js || electron-builder -m -c.extraMetadata.main=build/main.js",
     "app-start": "concurrently -k \"cross-env npm run start-backend\" \"react-scripts start\"",
     "app-start-nob": "concurrently -k \"npm run start-backend\" \"npm run start-nob\"",
     "start-backend": "cd ../backend/app && uvicorn main:app --reload --host 0.0.0.0 --port 8001",
     "start-nob": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "dist:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/main.js",
+    "dist:mac": "npm run build-backend && npm run build && npm run electron-build",
+    "build-backend": "cd ../backend/app && pyinstaller -y --clean --distpath ../../electron/py_dist main.spec",
+    "remove-previous-backend-build": "rm -r py_dist/*",
+    "remove-previous-dist": "rm -r dist/*",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -69,23 +79,36 @@
     "asar": false,
     "productName": "ParetoUI",
     "files": [
+      "py_dist/**/*",
       "dist/**/*",
       "build/**/*",
       "node_modules/**/*",
       "package.json",
-      "backend/**/*"
+      "backend/**/*",
+      "images/**/*"
     ],
     "directories": {
       "buildResources": "assets"
     },
+    "extraResources": [
+      "public/**/*"
+    ],
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "default",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
       "category": "utilities",
-      "type": "development"
+      "type": "development",
+      "icon": "./public/pareto-ico.ico"
     },
     "win": {
       "target": "portable",
-      "icon": "./src/assets/pareto-logo-2.png"
+      "icon": "./src/images/pareto-logo-2.png"
     },
     "linux": {
       "target": "deb",

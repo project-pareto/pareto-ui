@@ -46,7 +46,7 @@ function App() {
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
     setSection(0);
-    setCategory("ProductionPads")
+    setCategory("PNA")
   };
 
   const handleNewScenario = (data) => {
@@ -57,11 +57,11 @@ function App() {
 
   const handleScenarioUpdate = (updatedScenario) => {
     const temp = [...scenarios]
-    scenarios[scenarioIndex] = updatedScenario
+    temp[scenarioIndex] = {...updatedScenario}
     setScenarios(temp)
-    setScenarioData(updatedScenario)
+    setScenarioData({...updatedScenario})
     console.log('new scenario: ')
-    console.log(updatedScenario)
+    console.log({...updatedScenario})
     updateScenario({'updatedScenarios': temp})
     .then(response => response.json())
     .then((data) => {
@@ -76,7 +76,7 @@ function App() {
     if(section === 2) {
       setCategory("v_F_Overview_dict")
     } else if(section === 0) {
-      setCategory("ProductionPads")
+      setCategory("PNA")
     } else {
       setCategory(null)
     }
