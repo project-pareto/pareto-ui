@@ -9,9 +9,22 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableContainer from '@mui/material/TableContainer';
 
 
 export default function DataInput(props) {
+  const styles ={
+    firstCol: {
+      backgroundColor: "#f4f4f4", 
+      border:"1px solid #ddd",
+      position: 'sticky',
+      left: 0,
+    },
+    other: {
+      border:"1px solid #ddd"
+    }
+  }
+
   const scenario = props.scenario
    useEffect(()=>{
       //  console.log('curr scenario',scenario)
@@ -25,7 +38,7 @@ export default function DataInput(props) {
     });
 
     return (cells.map( (value, index) => {
-      return <TableCell key={index} style={index === 0 ? {backgroundColor: "#f4f4f4", border:"1px solid #ddd"} : {border:"1px solid #ddd"}}>{value}</TableCell>
+      return <TableCell key={index} style={index === 0 ? styles.firstCol : styles.other}>{value}</TableCell>
     }))
   }
 
@@ -51,7 +64,7 @@ export default function DataInput(props) {
     // </Box>
 
     // this works for parameters - which are tables
-    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflowX:'auto'}}>
+    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
       <Grid container>
         <Grid item xs={6}>
           <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'10px'}}>
@@ -68,12 +81,17 @@ export default function DataInput(props) {
           </Box>
         </Grid>
       </Grid>
-      
+      <TableContainer sx={{overflowX:'auto'}}>
       <Table style={{border:"1px solid #ddd"}} size='small'>
         <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
         <TableRow>
-        {Object.entries(props.scenario.data_input.df_parameters[props.category]).map( ([key, value]) => {
-          return <TableCell style={{color:"white"}}>{key}</TableCell>
+        {Object.entries(props.scenario.data_input.df_parameters[props.category]).map( ([key, value], index) => {
+          return (
+            index === 0 ? 
+           <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
+          : 
+           <TableCell style={{color:"white"}}>{key}</TableCell>
+          )
         })}
         </TableRow>
         </TableHead>
@@ -81,6 +99,7 @@ export default function DataInput(props) {
         {renderRows()}
         </TableBody>
       </Table>
+      </TableContainer>
     </Box>
   );
 

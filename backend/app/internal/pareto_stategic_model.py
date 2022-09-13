@@ -22,8 +22,8 @@ _log.addHandler(_h)
 # for debugging, force level
 _log.setLevel(logging.DEBUG)
 
-def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_report.xlsx", objective = 'reuse'):
 
+def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_report.xlsx", objective = 'reuse'):
     start_time = datetime.datetime.now()
 
     # import set and parameter lists

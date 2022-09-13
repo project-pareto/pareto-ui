@@ -1,0 +1,1 @@
+hiddenimports=['idaes', 'idaes-pse']

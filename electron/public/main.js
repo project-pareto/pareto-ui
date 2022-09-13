@@ -74,6 +74,43 @@ function createWindow() {
   )
 }
 
+const installExtensions = () => {
+
+    try{
+    installationProcess = spawn(
+      path.join(__dirname, "../py_dist/main/main"),
+      [
+        "install"
+      ]
+    );
+
+    log.info("installation started");
+    console.log("installation started");
+
+      var scriptOutput = "";
+      installationProcess.stdout.setEncoding('utf8');
+      installationProcess.stdout.on('data', function(data) {
+          // console.log('stdout: ' + data);
+          log.info('stdout: ' + data);
+          data=data.toString();
+          scriptOutput+=data;
+      });
+
+      installationProcess.stderr.setEncoding('utf8');
+      installationProcess.stderr.on('data', function(data) {
+          // console.log('stderr: ' + data);
+          log.info('stderr: ' + data);
+          data=data.toString();
+          scriptOutput+=data;
+      });
+    } catch (error) {
+      log.info("unable to get extensions: ",error);
+      console.error("unable to get extensions: ",error);
+    }
+    return installationProcess;
+  }
+  
+
 const startServer = () => {
     if (isDev) {
 
@@ -89,29 +126,30 @@ const startServer = () => {
         {
             cwd: '../backend/app'
         }
-    );
-    // backendProcess = spawn(
-    //   path.join(__dirname, "../py_dist/main/main"),
-    //   [
-    //     ">> mainjslogs.log"
-    //   ]
-    // );
+      );
+
+      // backendProcess = spawn(
+      //   path.join(__dirname, "../py_dist/main/main"),
+      //   [
+      //     ""
+      //   ]
+      // );
+
       log.info("Python Started in dev mode");
       console.log("Python Started in dev mode");
+
     } else {
-      console.log("spawning backend from : "+__dirname)
-      log.info("spawning backend from : "+__dirname)
       try {
         backendProcess = spawn(
           path.join(__dirname, "../py_dist/main/main"),
           [
-            ">> mainjslogs.log"
+            ""
           ]
         );
         var scriptOutput = "";
         backendProcess.stdout.setEncoding('utf8');
         backendProcess.stdout.on('data', function(data) {
-            console.log('stdout: ' + data);
+            // console.log('stdout: ' + data);
             log.info('stdout: ' + data);
             data=data.toString();
             scriptOutput+=data;
@@ -119,7 +157,7 @@ const startServer = () => {
 
         backendProcess.stderr.setEncoding('utf8');
         backendProcess.stderr.on('data', function(data) {
-            console.log('stderr: ' + data);
+            // console.log('stderr: ' + data);
             log.info('stderr: ' + data);
             data=data.toString();
             scriptOutput+=data;
@@ -129,8 +167,8 @@ const startServer = () => {
       } catch (error) {
         log.info("unable to start python process in build mode: ");
         log.info(error)
-        console.log("unable to start python process in build mode: ");
-        console.log(error)
+        console.error("unable to start python process in build mode: ");
+        console.error(error)
       }
       
     }
@@ -140,49 +178,61 @@ const startServer = () => {
 
 app.whenReady().then(() => {
     // Entry point
-    protocol.registerFileProtocol('file', (request, callback) => {
-      const pathname = request.url.replace('file:///', '');
-      callback(pathname);
-    });
+    // protocol.registerFileProtocol('file', (request, callback) => {
+    //   const pathname = request.url.replace('file:///', '');
+    //   callback(pathname);
+    // });
+    let serverProcess
+    let installationProcess = installExtensions()
+    installationProcess.on('exit', code => {
+      log.info('installation exit code is', code)
+      console.log('installation exit code is', code)
+      log.info('starting server')
+      console.log('starting server')
+      serverProcess = startServer()
 
-    let serverProcess = startServer()
-    // let uiProcess = startUI()
-    let noTrails = 0
-    // Start Window 
-    var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=15) => {
-        
-        axios.get(url).then(() => {
-            console.log(`${appName} is ready at ${url}!`)
-            log.info(`${appName} is ready at ${url}!`)
-            if (successFn) {
-                successFn()
-            }
-        })
-        .catch(async () => {
-            console.log(`Waiting to be able to connect ${appName} at ${url}...`)
-            log.info(`Waiting to be able to connect ${appName} at ${url}...`)
-            await new Promise(resolve => setTimeout(resolve, 2000))
-            noTrails += 1
-            if (noTrails < maxTrials) {
-                startUp(url, appName, spawnedProcess, successFn, maxTrials)
-            }
-            else {
-                console.error(`Exceeded maximum trials to connect to ${appName}`)
-                log.info(`Exceeded maximum trials to connect to ${appName}`)
-                spawnedProcess.kill('SIGINT')
-            }
-        });
-    };
-    startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
+      // let uiProcess = startUI()
+      let noTrails = 0
+      // Start Window 
+      var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=5) => {
+          
+          axios.get(url).then(() => {
+              console.log(`${appName} is ready at ${url}!`)
+              log.info(`${appName} is ready at ${url}!`)
+              if (successFn) {
+                  successFn()
+              }
+          })
+          .catch(async () => {
+              console.log(`Waiting to be able to connect ${appName} at ${url}...`)
+              log.info(`Waiting to be able to connect ${appName} at ${url}...`)
+              await new Promise(resolve => setTimeout(resolve, 10000))
+              noTrails += 1
+              if (noTrails < maxTrials) {
+                  startUp(url, appName, spawnedProcess, successFn, maxTrials)
+              }
+              else {
+                  console.error(`Exceeded maximum trials to connect to ${appName}`)
+                  log.info(`Exceeded maximum trials to connect to ${appName}`)
+                  spawnedProcess.kill('SIGINT')
+              }
+          });
+      };
+      startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
+      app.on('quit', () => {
+        console.log('shutting down backend server')
+        log.info('shutting down backend server')
+        serverProcess.kill()
+      })
+    })
+    
+    
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 
-    app.on('quit', () => {
-      console.log('shutting down backend server')
-      serverProcess.kill()
-  })
+
 })
 
 // For windows & linux platforms
