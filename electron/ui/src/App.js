@@ -6,13 +6,13 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
-import Header from 'components/Header/Header'; 
-import Dashboard from 'views/Dashboard/Dashboard';
-import ScenarioList from 'views/ScenarioList/ScenarioList';
+import Header from './components/Header/Header'; 
+import Dashboard from './views/Dashboard/Dashboard';
+import ScenarioList from './views/ScenarioList/ScenarioList';
 import { fetchScenarios } from './services/sidebar.service'
 import {useEffect, useState} from 'react';   
-import { updateScenario } from 'services/app.service'
-import { deleteScenario } from 'services/scenariolist.service'
+import { updateScenario } from './services/app.service'
+import { deleteScenario } from './services/scenariolist.service'
 
 
 function App() {

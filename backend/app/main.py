@@ -46,55 +46,29 @@ async def root():
     return {"message": "Hello Pareto"}
 
 def get_extensions():
-    _log.info('inside get extensions')
-    _log.info('setting environment variables')
-    os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
-    os.environ["SSL_CERT_FILE"] = certifi.where()
-    _log.info(f'current working directory {os.getcwd()}')
-    home_dir = os.path.expanduser("~")
-    _log.info('changing to home directory')
-    os.chdir(home_dir)
-    _log.info(f'new working directory {os.getcwd()}')
-    subprocess_output = open("subprocess_output.txt","a")
-    subprocess_error = open("subprocess_error.txt","a")
-    return_code = 0
+    print('inside get extensions')
+    extensions_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),'idaes-extensions')
+    print(f'extensions_dir{extensions_dir}')
     try:
         if(sys.platform == "darwin"):
-            _log.info('mac')
-            _log.info('trying to use idaes commands directly')
-            download_binaries(url=f'file://{home_dir}/Downloads')
-            _log.info(f'extensions have been gotten')
+            #XXX doesnt work on idaes 2.0.0 - unsupported darwin-x86_64
+            print('mac')
+            print('trying to download binaries')
+            download_binaries(url=f'file://{extensions_dir}')
+            print(f'extensions have been gotten')
         else:
-            _log.info('not mac')
-            _log.info(f'trying to download extensions from web')
-            _download_binaries(release=default_binary_release)
-            _log.info(f'extensions have been gotten')
-        _log.info('successfully installed idaes extensions')
-    except CalledProcessError as e:
-        _log.error(f'unable to install extensions, calledprocesserror: {e.output}')
-        return False
+            print('not mac')
+            print(f'trying to download binaries')
+            download_binaries(release=default_binary_release)
+            print(f'extensions have been gotten')
+        print('successfully installed idaes extensions')
     except Exception as e:
-        _log.error(f'unable to install extensions: {e}')
+        print(f'unable to install extensions: {e}')
         return False
-    # if (return_code != 0):
-    #     return False
     return True
-
-def check__for_extensions():
-    # check for ~/.idaes
-    home_dir = os.path.expanduser("~")
-    idaes_dir = os.path.join(home_dir, ".idaes/")
-    if os.path.exists(idaes_dir):
-        return False
-    else:
-        return False
 
 if __name__ == '__main__':
     if('i' in sys.argv or 'install' in sys.argv):
-        # _log.info('check for idaes installers')
-        # if check__for_extensions():
-        #     _log.info('found installers - ready to start backend')
-        # else:
         _log.info('running get_extensions()')
         if get_extensions():
             _log.info('SUCCESS: idaes extensions installed')
