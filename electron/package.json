@@ -49,7 +49,7 @@
   },
   "homepage": "./",
   "build": {
-    "appId": "com.electron.pareto-ui",
+    "appId": "com.pareto.pareto-ui",
     "extends": null,
     "asar": false,
     "productName": "ParetoUI",
@@ -59,7 +59,6 @@
       "build/**/*",
       "package.json",
       "backend/**/*",
-      "images/**/*",
       "get-idaes-extensions-dist/**/*"
     ],
     "directories": {
@@ -69,12 +68,17 @@
       "public/**/*"
     ],
     "mac": {
-      "target": "dmg",
+      "target": {
+        "target": "dmg",
+        "arch": [
+          "arm64"
+        ]
+      },
+      "category": "utilities",
       "gatekeeperAssess": false,
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.inherit.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "category": "utilities",
       "icon": "build/pareto-logo.ico"
     },
     "win": {
