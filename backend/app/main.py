@@ -46,7 +46,7 @@ async def root():
     return {"message": "Hello Pareto"}
 
 
-extensions_dir = Path.home() / ".pareto" / ".idaes"
+extensions_dir = Path.home() / ".pareto-ui" / ".idaes"
 def check_for_extensions():
     print('checking for extensions')
     found_extensions = os.path.exists(extensions_dir)
