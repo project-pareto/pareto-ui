@@ -27,7 +27,9 @@
     "build-replace-backend": "npm run remove-previous-backend-build && npm run build-backend || npm run build-backend",
     "build-backend": "cd ../backend/app && pyinstaller -y --clean --distpath ../../electron/py_dist main.spec",
     "remove-previous-backend-build": "rm -r py_dist/*",
-    "remove-previous-dist": "rm -r dist/*"
+    "remove-previous-dist": "rm -r dist/*",
+    "app-start": "npm --prefix ui run app-start",
+    "electron-start": "npm --prefix ui run electron-start"
   },
   "eslintConfig": {
     "extends": [
@@ -49,7 +51,7 @@
   },
   "homepage": "./",
   "build": {
-    "appId": "com.pareto.pareto-ui",
+    "appId": "com.electron.pareto-ui",
     "extends": null,
     "asar": false,
     "productName": "ParetoUI",
@@ -58,8 +60,7 @@
       "dist/**/*",
       "build/**/*",
       "package.json",
-      "backend/**/*",
-      "get-idaes-extensions-dist/**/*"
+      "backend/**/*"
     ],
     "directories": {
       "buildResources": "assets"
@@ -68,12 +69,7 @@
       "public/**/*"
     ],
     "mac": {
-      "target": {
-        "target": "dmg",
-        "arch": [
-          "arm64"
-        ]
-      },
+      "target": "dmg",
       "category": "utilities",
       "gatekeeperAssess": false,
       "hardenedRuntime": true,

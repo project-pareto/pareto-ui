@@ -178,53 +178,56 @@ const startServer = () => {
 
 app.whenReady().then(() => {
     // Entry point
-    // protocol.registerFileProtocol('file', (request, callback) => {
-    //   const pathname = request.url.replace('file:///', '');
-    //   callback(pathname);
-    // });
-    let serverProcess
-    let installationProcess = installExtensions()
-    installationProcess.on('exit', code => {
-      log.info('installation exit code is', code)
-      console.log('installation exit code is', code)
-      log.info('starting server')
-      console.log('starting server')
-      serverProcess = startServer()
-
-      // let uiProcess = startUI()
-      let noTrails = 0
-      // Start Window 
-      var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=5) => {
-          
-          axios.get(url).then(() => {
-              console.log(`${appName} is ready at ${url}!`)
-              log.info(`${appName} is ready at ${url}!`)
-              if (successFn) {
-                  successFn()
-              }
-          })
-          .catch(async () => {
-              console.log(`Waiting to be able to connect ${appName} at ${url}...`)
-              log.info(`Waiting to be able to connect ${appName} at ${url}...`)
-              await new Promise(resolve => setTimeout(resolve, 10000))
-              noTrails += 1
-              if (noTrails < maxTrials) {
-                  startUp(url, appName, spawnedProcess, successFn, maxTrials)
-              }
-              else {
-                  console.error(`Exceeded maximum trials to connect to ${appName}`)
-                  log.info(`Exceeded maximum trials to connect to ${appName}`)
-                  spawnedProcess.kill('SIGINT')
-              }
-          });
-      };
-      startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
-      app.on('quit', () => {
-        console.log('shutting down backend server')
-        log.info('shutting down backend server')
-        serverProcess.kill()
+    if (isDev) {
+      log.info('starting electron app in dev mode')
+      console.log('starting electron app in dev mode')
+      createWindow();
+    } else {
+      let serverProcess
+      let installationProcess = installExtensions()
+      installationProcess.on('exit', code => {
+        log.info('installation exit code is', code)
+        console.log('installation exit code is', code)
+        log.info('starting server')
+        console.log('starting server')
+        serverProcess = startServer()
+  
+        // let uiProcess = startUI()
+        let noTrails = 0
+        // Start Window 
+        var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=5) => {
+            
+            axios.get(url).then(() => {
+                console.log(`${appName} is ready at ${url}!`)
+                log.info(`${appName} is ready at ${url}!`)
+                if (successFn) {
+                    successFn()
+                }
+            })
+            .catch(async () => {
+                console.log(`Waiting to be able to connect ${appName} at ${url}...`)
+                log.info(`Waiting to be able to connect ${appName} at ${url}...`)
+                await new Promise(resolve => setTimeout(resolve, 10000))
+                noTrails += 1
+                if (noTrails < maxTrials) {
+                    startUp(url, appName, spawnedProcess, successFn, maxTrials)
+                }
+                else {
+                    console.error(`Exceeded maximum trials to connect to ${appName}`)
+                    log.info(`Exceeded maximum trials to connect to ${appName}`)
+                    spawnedProcess.kill('SIGINT')
+                }
+            });
+        };
+        startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
+        app.on('quit', () => {
+          console.log('shutting down backend server')
+          log.info('shutting down backend server')
+          serverProcess.kill()
+        })
       })
-    })
+    }
+
     
     
 
