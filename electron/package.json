@@ -56,6 +56,7 @@
     "extends": null,
     "asar": false,
     "productName": "ParetoUI",
+    "afterSign": "build/notarize.js",
     "files": [
       "py_dist/**/*",
       "dist/**/*",
