@@ -62,7 +62,8 @@
       "dist/**/*",
       "build/**/*",
       "package.json",
-      "backend/**/*"
+      "backend/**/*",
+      "images/**/*"
     ],
     "directories": {
       "buildResources": "assets"
