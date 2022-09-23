@@ -1,21 +1,16 @@
 import sys
 import os
 import logging
-import subprocess
-from subprocess import CalledProcessError
-from pathlib import Path
-import idaes.logger as idaeslog
-from idaes.util.download_bin import download_binaries
-from idaes.config import default_binary_release
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+import multiprocessing
+import certifi
+from app.routers import scenarios
+from app.internal.get_extensions import check_for_idaes_extensions, check_for_pyomo_extensions, get_idaes_extensions, get_pyomo_extensions
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.routers import scenarios
-import uvicorn
-import multiprocessing
 
 _log = logging.getLogger(__name__)
 
@@ -46,48 +41,21 @@ async def root():
     return {"message": "Hello Pareto"}
 
 
-extensions_dir = Path.home() / ".pareto-ui" / ".idaes"
-def check_for_extensions():
-    print('checking for extensions')
-    found_extensions = os.path.exists(extensions_dir)
-    print(f'found extensions: {found_extensions}')
-    return found_extensions
 
-def get_extensions():
-    print('inside get extensions')
-    try:
-        if(sys.platform == "darwin"):
-            #XXX doesnt work on idaes 2.0.0 - unsupported darwin-x86_64
-            print('mac')
-            print('trying to download binaries')
-            download_binaries(url=f'https://idaes-extensions.s3.us-west-1.amazonaws.com/')
-            print(f'extensions have been gotten, making directory')
-        else:
-            print('not mac')
-            print(f'trying to download binaries')
-            download_binaries(release=default_binary_release)
-            print(f'extensions have been gotten')
-        print('successfully installed idaes extensions')
-    except PermissionError as e:
-        print(f'unable to install extensions, permissionerror due to idaes extensions already being present: {e}\nmaking directory')
-        extensions_dir.mkdir(parents=True, exist_ok=True)
-        return False
-    except Exception as e:
-        print(f'unable to install extensions: {e}')
-        return False
-    extensions_dir.mkdir(parents=True, exist_ok=True)
-    return True
 
 if __name__ == '__main__':
     if('i' in sys.argv or 'install' in sys.argv):
+        try:
+            _log.info(f'setting requests_ca_bundle and ssl_cert_file to certifi.where(): {certifi.where()}')
+            os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+            os.environ["SSL_CERT_FILE"] = certifi.where()
+        except Exception as e:
+            _log.info(f'unable to set requests_ca_bundle and ssl_cert_file:\n{e}')
         _log.info('running get_extensions()')
-        if not check_for_extensions():
-            if get_extensions():
-                _log.info('SUCCESS: idaes extensions installed')
-                sys.exit(0)
-            else:
-                _log.error('unable to install idaes extensions :(')
-                sys.exit(1)
+        if not check_for_idaes_extensions():
+            get_idaes_extensions()
+        if not check_for_pyomo_extensions():
+            get_pyomo_extensions()
 
     else:
         _log.info(f"\nstarting app!!")
