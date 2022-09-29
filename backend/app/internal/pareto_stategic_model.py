@@ -71,7 +71,7 @@ def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_
     [model, results_dict] = generate_report(
         strategic_model,
         is_print=[PrintValues.essential],
-        output_units=OutputUnits.unscaled_model_units,
+        output_units=OutputUnits.user_units,
         fname=output_file,
     )
 

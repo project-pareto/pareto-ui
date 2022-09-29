@@ -7,7 +7,7 @@ import uvicorn
 import multiprocessing
 import certifi
 from routers import scenarios
-from internal.get_extensions import check_for_idaes_extensions, check_for_pyomo_extensions, get_idaes_extensions, get_pyomo_extensions
+from internal.get_extensions import check_for_idaes_extensions, get_idaes_extensions
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -54,8 +54,6 @@ if __name__ == '__main__':
         _log.info('running get_extensions()')
         if not check_for_idaes_extensions():
             get_idaes_extensions()
-        if not check_for_pyomo_extensions():
-            get_pyomo_extensions()
 
     else:
         _log.info(f"\nstarting app!!")

@@ -73,10 +73,10 @@ async def run_model(request: Request):
         excel_path = "{}{}.xlsx".format(scenario_handler.excelsheets_path,data['id'])
         output_path = "{}{}.xlsx".format(scenario_handler.outputs_path,data['id'])
         results_dict = run_strategic_model(input_file=excel_path, objective=data['objective'], output_file=output_path)
-    except:
-        _log.error(f"unable to find and run given excel sheet id{data['id']}")
+    except Exception as e:
+        _log.error(f"unable to find and run given excel sheet id{data['id']}: {e}")
         raise HTTPException(
-            500, f"unable to find and run given excel sheet id: {data['id']}"
+            500, f"unable to find and run given excel sheet id: {data['id']}: {e}"
         )
 
     return results_dict
