@@ -15,20 +15,23 @@ export default function ModelResults(props) {
    }, [scenario]);
   
   return ( 
+    <>
+    {props.scenario.results.status === "complete" ? 
+
     <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
       <h3>{props.category}</h3>
-      {Object.keys(props.scenario.results).length !== 0 ? 
+      
       <>
       <Table style={{border:"1px solid #ddd"}} size='small'>
         <TableHead>
         <TableRow>
-        {props.scenario.results[props.category][0].map((value, index) => {
+        {props.scenario.results.data[props.category][0].map((value, index) => {
           return <TableCell>{value}</TableCell>
         })}
         </TableRow>
         </TableHead>
        <TableBody>
-        {props.scenario.results[props.category].slice(1).map((value, index) => {
+        {props.scenario.results.data[props.category].slice(1).map((value, index) => {
           return (<TableRow>
           {value.map((cellValue, i)=> {
             return <TableCell>{cellValue}</TableCell>
@@ -38,9 +41,13 @@ export default function ModelResults(props) {
         </TableBody>
       </Table>
       </>
-      : 
-      "model results loading"}
+      
+      
     </Box>
+    : 
+      <h3>Status: {props.scenario.results.status}</h3>
+    }
+    </>
   );
 
 }

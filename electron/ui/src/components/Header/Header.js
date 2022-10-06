@@ -33,10 +33,9 @@ export default function Header(props) {
               onChange={handleScenarioSelection}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-                {props.scenarios.map((scenario, index) => 
-                (
-                    <MenuItem key={index} value={index}>{scenario.name}</MenuItem>
-                ))}
+                {Object.entries(props.scenarios).map( ([key, value] ) => {
+                  return <MenuItem key={key} value={key}>{value.name}</MenuItem>
+                })}
             </Select>
             </FormControl>
             

@@ -29,7 +29,7 @@ class AppSettings(BaseSettings):
         
         loggingFormat = "[%(levelname)s] %(asctime)s %(name)s (%(filename)s:%(lineno)s): %(message)s"
         loggingFileHandler = logging.handlers.RotatingFileHandler(v / "ui_backend_logs.log", backupCount=2, maxBytes=5000000)
-        logging.basicConfig(level=logging.INFO, format=loggingFormat, handlers=[loggingFileHandler])
+        logging.basicConfig(level=logging.INFO, format=loggingFormat, handlers=[loggingFileHandler, logging.StreamHandler()])
         return v
 
     class Config:

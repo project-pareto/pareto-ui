@@ -18,7 +18,7 @@ import { deleteScenario } from './services/scenariolist.service'
 function App() {
   
   const [ scenarioData, setScenarioData ] = useState(null);
-  const [ scenarios, setScenarios ] = useState([]); 
+  const [ scenarios, setScenarios ] = useState({}); 
   const [ section, setSection ] = useState(0)
   const [ category, setCategory ] = useState(null)
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
@@ -50,13 +50,13 @@ function App() {
   };
 
   const handleNewScenario = (data) => {
-    const temp = [...scenarios]
-    temp.push(data)
+    const temp = {...scenarios}
+    temp[data.id] = data
     setScenarios(temp)   
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
-    const temp = [...scenarios]
+    const temp = {...scenarios}
     temp[scenarioIndex] = {...updatedScenario}
     console.log('updating scenario: ',updateScenario)
     setScenarios(temp)
@@ -76,6 +76,13 @@ function App() {
   const handleSetSelection = (section) => {
     if(section === 2) {
       setCategory("v_F_Overview_dict")
+      fetchScenarios()
+      .then(response => response.json())
+      .then((data)=>{
+        console.log('setscenarios: ',data.data)
+        setScenarios(data.data)
+        setScenarioData(data.data[scenarioIndex])
+      });
     } else if(section === 0) {
       setCategory("PNA")
     } else {
@@ -92,7 +99,7 @@ function App() {
     const tempScenario = {...scenarioData}
     tempScenario.name = newName
     console.log('updating scenario: ',tempScenario)
-    const tempScenarios = [...scenarios]
+    const tempScenarios = {...scenarios}
     tempScenarios[scenarioIndex] = tempScenario
     setScenarios(tempScenarios)
     setScenarioData(tempScenario)

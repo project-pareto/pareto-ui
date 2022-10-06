@@ -13,13 +13,19 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
 # from .get_data import get_data
 from pareto.utilities.get_data import get_data
 from pareto.utilities.results import generate_report, PrintValues, OutputUnits
-from app.internal.get_data import get_input_lists
 import idaes.logger as idaeslog
 
-_log = idaeslog.getLogger(__name__)
+from app.internal.get_data import get_input_lists
+from app.internal.scenario_handler import (
+    scenario_handler,
+)
 
 
-def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_report.xlsx", objective = 'reuse'):
+# _log = idaeslog.getLogger(__name__)
+_log = logging.getLogger(__name__)
+
+
+def run_strategic_model(input_file, output_file, id,  objective = 'reuse'):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -39,6 +45,11 @@ def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_
         },
     )
 
+    scenario = scenario_handler.get_scenario(int(id))
+    results = {"data": {}, "status": "created model"}
+    scenario["results"] = results
+    scenario_handler.update_scenario(scenario)
+
     options = {
         "deactivate_slacks": True,
         "scale_model": True,
@@ -50,6 +61,11 @@ def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_
 
     _log.info(f"solving model")
     solve_model(model=strategic_model, options=options)
+
+    scenario = scenario_handler.get_scenario(int(id))
+    results = {"data": {}, "status": "solved model"}
+    scenario["results"] = results
+    scenario_handler.update_scenario(scenario)
 
     print("\nConverting to Output Units and Displaying Solution\n" + "-" * 60)
     """Valid values of parameters in the generate_report() call
@@ -73,3 +89,10 @@ def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_
     _log.info(f"total process took {total_time.seconds} seconds")
 
     return results_dict
+
+def handle_run_strategic_model(input_file, output_file, id, objective = 'reuse'):
+    results_dict = run_strategic_model(input_file, output_file, id, objective)
+    scenario = scenario_handler.get_scenario(int(id))
+    results = {"data": results_dict, "status": "complete"}
+    scenario["results"] = results
+    scenario_handler.update_scenario(scenario)

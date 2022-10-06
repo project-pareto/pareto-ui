@@ -62,7 +62,7 @@ export default function Dashboard(props) {
 
    const handleRunModel = () => {
     console.log('running model')
-      runModel({"id": scenario.id, 'objective':scenario.optimization.objective})
+      runModel({"scenario": scenario, 'objective':scenario.optimization.objective})
       .then(r =>  r.json().then(data => ({status: r.status, body: data})))
       .then((response) => {
         let responseCode = response.status
@@ -70,14 +70,12 @@ export default function Dashboard(props) {
         if(responseCode === 200) {
           console.log('run model successful: ')
           console.log(data)
-          scenario["results"] = data
-          props.updateScenario(scenario)
+          props.updateScenario(data)
           props.handleSetSelection(2)
         }
         else if(responseCode === 500) {
           console.error('error on model run: ',data.detail)
         }
-
       })
       .catch(e => {
         console.error('error on model run: ',e)
@@ -102,7 +100,7 @@ export default function Dashboard(props) {
         selected={props.section} 
         scenario={scenario}>
       </ProcessToolbar>
-      {props.section !== 1 && 
+      {(props.section === 0 || (props.section === 2 && scenario.results.status === "complete")) && 
         <Sidebar handleSetCategory={props.handleSetCategory} scenario={scenario} section={props.section} category={props.category}></Sidebar>
       }
       

@@ -65,7 +65,7 @@ export default function Optimization(props) {
               // row
             >
               <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
-              <FormControlLabel value="cost" control={<Radio />} label="Maximize Cost" />
+              <FormControlLabel value="cost" control={<Radio />} label="Minimize Cost" />
             </RadioGroup>
           </FormControl>
           </Grid>
