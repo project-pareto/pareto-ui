@@ -5,7 +5,7 @@ import sys
 import os
 from shutil import copytree
 
-idaes_extensions_dir = Path.home() / ".pareto-ui" / ".idaes"
+idaes_extensions_dir = Path.home() / ".pareto" / ".idaes"
 
 
 def check_for_idaes_extensions():

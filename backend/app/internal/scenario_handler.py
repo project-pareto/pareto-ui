@@ -5,24 +5,29 @@ import os
 import datetime
 import math
 from pathlib import Path
-from .get_data import get_data, get_input_lists
+import tinydb
 
-_log = logging.getLogger(__name__)
-_h = logging.StreamHandler()
-_h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-_log.addHandler(_h)
-# for debugging, force level
-_log.setLevel(logging.DEBUG)
+import idaes.logger as idaeslog
 
+from app.internal.get_data import get_data, get_input_lists
+from app.internal.settings import AppSettings
+
+_log = idaeslog.getLogger(__name__)
 
 class ScenarioHandler:
-    def __init__(self) -> None:
+    """Manage the saved scenarios."""
+
+    SCENARIO_DB_FILE = "scenarios.json"
+
+    def __init__(self, **kwargs) -> None:
 
         _log.info(f"initializing scenario handler")
+        self.app_settings = AppSettings(**kwargs)
+
         self.scenario_list = []
-        self.data_directory_path = Path.home() / ".pareto-ui"
-        self.pareto_data_path = os.path.join(self.data_directory_path, "pareto_data.json")
-        self.scenarios_path = os.path.join(self.data_directory_path, "scenarios.json")
+        self.next_id = 0
+        self.data_directory_path = self.app_settings.data_basedir
+        self.scenarios_path = os.path.join(self.data_directory_path, self.SCENARIO_DB_FILE)
         self.excelsheets_path = self.data_directory_path / "excelsheets"
         self.outputs_path = self.data_directory_path / "outputs"
 
@@ -46,23 +51,47 @@ class ScenarioHandler:
         _log.info(f"making directory: {self.outputs_path}")
         self.outputs_path.mkdir(parents=True, exist_ok=True)
 
+        # Connect to DB
+        path = self.scenarios_path
+        self._db = tinydb.TinyDB(path)
+
         self.retrieve_scenarios()
 
     def retrieve_scenarios(self):
         _log.info(f"retrieving scenarios")
+        query = tinydb.Query()
+        scenarios = self._db.search(query.id_ != None)
+        scenario_list = []
+        if len(scenarios) > 0:
+            for each in scenarios:
+                scenario_list.append(each['scenario'])
+            self.scenario_list=scenario_list
+        else:
+            self.scenario_list=[]
+            
         try:
-            with open(self.scenarios_path, 'r') as f:
-                self.scenario_list = json.load(f)
-        except:
-            _log.info(f"no scenarios available")
+            _log.info(f"searching for next id")
+            next_id_list = self._db.search(query.next_id != None)
+            if len(next_id_list) > 0:
+                self.next_id = next_id_list[0]['next_id']
+            else:
+                _log.info(f"setting next id in tinydb")
+                self._db.insert({"next_id": self.next_id})
+            _log.info(f"next_id is {self.next_id}")
+        except Exception as e:
+            _log.info(f"unable to find next id: {e}")
+            _log.info(f"setting next id in tinydb")
+            self._db.insert({"next_id": self.next_id})
         
-    def update_scenario_list(self, updatedScenarios):
+    def update_scenario(self, updatedScenario):
         _log.info(f"Updating scenario list")
-        self.scenario_list = updatedScenarios.copy()
-
-        # update scenarios json
-        with open(self.scenarios_path, 'w') as f:
-            json.dump(updatedScenarios,f, indent=4)
+        
+        query = tinydb.Query()
+        self._db.upsert(
+            {"scenario": updatedScenario, 'id_': updatedScenario['id']},
+            (query.id_ == updatedScenario['id']),
+        )
+        self.retrieve_scenarios()
     
     def upload_excelsheet(self, output_path, filename):
         _log.info(f"Uploading excel sheet: {filename}")
@@ -94,31 +123,40 @@ class ScenarioHandler:
         # create scenario object
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
-        return_object = {"name": filename, "id": len(self.scenario_list), "date": date,"data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, "optimization": {"objective":"reuse"}, "results": {}}
+        return_object = {
+            "name": filename, 
+            "id": self.next_id, 
+            "date": date,
+            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, 
+            "optimization": {"objective":"reuse"}, 
+            "results": {}
+            }
 
-        # update json containing scenarios
-        self.scenario_list.append(return_object)
-        with open(self.scenarios_path, 'w') as f:
-            json.dump(self.scenario_list,f, indent=4)
+        self._db.insert({'id_': self.next_id, "scenario": return_object})
+
+        _log.info(f"inserted")
+        query = tinydb.Query()
+        self._db.upsert(
+            {"next_id": self.next_id+1},
+            (query.next_id == self.next_id),
+        )
+        _log.info(f"and upserted")
+        self.retrieve_scenarios()
         
         return return_object
 
     def delete_scenario(self, index):
         _log.info(f"Deleting scenario #{index}")
 
+        query = tinydb.Query()
+        self._db.remove((query.id_ == index))
+
         # remove excel sheet
         excel_sheet = "{}{}.xlsx".format(self.excelsheets_path,index)
         os.remove(excel_sheet)
-        for i in range(index+1, len(self.scenario_list)):
-            previous_name = "{}{}.xlsx".format(self.excelsheets_path,i)
-            new_name = "{}{}.xlsx".format(self.excelsheets_path,i-1)
-            _log.info(f"Moving {previous_name} to {new_name}")
-            os.rename(previous_name, new_name)
-        
+
         # update scenario list
-        del self.scenario_list[index]
-        with open(self.scenarios_path, 'w') as f:
-            json.dump(self.scenario_list,f, indent=4)
+        self.retrieve_scenarios()
 
     def get_list(self):
         return self.scenario_list

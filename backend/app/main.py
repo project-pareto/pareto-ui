@@ -6,23 +6,15 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import multiprocessing
 import certifi
-from routers import scenarios
-from internal.get_extensions import check_for_idaes_extensions, get_idaes_extensions
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-_log = logging.getLogger(__name__)
+from app.internal.get_extensions import check_for_idaes_extensions, get_idaes_extensions
+from app.routers import scenarios
+import idaes.logger as idaeslog
 
-_h = logging.StreamHandler()
-_h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-_f = logging.FileHandler('paretoui-backendlogs.log')
-_f.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-_log.addHandler(_h)
-_log.addHandler(_f)
-# for debugging, force level
-_log.setLevel(logging.DEBUG)
-
+_log = idaeslog.getLogger(__name__)
 
 app = FastAPI()
 

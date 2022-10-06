@@ -37,10 +37,10 @@ async def scenarios():
 @router.post("/update")
 async def update(request: Request):
     data = await request.json()
-    updated_scenarios = data['updatedScenarios']
-    scenario_handler.update_scenario_list(updated_scenarios)
+    updated_scenario = data['updatedScenario']
+    scenario_handler.update_scenario(updated_scenario)
 
-    return {"data": updated_scenarios}
+    return {"data": updated_scenario}
 
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
