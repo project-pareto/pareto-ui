@@ -40,9 +40,7 @@
     "build": "react-scripts build",
     "postbuild": "rm -r ../build && mv build ../ || mv build ../",
     "test": "react-scripts test",
-    "build-backend": "cd ../backend/app && pyinstaller -y --clean --distpath ../../electron/py_dist main.spec",
-    "dist:mac": "npm --prefix ../ run dist:mac",
-    "dist:win": "npm --prefix ../ run dist:win"
+    "build-backend": "cd ../backend/app && pyinstaller -y --clean --distpath ../../electron/py_dist main.spec"
   },
   "eslintConfig": {
     "extends": [
