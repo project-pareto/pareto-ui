@@ -58,13 +58,25 @@
     "productName": "ParetoUI",
     "afterSign": "build/notarize.js",
     "files": [
-      "py_dist/**/*",
       "dist/**/*",
       "build/**/*",
-      "package.json",
-      "backend/**/*",
-      "images/**/*"
+      "py_dist/**/*",
+      "package.json"
     ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "PARETO-UI_Setup.exe"
+    },
+    "deb": {
+      "depends": [
+        "libgfortran5", 
+        "libgomp1",
+        "liblapack3",
+        "libblas3"
+      ],
+      "artifactName": "pareto-ui_0.1.0_amd64.deb"
+    },
     "directories": {
       "buildResources": "assets"
     },
@@ -81,12 +93,13 @@
       "icon": "build/pareto-logo.ico"
     },
     "win": {
-      "target": "zip",
-      "icon": "build/pareto-logo.ico"
+      "target": "nsis",
+      "icon": "build/nawi-logo.ico"
     },
     "linux": {
-      "target": "deb",
-      "category": "Development"
+      "target": "Deb",
+      "category": "Utility",
+      "icon": "build/512x512.png"
     }
   }
 }
