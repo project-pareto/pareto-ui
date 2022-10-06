@@ -63,7 +63,6 @@ class ScenarioHandler:
         _log.info(f"retrieving scenarios")
         query = tinydb.Query()
         scenarios = self._db.search((query.id_ != None) & (query.version == self.VERSION))
-        _log.info(f"scenarions are : {scenarios}")
         scenario_list = []
         if len(scenarios) > 0:
             for each in scenarios:
