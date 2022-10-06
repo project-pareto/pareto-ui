@@ -37,23 +37,28 @@ jobs:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
 
-      - name: Install JS dependencies
+      - name: Install electron JS dependencies
         run: |
           npm --prefix electron clean-install
+
+      - name: Install frontendJS dependencies
+        run: |
+          npm --prefix electron/ui clean-install
+
       - name: get idaes extensions
         run: idaes get-extensions
 
       - name: run component tests
-        run: npm --prefix electron test
+        run: npm --prefix electron/ui test
 
       - name: run backend server
         run: uvicorn --app-dir backend/app main:app --reload --host 0.0.0.0 --port 8001 & sleep 10
 
       - name: run frontend
-        run: npm --prefix electron start & sleep 30
+        run: npm --prefix electron/ui start & sleep 30
 
       - name: Cypress e2e tests
-        working-directory: electron
+        working-directory: electron/ui
         timeout-minutes: 15
         run: |
           "$(npm bin)"/cypress run
@@ -63,5 +68,5 @@ jobs:
         with:
             name: cypress_results-${{ matrix.os }}
             path: |
-              electron/cypress/screenshots/
-              electron/cypress/videos/
+              electron/ui/cypress/screenshots/
+              electron/ui/cypress/videos/
