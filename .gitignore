@@ -136,6 +136,7 @@ example_results_dict.json
 scenarios.json
 scenarios2.json
 strategic_optimization_results_test.xlsx
+input_data_generic_strategic_case_study_Treatment_Demo.xlsx
 model_output.xlsx
 small_strategic_case_study.xlsx
 PARETO_report.xlsx 
@@ -144,3 +145,5 @@ PARETO_report.xlsx
 
 videos/
 screenshots/
+idaes-extensions/
+extensions/

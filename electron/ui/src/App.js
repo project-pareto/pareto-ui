@@ -6,13 +6,13 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
-import Header from 'components/Header/Header'; 
-import Dashboard from 'views/Dashboard/Dashboard';
-import ScenarioList from 'views/ScenarioList/ScenarioList';
+import Header from './components/Header/Header'; 
+import Dashboard from './views/Dashboard/Dashboard';
+import ScenarioList from './views/ScenarioList/ScenarioList';
 import { fetchScenarios } from './services/sidebar.service'
 import {useEffect, useState} from 'react';   
-import { updateScenario } from 'services/app.service'
-import { deleteScenario } from 'services/scenariolist.service'
+import { updateScenario } from './services/app.service'
+import { deleteScenario } from './services/scenariolist.service'
 
 
 function App() {
@@ -58,11 +58,12 @@ function App() {
   const handleScenarioUpdate = (updatedScenario) => {
     const temp = [...scenarios]
     temp[scenarioIndex] = {...updatedScenario}
+    console.log('updating scenario: ',updateScenario)
     setScenarios(temp)
     setScenarioData({...updatedScenario})
     console.log('new scenario: ')
     console.log({...updatedScenario})
-    updateScenario({'updatedScenarios': temp})
+    updateScenario({'updatedScenario': {...updatedScenario}})
     .then(response => response.json())
     .then((data) => {
       console.log('updated scenarios on backend')
@@ -90,11 +91,12 @@ function App() {
   const handleEditScenarioName = (newName) => {
     const tempScenario = {...scenarioData}
     tempScenario.name = newName
+    console.log('updating scenario: ',tempScenario)
     const tempScenarios = [...scenarios]
     tempScenarios[scenarioIndex] = tempScenario
     setScenarios(tempScenarios)
     setScenarioData(tempScenario)
-    updateScenario({'updatedScenarios': tempScenarios})
+    updateScenario({'updatedScenario': tempScenario})
     .then(response => response.json())
     .then((data) => {
       console.log('updated scenarios on backend')

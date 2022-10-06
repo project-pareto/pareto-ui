@@ -8,7 +8,7 @@ import Bottombar from '../../components/Bottombar/Bottombar';
 import DataInput from '../DataInput/DataInput'
 import Optimization from '../Optimization/Optimization'
 import ModelResults from '../ModelResults/ModelResults'
-import Sidebar from 'components/Sidebar/Sidebar'
+import Sidebar from '../../components/Sidebar/Sidebar'
 import { runModel } from '../../services/homepage.service'
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
