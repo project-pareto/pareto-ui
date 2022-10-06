@@ -1,9 +1,8 @@
 from pathlib import Path
-from idaes.util.download_bin import download_binaries
-from idaes.config import default_binary_release
 import sys
 import os
 from shutil import copytree
+import certifi
 
 idaes_extensions_dir = Path.home() / ".pareto" / ".idaes"
 
@@ -18,14 +17,21 @@ def get_idaes_extensions():
     print('inside get idaes extensions')
     try:
         if(sys.platform == "darwin"):
+            print('mac')
             idaes_src = Path(os.path.dirname(os.path.realpath(__file__))) / 'extensions' / '.idaes'
             idaes_dst = Path.home() / ".idaes"
-            print('mac')
+            print(f'moving binaries from {idaes_src} to {idaes_dst}')
+            copytree(idaes_src,idaes_dst,dirs_exist_ok=True)
+            print(f'get idaes extensions successful, making directory')
+        elif(sys.platform == "linux"):
+            print('linux')
+            idaes_src = Path(os.path.dirname(os.path.realpath(__file__))) / 'extensions' / '.idaes'
+            idaes_dst = Path.home() / ".idaes"
             print(f'moving binaries from {idaes_src} to {idaes_dst}')
             copytree(idaes_src,idaes_dst,dirs_exist_ok=True)
             print(f'get idaes extensions successful, making directory')
         else:
-            print('not mac')
+            print('windows')
             try:
                 print(f'setting requests_ca_bundle and ssl_cert_file to certifi.where(): {certifi.where()}')
                 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
@@ -33,7 +39,7 @@ def get_idaes_extensions():
             except Exception as e:
                 print(f'unable to set requests_ca_bundle and ssl_cert_file:\n{e}')
             print(f'trying to download binaries')
-            from idaes.commands.util.download_bin import download_binaries
+            from idaes.util.download_bin import download_binaries
             from idaes.config import default_binary_release
             download_binaries(release=default_binary_release)
             print(f'extensions have been gotten')
