@@ -1,6 +1,6 @@
 {
   "name": "pareto-ui",
-  "version": "0.1.0v3",
+  "version": "0.1.0v4",
   "author": "Michael Pesce",
   "private": true,
   "main": "build/main.js",
@@ -38,8 +38,7 @@
     "remove-previous-dist": "rm -r dist/*",
     "remove-previous-dist-win": "rd /S /Q dist",
     "app-start": "npm --prefix ui run app-start",
-    "electron-start": "npm --prefix ui run electron-start",
-    "get-extensions-installer": "cd ../backend/app && pyinstaller -y --clean --distpath ../../electron/setup-extensions-dist setup-extensions.spec"
+    "electron-start": "npm --prefix ui run electron-start"
   },
   "eslintConfig": {
     "extends": [

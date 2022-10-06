@@ -5,6 +5,7 @@ import os
 import datetime
 import math
 from pathlib import Path
+from xml.etree.ElementTree import VERSION
 import tinydb
 
 import idaes.logger as idaeslog
@@ -18,6 +19,7 @@ class ScenarioHandler:
     """Manage the saved scenarios."""
 
     SCENARIO_DB_FILE = "scenarios.json"
+    VERSION = 1
 
     def __init__(self, **kwargs) -> None:
 
@@ -60,7 +62,8 @@ class ScenarioHandler:
     def retrieve_scenarios(self):
         _log.info(f"retrieving scenarios")
         query = tinydb.Query()
-        scenarios = self._db.search(query.id_ != None)
+        scenarios = self._db.search((query.id_ != None) & (query.version == self.VERSION))
+        _log.info(f"scenarions are : {scenarios}")
         scenario_list = []
         if len(scenarios) > 0:
             for each in scenarios:
@@ -71,25 +74,25 @@ class ScenarioHandler:
             
         try:
             _log.info(f"searching for next id")
-            next_id_list = self._db.search(query.next_id != None)
+            next_id_list = self._db.search((query.next_id != None) & (query.version == self.VERSION))
             if len(next_id_list) > 0:
                 self.next_id = next_id_list[0]['next_id']
             else:
                 _log.info(f"setting next id in tinydb")
-                self._db.insert({"next_id": self.next_id})
+                self._db.insert({"next_id": self.next_id, "version": self.VERSION})
             _log.info(f"next_id is {self.next_id}")
         except Exception as e:
             _log.info(f"unable to find next id: {e}")
             _log.info(f"setting next id in tinydb")
-            self._db.insert({"next_id": self.next_id})
+            self._db.insert({"next_id": self.next_id, "version": self.VERSION})
         
     def update_scenario(self, updatedScenario):
         _log.info(f"Updating scenario list")
         
         query = tinydb.Query()
         self._db.upsert(
-            {"scenario": updatedScenario, 'id_': updatedScenario['id']},
-            (query.id_ == updatedScenario['id']),
+            {"scenario": updatedScenario, 'id_': updatedScenario['id'], 'version': self.VERSION},
+            ((query.id_ == updatedScenario['id']) & (query.version == self.VERSION)),
         )
         self.retrieve_scenarios()
     
@@ -132,15 +135,13 @@ class ScenarioHandler:
             "results": {}
             }
 
-        self._db.insert({'id_': self.next_id, "scenario": return_object})
-
-        _log.info(f"inserted")
         query = tinydb.Query()
+        self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
         self._db.upsert(
-            {"next_id": self.next_id+1},
-            (query.next_id == self.next_id),
+            {"next_id": self.next_id+1, 'version': self.VERSION},
+            ((query.next_id == self.next_id) & (query.version == self.VERSION)),
         )
-        _log.info(f"and upserted")
+
         self.retrieve_scenarios()
         
         return return_object

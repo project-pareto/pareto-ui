@@ -8,11 +8,12 @@ from fastapi import Body, Request, APIRouter, HTTPException, File, UploadFile
 from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional
-import internal.aiofiles as aiofiles
 
 from pareto.utilities.get_data import get_data
-from internal.pareto_stategic_model import run_strategic_model
-from internal.scenario_handler import (
+
+import app.internal.aiofiles as aiofiles
+from app.internal.pareto_stategic_model import run_strategic_model
+from app.internal.scenario_handler import (
     scenario_handler,
 )
 
@@ -45,7 +46,7 @@ async def update(request: Request):
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
     new_id = len(scenario_handler.get_list())
-    output_path = "{}{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
+    output_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
 
     # get file contents
     async with aiofiles.open(output_path, 'wb') as out_file:
@@ -70,8 +71,8 @@ async def run_model(request: Request):
     data = await request.json()
     _log.info(f"running model on : \n{data}")
     try:
-        excel_path = "{}{}.xlsx".format(scenario_handler.excelsheets_path,data['id'])
-        output_path = "{}{}.xlsx".format(scenario_handler.outputs_path,data['id'])
+        excel_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,data['id'])
+        output_path = "{}/{}.xlsx".format(scenario_handler.outputs_path,data['id'])
         results_dict = run_strategic_model(input_file=excel_path, objective=data['objective'], output_file=output_path)
     except Exception as e:
         _log.error(f"unable to find and run given excel sheet id{data['id']}: {e}")
