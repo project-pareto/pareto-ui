@@ -37,7 +37,7 @@ async def update(request: Request):
 
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
-    new_id = len(scenario_handler.get_list())
+    new_id = scenario_handler.get_next_id()
     output_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
 
     # get file contents

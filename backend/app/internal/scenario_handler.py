@@ -149,7 +149,7 @@ class ScenarioHandler:
             "date": date,
             "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, 
             "optimization": {"objective":"reuse"}, 
-            "results": {"status": "uninitiated", "data": {}}
+            "results": {"status": "none", "data": {}}
             }
 
         # check if db is in use. if so, wait til its done being used
@@ -207,6 +207,10 @@ class ScenarioHandler:
 
     def get_list(self):
         return self.scenario_list
+
+    def get_next_id(self):
+        nextid = self.next_id
+        return nextid
 
 
 scenario_handler = ScenarioHandler()

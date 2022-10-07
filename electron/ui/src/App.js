@@ -38,6 +38,12 @@ function App() {
     setSection(0)
     setCategory(null)
     setScenarioIndex(null)
+    fetchScenarios()
+    .then(response => response.json())
+    .then((data)=>{
+      console.log('setscenarios: ',data.data)
+      setScenarios(data.data)
+    });
     navigate('/', {replace: true})
   }
 

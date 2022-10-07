@@ -104,7 +104,7 @@ export default function Dashboard(props) {
         <Sidebar handleSetCategory={props.handleSetCategory} scenario={scenario} section={props.section} category={props.category}></Sidebar>
       }
       
-    <Grid container spacing={1} sx={props.section !== 1 && styles.shiftTextRight}>
+    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section == 2 && scenario.results.status != "complete")) && styles.shiftTextRight}>
       <Grid item xs={4} ></Grid>
       <Modal
           open={openEditName}

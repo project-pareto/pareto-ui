@@ -38,7 +38,7 @@ export default function Bottombar(props) {
                 <Grid item xs={6}>
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
                         {props.section === 0 && <Button sx={styles.filled} onClick={() => props.handleSelection(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
-                        {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
+                        {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={(props.scenario.results.status!="none" && props.scenario.results.status!="complete") ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
                     </Box>
                 </Grid>
             </Grid>
