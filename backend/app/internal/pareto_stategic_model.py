@@ -8,7 +8,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     solve_model,
     PipelineCost,
     PipelineCapacity,
-    IncludeNodeCapacity,
+    WaterQuality,
 )
 # from .get_data import get_data
 from pareto.utilities.get_data import get_data
@@ -25,7 +25,7 @@ from app.internal.scenario_handler import (
 _log = logging.getLogger(__name__)
 
 
-def run_strategic_model(input_file, output_file, id,  objective = 'reuse'):
+def run_strategic_model(input_file, output_file, id,  objective, water_quality = WaterQuality.false):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -34,6 +34,7 @@ def run_strategic_model(input_file, output_file, id,  objective = 'reuse'):
     [df_sets, df_parameters] = get_data(input_file, set_list, parameter_list)
 
     _log.info(f"creating model")
+    _log.info(f"water_quality.false equates to {WaterQuality.false}")
     strategic_model = create_model(
         df_sets,
         df_parameters,
@@ -41,7 +42,8 @@ def run_strategic_model(input_file, output_file, id,  objective = 'reuse'):
             "objective": Objectives[objective],
             "pipeline_cost": PipelineCost.distance_based,
             "pipeline_capacity": PipelineCapacity.input,
-            "node_capacity": IncludeNodeCapacity.true,
+            "node_capacity": True,
+            "water_quality": water_quality,
         },
     )
 
@@ -56,7 +58,7 @@ def run_strategic_model(input_file, output_file, id,  objective = 'reuse'):
         "scaling_factor": 1000,
         "running_time": 60,
         "gap": 0,
-        "water_quality": True,
+        # "water_quality": True,
     }
 
     _log.info(f"solving model")
