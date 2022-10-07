@@ -1,10 +1,12 @@
 import {useEffect, useState} from 'react';   
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import LinearProgress from '@mui/material/LinearProgress';
 //import SankeyPlot from './SankeyPlot';
 
 
@@ -45,7 +47,27 @@ export default function ModelResults(props) {
       
     </Box>
     : 
-      <h3>Status: {props.scenario.results.status}</h3>
+    <Grid container alignItems="center" justifyContent="center">
+      <Grid item xs={3}>
+
+      </Grid>
+      <Grid item xs={6} style={{alignContent:"center", alignItems:"center", justifyContent:"center"}}>
+      <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+        <h2>Running Optimization</h2>
+        <p>This process could take several minutes</p>
+        <Box sx={{display: 'flex', justifyContent: 'center'}}>
+        <LinearProgress style={{width:"50%"}}/>
+        </Box>
+        
+        <p>Status: <b>{props.scenario.results.status}</b></p>
+      </Box>
+      </Grid>
+      <Grid item xs={3}>
+
+      </Grid>
+    </Grid>
+    
+      
     }
     </>
   );

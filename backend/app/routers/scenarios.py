@@ -22,8 +22,8 @@ router = APIRouter(
     responses={404: {"description": "Scenario not found"}},
 )
 
-@router.get("/scenarios")
-async def scenarios():
+@router.get("/get_scenario_list")
+async def get_scenario_list():
     """
     Get basic information about all saved scenarios.
     """

@@ -1,7 +1,7 @@
 
 
 export const fetchScenarios = () => {
-    return fetch('http://localhost:8001/scenarios/', {
+    return fetch('http://localhost:8001/get_scenario_list/', {
         method: 'GET', 
         mode: 'cors'
     });

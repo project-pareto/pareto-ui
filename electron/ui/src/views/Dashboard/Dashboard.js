@@ -133,7 +133,7 @@ export default function Dashboard(props) {
       <Grid item xs={4}>
       <div>
         <b id='scenarioTitle' >
-        {scenario ? <p>{scenario.name}<IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}}><EditIcon fontSize='inherit'></EditIcon></IconButton></p> :  <p>Please select or create a scenario</p>}
+        {(scenario && props.section===0)? <p>{scenario.name}<IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}}><EditIcon fontSize='inherit'></EditIcon></IconButton></p> : null}
       </b> 
       </div>
       </Grid>
