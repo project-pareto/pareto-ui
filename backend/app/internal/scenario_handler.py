@@ -31,6 +31,7 @@ class ScenarioHandler:
 
         self.scenario_list = {}
         self.next_id = 0
+        self.background_tasks = []
         self.data_directory_path = self.app_settings.data_basedir
         self.scenarios_path = os.path.join(self.data_directory_path, self.SCENARIO_DB_FILE)
         self.excelsheets_path = self.data_directory_path / "excelsheets"
@@ -205,12 +206,27 @@ class ScenarioHandler:
             _log.error(f'unable to get scenario with id {id}: {e}')
             return {'error': f'unable to get scenario with id {id}: {e}'}
 
+    def add_background_task(self, id):
+        self.background_tasks.append(id)
+        return self.background_tasks
+
+    def remove_background_task(self, id):
+        self.background_tasks.append(id)
+        if id in self.background_tasks: 
+            self.background_tasks.remove(id)
+        else:
+            _log.error(f'id #{id} is not in background tasks list')
+        return self.background_tasks
+
     def get_list(self):
         return self.scenario_list
 
     def get_next_id(self):
         nextid = self.next_id
         return nextid
+    
+    def get_background_tasks(self):
+        return self.background_tasks
 
 
 scenario_handler = ScenarioHandler()

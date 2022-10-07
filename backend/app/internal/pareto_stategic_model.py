@@ -92,8 +92,17 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
     return results_dict
 
 def handle_run_strategic_model(input_file, output_file, id, objective = 'reuse'):
-    results_dict = run_strategic_model(input_file, output_file, id, objective)
-    scenario = scenario_handler.get_scenario(int(id))
-    results = {"data": results_dict, "status": "complete"}
-    scenario["results"] = results
-    scenario_handler.update_scenario(scenario)
+    try:
+        results_dict = run_strategic_model(input_file, output_file, id, objective)
+        _log.info(f'successfully ran model for id #{id}, updating scenarios')
+        scenario = scenario_handler.get_scenario(int(id))
+        results = {"data": results_dict, "status": "complete"}
+        scenario["results"] = results
+        scenario_handler.update_scenario(scenario)
+    except Exception as e:
+        _log.error(f"unable to run strategic model: {e}")
+    try:
+        _log.info(f'removing id {id} from background tasks')
+        scenario_handler.remove_background_task(id)
+    except Exception as e:
+        _log.error(f"unable to remove id {id} from background tasks: {e}")
