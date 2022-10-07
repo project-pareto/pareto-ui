@@ -52,7 +52,12 @@ function App() {
   const handleNewScenario = (data) => {
     const temp = {...scenarios}
     temp[data.id] = data
-    setScenarios(temp)   
+    setScenarios(temp)
+    setScenarioIndex(data.id)
+    setScenarioData(data)
+    setSection(0);
+    setCategory("PNA")
+    navigate('/scenario', {replace: true})   
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
@@ -73,7 +78,7 @@ function App() {
     })
   }
 
-  const handleSetSelection = (section) => {
+  const handlesetSection = (section) => {
     if(section === 2) {
       setCategory("v_F_Overview_dict")
       fetchScenarios()
@@ -146,6 +151,7 @@ function App() {
             section={section} 
             scenarios={scenarios} 
             deleteScenario={handleDeleteScenario}
+            handlesetSection={handlesetSection} 
             />} 
         />
         <Route 
@@ -158,7 +164,7 @@ function App() {
             section={section} 
             category={category} 
             handleSetCategory={handleSetCategory} 
-            handleSetSelection={handleSetSelection} 
+            handlesetSection={handlesetSection} 
             />} 
         />
         <Route

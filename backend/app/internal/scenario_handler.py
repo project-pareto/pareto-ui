@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 from xml.etree.ElementTree import VERSION
 import tinydb
+from tinydb import where
 
 import idaes.logger as idaeslog
 
@@ -174,12 +175,17 @@ class ScenarioHandler:
         while(locked):
             locked = self.LOCKED
         self.LOCKED = True
-        query = tinydb.Query()
-        self._db.remove((query.id_ == index))
-        self.LOCKED = False
-        # remove excel sheet
-        excel_sheet = "{}/{}.xlsx".format(self.excelsheets_path,index)
-        os.remove(excel_sheet)
+        try:
+            index = int(index)
+            query = tinydb.Query()
+            self._db.remove((query.id_ == index) & (query.version == self.VERSION))
+            self.LOCKED = False
+
+            # remove excel sheet
+            excel_sheet = "{}/{}.xlsx".format(self.excelsheets_path,index)
+            os.remove(excel_sheet)
+        except Exception as e:
+            _log.error(f"unable to delete scenarion #{index}: {e}")
 
         # update scenario list
         self.retrieve_scenarios()
@@ -192,7 +198,6 @@ class ScenarioHandler:
                 locked = self.LOCKED
             self.LOCKED = True
             query = tinydb.Query()
-            _log.info(f'self._db.search((query.id_ == {id}) & (query.version == {self.VERSION}))')
             scenario = self._db.search((query.id_ == id) & (query.version == self.VERSION))
             self.LOCKED = False
             return scenario[0]['scenario']

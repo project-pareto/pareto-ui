@@ -34,7 +34,6 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
     [df_sets, df_parameters] = get_data(input_file, set_list, parameter_list)
 
     _log.info(f"creating model")
-    _log.info(f"water_quality.false equates to {WaterQuality.false}")
     strategic_model = create_model(
         df_sets,
         df_parameters,
