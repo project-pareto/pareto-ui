@@ -8,9 +8,10 @@ from fastapi import Body, Request, APIRouter, HTTPException, File, UploadFile
 from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional
-import app.internal.aiofiles as aiofiles
 
 from pareto.utilities.get_data import get_data
+
+import app.internal.aiofiles as aiofiles
 from app.internal.pareto_stategic_model import run_strategic_model
 from app.internal.scenario_handler import (
     scenario_handler,
@@ -37,15 +38,15 @@ async def scenarios():
 @router.post("/update")
 async def update(request: Request):
     data = await request.json()
-    updated_scenarios = data['updatedScenarios']
-    scenario_handler.update_scenario_list(updated_scenarios)
+    updated_scenario = data['updatedScenario']
+    scenario_handler.update_scenario(updated_scenario)
 
-    return {"data": updated_scenarios}
+    return {"data": updated_scenario}
 
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
     new_id = len(scenario_handler.get_list())
-    output_path = "{}{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
+    output_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
 
     # get file contents
     async with aiofiles.open(output_path, 'wb') as out_file:
@@ -70,13 +71,13 @@ async def run_model(request: Request):
     data = await request.json()
     _log.info(f"running model on : \n{data}")
     try:
-        excel_path = "{}{}.xlsx".format(scenario_handler.excelsheets_path,data['id'])
-        output_path = "{}{}.xlsx".format(scenario_handler.outputs_path,data['id'])
+        excel_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,data['id'])
+        output_path = "{}/{}.xlsx".format(scenario_handler.outputs_path,data['id'])
         results_dict = run_strategic_model(input_file=excel_path, objective=data['objective'], output_file=output_path)
-    except:
-        _log.error(f"unable to find and run given excel sheet id{data['id']}")
+    except Exception as e:
+        _log.error(f"unable to find and run given excel sheet id{data['id']}: {e}")
         raise HTTPException(
-            500, f"unable to find and run given excel sheet id: {data['id']}"
+            500, f"unable to find and run given excel sheet id: {data['id']}: {e}"
         )
 
     return results_dict

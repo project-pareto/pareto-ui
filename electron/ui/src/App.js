@@ -58,11 +58,12 @@ function App() {
   const handleScenarioUpdate = (updatedScenario) => {
     const temp = [...scenarios]
     temp[scenarioIndex] = {...updatedScenario}
+    console.log('updating scenario: ',updateScenario)
     setScenarios(temp)
     setScenarioData({...updatedScenario})
     console.log('new scenario: ')
     console.log({...updatedScenario})
-    updateScenario({'updatedScenarios': temp})
+    updateScenario({'updatedScenario': {...updatedScenario}})
     .then(response => response.json())
     .then((data) => {
       console.log('updated scenarios on backend')
@@ -90,11 +91,12 @@ function App() {
   const handleEditScenarioName = (newName) => {
     const tempScenario = {...scenarioData}
     tempScenario.name = newName
+    console.log('updating scenario: ',tempScenario)
     const tempScenarios = [...scenarios]
     tempScenarios[scenarioIndex] = tempScenario
     setScenarios(tempScenarios)
     setScenarioData(tempScenario)
-    updateScenario({'updatedScenarios': tempScenarios})
+    updateScenario({'updatedScenario': tempScenario})
     .then(response => response.json())
     .then((data) => {
       console.log('updated scenarios on backend')
