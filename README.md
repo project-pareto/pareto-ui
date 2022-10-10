@@ -10,7 +10,7 @@ The following steps assume that:
 1. `conda` is already installed and configured
 2. This repository (i.e. the Pareto UI repository, https://github.com/project-pareto/pareto-ui) has been cloned locally and the working directory is set to the root of the repository
 
-### 1. Creating the Conda environment
+### 1. (Windows) Creating the Conda environment
 
 Run the following command to create and activate a new Conda environment named `pareto-ui-env`:
 
@@ -19,6 +19,37 @@ conda env create --file environment.yml && conda activate pareto-ui-env
 ```
 
 This will install the correct runtime versions of both the backend (Python) and frontend (JavaScript/NodeJS/Electron) portions of the UI, as well as the backend (Python) dependencies.
+
+Continue to step 2
+
+### 1. (MacOS ARM64) Creating the Conda environment
+
+Installing the Python dependencies requires a couple extra steps for Mac ARM64 users. 
+
+#### 1.1
+
+Run the following command to create and activate a new Conda environment named `pareto-ui-env`:
+
+```sh
+conda env create --file environment-mac.yml && conda activate pareto-ui-env
+```
+
+#### 1.2
+
+Uninstall x86-64 versions of numpy and pandas:
+
+```sh
+conda uninstall -y numpy pandas
+```
+
+#### 1.3
+
+Install arm64 versions of numpy and pandas:
+
+```sh
+conda install -y -c conda-forge/osx-arm64 numpy pandas
+```
+
 
 ### 2. Install the IDAES solver dependencies
 

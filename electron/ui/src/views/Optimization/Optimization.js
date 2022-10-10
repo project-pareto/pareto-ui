@@ -25,6 +25,7 @@ export default function Optimization(props) {
      const tempScenario = {...scenario}
      tempScenario.optimization.objective = event.target.value
      setScenario(tempScenario)
+     props.updateScenario(tempScenario)
    }
 
    const handleSave = () => {
@@ -52,28 +53,7 @@ export default function Optimization(props) {
   return ( 
     <Grid container spacing={2}>
       <Grid item xs={3}>
-      <Box style={{backgroundColor:'white'}} sx={styles.objectiveSelection}>
-        <Grid container>
-          <Grid item xs={12}>
-          <FormControl>
-            <FormLabel style={{color: "#157498", fontWeight: "bold"}} id="objectives-select">OBJECTIVE SELECTION</FormLabel>
-            <RadioGroup
-              aria-labelledby="objectives-select"
-              value={scenario.optimization.objective}
-              name="objectives-select"
-              onChange={handleChange}
-              // row
-            >
-              <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
-              <FormControlLabel value="cost" control={<Radio />} label="Maximize Cost" />
-            </RadioGroup>
-          </FormControl>
-          </Grid>
-          <Grid item xs={12} style={{marginTop: "100px"}}>
-          <Button onClick={handleSave} variant="contained">Save Objective</Button>
-          </Grid>
-        </Grid>
-      </Box>
+
       </Grid>
 
       <Grid item xs={6}>
@@ -83,6 +63,25 @@ export default function Optimization(props) {
           <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'50px'}}>
             <p>OPTIMIZATION SETTINGS</p>
           </Box>
+          </Grid>
+          <Grid item xs={4} style={{marginTop: "25px"}}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Objective Selection</p>
+            </Box>
+          </Grid>
+          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <FormControl>
+            <RadioGroup
+              aria-labelledby="objectives-select"
+              value={scenario.optimization.objective}
+              name="objectives-select"
+              onChange={handleChange}
+              // row
+            >
+              <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
+              <FormControlLabel value="cost" control={<Radio />} label="Minimize Cost" />
+            </RadioGroup>
+          </FormControl>
           </Grid>
 
           <Grid item xs={4} style={{marginTop: "25px"}}>
@@ -106,7 +105,7 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          <Grid item xs={4} style={{marginTop: "25px"}}>
+          {/* <Grid item xs={4} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Solver Selection</p>
             </Box>
@@ -122,7 +121,7 @@ export default function Optimization(props) {
               <MenuItem key={1} value={1}>Operational Model</MenuItem>
             </Select>
             </FormControl>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={4} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
@@ -144,6 +143,9 @@ export default function Optimization(props) {
 
         </Grid>
       </Box>
+      </Grid>
+      <Grid item xs={3}>
+
       </Grid>
     </Grid>
   );

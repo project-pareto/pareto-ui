@@ -9,28 +9,67 @@ import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Header from './components/Header/Header'; 
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
-import { fetchScenarios } from './services/sidebar.service'
 import {useEffect, useState} from 'react';   
 import { updateScenario } from './services/app.service'
 import { deleteScenario } from './services/scenariolist.service'
+import { fetchScenarios } from './services/sidebar.service'
+import { checkTasks } from './services/homepage.service'
 
 
 function App() {
   
   const [ scenarioData, setScenarioData ] = useState(null);
-  const [ scenarios, setScenarios ] = useState([]); 
+  const [ scenarios, setScenarios ] = useState({}); 
   const [ section, setSection ] = useState(0)
   const [ category, setCategory ] = useState(null)
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
+  const [ backgroundTasks, setBackgroundTasks ] = useState([])
   let navigate = useNavigate();
 
   useEffect(()=>{
-    fetchScenarios()
+    /*
+      1) check for optimizations that are currently running
+      2) fetch all scenarios
+      3) if a scenario is a draft, is optimized, or is currently running, leave it as is
+      4) if a scenario was running when the app was previously quit, reset it to draft
+    */
+    checkTasks()
     .then(response => response.json())
     .then((data)=>{
-      console.log('setscenarios: ',data.data)
-      setScenarios(data.data)
+      let tasks = data.tasks
+      setBackgroundTasks(tasks)
+      fetchScenarios()
+      .then(response => response.json())
+      .then((data)=>{
+        console.log('setscenarios: ',data.data)
+        /* 
+        check for any scenarios that were running when the app was previously quit
+        reset the status of these scenarios so that they can be treated as drafts again
+        */ 
+        const tempScenarios = {}
+          for (var key in data.data){
+            let scenario = {...data.data[key]}
+            tempScenarios[key] = scenario
+            console.log('scenario[',key,'].status: ',scenario.results.status)
+            if (!['complete','none'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
+              scenario.results.status = 'none'
+              updateScenario({'updatedScenario': {...scenario}})
+              .then(response => response.json())
+              .then((data) => {
+                console.log('reset scenario')
+              }).catch(e => {
+                console.log('error on scenario update')
+                console.log(e)
+              })
+            }
+        }
+      setScenarios(tempScenarios)
     });
+    })
+    .catch(e => {
+      console.error('unable to check for tasks: ',e)
+    })
+    
 }, []);
 
   const navigateHome = () => {
@@ -38,6 +77,12 @@ function App() {
     setSection(0)
     setCategory(null)
     setScenarioIndex(null)
+    fetchScenarios()
+    .then(response => response.json())
+    .then((data)=>{
+      console.log('setscenarios: ',data.data)
+      setScenarios(data.data)
+    });
     navigate('/', {replace: true})
   }
 
@@ -50,13 +95,18 @@ function App() {
   };
 
   const handleNewScenario = (data) => {
-    const temp = [...scenarios]
-    temp.push(data)
-    setScenarios(temp)   
+    const temp = {...scenarios}
+    temp[data.id] = data
+    setScenarios(temp)
+    setScenarioIndex(data.id)
+    setScenarioData(data)
+    setSection(0);
+    setCategory("PNA")
+    navigate('/scenario', {replace: true})   
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
-    const temp = [...scenarios]
+    const temp = {...scenarios}
     temp[scenarioIndex] = {...updatedScenario}
     console.log('updating scenario: ',updateScenario)
     setScenarios(temp)
@@ -73,13 +123,26 @@ function App() {
     })
   }
 
-  const handleSetSelection = (section) => {
+  const handlesetSection = (section) => {
     if(section === 2) {
       setCategory("v_F_Overview_dict")
+      fetchScenarios()
+      .then(response => response.json())
+      .then((data)=>{
+        console.log('setscenarios: ',data.data)
+        setScenarios(data.data)
+        setScenarioData(data.data[scenarioIndex])
+      });
     } else if(section === 0) {
       setCategory("PNA")
     } else {
       setCategory(null)
+      checkTasks()
+      .then(response => response.json())
+      .then((data)=>{
+        console.log('background tasks: ',data.tasks)
+        setBackgroundTasks(data.tasks)
+      });
     }
     setSection(section)
  }
@@ -92,7 +155,7 @@ function App() {
     const tempScenario = {...scenarioData}
     tempScenario.name = newName
     console.log('updating scenario: ',tempScenario)
-    const tempScenarios = [...scenarios]
+    const tempScenarios = {...scenarios}
     tempScenarios[scenarioIndex] = tempScenario
     setScenarios(tempScenarios)
     setScenarioData(tempScenario)
@@ -139,6 +202,7 @@ function App() {
             section={section} 
             scenarios={scenarios} 
             deleteScenario={handleDeleteScenario}
+            handlesetSection={handlesetSection} 
             />} 
         />
         <Route 
@@ -151,7 +215,8 @@ function App() {
             section={section} 
             category={category} 
             handleSetCategory={handleSetCategory} 
-            handleSetSelection={handleSetSelection} 
+            handlesetSection={handlesetSection} 
+            backgroundTasks={backgroundTasks}
             />} 
         />
         <Route

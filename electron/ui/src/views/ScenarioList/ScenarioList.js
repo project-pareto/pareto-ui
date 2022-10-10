@@ -87,20 +87,23 @@ const handleFileUpload = (e) => {
             </TableRow>
             </TableHead>
             <TableBody>
-            {props.scenarios.map((row, index) => (
-                <TableRow
+            
+            {Object.entries(props.scenarios).map( ([key, value] ) => {
+                return( <TableRow
                 hover
-                key={row.name}
+                key={value.key}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } , cursor:"pointer"}}
                 >
-                <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => props.handleSelection(index)}>
-                    {row.name}
+                <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => props.handleSelection(key)}>
+                    {value.name}
                 </TableCell>
-                <TableCell onClick={() => props.handleSelection(index)} sx={styles.bodyCell}>{row.date}</TableCell>
-                <TableCell onClick={() => props.handleSelection(index)} sx={styles.bodyCell}>{Object.keys(row.results).length !== 0 ? "Optimized" : "Draft"}</TableCell>
-                <TableCell sx={styles.bodyCell}><IconButton onClick={() => props.deleteScenario(index)}><DeleteIcon fontSize="small"/></IconButton><IconButton><ContentCopyIcon fontSize="small"/></IconButton></TableCell>
+                <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.date}</TableCell>
+                <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
+                <TableCell sx={styles.bodyCell}><IconButton onClick={() => props.deleteScenario(key)}><DeleteIcon fontSize="small"/></IconButton><IconButton><ContentCopyIcon fontSize="small"/></IconButton></TableCell>
                 </TableRow>
-            ))}
+                )
+                
+            })}
             </TableBody>
         </Table>
         </TableContainer>

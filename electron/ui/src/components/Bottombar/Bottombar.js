@@ -10,6 +10,26 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 
 export default function Bottombar(props) {
+    const [ disableOptimize, setDisableOptimize ] = useState(false) 
+    useEffect(() => {
+        /*
+            if the current scenario is already being optimized OR if there are multiple optimizations
+            currently running, then we disable the ability to optimize the current scenario
+        */
+       try{
+        let tasks = props.backgroundTasks
+        if ((tasks.length > 1) || (props.scenario.results.status!="none" && props.scenario.results.status!="complete")) {
+            console.log('optimized is disabled')
+            setDisableOptimize(true)
+        } else {
+            console.log('optimized is enabled')
+            setDisableOptimize(false)
+        }
+       } catch(e){
+        console.error("unable to check for background tasks from bottom bar : ",e)
+       }
+        
+    },[props])
     const styles = {
         filled: {
             backgroundColor: '#01678f',
@@ -38,7 +58,7 @@ export default function Bottombar(props) {
                 <Grid item xs={6}>
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
                         {props.section === 0 && <Button sx={styles.filled} onClick={() => props.handleSelection(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
-                        {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
+                        {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
                     </Box>
                 </Grid>
             </Grid>

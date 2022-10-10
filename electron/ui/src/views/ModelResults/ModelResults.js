@@ -1,10 +1,12 @@
 import {useEffect, useState} from 'react';   
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import LinearProgress from '@mui/material/LinearProgress';
 //import SankeyPlot from './SankeyPlot';
 
 
@@ -15,20 +17,23 @@ export default function ModelResults(props) {
    }, [scenario]);
   
   return ( 
+    <>
+    {props.scenario.results.status === "complete" ? 
+
     <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
       <h3>{props.category}</h3>
-      {Object.keys(props.scenario.results).length !== 0 ? 
+      
       <>
       <Table style={{border:"1px solid #ddd"}} size='small'>
         <TableHead>
         <TableRow>
-        {props.scenario.results[props.category][0].map((value, index) => {
+        {props.scenario.results.data[props.category][0].map((value, index) => {
           return <TableCell>{value}</TableCell>
         })}
         </TableRow>
         </TableHead>
        <TableBody>
-        {props.scenario.results[props.category].slice(1).map((value, index) => {
+        {props.scenario.results.data[props.category].slice(1).map((value, index) => {
           return (<TableRow>
           {value.map((cellValue, i)=> {
             return <TableCell>{cellValue}</TableCell>
@@ -38,9 +43,33 @@ export default function ModelResults(props) {
         </TableBody>
       </Table>
       </>
-      : 
-      "model results loading"}
+      
+      
     </Box>
+    : 
+    <Grid container alignItems="center" justifyContent="center">
+      <Grid item xs={3}>
+
+      </Grid>
+      <Grid item xs={6} style={{alignContent:"center", alignItems:"center", justifyContent:"center"}}>
+      <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+        <h2>Running Optimization</h2>
+        <p>This process could take several minutes</p>
+        <Box sx={{display: 'flex', justifyContent: 'center'}}>
+        <LinearProgress style={{width:"50%"}}/>
+        </Box>
+        
+        <p>Status: <b>{props.scenario.results.status}</b></p>
+      </Box>
+      </Grid>
+      <Grid item xs={3}>
+
+      </Grid>
+    </Grid>
+    
+      
+    }
+    </>
   );
 
 }

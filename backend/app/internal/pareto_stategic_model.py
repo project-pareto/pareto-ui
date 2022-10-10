@@ -8,22 +8,28 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     solve_model,
     PipelineCost,
     PipelineCapacity,
-    IncludeNodeCapacity,
+    WaterQuality,
 )
 # from .get_data import get_data
 from pareto.utilities.get_data import get_data
 from pareto.utilities.results import generate_report, PrintValues, OutputUnits
-from app.internal.get_data import get_input_lists
 import idaes.logger as idaeslog
 
-_log = idaeslog.getLogger(__name__)
+from app.internal.get_data import get_input_lists
+from app.internal.scenario_handler import (
+    scenario_handler,
+)
 
 
-def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_report.xlsx", objective = 'reuse'):
+# _log = idaeslog.getLogger(__name__)
+_log = logging.getLogger(__name__)
+
+
+def run_strategic_model(input_file, output_file, id,  objective, water_quality = WaterQuality.false):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
-
+    
     _log.info(f"getting data from excel sheet")
     [df_sets, df_parameters] = get_data(input_file, set_list, parameter_list)
 
@@ -35,9 +41,15 @@ def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_
             "objective": Objectives[objective],
             "pipeline_cost": PipelineCost.distance_based,
             "pipeline_capacity": PipelineCapacity.input,
-            "node_capacity": IncludeNodeCapacity.true,
+            "node_capacity": True,
+            "water_quality": water_quality,
         },
     )
+    
+    scenario = scenario_handler.get_scenario(int(id))
+    results = {"data": {}, "status": "Solving model"}
+    scenario["results"] = results
+    scenario_handler.update_scenario(scenario)
 
     options = {
         "deactivate_slacks": True,
@@ -45,11 +57,16 @@ def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_
         "scaling_factor": 1000,
         "running_time": 60,
         "gap": 0,
-        "water_quality": True,
+        # "water_quality": True,
     }
 
     _log.info(f"solving model")
     solve_model(model=strategic_model, options=options)
+
+    scenario = scenario_handler.get_scenario(int(id))
+    results = {"data": {}, "status": "Generating output"}
+    scenario["results"] = results
+    scenario_handler.update_scenario(scenario)
 
     print("\nConverting to Output Units and Displaying Solution\n" + "-" * 60)
     """Valid values of parameters in the generate_report() call
@@ -62,14 +79,24 @@ def run_strategic_model(input_file, output_file = "ParetoUI_Data/outputs/PARETO_
         output_units=OutputUnits.user_units,
         fname=output_file,
     )
-
-    # This shows how to read data from PARETO reports
-    # set_list = []
-    # parameter_list = ["v_F_Trucked", "v_C_Trucked"]
-    # fname = output_file
-    # [sets_reports, parameters_report] = get_data(fname, set_list, parameter_list)
     
     total_time = datetime.datetime.now() - start_time
     _log.info(f"total process took {total_time.seconds} seconds")
 
     return results_dict
+
+def handle_run_strategic_model(input_file, output_file, id, objective = 'reuse'):
+    try:
+        results_dict = run_strategic_model(input_file, output_file, id, objective)
+        _log.info(f'successfully ran model for id #{id}, updating scenarios')
+        scenario = scenario_handler.get_scenario(int(id))
+        results = {"data": results_dict, "status": "complete"}
+        scenario["results"] = results
+        scenario_handler.update_scenario(scenario)
+    except Exception as e:
+        _log.error(f"unable to run strategic model: {e}")
+    try:
+        _log.info(f'removing id {id} from background tasks')
+        scenario_handler.remove_background_task(id)
+    except Exception as e:
+        _log.error(f"unable to remove id {id} from background tasks: {e}")

@@ -42,7 +42,7 @@ export default function ProcessToolbar(props) {
         <p style={props.selected === 1 ? styles.textSelected : styles.textUnselected}>Optimization Setup</p>
       </Grid>
       <Grid item xs={1.8}>
-        <IconButton aria-label="results" sx={{marginTop:'5px'}} disabled={props.scenario ? Object.keys(props.scenario.results).length !== 0 ? false : true : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => props.handleSelection(2)}>
+        <IconButton aria-label="results" sx={{marginTop:'5px'}} disabled={props.scenario ? props.scenario.results.status !== "none" ? false : true : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => props.handleSelection(2)}>
             <PieChartIcon fontSize="large"></PieChartIcon>
         </IconButton>
         <p style={props.selected === 2 ? styles.textSelected : styles.textUnselected}>Model Results</p>
