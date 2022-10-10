@@ -155,7 +155,11 @@ function App() {
     const tempScenario = {...scenarioData}
     tempScenario.name = newName
     console.log('updating scenario: ',tempScenario)
+<<<<<<< HEAD
     const tempScenarios = {...scenarios}
+=======
+    const tempScenarios = [...scenarios]
+>>>>>>> project-pareto-main
     tempScenarios[scenarioIndex] = tempScenario
     setScenarios(tempScenarios)
     setScenarioData(tempScenario)
