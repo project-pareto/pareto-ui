@@ -74,7 +74,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "PARETO-UI_Setup.exe"
+      "artifactName": "Pareto-UI_Setup.exe"
     },
     "deb": {
       "depends": [
@@ -102,7 +102,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "build/nawi-logo.ico"
+      "icon": "build/pareto-logo.ico"
     },
     "linux": {
       "target": "Deb",
