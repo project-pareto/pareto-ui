@@ -91,7 +91,7 @@ const handleFileUpload = (e) => {
             {Object.entries(props.scenarios).map( ([key, value] ) => {
                 return( <TableRow
                 hover
-                key={value.name}
+                key={value.key}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } , cursor:"pointer"}}
                 >
                 <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => props.handleSelection(key)}>

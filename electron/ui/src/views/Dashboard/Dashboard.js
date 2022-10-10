@@ -145,7 +145,7 @@ export default function Dashboard(props) {
       {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario}></ModelResults> : null}
       </Grid>
     </Grid>
-    <Bottombar handleSelection={props.handlesetSection} section={props.section} scenario={scenario} handleRunModel={handleRunModel}></Bottombar>
+    <Bottombar handleSelection={props.handlesetSection} section={props.section} backgroundTasks={props.backgroundTasks} scenario={scenario} handleRunModel={handleRunModel}></Bottombar>
     </>
   );
 

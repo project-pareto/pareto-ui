@@ -211,7 +211,6 @@ class ScenarioHandler:
         return self.background_tasks
 
     def remove_background_task(self, id):
-        self.background_tasks.append(id)
         if id in self.background_tasks: 
             self.background_tasks.remove(id)
         else:

@@ -29,7 +29,7 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
-
+    
     _log.info(f"getting data from excel sheet")
     [df_sets, df_parameters] = get_data(input_file, set_list, parameter_list)
 
@@ -45,9 +45,9 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
             "water_quality": water_quality,
         },
     )
-
+    
     scenario = scenario_handler.get_scenario(int(id))
-    results = {"data": {}, "status": "created model"}
+    results = {"data": {}, "status": "Solving model"}
     scenario["results"] = results
     scenario_handler.update_scenario(scenario)
 
@@ -64,7 +64,7 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
     solve_model(model=strategic_model, options=options)
 
     scenario = scenario_handler.get_scenario(int(id))
-    results = {"data": {}, "status": "solved model"}
+    results = {"data": {}, "status": "Generating output"}
     scenario["results"] = results
     scenario_handler.update_scenario(scenario)
 
@@ -79,12 +79,6 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
         output_units=OutputUnits.user_units,
         fname=output_file,
     )
-
-    # This shows how to read data from PARETO reports
-    # set_list = []
-    # parameter_list = ["v_F_Trucked", "v_C_Trucked"]
-    # fname = output_file
-    # [sets_reports, parameters_report] = get_data(fname, set_list, parameter_list)
     
     total_time = datetime.datetime.now() - start_time
     _log.info(f"total process took {total_time.seconds} seconds")

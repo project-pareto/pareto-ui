@@ -72,13 +72,13 @@ export default function DataInput(props) {
           </Box>
         </Grid>
         <Grid item xs={6}>
-          <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
+          {/* <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
             <IconButton aria-label="filter">
               <FilterListIcon fontSize="small"></FilterListIcon>
               Filter
             </IconButton>
             
-          </Box>
+          </Box> */}
         </Grid>
       </Grid>
       <TableContainer sx={{overflowX:'auto'}}>

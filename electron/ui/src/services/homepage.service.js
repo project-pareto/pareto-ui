@@ -6,3 +6,10 @@ export const runModel = (data) => {
         body: JSON.stringify(data)
     });
 }; 
+
+export const checkTasks = () => {
+    return fetch('http://localhost:8001/check_tasks/', {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}; 

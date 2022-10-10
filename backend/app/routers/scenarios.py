@@ -105,7 +105,7 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         background_tasks.add_task(handle_run_strategic_model, input_file=excel_path, objective=data['objective'], id=data['scenario']['id'], output_file=output_path)
         scenario_handler.add_background_task(data['scenario']['id'])
         scenario = data['scenario']
-        results = {"data": {}, "status": "initialized"}
+        results = {"data": {}, "status": "Initializing"}
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
     except Exception as e:
