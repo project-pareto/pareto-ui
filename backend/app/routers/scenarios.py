@@ -102,7 +102,18 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
     try:
         excel_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,data['scenario']['id'])
         output_path = "{}/{}.xlsx".format(scenario_handler.outputs_path,data['scenario']['id'])
-        background_tasks.add_task(handle_run_strategic_model, input_file=excel_path, objective=data['objective'], id=data['scenario']['id'], output_file=output_path)
+        background_tasks.add_task(
+            handle_run_strategic_model, 
+            input_file=excel_path,
+            output_file=output_path,
+            id=data['scenario']['id'],
+            objective=data['scenario']['optimization']['objective'],
+            runtime=data['scenario']['optimization']['runtime'],
+            pipelineCost=data['scenario']['optimization']['pipelineCostCalculation'],
+            waterQuality=data['scenario']['optimization']['waterQuality']
+        )
+        
+        # add id to scenario handler task list to keep track of running tasks
         scenario_handler.add_background_task(data['scenario']['id'])
         scenario = data['scenario']
         results = {"data": {}, "status": "Initializing"}

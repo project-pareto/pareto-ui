@@ -17,19 +17,43 @@ import Select from '@mui/material/Select';
 
 export default function Optimization(props) {
   const [scenario, setScenario] = useState(props.scenario)
+  const [runtime, setRuntime] = useState(180)
+  // const [pipelineCostCalculation, setPipelineCostCalculation] = useState("capacity_based")
+  // const [waterQuality, setWaterQuality] = useState("discrete")
+
    useEffect(()=>{
       //  console.log('curr scenario',scenario)
    }, [scenario]);
   
-   const handleChange = (event) => {
+   const handleObjectiveChange = (event) => {
      const tempScenario = {...scenario}
      tempScenario.optimization.objective = event.target.value
      setScenario(tempScenario)
      props.updateScenario(tempScenario)
    }
 
-   const handleSave = () => {
-     props.updateScenario(scenario)
+   const handleRuntimeChange = (event) => {
+    const tempScenario = {...scenario}
+    tempScenario.optimization.runtime = event.target.value
+    setRuntime(event.target.value)
+    setScenario(tempScenario)
+    props.updateScenario(tempScenario)
+  }
+
+  const handlePipelineCostChange = (event) => {
+    const tempScenario = {...scenario}
+    tempScenario.optimization.pipelineCostCalculation = event.target.value
+    // setPipelineCostCalculation(event.target.value)
+    setScenario(tempScenario)
+    props.updateScenario(tempScenario)
+  }
+
+  const handleWaterQualityChange = (event) => {
+    const tempScenario = {...scenario}
+    tempScenario.optimization.waterQuality = event.target.value
+    // setWaterQuality(event.target.value)
+    setScenario(tempScenario)
+    props.updateScenario(tempScenario)
   }
 
   const styles = {
@@ -75,7 +99,7 @@ export default function Optimization(props) {
               aria-labelledby="objectives-select"
               value={scenario.optimization.objective}
               name="objectives-select"
-              onChange={handleChange}
+              onChange={handleObjectiveChange}
               // row
             >
               <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
@@ -93,9 +117,8 @@ export default function Optimization(props) {
           <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small">
             <OutlinedInput
               id="outlined-adornment-sec"
-              // value={values.weight}
-              value={180}
-              // onChange={handleChange('weight')}
+              value={runtime}
+              onChange={handleRuntimeChange}
               endAdornment={<InputAdornment position="end">sec</InputAdornment>}
               aria-describedby="outlined-weight-helper-text"
               inputProps={{
@@ -131,12 +154,31 @@ export default function Optimization(props) {
           <Grid item xs={8} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small">
             <Select
-              value={0}
-              // onChange={handleScenarioSelection}
+              value={scenario.optimization.pipelineCostCalculation}
+              onChange={handlePipelineCostChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={0} value={0}>Option 1</MenuItem>
-              <MenuItem key={1} value={1}>Option 2</MenuItem>
+              <MenuItem key={0} value={"distance_based"}>Distance Based</MenuItem>
+              <MenuItem key={1} value={"capacity_based"}>Capacity Based</MenuItem>
+            </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={4} style={{marginTop: "25px"}}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Water Quality</p>
+            </Box>
+          </Grid>
+          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small">
+            <Select
+              value={scenario.optimization.waterQuality}
+              onChange={handleWaterQualityChange}
+              sx={{color:'#0b89b9', fontWeight: "bold"}}
+            >
+              <MenuItem key={0} value={"false"}>False</MenuItem>
+              <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
+              <MenuItem key={2} value={"discrete"}>Discrete</MenuItem>
             </Select>
             </FormControl>
           </Grid>

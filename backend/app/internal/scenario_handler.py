@@ -21,7 +21,7 @@ class ScenarioHandler:
     """Manage the saved scenarios."""
 
     SCENARIO_DB_FILE = "scenarios.json"
-    VERSION = 1
+    VERSION = 2
     LOCKED = False
 
     def __init__(self, **kwargs) -> None:
@@ -149,7 +149,7 @@ class ScenarioHandler:
             "id": self.next_id, 
             "date": date,
             "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, 
-            "optimization": {"objective":"reuse"}, 
+            "optimization": {"objective":"reuse", "runtime": 180, "pipelineCostCalculation": "distance_based", "waterQuality": "false"}, 
             "results": {"status": "none", "data": {}}
             }
 

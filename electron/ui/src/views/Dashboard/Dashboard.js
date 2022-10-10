@@ -62,7 +62,7 @@ export default function Dashboard(props) {
 
    const handleRunModel = () => {
     console.log('running model')
-      runModel({"scenario": scenario, 'objective':scenario.optimization.objective})
+      runModel({"scenario": scenario})
       .then(r =>  r.json().then(data => ({status: r.status, body: data})))
       .then((response) => {
         let responseCode = response.status
