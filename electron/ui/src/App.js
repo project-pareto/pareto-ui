@@ -93,7 +93,8 @@ function App() {
     /*
       if scenario is curretly running, send user to model results tab
     */
-    if(["Initializing", "Solving model", "Generating output"].includes(scenarios[scenario].results.status)) {
+    if(["Initializing", "Solving model", "Generating output", "complete"].includes(scenarios[scenario].results.status)) {
+      setCategory("v_F_Overview_dict")
       setSection(2)
     } else {
       setSection(0);

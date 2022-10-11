@@ -59,15 +59,16 @@ async def upload(file: UploadFile = File(...)):
     new_id = scenario_handler.get_next_id()
     output_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
 
-    # get file contents
-    async with aiofiles.open(output_path, 'wb') as out_file:
-        content = await file.read()  # async read
-        await out_file.write(content) 
     try:
+    # get file contents
+        async with aiofiles.open(output_path, 'wb') as out_file:
+            content = await file.read()  # async read
+            await out_file.write(content) 
         return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
 
     except Exception as e:
-        return {"error" : str(e)}
+        _log.error(f"error on file upload: {str(e)}")
+        raise HTTPException(400, detail=f"Build failed: {e}")
 
 @router.post("/delete_scenario")
 async def delete_scenario(request: Request):
