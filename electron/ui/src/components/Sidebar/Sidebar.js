@@ -13,6 +13,39 @@ const drawerWidth = 240;
 
 export default function Sidebar(props) {
 
+  const renderAdditionalCategories = () => {
+    let additionalCategories = props.section === 0 ? {"Completion Demand Plot": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null}
+    console.log('additional categories: ',additionalCategories)
+    return (
+      Object.entries(additionalCategories).map( ([key, value]) => ( 
+        <>
+        <ListItem key={key} disablePadding>
+            <ListItemButton selected={props.category===key} onClick={() => props.handleSetCategory(key)} key={key}>
+            <ListItemText key={key} primary={key} />
+            </ListItemButton>
+        </ListItem>
+        <Divider></Divider>
+      </>
+      ))
+    )
+  }
+
+  const renderTable = () => {
+    return (
+      Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
+        <>
+        <ListItem key={key} disablePadding>
+            <ListItemButton selected={props.category===key} onClick={() => props.handleSetCategory(key)} key={key}>
+            <ListItemText key={key} primary={key} />
+            </ListItemButton>
+        </ListItem>
+        <Divider></Divider>
+      </>
+      ))
+    )
+    
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -35,18 +68,12 @@ export default function Sidebar(props) {
       >
         <Box sx={{ overflow: 'auto', overflowX: 'hidden'}}>
             <List aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
-            {props.scenario  ? 
-            Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
-              <>
-              <ListItem key={key} disablePadding>
-                  <ListItemButton selected={props.category===key} onClick={() => props.handleSetCategory(key)} key={key}>
-                  <ListItemText key={key} primary={key} />
-                  </ListItemButton>
-              </ListItem>
-              <Divider></Divider>
-            </>
-            ))
-            : null}
+            {props.scenario &&
+              renderAdditionalCategories()
+            }
+            {props.scenario &&
+              renderTable()
+            }
           </List>
         </Box>
       </Drawer>

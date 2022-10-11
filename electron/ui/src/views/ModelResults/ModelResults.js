@@ -8,7 +8,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import LinearProgress from '@mui/material/LinearProgress';
-//import SankeyPlot from './SankeyPlot';
+import SankeyPlot from './SankeyPlot';
 
 
 export default function ModelResults(props) {
@@ -17,34 +17,61 @@ export default function ModelResults(props) {
        console.log('curr scenario',scenario)
    }, [scenario]);
   
+  const renderOutputCategory = () => {
+    try {
+      /*
+        if category is sankey, return sankey plot
+      */
+      if (props.category === "Sankey") {
+        let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"], "v_F_Sourced": props.scenario.results.data["v_F_Sourced_dict"]}
+        return <SankeyPlot data={sankeyData} />
+      }
+      /*
+        if category is dashboard, return KPI dashboard
+      */
+      else if(props.category === "Dashboard"){
+        return null
+      }
+      /*
+        otherwise, return table for given category
+      */
+      else {
+        return (
+          <Table style={{border:"1px solid #ddd"}} size='small'>
+            <TableHead>
+            <TableRow>
+            {props.scenario.results.data[props.category][0].map((value, index) => {
+              return <TableCell>{value}</TableCell>
+            })}
+            </TableRow>
+            </TableHead>
+           <TableBody>
+            {props.scenario.results.data[props.category].slice(1).map((value, index) => {
+              return (<TableRow>
+              {value.map((cellValue, i)=> {
+                return <TableCell>{cellValue}</TableCell>
+              })}
+              </TableRow>)
+            })}
+            </TableBody>
+          </Table>
+        )
+      }
+    } catch (e) {
+      console.log('unable to render table for this category: ',props.category)
+    }
+    
+  }
+
+
   return ( 
     <>
     {props.scenario.results.status === "complete" ? 
 
     <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
       <h3>{props.category}</h3>
-      
-      <>
-      <Table style={{border:"1px solid #ddd"}} size='small'>
-        <TableHead>
-        <TableRow>
-        {props.scenario.results.data[props.category][0].map((value, index) => {
-          return <TableCell>{value}</TableCell>
-        })}
-        </TableRow>
-        </TableHead>
-       <TableBody>
-        {props.scenario.results.data[props.category].slice(1).map((value, index) => {
-          return (<TableRow>
-          {value.map((cellValue, i)=> {
-            return <TableCell>{cellValue}</TableCell>
-          })}
-          </TableRow>)
-        })}
-        </TableBody>
-      </Table>
-      </>
-      
+    
+      {renderOutputCategory()}  
       
     </Box>
     : 
