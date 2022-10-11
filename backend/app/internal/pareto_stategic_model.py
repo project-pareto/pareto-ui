@@ -97,12 +97,10 @@ def handle_run_strategic_model(input_file, output_file, id, objective, runtime, 
     except Exception as e:
         _log.error(f"unable to run strategic model: {e}")
         time.sleep(2)
-        _log.info(f'updating scenario status to failure')
         scenario = scenario_handler.get_scenario(int(id))
         results = {"data": {}, "status": "failure", "error": str(e)}
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
-        _log.info(f'updated scenario status to failure')
     try:
         _log.info(f'removing id {id} from background tasks')
         scenario_handler.remove_background_task(id)

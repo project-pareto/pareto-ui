@@ -116,11 +116,9 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         # add id to scenario handler task list to keep track of running tasks
         scenario_handler.add_background_task(data['scenario']['id'])
         scenario = data['scenario']
-        _log.info(f'updating scenario status to initializing')
         results = {"data": {}, "status": "Initializing"}
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
-        _log.info(f'updated scenario status to initializing')
     except Exception as e:
         _log.error(f"unable to find and run given excel sheet id{data['scenario']['id']}: {e}")
         raise HTTPException(

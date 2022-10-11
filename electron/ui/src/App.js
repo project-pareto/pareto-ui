@@ -90,8 +90,16 @@ function App() {
     navigate('/scenario', {replace: true})
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
-    setSection(0);
-    setCategory("PNA")
+    /*
+      if scenario is curretly running, send user to model results tab
+    */
+    if(["Initializing", "Solving model", "Generating output"].includes(scenarios[scenario].results.status)) {
+      setSection(2)
+    } else {
+      setSection(0);
+      setCategory("PNA")
+    }
+
   };
 
   const handleNewScenario = (data) => {

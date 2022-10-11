@@ -99,7 +99,10 @@ const handleFileUpload = (e) => {
                 </TableCell>
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.date}</TableCell>
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
-                <TableCell sx={styles.bodyCell}><IconButton onClick={() => props.deleteScenario(key)}><DeleteIcon fontSize="small"/></IconButton><IconButton><ContentCopyIcon fontSize="small"/></IconButton></TableCell>
+                <TableCell sx={styles.bodyCell}>
+                    <IconButton onClick={() => props.deleteScenario(key)}><DeleteIcon fontSize="small"/></IconButton>
+                    {/* <IconButton><ContentCopyIcon fontSize="small"/></IconButton> */}
+                </TableCell>
                 </TableRow>
                 )
                 
