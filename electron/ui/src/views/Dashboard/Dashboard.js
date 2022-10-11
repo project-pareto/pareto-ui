@@ -71,7 +71,7 @@ export default function Dashboard(props) {
           console.log('run model successful: ')
           console.log(data)
           props.updateScenario(data)
-          props.handlesetSection(2)
+          props.handleSetSection(2)
         }
         else if(responseCode === 500) {
           console.error('error on model run: ',data.detail)
@@ -96,7 +96,7 @@ export default function Dashboard(props) {
   return (
     <>
     <ProcessToolbar 
-        handleSelection={props.handlesetSection} 
+        handleSelection={props.handleSetSection} 
         selected={props.section} 
         scenario={scenario}>
       </ProcessToolbar>
@@ -142,10 +142,10 @@ export default function Dashboard(props) {
       <Grid item xs={12}>
       {(scenario && props.section===0) ? <DataInput category={props.category} scenario={scenario}></DataInput> : null}
       {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario} updateScenario={props.updateScenario}></Optimization> : null}
-      {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario}></ModelResults> : null}
+      {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario} handleSetSection={props.handleSetSection}></ModelResults> : null}
       </Grid>
     </Grid>
-    <Bottombar handleSelection={props.handlesetSection} section={props.section} backgroundTasks={props.backgroundTasks} scenario={scenario} handleRunModel={handleRunModel}></Bottombar>
+    <Bottombar handleSelection={props.handleSetSection} section={props.section} backgroundTasks={props.backgroundTasks} scenario={scenario} handleRunModel={handleRunModel}></Bottombar>
     </>
   );
 

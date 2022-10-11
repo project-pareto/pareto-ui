@@ -51,7 +51,7 @@ function App() {
             let scenario = {...data.data[key]}
             tempScenarios[key] = scenario
             console.log('scenario[',key,'].status: ',scenario.results.status)
-            if (!['complete','none'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
+            if (!['complete','none','failure'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
               scenario.results.status = 'none'
               updateScenario({'updatedScenario': {...scenario}})
               .then(response => response.json())
@@ -123,7 +123,7 @@ function App() {
     })
   }
 
-  const handlesetSection = (section) => {
+  const handleSetSection = (section) => {
     if(section === 2) {
       setCategory("v_F_Overview_dict")
       fetchScenarios()
@@ -202,7 +202,7 @@ function App() {
             section={section} 
             scenarios={scenarios} 
             deleteScenario={handleDeleteScenario}
-            handlesetSection={handlesetSection} 
+            handleSetSection={handleSetSection} 
             />} 
         />
         <Route 
@@ -215,7 +215,7 @@ function App() {
             section={section} 
             category={category} 
             handleSetCategory={handleSetCategory} 
-            handlesetSection={handlesetSection} 
+            handleSetSection={handleSetSection} 
             backgroundTasks={backgroundTasks}
             />} 
         />

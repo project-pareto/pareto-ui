@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';   
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -52,15 +53,24 @@ export default function ModelResults(props) {
 
       </Grid>
       <Grid item xs={6} style={{alignContent:"center", alignItems:"center", justifyContent:"center"}}>
-      <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
-        <h2>Running Optimization</h2>
-        <p>This process could take several minutes</p>
-        <Box sx={{display: 'flex', justifyContent: 'center'}}>
-        <LinearProgress style={{width:"50%"}}/>
-        </Box>
+        {props.scenario.results.status === "failure" ? 
+        <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+          <h2>Optimization Failed</h2>
+          <p>Error: <b>{props.scenario.results.error}</b></p>
+        </Box> 
+        : 
         
-        <p>Status: <b>{props.scenario.results.status}</b></p>
-      </Box>
+        <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+          <h2>Running Optimization</h2>
+          <p>This process could take several minutes</p>
+          <Box sx={{display: 'flex', justifyContent: 'center'}}>
+          <LinearProgress style={{width:"50%"}}/>
+          </Box>
+          
+          <p>Status: <b>{props.scenario.results.status}</b></p>
+          <Button onClick={() => props.handleSetSection(2)}>Refresh Status</Button>
+        </Box>
+        }
       </Grid>
       <Grid item xs={3}>
 

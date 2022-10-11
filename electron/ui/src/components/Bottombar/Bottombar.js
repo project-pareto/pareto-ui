@@ -18,7 +18,7 @@ export default function Bottombar(props) {
         */
        try{
         let tasks = props.backgroundTasks
-        if ((tasks.length > 1) || (props.scenario.results.status!="none" && props.scenario.results.status!="complete")) {
+        if ((tasks.length > 1) || (!["none", "failure", "complete"].includes(props.scenario.results.status))) {
             console.log('optimized is disabled')
             setDisableOptimize(true)
         } else {

@@ -17,7 +17,7 @@ import Select from '@mui/material/Select';
 
 export default function Optimization(props) {
   const [scenario, setScenario] = useState(props.scenario)
-  const [runtime, setRuntime] = useState(180)
+  const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
   // const [pipelineCostCalculation, setPipelineCostCalculation] = useState("capacity_based")
   // const [waterQuality, setWaterQuality] = useState("discrete")
 

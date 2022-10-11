@@ -39,7 +39,12 @@ if __name__ == '__main__':
         if not check_for_idaes_extensions():
             get_idaes_extensions()
 
+    elif('d' in sys.argv or 'dev' in sys.argv):
+        _log.info(f"starting app")
+        multiprocessing.freeze_support()
+        uvicorn.run("__main__:app", host="127.0.0.1", port=8001, reload=True)
+
     else:
-        _log.info(f"\nstarting app!!")
+        _log.info(f"starting app")
         multiprocessing.freeze_support()
         uvicorn.run(app, host="127.0.0.1", port=8001, reload=False)

@@ -1,6 +1,6 @@
 {
-  "name": "pareto-ui",
-  "version": "0.1.0v1",
+  "name": "pareto-ui-frontend",
+  "version": "0.1.0",
   "author": "Michael Pesce",
   "private": true,
   "main": "public/main.js",
