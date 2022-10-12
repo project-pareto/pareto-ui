@@ -174,8 +174,18 @@ export default function KPIDashboard(props) {
                     data={[
                     {
                         type: "pie",
-                        values: [200, 300, 400, 400, 10, 20],
-                        labels: ["Wages", "Operating expenses", "Cost of sales", "Insurance", "extra1", "extra2"],
+                        values: [
+                            kpiData.v_C_TotalSourced.value, 
+                            kpiData.v_C_TotalTreatment.value, 
+                            kpiData.v_C_TotalDisposal.value, 
+                            kpiData.v_C_TotalPiping.value,
+                            kpiData.v_C_TotalTrucking.value >= 0 ? kpiData.v_C_TotalTrucking.value : 0],
+                        labels: [
+                            "Source", 
+                            "Treatment", 
+                            "Disposal", 
+                            "Piping",
+                            "Trucking"],
                         textinfo: "label+percent",
                         insidetextorientation: "radial"
                         }
@@ -196,11 +206,6 @@ export default function KPIDashboard(props) {
         <Grid item xs={12}>
         <Box style={{backgroundColor:'white'}} sx={styles.box}>
             <Grid container>
-            {/* <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.chartTitle}>Water Deliveries By Destination</p>
-                </Box>
-            </Grid> */}
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
