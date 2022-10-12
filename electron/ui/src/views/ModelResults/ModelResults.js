@@ -9,6 +9,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import LinearProgress from '@mui/material/LinearProgress';
 import SankeyPlot from './SankeyPlot';
+import KPIDashboard from './KPIDashboard';
 
 
 export default function ModelResults(props) {
@@ -24,19 +25,24 @@ export default function ModelResults(props) {
       */
       if (props.category === "Sankey") {
         let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"], "v_F_Sourced": props.scenario.results.data["v_F_Sourced_dict"]}
-        return <SankeyPlot data={sankeyData} />
+        return (
+            <SankeyPlot data={sankeyData} />
+        )
       }
       /*
         if category is dashboard, return KPI dashboard
       */
       else if(props.category === "Dashboard"){
-        return null
+        return <KPIDashboard data={props.scenario.results.data['v_F_Overview_dict']}/>
       }
       /*
         otherwise, return table for given category
       */
       else {
         return (
+          <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+            <h3>{props.category}</h3>
+    
           <Table style={{border:"1px solid #ddd"}} size='small'>
             <TableHead>
             <TableRow>
@@ -55,6 +61,7 @@ export default function ModelResults(props) {
             })}
             </TableBody>
           </Table>
+          </Box>
         )
       }
     } catch (e) {
@@ -66,14 +73,12 @@ export default function ModelResults(props) {
 
   return ( 
     <>
+    {/*
+      if a scenario has been optimized, show outputs
+      otherwise, display the status of the optimization
+    */}
     {props.scenario.results.status === "complete" ? 
-
-    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
-      <h3>{props.category}</h3>
-    
-      {renderOutputCategory()}  
-      
-    </Box>
+      renderOutputCategory()
     : 
     <Grid container alignItems="center" justifyContent="center">
       <Grid item xs={3}>

@@ -94,7 +94,7 @@ function App() {
       if scenario is curretly running, send user to model results tab
     */
     if(["Initializing", "Solving model", "Generating output", "complete"].includes(scenarios[scenario].results.status)) {
-      setCategory("v_F_Overview_dict")
+      setCategory("Dashboard")
       setSection(2)
     } else {
       setSection(0);
@@ -134,7 +134,7 @@ function App() {
 
   const handleSetSection = (section) => {
     if(section === 2) {
-      setCategory("v_F_Overview_dict")
+      setCategory("Dashboard")
       fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
