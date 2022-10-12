@@ -128,7 +128,7 @@ export default function KPIDashboard(props) {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "hidden"}}>
+                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
                     data={[
                     {
@@ -169,7 +169,7 @@ export default function KPIDashboard(props) {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "hidden"}}>
+                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
                     data={[
                     {
@@ -202,7 +202,7 @@ export default function KPIDashboard(props) {
                 </Box>
             </Grid> */}
             <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "hidden"}}>
+                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
                     data={[
                         {x: [1,2,3], y: [2,1,4], stackgroup: 'one'},

@@ -60,7 +60,7 @@ export default function SankeyPlot(props) {
     }
 
   return ( 
-    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: 'scroll'}}>
     <Grid container direction="row">
         <Grid item sm={1} direction="row">
         </Grid>
