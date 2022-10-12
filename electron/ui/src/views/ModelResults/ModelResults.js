@@ -7,6 +7,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableContainer from '@mui/material/TableContainer';
 import LinearProgress from '@mui/material/LinearProgress';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
@@ -17,6 +18,18 @@ export default function ModelResults(props) {
    useEffect(()=>{
        console.log('curr scenario',scenario)
    }, [scenario]);
+
+   const styles ={
+    firstCol: {
+      backgroundColor: "#f4f4f4", 
+      border:"1px solid #ddd",
+      position: 'sticky',
+      left: 0,
+    },
+    other: {
+      border:"1px solid #ddd"
+    }
+  }
   
   const renderOutputCategory = () => {
     try {
@@ -42,32 +55,32 @@ export default function ModelResults(props) {
         return (
           <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
             <h3>{props.category}</h3>
-    
-          <Table style={{border:"1px solid #ddd"}} size='small'>
-            <TableHead>
-            <TableRow>
-            {props.scenario.results.data[props.category][0].map((value, index) => {
-              return <TableCell>{value}</TableCell>
-            })}
-            </TableRow>
-            </TableHead>
-           <TableBody>
-            {props.scenario.results.data[props.category].slice(1).map((value, index) => {
-              return (<TableRow>
-              {value.map((cellValue, i)=> {
-                return <TableCell>{cellValue}</TableCell>
+            <TableContainer sx={{overflowX:'auto'}}>
+            <Table style={{border:"1px solid #ddd"}} size='small'>
+              <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
+              <TableRow>
+              {props.scenario.results.data[props.category][0].map((value, index) => {
+                return <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>{value}</TableCell>
               })}
-              </TableRow>)
-            })}
-            </TableBody>
-          </Table>
+              </TableRow>
+              </TableHead>
+            <TableBody>
+              {props.scenario.results.data[props.category].slice(1).map((value, index) => {
+                return (<TableRow>
+                {value.map((cellValue, i)=> {
+                  return <TableCell key={index} style={i === 0 ? styles.firstCol : styles.other}>{cellValue}</TableCell>
+                })}
+                </TableRow>)
+              })}
+              </TableBody>
+            </Table>
+            </TableContainer>
           </Box>
         )
       }
     } catch (e) {
       console.log('unable to render table for this category: ',props.category)
     }
-    
   }
 
 
