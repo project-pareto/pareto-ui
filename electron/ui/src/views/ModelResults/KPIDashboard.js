@@ -70,7 +70,7 @@ export default function KPIDashboard(props) {
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <IconButton disabled><ChangeCircleIcon /></IconButton>
+                <IconButton disabled><ChangeCircleIcon sx={{ color: "#947eaa" }}/></IconButton>
                 <p style={styles.kpiTitle}>Recycling Rate</p>
                 </Box>
             </Grid>
@@ -88,13 +88,13 @@ export default function KPIDashboard(props) {
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <IconButton disabled><RemoveCircleOutlineIcon /></IconButton>
+                <IconButton disabled><RemoveCircleOutlineIcon sx={{ color: "#fc2414" }}/></IconButton>
                 <p style={styles.kpiTitle}>Disposal</p>
                 </Box>
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed.value.toLocaleString()} bbls</p>
+                <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed.value.toLocaleString()+" "+kpiData.v_F_TotalDisposed.unit}</p>
                 </Box>
             </Grid>
             </Grid>
@@ -106,13 +106,13 @@ export default function KPIDashboard(props) {
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <IconButton disabled><WaterIcon /></IconButton>
+                <IconButton disabled><WaterIcon sx={{ color:"#59b8d6" }}/></IconButton>
                 <p style={styles.kpiTitle}>Sourced</p>
                 </Box>
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced.value.toLocaleString()} bbls</p>
+                <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced.value.toLocaleString()+" "+kpiData.v_F_TotalSourced.unit}</p>
                 </Box>
             </Grid>
             </Grid>
