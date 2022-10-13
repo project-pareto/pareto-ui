@@ -27,10 +27,13 @@ export default function Dashboard(props) {
 
   useEffect(()=>{
     try {
+      if(!scenario) {
+        props.navigateHome()
+      }
       setName(scenario.name)
     }
-    catch {
-      
+    catch (e){
+      console.error('unable to set scenario name: ',e)
     }
   }, [scenario]);
 

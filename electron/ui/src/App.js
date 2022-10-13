@@ -226,6 +226,7 @@ function App() {
             handleSetCategory={handleSetCategory} 
             handleSetSection={handleSetSection} 
             backgroundTasks={backgroundTasks}
+            navigateHome={navigateHome}
             />} 
         />
         <Route

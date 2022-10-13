@@ -65,7 +65,7 @@ export default function SankeyPlot(props) {
         <Grid item sm={1} direction="row">
         </Grid>
         <Grid item sm={2} direction="row">
-        <Box display="flex" justifyContent="flex-start">
+        {/* <Box display="flex" justifyContent="flex-start">
             <Button variant="outlined" 
                 sx={{
                     backgroundColor: 'white', 
@@ -75,7 +75,7 @@ export default function SankeyPlot(props) {
             >
                 Save Sankey
             </Button>
-        </Box>
+        </Box> */}
         </Grid>
         <Grid item sm={8} direction="row">
         <Box display="flex" justifyContent="flex-end">
