@@ -46,7 +46,10 @@ export default function ModelResults(props) {
         if category is dashboard, return KPI dashboard
       */
       else if(props.category === "Dashboard"){
-        return <KPIDashboard data={props.scenario.results.data['v_F_Overview_dict']}/>
+        return <KPIDashboard 
+                  overviewData={props.scenario.results.data['v_F_Overview_dict']}
+                  truckedData={props.scenario.results.data['v_F_Trucked_dict']}
+                />
       }
       /*
         otherwise, return table for given category

@@ -11,20 +11,39 @@ import Plot from 'react-plotly.js';
 
 export default function KPIDashboard(props) {
     const [ kpiData, setKpiData ] = useState(null)
+    const [ areaChartData, setAreaChartData ] = useState(null)
 
     useEffect(()=>{
         let tempData = {}
-        for (var index in props.data) {
-            let item = props.data[index]
+        // organize results dict data
+        for (var index in props.overviewData) {
+            let item = props.overviewData[index]
             let key = item[0]
             let description = item[1]
             let unit = item[2]
             let value = item[3]
             tempData[key] = {"description": description, "unit": unit, "value": value}
         }
-        console.log("setting kpi data: ")
-        console.log(tempData)
+        // organize area chart data
+        let tempTruckedData = {}
+        for (var index = 1; index < props.truckedData.length; index++) {
+            let item = props.truckedData[index]
+            let key = item[1]
+            let x = item[2]
+            let y = item[3]
+            if (key in tempTruckedData){
+                tempTruckedData[key].x.push(x)
+                tempTruckedData[key].y.push(y)
+            }else {
+                tempTruckedData[key] = {x: [x], y: [y]}
+            }
+        }
+        let tempAreaChartData = []
+        Object.entries(tempTruckedData).map(([key, value] ) => {
+            tempAreaChartData.push({x: parseInt(value.x), y: value.y, stackgroup: 'one', name: key})
+        })
         setKpiData(tempData)
+        setAreaChartData(tempAreaChartData)
     }, [props]);
 
     const styles = {
@@ -76,7 +95,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{Math.round(kpiData.reuse_WaterKPI.value)}%</p>
+                <p style={styles.kpiValue}>{Math.round(kpiData.reuse_CompletionsDemandKPI.value)}%</p>
                 </Box>
             </Grid>
             </Grid>
@@ -209,23 +228,30 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
-                    data={[
-                        {x: [1,2,3], y: [2,1,4], stackgroup: 'one'},
-                        {x: [1,2,3], y: [1,1,2], stackgroup: 'one'},
-                        {x: [1,2,3], y: [3,0,2], stackgroup: 'one'}
-                    ]}
+                    /* 
+                        x values are T values
+                        y values are bbl/week
+                        where does K value go? needs to be a label of some sort
+                    */
+                    // data={[
+                    //     {x: [1,2,3], y: [2,1,4], stackgroup: 'one', name: 'name of trace 1'},
+                    //     {x: [1,2,3], y: [1,1,2], stackgroup: 'one', name: 'name of trace 2'},
+                    //     {x: [1,2,3], y: [3,0,2], stackgroup: 'one', name: 'name of trace 3'}
+                    // ]}
+
+                    data={areaChartData}
 
                     layout={{
                         width: 750,
                         height: 500, 
-                        showlegend: false, 
+                        showlegend: true, 
                         title: 'Water Deliveries By Destination',
-                        xaxis: {
-                        range: [1,3]
-                        },
-                        yaxis: {
-                        range: [0,8]
-                        }
+                        // xaxis: {
+                        // range: [1,3]
+                        // },
+                        // yaxis: {
+                        // range: [0,8]
+                        // }
                    }}
                 />
                 </Box>
