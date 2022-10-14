@@ -7,7 +7,6 @@ from fastapi.responses import StreamingResponse, FileResponse
 import logging
 import idaes.logger as idaeslog
 
-# import app.internal.aiofiles as aiofiles
 from app.internal.pareto_stategic_model import run_strategic_model, handle_run_strategic_model
 from app.internal.scenario_handler import (
     scenario_handler,

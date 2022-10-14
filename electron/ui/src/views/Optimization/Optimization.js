@@ -102,8 +102,8 @@ export default function Optimization(props) {
               onChange={handleObjectiveChange}
               // row
             >
-              <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
               <FormControlLabel value="cost" control={<Radio />} label="Minimize Cost" />
+              <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
             </RadioGroup>
           </FormControl>
           </Grid>
