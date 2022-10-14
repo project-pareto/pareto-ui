@@ -59,15 +59,16 @@ async def upload(file: UploadFile = File(...)):
     new_id = scenario_handler.get_next_id()
     output_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
 
-    # get file contents
-    async with aiofiles.open(output_path, 'wb') as out_file:
-        content = await file.read()  # async read
-        await out_file.write(content) 
     try:
+    # get file contents
+        async with aiofiles.open(output_path, 'wb') as out_file:
+            content = await file.read()  # async read
+            await out_file.write(content) 
         return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
 
     except Exception as e:
-        return {"error" : str(e)}
+        _log.error(f"error on file upload: {str(e)}")
+        raise HTTPException(400, detail=f"Build failed: {e}")
 
 @router.post("/delete_scenario")
 async def delete_scenario(request: Request):
@@ -102,7 +103,18 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
     try:
         excel_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,data['scenario']['id'])
         output_path = "{}/{}.xlsx".format(scenario_handler.outputs_path,data['scenario']['id'])
-        background_tasks.add_task(handle_run_strategic_model, input_file=excel_path, objective=data['objective'], id=data['scenario']['id'], output_file=output_path)
+        background_tasks.add_task(
+            handle_run_strategic_model, 
+            input_file=excel_path,
+            output_file=output_path,
+            id=data['scenario']['id'],
+            objective=data['scenario']['optimization']['objective'],
+            runtime=data['scenario']['optimization']['runtime'],
+            pipelineCost=data['scenario']['optimization']['pipelineCostCalculation'],
+            waterQuality=data['scenario']['optimization']['waterQuality']
+        )
+        
+        # add id to scenario handler task list to keep track of running tasks
         scenario_handler.add_background_task(data['scenario']['id'])
         scenario = data['scenario']
         results = {"data": {}, "status": "Initializing"}

@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import datetime
 import logging
 from pareto.strategic_water_management.strategic_produced_water_optimization import (
@@ -25,7 +26,7 @@ from app.internal.scenario_handler import (
 _log = logging.getLogger(__name__)
 
 
-def run_strategic_model(input_file, output_file, id,  objective, water_quality = WaterQuality.false):
+def run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -39,10 +40,10 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
         df_parameters,
         default={
             "objective": Objectives[objective],
-            "pipeline_cost": PipelineCost.distance_based,
+            "pipeline_cost": PipelineCost[pipelineCost],
             "pipeline_capacity": PipelineCapacity.input,
             "node_capacity": True,
-            "water_quality": water_quality,
+            "water_quality": WaterQuality[waterQuality],
         },
     )
     
@@ -55,7 +56,7 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
         "deactivate_slacks": True,
         "scale_model": True,
         "scaling_factor": 1000,
-        "running_time": 60,
+        "running_time": runtime,
         "gap": 0,
         # "water_quality": True,
     }
@@ -85,9 +86,9 @@ def run_strategic_model(input_file, output_file, id,  objective, water_quality =
 
     return results_dict
 
-def handle_run_strategic_model(input_file, output_file, id, objective = 'reuse'):
+def handle_run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality):
     try:
-        results_dict = run_strategic_model(input_file, output_file, id, objective)
+        results_dict = run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
         results = {"data": results_dict, "status": "complete"}
@@ -95,6 +96,11 @@ def handle_run_strategic_model(input_file, output_file, id, objective = 'reuse')
         scenario_handler.update_scenario(scenario)
     except Exception as e:
         _log.error(f"unable to run strategic model: {e}")
+        time.sleep(2)
+        scenario = scenario_handler.get_scenario(int(id))
+        results = {"data": {}, "status": "failure", "error": str(e)}
+        scenario["results"] = results
+        scenario_handler.update_scenario(scenario)
     try:
         _log.info(f'removing id {id} from background tasks')
         scenario_handler.remove_background_task(id)

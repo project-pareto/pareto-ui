@@ -13,23 +13,39 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {  uploadExcelSheet } from '../../services/sidebar.service'
+import ErrorBar from '../../components/ErrorBar/ErrorBar'
 
 export default function ScenarioList(props) {
+    const [ showError, setShowError ] = React.useState(false)
+    const [ errorMessage, setErrorMessage ] = React.useState("")
 
 const handleFileUpload = (e) => {
     console.log('handle file upload')
     const formData = new FormData();
     formData.append('file', e.target.files[0], e.target.files[0].name);
+
     uploadExcelSheet(formData)
-    .then(response => response.json())
-    .then((data)=> {
-      console.log('fileupload successful: ',data)
-      props.handleNewScenario(data)
-    })
-    .catch(e => {
-      console.log('error on file upload')
-      console.log(e)
-    })
+      .then(response => {
+      if (response.status === 200) {
+          response.json()
+          .then((data)=>{
+            console.log('fileupload successful: ',data)
+            props.handleNewScenario(data)
+          }).catch((err)=>{
+              console.error("error on file upload: ",err)
+              setErrorMessage(String(err))
+              setShowError(true)
+          })
+      }
+      /*
+        in the case of bad file type
+      */
+      else if (response.status === 400) {
+        console.error("error on file upload: ",response.statusText)
+        setErrorMessage(response.statusText)
+        setShowError(true)
+      }
+      })
   }
 
   const styles={
@@ -99,7 +115,10 @@ const handleFileUpload = (e) => {
                 </TableCell>
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.date}</TableCell>
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
-                <TableCell sx={styles.bodyCell}><IconButton onClick={() => props.deleteScenario(key)}><DeleteIcon fontSize="small"/></IconButton><IconButton><ContentCopyIcon fontSize="small"/></IconButton></TableCell>
+                <TableCell sx={styles.bodyCell}>
+                    <IconButton onClick={() => props.deleteScenario(key)}><DeleteIcon fontSize="small"/></IconButton>
+                    {/* <IconButton><ContentCopyIcon fontSize="small"/></IconButton> */}
+                </TableCell>
                 </TableRow>
                 )
                 
@@ -107,6 +126,9 @@ const handleFileUpload = (e) => {
             </TableBody>
         </Table>
         </TableContainer>
+        {
+            showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
+        }
     </Grid>
     </Box>
   );

@@ -30,41 +30,34 @@ export default function DataInput(props) {
       //  console.log('curr scenario',scenario)
    }, [scenario]);
   
-   const renderRow = (ind) => {
-    var cells = []
+  const renderRow = (ind) => {
+      var cells = []
 
-    Object.entries(props.scenario.data_input.df_parameters[props.category]).forEach(function([key, value]) {
-      cells.push(value[ind])
-    });
+      Object.entries(props.scenario.data_input.df_parameters[props.category]).forEach(function([key, value]) {
+        cells.push(value[ind])
+      });
 
-    return (cells.map( (value, index) => {
-      return <TableCell key={index} style={index === 0 ? styles.firstCol : styles.other}>{value}</TableCell>
-    }))
+      return (cells.map( (value, index) => {
+        return <TableCell key={index} style={index === 0 ? styles.firstCol : styles.other}>{value}</TableCell>
+      }))
   }
 
-   const renderRows = () => {
-    const rows = []
-    let len = props.scenario.data_input.df_parameters[props.category][Object.keys(props.scenario.data_input.df_parameters[props.category])[0]].length
-    for (let i = 0; i < len; i++) {
-      rows.push(renderRow(i))
-    }
+  const renderRows = () => {
+      const rows = []
+      let len = props.scenario.data_input.df_parameters[props.category][Object.keys(props.scenario.data_input.df_parameters[props.category])[0]].length
+      for (let i = 0; i < len; i++) {
+        rows.push(renderRow(i))
+      }
 
-    return (rows.map( (value, index) => {
-      return <TableRow>{value}</TableRow>
-    }))
+      return (rows.map( (value, index) => {
+        return <TableRow>{value}</TableRow>
+      }))
   }
 
-  return ( 
-    /* 
-      this works for sets - which are all lists 
-    */
-    // <Box style={{backgroundColor:'white'}} sx={{overflow: "hidden",textOverflow: "ellipsis", m:3, padding:2, boxShadow:3}}>
-    //   <h3>{props.category}</h3>
-    //   {JSON.stringify(scenario.data_input.df_sets[props.category])}
-    // </Box>
-
-    // this works for parameters - which are tables
-    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+  const renderInputCategory = () => {
+    try {
+      return (
+        <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
       <Grid container>
         <Grid item xs={6}>
           <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'10px'}}>
@@ -72,13 +65,7 @@ export default function DataInput(props) {
           </Box>
         </Grid>
         <Grid item xs={6}>
-          {/* <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
-            <IconButton aria-label="filter">
-              <FilterListIcon fontSize="small"></FilterListIcon>
-              Filter
-            </IconButton>
-            
-          </Box> */}
+
         </Grid>
       </Grid>
       <TableContainer sx={{overflowX:'auto'}}>
@@ -100,7 +87,16 @@ export default function DataInput(props) {
         </TableBody>
       </Table>
       </TableContainer>
-    </Box>
+      </Box>
+      )
+    } catch (e) {
+      console.error("unable to render input category: ",e)
+    }
+    
+}
+
+  return ( 
+      renderInputCategory()
   );
 
 }

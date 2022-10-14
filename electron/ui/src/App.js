@@ -51,7 +51,7 @@ function App() {
             let scenario = {...data.data[key]}
             tempScenarios[key] = scenario
             console.log('scenario[',key,'].status: ',scenario.results.status)
-            if (!['complete','none'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
+            if (!['complete','none','failure'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
               scenario.results.status = 'none'
               updateScenario({'updatedScenario': {...scenario}})
               .then(response => response.json())
@@ -90,8 +90,17 @@ function App() {
     navigate('/scenario', {replace: true})
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
-    setSection(0);
-    setCategory("PNA")
+    /*
+      if scenario is curretly running, send user to model results tab
+    */
+    if(["Initializing", "Solving model", "Generating output", "complete"].includes(scenarios[scenario].results.status)) {
+      setCategory("Dashboard")
+      setSection(2)
+    } else {
+      setSection(0);
+      setCategory("PNA")
+    }
+
   };
 
   const handleNewScenario = (data) => {
@@ -123,9 +132,9 @@ function App() {
     })
   }
 
-  const handlesetSection = (section) => {
+  const handleSetSection = (section) => {
     if(section === 2) {
-      setCategory("v_F_Overview_dict")
+      setCategory("Dashboard")
       fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
@@ -202,7 +211,7 @@ function App() {
             section={section} 
             scenarios={scenarios} 
             deleteScenario={handleDeleteScenario}
-            handlesetSection={handlesetSection} 
+            handleSetSection={handleSetSection} 
             />} 
         />
         <Route 
@@ -215,8 +224,9 @@ function App() {
             section={section} 
             category={category} 
             handleSetCategory={handleSetCategory} 
-            handlesetSection={handlesetSection} 
+            handleSetSection={handleSetSection} 
             backgroundTasks={backgroundTasks}
+            navigateHome={navigateHome}
             />} 
         />
         <Route
