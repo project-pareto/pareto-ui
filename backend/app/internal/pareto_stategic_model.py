@@ -58,7 +58,6 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
         "scaling_factor": 1000,
         "running_time": runtime,
         "gap": 0,
-        # "water_quality": True,
     }
 
     _log.info(f"solving model")
