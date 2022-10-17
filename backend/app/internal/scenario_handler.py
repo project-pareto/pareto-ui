@@ -8,8 +8,11 @@ from pathlib import Path
 from xml.etree.ElementTree import VERSION
 import tinydb
 from tinydb import where
+from fastapi import HTTPException
 
 import idaes.logger as idaeslog
+
+from pareto.utilities.results import plot_bars
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
@@ -114,7 +117,7 @@ class ScenarioHandler:
 
         self.retrieve_scenarios()
     
-    def upload_excelsheet(self, output_path, filename):
+    def upload_excelsheet(self, output_path, filename, id):
         _log.info(f"Uploading excel sheet: {filename}")
 
         [set_list, parameter_list] = get_input_lists()
@@ -122,6 +125,20 @@ class ScenarioHandler:
         # read in data from uploaded excel sheet
         [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
         del frontend_parameters['Units']
+
+        # create completions demand plot
+        try:
+            
+            args = {"plot_title": "Completion Pad Demand",
+            "output_file": f"{self.outputs_path}/{id}_plot.html",
+            "print_data": False}
+            input_data = {"pareto_var": df_parameters["CompletionsDemand"],
+                        "labels": [("Completion Pad", "Time", "Demand Water (bbl/Day)")]
+                        }
+            _log.info(f'plotting bars to {self.outputs_path}/bar_plot.html')
+            plot_bars(input_data, args)
+        except Exception as e:
+            _log.error(f'unable to create completions demand plot: {e}')
 
         # convert tuple keys into dictionary values - necessary for javascript interpretation
         for key in df_parameters:
@@ -182,11 +199,25 @@ class ScenarioHandler:
             self._db.remove((query.id_ == index) & (query.version == self.VERSION))
             self.LOCKED = False
 
-            # remove excel sheet
+            # remove input excel sheet
             excel_sheet = "{}/{}.xlsx".format(self.excelsheets_path,index)
             os.remove(excel_sheet)
         except Exception as e:
-            _log.error(f"unable to delete scenarion #{index}: {e}")
+            _log.error(f"unable to delete scenario #{index}: {e}")
+
+        # remove output excel sheet
+        try:
+            excel_sheet = "{}/{}.xlsx".format(self.outputs_path,index)
+            os.remove(excel_sheet)
+        except Exception as e:
+            _log.error(f"unable to remove output for #{index}: {e}")
+
+        # remove completions demand plot
+        try:
+            plot_file = "{}/{}_plot.html".format(self.outputs_path,index)
+            os.remove(plot_file)
+        except Exception as e:
+            _log.error(f"unable to delete completions demand plot for #{index}: {e}")
 
         # update scenario list
         self.retrieve_scenarios()
@@ -205,6 +236,18 @@ class ScenarioHandler:
         except Exception as e:
             _log.error(f'unable to get scenario with id {id}: {e}')
             return {'error': f'unable to get scenario with id {id}: {e}'}
+
+    def get_completions_demand_plot(self, id):
+        try:
+            plot_file = "{}/{}_plot.html".format(self.outputs_path,id)
+            with open(plot_file, 'r') as f:
+                plot_html = f.read()
+                return plot_html
+        except Exception as e:
+            _log.error(f"unable to get plot for id{id}: {e}")
+            raise HTTPException(
+                500, f"unable to find plot: {e}"
+            )
 
     def add_background_task(self, id):
         self.background_tasks.append(id)

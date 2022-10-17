@@ -13,3 +13,10 @@ export const checkTasks = () => {
         mode: 'cors'
     });
 }; 
+
+export const getCompletionsDemandPlot = (id) => {
+    return fetch('http://localhost:8001/get_plot/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}; 
