@@ -30,6 +30,28 @@ export default function ModelResults(props) {
       border:"1px solid #ddd"
     }
   }
+
+  function toFixed(value, precision) {
+    if(typeof(value) === "string") {
+      try {
+        value = parseInt(value)
+      }catch (e) {
+        console.log('unable to fix decimals for value: ',value)
+        return value
+      }
+    }
+    var precision = precision || 0,
+        power = Math.pow(10, precision),
+        absValue = Math.abs(Math.round(value * power)),
+        result = (value < 0 ? '-' : '') + String(Math.floor(absValue / power));
+
+    if (precision > 0) {
+        var fraction = String(absValue % power),
+            padding = new Array(Math.max(precision - fraction.length, 0) + 1).join('0');
+        result += '.' + padding + fraction;
+    }
+    return result;
+}
   
   const renderOutputCategory = () => {
     try {
@@ -67,22 +89,35 @@ export default function ModelResults(props) {
               })}
               </TableRow>
               </TableHead>
-            <TableBody>
+              {props.category === "v_F_Overview_dict" ? 
+              <TableBody>
               {props.scenario.results.data[props.category].slice(1).map((value, index) => {
                 return (<TableRow>
                 {value.map((cellValue, i)=> {
-                  return <TableCell key={index} style={i === 0 ? styles.firstCol : styles.other}>{cellValue}</TableCell>
+                  return <TableCell align={(i === (value.length - 1)) ? "right" : "left"} key={"" + index + i} style={i === 0 ? styles.firstCol : styles.other}>{(i === (value.length - 1)) ? toFixed(cellValue, 2) : cellValue}</TableCell>
+                })}
+                </TableRow>)
+              })}
+              </TableBody> 
+              : 
+              <TableBody>
+              {props.scenario.results.data[props.category].slice(1).map((value, index) => {
+                return (<TableRow>
+                {value.map((cellValue, i)=> {
+                  return <TableCell key={"" + index + i} style={i === 0 ? styles.firstCol : styles.other}>{cellValue}</TableCell>
                 })}
                 </TableRow>)
               })}
               </TableBody>
+              }
+            
             </Table>
             </TableContainer>
           </Box>
         )
       }
     } catch (e) {
-      console.log('unable to render table for this category: ',props.category)
+      console.log('unable to render table for this category: ',e)
     }
   }
 

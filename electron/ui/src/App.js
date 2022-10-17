@@ -50,7 +50,6 @@ function App() {
           for (var key in data.data){
             let scenario = {...data.data[key]}
             tempScenarios[key] = scenario
-            console.log('scenario[',key,'].status: ',scenario.results.status)
             if (!['complete','none','failure'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
               scenario.results.status = 'none'
               updateScenario({'updatedScenario': {...scenario}})
