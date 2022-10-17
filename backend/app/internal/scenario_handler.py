@@ -126,19 +126,36 @@ class ScenarioHandler:
         [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
         del frontend_parameters['Units']
 
-        # create completions demand plot
-        try:
-            
-            args = {"plot_title": "Completion Pad Demand",
-            "output_file": f"{self.outputs_path}/{id}_plot.html",
-            "print_data": False}
-            input_data = {"pareto_var": df_parameters["CompletionsDemand"],
-                        "labels": [("Completion Pad", "Time", "Demand Water (bbl/Day)")]
-                        }
-            _log.info(f'plotting bars to {self.outputs_path}/bar_plot.html')
-            plot_bars(input_data, args)
-        except Exception as e:
-            _log.error(f'unable to create completions demand plot: {e}')
+        # create plots
+        plots = [
+            {   'title': 'Completion Pad Demand', 
+                'paramaterName': 'CompletionsDemand', 
+                'labels': [("Completion Pad", "Time", "Demand Water (bbl/Day)")]
+            },
+            {   'title': 'Production Forecast', 
+                'paramaterName': 'PadRates', 
+                'labels': [("PW Production Forecast", "Time", "Demand Water (bbl/Day)")]
+            },
+            {   'title': 'Flowback Forecast', 
+                'paramaterName': 'FlowbackRates', 
+                'labels': [("PW Flowback Forecast", "Time", "Demand Water (bbl/Day)")]
+            },
+            ]
+        for plot in plots:
+            output_file = f"{self.outputs_path}/{id}_{plot['paramaterName']}_plot.html"
+            _log.info(f'output file for plot is: {output_file}')
+            try:
+                parameterName = plot['paramaterName']
+                args = {"plot_title": plot['title'],
+                "output_file": output_file,
+                "print_data": False}
+                input_data = {"pareto_var": df_parameters[parameterName],
+                            "labels": plot["labels"]
+                            }
+                _log.info(f'plotting bars to {output_file}')
+                plot_bars(input_data, args)
+            except Exception as e:
+                _log.error(f'unable to create completions demand plot: {e}')
 
         # convert tuple keys into dictionary values - necessary for javascript interpretation
         for key in df_parameters:
@@ -237,17 +254,26 @@ class ScenarioHandler:
             _log.error(f'unable to get scenario with id {id}: {e}')
             return {'error': f'unable to get scenario with id {id}: {e}'}
 
-    def get_completions_demand_plot(self, id):
-        try:
-            plot_file = "{}/{}_plot.html".format(self.outputs_path,id)
-            with open(plot_file, 'r') as f:
-                plot_html = f.read()
-                return plot_html
-        except Exception as e:
-            _log.error(f"unable to get plot for id{id}: {e}")
-            raise HTTPException(
-                500, f"unable to find plot: {e}"
-            )
+    def get_plots(self, id):
+        return_object = {}
+        plot_files = {
+            'CompletionsDemand': 'Completion Pad Demand', 
+            "PadRates": "Production Forecast", 
+            "FlowbackRates": "Flowback Forecast"
+        }
+        for each in plot_files:
+            try:
+                key = plot_files[each]
+                plot_file = f"{self.outputs_path}/{id}_{each}_plot.html"
+                with open(plot_file, 'r') as f:
+                    plot_html = f.read()
+                    return_object[key] = plot_html
+            except Exception as e:
+                _log.error(f"unable to get plot for id{id}: {e}")
+                raise HTTPException(
+                    500, f"unable to find plot: {e}"
+                )
+        return return_object
 
     def add_background_task(self, id):
         self.background_tasks.append(id)

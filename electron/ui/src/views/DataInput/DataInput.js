@@ -10,11 +10,16 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableContainer from '@mui/material/TableContainer';
-import { getCompletionsDemandPlot } from '../../services/homepage.service'
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import { getPlots } from '../../services/homepage.service'
 
 
 export default function DataInput(props) {
-  const [ plotHtml, setPlotHtml ] = useState(null)
+  const scenario = props.scenario
+  const [ plotHtml, setPlotHtml ] = useState({})
+  const [ plotCategory, setPlotCategory ] = useState("Completion Pad Demand")
   const styles ={
     firstCol: {
       backgroundColor: "#f4f4f4", 
@@ -26,18 +31,15 @@ export default function DataInput(props) {
       border:"1px solid #ddd"
     }
   }
-
-  const scenario = props.scenario
+  
    useEffect(()=>{
-    getCompletionsDemandPlot(scenario.id)
+    getPlots(scenario.id)
     .then(response => {
     if (response.status === 200) {
         response.json()
         .then((data)=>{
           console.log('got plot: ',data)
-          
-          // setPlotHtml({__html: data.plot})
-          setPlotHtml(data.plot)
+          setPlotHtml(data)
         }).catch((err)=>{
             console.error("error on plot fetch: ",err)
         })
@@ -50,6 +52,10 @@ export default function DataInput(props) {
     }
     })
    }, [scenario]);
+
+   const handlePlotCategoryChange = (event) => {
+    setPlotCategory(event.target.value)
+   }
   
   const renderRow = (ind) => {
       var cells = []
@@ -77,12 +83,24 @@ export default function DataInput(props) {
 
   const renderInputCategory = () => {
     try {
-      if(props.category === "Completion Demand Plot") {
-        if (plotHtml) {
+      if(props.category === "Plots") {
+        if (Object.keys(plotHtml).length) {
           return (
-            <Box style={{backgroundColor:'white', height:"505px"}} sx={{m:3, padding:2, boxShadow:3}}>
-              {/* <span dangerouslySetInnerHTML={plotHtml}></span> */}
-              <iframe style={{width: '100%', height:"100%"}} srcdoc={plotHtml}></iframe>
+            <Box style={{backgroundColor:'white', height:"560px"}} sx={{m:3, padding:2, boxShadow:3}}>
+              <Box display="flex" justifyContent="center" sx={{marginBottom:"20px"}}>
+                <FormControl sx={{ width: "30ch" }} size="small">
+                    <Select
+                    value={plotCategory}
+                    onChange={handlePlotCategoryChange}
+                    sx={{color:'#0b89b9', fontWeight: "bold"}}
+                    >
+                    <MenuItem key={0} value={"Completion Pad Demand"}>Completion Pad Demand</MenuItem>
+                    <MenuItem key={1} value={"Production Forecast"}>Production Forecast</MenuItem>
+                    <MenuItem key={2} value={"Flowback Forecast"}>Flowback Forecast</MenuItem>
+                    </Select>
+                </FormControl>
+            </Box>
+              <iframe style={{width: '100%', height:"90%"}} srcdoc={plotHtml[plotCategory]}></iframe>
             </Box>
             )
         } else {

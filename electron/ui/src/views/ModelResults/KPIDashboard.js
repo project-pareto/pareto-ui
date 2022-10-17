@@ -149,7 +149,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
-                    style={{marginBottom:"-100px"}}
+                    style={{marginBottom:"-50px"}}
                     data={[
                     {
                         type: "pie",
@@ -169,8 +169,8 @@ export default function KPIDashboard(props) {
                     ]}
 
                     layout={{
-                        width: 350,
-                        height: 450,
+                        width: 450,
+                        height: 525,
                         showlegend: false
                     }}
                 />
@@ -191,7 +191,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
-                    style={{marginBottom:"-100px"}}
+                    style={{marginBottom:"-50px"}}
                     data={[
                     {
                         type: "pie",
@@ -213,8 +213,8 @@ export default function KPIDashboard(props) {
                     ]}
 
                     layout={{
-                        width: 350,
-                        height: 450,
+                        width: 450,
+                        height: 525,
                         showlegend: false
                     }}
                 />

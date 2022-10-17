@@ -14,8 +14,8 @@ export const checkTasks = () => {
     });
 }; 
 
-export const getCompletionsDemandPlot = (id) => {
-    return fetch('http://localhost:8001/get_plot/'+id, {
+export const getPlots = (id) => {
+    return fetch('http://localhost:8001/get_plots/'+id, {
         method: 'GET', 
         mode: 'cors'
     });
