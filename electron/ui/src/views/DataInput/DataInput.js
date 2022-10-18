@@ -14,7 +14,7 @@ import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { getPlots } from '../../services/homepage.service'
-
+import demoInputDiagram from "../../assets/demo_figure_input.png";
 
 export default function DataInput(props) {
   const scenario = props.scenario
@@ -83,6 +83,9 @@ export default function DataInput(props) {
 
   const renderInputCategory = () => {
     try {
+      /*
+        if category is plots, return input plots
+      */
       if(props.category === "Plots") {
         if (Object.keys(plotHtml).length) {
           return (
@@ -112,6 +115,19 @@ export default function DataInput(props) {
         }
         
       }
+      /*
+        if category is network diagram, return demo image
+      */
+        else if(props.category === "Network Diagram"){
+          return (
+            <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
+              <img style={{height:"500px"}} src={demoInputDiagram}></img>
+            </Box>
+          )
+        }
+      /*
+        else, return table for input category dictionary
+      */
       else {
         return (
           <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>

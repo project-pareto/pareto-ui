@@ -11,6 +11,7 @@ import TableContainer from '@mui/material/TableContainer';
 import LinearProgress from '@mui/material/LinearProgress';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
+import demoOutputDiagram from "../../assets/demo_figure_output.png";
 
 
 export default function ModelResults(props) {
@@ -73,6 +74,16 @@ export default function ModelResults(props) {
                   truckedData={props.scenario.results.data['v_F_Trucked_dict']}
                 />
       }
+      /*
+        if category is network diagram, return demo image
+      */
+        else if(props.category === "Network Diagram"){
+          return (
+            <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
+              <img style={{height:"400px"}} src={demoOutputDiagram}></img>
+            </Box>
+          )
+        }
       /*
         otherwise, return table for given category
       */
