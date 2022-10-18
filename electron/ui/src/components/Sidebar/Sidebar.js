@@ -14,7 +14,7 @@ const drawerWidth = 240;
 export default function Sidebar(props) {
 
   const renderAdditionalCategories = () => {
-    let additionalCategories = props.section === 0 ? {"Completion Demand Plot": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null}
+    let additionalCategories = props.section === 0 ? {"Plots": null, "Network Diagram": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     console.log('additional categories: ',additionalCategories)
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 

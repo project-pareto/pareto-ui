@@ -149,6 +149,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
+                    style={{marginBottom:"-50px"}}
                     data={[
                     {
                         type: "pie",
@@ -168,8 +169,8 @@ export default function KPIDashboard(props) {
                     ]}
 
                     layout={{
-                        width: 350,
-                        height: 350,
+                        width: 450,
+                        height: 525,
                         showlegend: false
                     }}
                 />
@@ -190,6 +191,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
+                    style={{marginBottom:"-50px"}}
                     data={[
                     {
                         type: "pie",
@@ -211,8 +213,8 @@ export default function KPIDashboard(props) {
                     ]}
 
                     layout={{
-                        width: 350,
-                        height: 350,
+                        width: 450,
+                        height: 525,
                         showlegend: false
                     }}
                 />
@@ -233,11 +235,6 @@ export default function KPIDashboard(props) {
                         y values are bbl/week
                         where does K value go? needs to be a label of some sort
                     */
-                    // data={[
-                    //     {x: [1,2,3], y: [2,1,4], stackgroup: 'one', name: 'name of trace 1'},
-                    //     {x: [1,2,3], y: [1,1,2], stackgroup: 'one', name: 'name of trace 2'},
-                    //     {x: [1,2,3], y: [3,0,2], stackgroup: 'one', name: 'name of trace 3'}
-                    // ]}
 
                     data={areaChartData}
 
@@ -246,12 +243,16 @@ export default function KPIDashboard(props) {
                         height: 500, 
                         showlegend: true, 
                         title: 'Water Deliveries By Destination',
-                        // xaxis: {
-                        // range: [1,3]
-                        // },
-                        // yaxis: {
-                        // range: [0,8]
-                        // }
+                        xaxis: {
+                            title: {
+                                text: "Planning Horizon (weeks)"
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: "Amount of Water (bbl/week)"
+                            }
+                        }
                    }}
                 />
                 </Box>

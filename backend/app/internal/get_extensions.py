@@ -18,14 +18,14 @@ def get_idaes_extensions():
     try:
         if(sys.platform == "darwin"):
             print('mac')
-            idaes_src = Path(os.path.dirname(os.path.realpath(__file__))) / 'extensions' / '.idaes'
+            idaes_src = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent / 'extensions' / '.idaes'
             idaes_dst = Path.home() / ".idaes"
             print(f'moving binaries from {idaes_src} to {idaes_dst}')
             copytree(idaes_src,idaes_dst,dirs_exist_ok=True)
             print(f'get idaes extensions successful, making directory')
         elif(sys.platform == "linux"):
             print('linux')
-            idaes_src = Path(os.path.dirname(os.path.realpath(__file__))) / 'extensions' / '.idaes'
+            idaes_src = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent / 'extensions' / '.idaes'
             idaes_dst = Path.home() / ".idaes"
             print(f'moving binaries from {idaes_src} to {idaes_dst}')
             copytree(idaes_src,idaes_dst,dirs_exist_ok=True)

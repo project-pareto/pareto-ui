@@ -8,8 +8,11 @@ from pathlib import Path
 from xml.etree.ElementTree import VERSION
 import tinydb
 from tinydb import where
+from fastapi import HTTPException
 
 import idaes.logger as idaeslog
+
+from pareto.utilities.results import plot_bars
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
@@ -114,7 +117,7 @@ class ScenarioHandler:
 
         self.retrieve_scenarios()
     
-    def upload_excelsheet(self, output_path, filename):
+    def upload_excelsheet(self, output_path, filename, id):
         _log.info(f"Uploading excel sheet: {filename}")
 
         [set_list, parameter_list] = get_input_lists()
@@ -122,6 +125,37 @@ class ScenarioHandler:
         # read in data from uploaded excel sheet
         [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
         del frontend_parameters['Units']
+
+        # create plots
+        plots = [
+            {   'title': 'Completion Pad Demand', 
+                'paramaterName': 'CompletionsDemand', 
+                'labels': [("Completion Pad", "Time", "Demand Water (bbl/Day)")]
+            },
+            {   'title': 'Production Forecast', 
+                'paramaterName': 'PadRates', 
+                'labels': [("PW Production Forecast", "Time", "Demand Water (bbl/Day)")]
+            },
+            {   'title': 'Flowback Forecast', 
+                'paramaterName': 'FlowbackRates', 
+                'labels': [("PW Flowback Forecast", "Time", "Demand Water (bbl/Day)")]
+            },
+            ]
+        for plot in plots:
+            output_file = f"{self.outputs_path}/{id}_{plot['paramaterName']}_plot.html"
+            _log.info(f'output file for plot is: {output_file}')
+            try:
+                parameterName = plot['paramaterName']
+                args = {"plot_title": plot['title'],
+                "output_file": output_file,
+                "print_data": False}
+                input_data = {"pareto_var": df_parameters[parameterName],
+                            "labels": plot["labels"]
+                            }
+                _log.info(f'plotting bars to {output_file}')
+                plot_bars(input_data, args)
+            except Exception as e:
+                _log.error(f'unable to create completions demand plot: {e}')
 
         # convert tuple keys into dictionary values - necessary for javascript interpretation
         for key in df_parameters:
@@ -182,11 +216,25 @@ class ScenarioHandler:
             self._db.remove((query.id_ == index) & (query.version == self.VERSION))
             self.LOCKED = False
 
-            # remove excel sheet
+            # remove input excel sheet
             excel_sheet = "{}/{}.xlsx".format(self.excelsheets_path,index)
             os.remove(excel_sheet)
         except Exception as e:
-            _log.error(f"unable to delete scenarion #{index}: {e}")
+            _log.error(f"unable to delete scenario #{index}: {e}")
+
+        # remove output excel sheet
+        try:
+            excel_sheet = "{}/{}.xlsx".format(self.outputs_path,index)
+            os.remove(excel_sheet)
+        except Exception as e:
+            _log.error(f"unable to remove output for #{index}: {e}")
+
+        # remove completions demand plot
+        try:
+            plot_file = "{}/{}_plot.html".format(self.outputs_path,index)
+            os.remove(plot_file)
+        except Exception as e:
+            _log.error(f"unable to delete completions demand plot for #{index}: {e}")
 
         # update scenario list
         self.retrieve_scenarios()
@@ -205,6 +253,27 @@ class ScenarioHandler:
         except Exception as e:
             _log.error(f'unable to get scenario with id {id}: {e}')
             return {'error': f'unable to get scenario with id {id}: {e}'}
+
+    def get_plots(self, id):
+        return_object = {}
+        plot_files = {
+            'CompletionsDemand': 'Completion Pad Demand', 
+            "PadRates": "Production Forecast", 
+            "FlowbackRates": "Flowback Forecast"
+        }
+        for each in plot_files:
+            try:
+                key = plot_files[each]
+                plot_file = f"{self.outputs_path}/{id}_{each}_plot.html"
+                with open(plot_file, 'r') as f:
+                    plot_html = f.read()
+                    return_object[key] = plot_html
+            except Exception as e:
+                _log.error(f"unable to get plot for id{id}: {e}")
+                raise HTTPException(
+                    500, f"unable to find plot: {e}"
+                )
+        return return_object
 
     def add_background_task(self, id):
         self.background_tasks.append(id)
