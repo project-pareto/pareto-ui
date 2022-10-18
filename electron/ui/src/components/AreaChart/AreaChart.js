@@ -6,27 +6,55 @@ export default function KPIDashboard(props) {
     const [ areaChartData, setAreaChartData ] = useState(null)
 
     useEffect(()=>{
-        let tempData = {}
-        console.log('area chart data is',props.data)
-        // organize area chart data
-        for (var index = 1; index < props.data.length; index++) {
-            let item = props.data[index]
-            let key = item[1]
-            let x = item[2]
-            let y = item[3]
-            if (key in tempData){
-                tempData[key].x.push(x)
-                tempData[key].y.push(y)
-            }else {
-                tempData[key] = {x: [x], y: [y]}
+        if(props.input) {
+            let tempData = {}
+            let tempKeys = []
+            for (var key in props.data[props.category]) {
+                tempData[props.data[props.category][key]] = {x:[], y: []}
+                tempKeys.push(props.data[props.category][key])
             }
+            Object.entries(props.data).map(([time, item], index ) => {
+                if(index > 0) {
+                    for (var index in item){
+                        var value = item[index]
+                        var key = tempKeys[index]
+                        if (value) {
+                            tempData[key].x.push(time)
+                            tempData[key].y.push(value)
+                        }
+                    }
+                }
+                
+            })
+            let tempAreaChartData = []
+            Object.entries(tempData).map(([key, value] ) => {
+                tempAreaChartData.push({x: parseInt(value.x), y: value.y, stackgroup: 'one', name: key})
+            })
+            setAreaChartData(tempAreaChartData)
+        } else {
+            let tempData = {}
+            console.log('area chart data is',props.data)
+            // organize area chart data
+            for (var index = 1; index < props.data.length; index++) {
+                let item = props.data[index]
+                let key = item[1]
+                let x = item[2]
+                let y = item[3]
+                if (key in tempData){
+                    tempData[key].x.push(x)
+                    tempData[key].y.push(y)
+                }else {
+                    tempData[key] = {x: [x], y: [y]}
+                }
+            }
+            let tempAreaChartData = []
+            Object.entries(tempData).map(([key, value] ) => {
+                tempAreaChartData.push({x: parseInt(value.x), y: value.y, stackgroup: 'one', name: key})
+            })
+    
+            setAreaChartData(tempAreaChartData)
         }
-        let tempAreaChartData = []
-        Object.entries(tempData).map(([key, value] ) => {
-            tempAreaChartData.push({x: parseInt(value.x), y: value.y, stackgroup: 'one', name: key})
-        })
 
-        setAreaChartData(tempAreaChartData)
     }, [props]);
 
   return ( 

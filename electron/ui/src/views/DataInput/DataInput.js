@@ -15,11 +15,17 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { getPlots } from '../../services/homepage.service'
 import demoInputDiagram from "../../assets/demo_figure_input.png";
+import AreaChart from '../../components/AreaChart/AreaChart'
 
 export default function DataInput(props) {
   const scenario = props.scenario
   const [ plotHtml, setPlotHtml ] = useState({})
-  const [ plotCategory, setPlotCategory ] = useState("Completion Pad Demand")
+  const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
+  const [ plotCategoryDictionary, setPlotCategoryDictionary ] = useState({
+                                "CompletionsDemand": "CompletionsPads",
+                                "PadRates": "ProductionPads",
+                                "FlowbackRates": "CompletionsPads"
+                              })
   const styles ={
     firstCol: {
       backgroundColor: "#f4f4f4", 
@@ -32,27 +38,6 @@ export default function DataInput(props) {
     }
   }
   
-   useEffect(()=>{
-    getPlots(scenario.id)
-    .then(response => {
-    if (response.status === 200) {
-        response.json()
-        .then((data)=>{
-          console.log('got plot: ',data)
-          setPlotHtml(data)
-        }).catch((err)=>{
-            console.error("error on plot fetch: ",err)
-        })
-    }
-    /*
-      in the case plot doesnt exist
-    */
-    else if (response.status === 500) {
-      console.error("error on plot fetch: ",response.statusText)
-    }
-    })
-   }, [scenario]);
-
    const handlePlotCategoryChange = (event) => {
     setPlotCategory(event.target.value)
    }
@@ -87,9 +72,9 @@ export default function DataInput(props) {
         if category is plots, return input plots
       */
       if(props.category === "Plots") {
-        if (Object.keys(plotHtml).length) {
+        // if (Object.keys(plotHtml).length) {
           return (
-            <Box style={{backgroundColor:'white', height:"560px"}} sx={{m:3, padding:2, boxShadow:3}}>
+            <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
               <Box display="flex" justifyContent="center" sx={{marginBottom:"20px"}}>
                 <FormControl sx={{ width: "30ch" }} size="small">
                     <Select
@@ -97,22 +82,25 @@ export default function DataInput(props) {
                     onChange={handlePlotCategoryChange}
                     sx={{color:'#0b89b9', fontWeight: "bold"}}
                     >
-                    <MenuItem key={0} value={"Completion Pad Demand"}>Completion Pad Demand</MenuItem>
-                    <MenuItem key={1} value={"Production Forecast"}>Production Forecast</MenuItem>
-                    <MenuItem key={2} value={"Flowback Forecast"}>Flowback Forecast</MenuItem>
+                    <MenuItem key={0} value={"CompletionsDemand"}>Completion Pad Demand</MenuItem>
+                    <MenuItem key={1} value={"PadRates"}>Production Forecast</MenuItem>
+                    <MenuItem key={2} value={"FlowbackRates"}>Flowback Forecast</MenuItem>
                     </Select>
                 </FormControl>
             </Box>
-              <iframe style={{width: '100%', height:"90%"}} srcdoc={plotHtml[plotCategory]}></iframe>
+                <AreaChart
+                  input
+                  category={plotCategoryDictionary[plotCategory]}
+                  data={props.scenario.data_input.df_parameters[plotCategory]} 
+                  title={plotCategory}
+                  xaxis={{titletext: "Planning Horizon (weeks)"}}
+                  yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                  width={750}
+                  height={500}
+                  showlegend={true}
+                />
             </Box>
             )
-        } else {
-          return (
-            <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
-              <h1>No plot found!</h1>
-            </Box>
-            )
-        }
         
       }
       /*
