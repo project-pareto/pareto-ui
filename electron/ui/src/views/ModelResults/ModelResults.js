@@ -72,6 +72,7 @@ export default function ModelResults(props) {
         return <KPIDashboard 
                   overviewData={props.scenario.results.data['v_F_Overview_dict']}
                   truckedData={props.scenario.results.data['v_F_Trucked_dict']}
+                  pipedData={props.scenario.results.data['v_F_Piped_dict']}
                 />
       }
       /*

@@ -7,21 +7,31 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Plot from 'react-plotly.js';
 
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ListItemText from '@mui/material/ListItemText';
+import Checkbox from '@mui/material/Checkbox';
+import ListItemIcon from '@mui/material/ListItemIcon';
+
 
 export default function SankeyPlot(props) {
     const [ sankeyCategory, setSankeyCategory ] = useState("v_F_Piped")
-
+    const [ filteredNodes, setFilteredNodes ] = useState(["CP01", "F03", "N21", "N12"]) 
+    // const [ filteredNodes, setFilteredNodes ] = useState(["CP01"])
+    const [ totalNodes, setTotalNodes ] = useState(["CP01", "F03", "N21", "N12", "CP02"])
+    const isAllSelected = totalNodes.length > 0 && filteredNodes.length === totalNodes.length;
     const [ plotData, setPlotData ] = useState({link: {source: [], target:[], value: [], label: []}, node: {label: []}});
-
+    
     useEffect(()=>{
-        unpackData();
+        unpackData(false);
     }, [sankeyCategory]);
 
     const handleCategoryChange = (event) => {
         setSankeyCategory(event.target.value)
     }
 
-    const unpackData = () =>
+    const unpackData = (unpackAll) =>
     {
         var d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
         var locationsInArray = {}
@@ -31,28 +41,30 @@ export default function SankeyPlot(props) {
             var target = props.data[sankeyCategory][i][1]
             var label = props.data[sankeyCategory][i][2]
             var value = props.data[sankeyCategory][i][3]
-            var sourceIndex, targetIndex
-            if (d.node.label.includes(source)) {
-                sourceIndex = locationsInArray[source]
-            } 
-            else {
-                sourceIndex = d.node.label.length
-                d.node.label.push(source)
-                locationsInArray[source] = sourceIndex
-            }
-            if (d.node.label.includes(target)) {
-                targetIndex = locationsInArray[target]
-            } 
-            else {
-                targetIndex = d.node.label.length
-                d.node.label.push(target)
-                locationsInArray[target] = targetIndex
-            }
-            d.link.source.push(sourceIndex)
-            d.link.target.push(targetIndex)
-            d.link.value.push(value)
-            d.link.label.push(label)
-            
+            // if (unpackAll || filteredNodes.includes(source) || filteredNodes.includes(target)) {
+                var sourceIndex, targetIndex
+                if (d.node.label.includes(source)) {
+                    sourceIndex = locationsInArray[source]
+                } 
+                else {
+                    sourceIndex = d.node.label.length
+                    d.node.label.push(source)
+                    locationsInArray[source] = sourceIndex
+                }
+                if (d.node.label.includes(target)) {
+                    targetIndex = locationsInArray[target]
+                } 
+                else {
+                    targetIndex = d.node.label.length
+                    d.node.label.push(target)
+                    locationsInArray[target] = targetIndex
+                }
+                // console.log('label for '+source+' going to '+target+' is '+label+'. value is '+value)
+                d.link.source.push(sourceIndex)
+                d.link.target.push(targetIndex)
+                d.link.value.push(value)
+                d.link.label.push(label)
+            // }
         }
         console.log(d)
         setPlotData(d)
@@ -62,23 +74,8 @@ export default function SankeyPlot(props) {
   return ( 
     <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: 'scroll'}}>
     <Grid container direction="row">
-        <Grid item sm={1} direction="row">
-        </Grid>
         <Grid item sm={2} direction="row">
-        {/* <Box display="flex" justifyContent="flex-start">
-            <Button variant="outlined" 
-                sx={{
-                    backgroundColor: 'white', 
-                    borderRadius: '8px', 
-                    borderColor: '#0884b4',
-                    color:'#0884b4'}}
-            >
-                Save Sankey
-            </Button>
-        </Box> */}
-        </Grid>
-        <Grid item sm={8} direction="row">
-        <Box display="flex" justifyContent="flex-end">
+        <Box display="flex" justifyContent="flex-start">
             <FormControl sx={{ width: "25ch" }} size="small">
                 <Select
                 value={sankeyCategory}
@@ -92,11 +89,8 @@ export default function SankeyPlot(props) {
             </FormControl>
         </Box>
         </Grid>
-        <Grid item sm={1} direction="row">
-
-        </Grid>
-        <Grid item sm={12}>
-        <Box display="flex" justifyContent="center">
+        <Grid item sm="8">
+        <Box display="flex" justifyContent="center" sx={{paddingTop:'50px'}}>
             <Plot
                 data={[
                 {
@@ -107,7 +101,7 @@ export default function SankeyPlot(props) {
                     },
                     orientation: "h",
                     valueformat: ".0f",
-                    valuesuffix: "TWh",
+                    valuesuffix: " bbl",
                     node: {
                         pad: 15,
                         thickness: 15,
@@ -132,10 +126,42 @@ export default function SankeyPlot(props) {
             />
         </Box>
         </Grid>
+        <Grid item sm={2} direction="row">
+        <Box display="flex" justifyContent="flex-end">
+
+            <Accordion sx={{width:"220px"}}>
+                <AccordionSummary>
+                <p style={{margin:0, fontWeight: "bold", color: "#0884b4"}}>Time & Location Filters</p>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <MenuItem value="all">
+                    <ListItemIcon>
+                        <Checkbox
+                        checked={isAllSelected}
+                        indeterminate={
+                            filteredNodes.length > 0 && filteredNodes.length < totalNodes.length
+                        }
+                        />
+                    </ListItemIcon>
+                    <ListItemText
+                        primary="Select All"
+                    />
+                    </MenuItem>
+                    {totalNodes.map((option) => (
+                    <MenuItem key={option} value={option}>
+                        <ListItemIcon>
+                        <Checkbox checked={filteredNodes.indexOf(option) > -1} />
+                        </ListItemIcon>
+                        <ListItemText primary={option} />
+                    </MenuItem>
+                    ))}
+                </AccordionDetails>
+            </Accordion>
+
+        </Box>
+        </Grid>
     </Grid>
     </Box>
   );
 
 }
-
-
