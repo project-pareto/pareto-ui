@@ -63,7 +63,7 @@ async def upload(file: UploadFile = File(...)):
         async with aiofiles.open(output_path, 'wb') as out_file:
             content = await file.read()  # async read
             await out_file.write(content) 
-        return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename)
+        return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename, id=new_id)
 
     except Exception as e:
         _log.error(f"error on file upload: {str(e)}")
@@ -125,6 +125,18 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
             500, f"unable to find and run given excel sheet id: {data['scenario']['id']}: {e}"
         )
     return scenario
+
+@router.get("/get_plots/{scenario_id}")
+async def get_plots(scenario_id: int):
+    """Get completions demand plot
+
+    Args:
+        scenario_id: scenario id for given completions demand plot
+
+    Returns:
+        Raw html of completions demand plot
+    """
+    return scenario_handler.get_plots(scenario_id)
 
 @router.get("/check_tasks")
 async def check_tasks(request: Request):
