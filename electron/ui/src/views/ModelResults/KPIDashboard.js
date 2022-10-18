@@ -1,17 +1,15 @@
 import {useEffect, useState} from 'react';   
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
 import Plot from 'react-plotly.js';
-
+import AreaChart from '../../components/AreaChart/AreaChart'
 
 export default function KPIDashboard(props) {
     const [ kpiData, setKpiData ] = useState(null)
-    const [ areaChartData, setAreaChartData ] = useState(null)
 
     useEffect(()=>{
         let tempData = {}
@@ -24,46 +22,8 @@ export default function KPIDashboard(props) {
             let value = item[3]
             tempData[key] = {"description": description, "unit": unit, "value": value}
         }
-        // organize area chart data for trucked data
-        let tempTruckedData = {}
-        for (var index = 1; index < props.truckedData.length; index++) {
-            let item = props.truckedData[index]
-            let key = item[1]
-            let x = item[2]
-            let y = item[3]
-            if (key in tempTruckedData){
-                tempTruckedData[key].x.push(x)
-                tempTruckedData[key].y.push(y)
-            }else {
-                tempTruckedData[key] = {x: [x], y: [y]}
-            }
-        }
-        let tempAreaChartData_trucked = []
-        Object.entries(tempTruckedData).map(([key, value] ) => {
-            tempAreaChartData_trucked.push({x: parseInt(value.x), y: value.y, stackgroup: 'one', name: key})
-        })
-
-        // organize area chart data for piped data
-        let tempPipedData = {}
-        for (var index = 1; index < props.pipedData.length; index++) {
-            let item = props.pipedData[index]
-            let key = item[1]
-            let x = item[2]
-            let y = item[3]
-            if (key in tempPipedData){
-                tempPipedData[key].x.push(x)
-                tempPipedData[key].y.push(y)
-            }else {
-                tempPipedData[key] = {x: [x], y: [y]}
-            }
-        }
-        let tempAreaChartData_piped = []
-        Object.entries(tempPipedData).map(([key, value] ) => {
-            tempAreaChartData_piped.push({x: parseInt(value.x), y: value.y, stackgroup: 'one', name: key})
-        })
 
         setKpiData(tempData)
-        setAreaChartData([tempAreaChartData_trucked, tempAreaChartData_piped])
     }, [props]);
 
     const styles = {
@@ -243,63 +203,33 @@ export default function KPIDashboard(props) {
             </Grid>
         </Box>
         </Grid>
-
+        
         <Grid item xs={12}>
         <Box style={{backgroundColor:'white'}} sx={styles.box}>
             <Grid container>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <Plot
-                    /* 
-                        x values are T values
-                        y values are bbl/week
-                        where does K value go? needs to be a label of some sort
-                    */
-                    data={areaChartData[0]}
-                    layout={{
-                        width: 600,
-                        height: 500, 
-                        showlegend: true, 
-                        title: 'Trucked Water Deliveries By Destination',
-                        xaxis: {
-                            title: {
-                                text: "Planning Horizon (weeks)"
-                            }
-                        },
-                        yaxis: {
-                            title: {
-                                text: "Amount of Water (bbl/week)"
-                            }
-                        }
-                   }}
+                <AreaChart
+                    data={props.truckedData} 
+                    title="Trucked Water Deliveries By Destination"
+                    xaxis={{titletext: "Planning Horizon (weeks)"}}
+                    yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                    width={600}
+                    height={500}
+                    showlegend={true}
                 />
                 </Box>
             </Grid>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <Plot
-                    /* 
-                        x values are T values
-                        y values are bbl/week
-                        where does K value go? needs to be a label of some sort
-                    */
-                    data={areaChartData[1]}
-                    layout={{
-                        width: 600,
-                        height: 500, 
-                        showlegend: true, 
-                        title: 'Piped Water Deliveries By Destination',
-                        xaxis: {
-                            title: {
-                                text: "Planning Horizon (weeks)"
-                            }
-                        },
-                        yaxis: {
-                            title: {
-                                text: "Amount of Water (bbl/week)"
-                            }
-                        }
-                   }}
+                <AreaChart
+                    data={props.pipedData} 
+                    title="Piped Water Deliveries By Destination"
+                    xaxis={{titletext: "Planning Horizon (weeks)"}}
+                    yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                    width={600}
+                    height={500}
+                    showlegend={true}
                 />
                 </Box>
             </Grid>
