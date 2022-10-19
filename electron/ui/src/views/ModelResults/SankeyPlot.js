@@ -14,32 +14,19 @@ import ListItemText from '@mui/material/ListItemText';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemIcon from '@mui/material/ListItemIcon';
 
+
+
+
 export default function SankeyPlot(props) {
     const [ sankeyCategory, setSankeyCategory ] = useState("v_F_Piped")
     const [ filteredNodes, setFilteredNodes ] = useState([]) 
     const [ totalNodes, setTotalNodes ] = useState([])
     const [ filteredTimes, setFilteredTimes ] = useState([]) 
     const [ totalTimes, setTotalTimes ] = useState([])
-    const [ filterType, setFilterType ] = useState("location")
     const isAllNodesSelected = totalNodes.length > 0 && filteredNodes.length === totalNodes.length;
     const isAllTimesSelected = totalTimes.length > 0 && filteredTimes.length === totalTimes.length;
     const [ plotData, setPlotData ] = useState({link: {source: [], target:[], value: [], label: []}, node: {label: []}});
-    
-    const styles = {
-        iconSelected: {
-            backgroundColor:'#6094bc', 
-            color: 'white',
-            borderRadius: 10,
-            // margin:0,
-            // padding:0
-        },
-        iconUnselected: {
-            borderRadius: 10,
-            color:'black',
-            // margin:0,
-            // padding:0
-        }
-       }
+
 
     useEffect(()=>{
         unpackData(true, [], []);
@@ -47,10 +34,6 @@ export default function SankeyPlot(props) {
 
     const handleCategoryChange = (event) => {
         setSankeyCategory(event.target.value)
-    }
-
-    const handleFilterTypeChange = (filterType) => {
-        setFilterType(filterType)
     }
 
     const handleNodeFilter = (node) => {
@@ -209,8 +192,49 @@ export default function SankeyPlot(props) {
         </Grid>
         <Grid item sm={2} direction="row">
         <Box display="flex" justifyContent="flex-end">
+            <FilterDropdown
+                filteredNodes={filteredNodes}
+                totalNodes={totalNodes}
+                filteredTimes={filteredTimes}
+                totalTimes={totalTimes}
+                isAllNodesSelected={isAllNodesSelected}
+                isAllTimesSelected={isAllTimesSelected}
+                handleNodeFilter={handleNodeFilter}
+                handleTimeFilter={handleTimeFilter}
+            />
+        </Box>
+        </Grid>
+    </Grid>
+    </Box>
+  );
 
-            <Accordion sx={{width:"220px"}}>
+}
+
+/*
+    dropdown for filtering time and nodes
+    created separate component for this to prevent rerendering of sankey diagram when changing filterType
+*/
+function FilterDropdown(props) {
+    const [ filterType, setFilterType ] = useState("location")
+
+    const styles = {
+        iconSelected: {
+            backgroundColor:'#6094bc', 
+            color: 'white',
+            borderRadius: 10,
+        },
+        iconUnselected: {
+            borderRadius: 10,
+            color:'black',
+        }
+       }
+
+    const handleFilterTypeChange = (filterType) => {
+        setFilterType(filterType)
+    }
+
+    return (
+        <Accordion sx={{width:"220px"}}>
                 <AccordionSummary sx={{marginBottom: 0, paddingBottom:0}}>
                 <p style={{margin:0, fontWeight: "bold", color: "#0884b4"}}>Time & Location Filters</p>
                 </AccordionSummary>
@@ -220,12 +244,12 @@ export default function SankeyPlot(props) {
                     
                     {filterType === 'time' && 
                     <>
-                        <MenuItem value="all" onClick={()=> handleTimeFilter("all")}>
+                        <MenuItem value="all" onClick={()=> props.handleTimeFilter("all")}>
                         <ListItemIcon>
                             <Checkbox
-                            checked={isAllTimesSelected}
+                            checked={props.isAllTimesSelected}
                             indeterminate={
-                                filteredTimes.length > 0 && filteredTimes.length < totalTimes.length
+                                props.filteredTimes.length > 0 && props.filteredTimes.length < props.totalTimes.length
                             }
                             />
                         </ListItemIcon>
@@ -233,10 +257,10 @@ export default function SankeyPlot(props) {
                             primary="Select All"
                         />
                         </MenuItem>
-                        {totalTimes.map((option, index) => (
-                        <MenuItem key={option} value={option} onClick={()=> handleTimeFilter(option)}>
+                        {props.totalTimes.map((option, index) => (
+                        <MenuItem key={option} value={option} onClick={()=> props.handleTimeFilter(option)}>
                             <ListItemIcon>
-                            <Checkbox checked={filteredTimes.indexOf(option) > -1} />
+                            <Checkbox checked={props.filteredTimes.indexOf(option) > -1} />
                             </ListItemIcon>
                             <ListItemText primary={option} />
                         </MenuItem>
@@ -245,12 +269,12 @@ export default function SankeyPlot(props) {
                 }
                     {filterType === 'location' && 
                     <>
-                        <MenuItem value="all" onClick={()=> handleNodeFilter("all")}>
+                        <MenuItem value="all" onClick={()=> props.handleNodeFilter("all")}>
                         <ListItemIcon>
                             <Checkbox
-                            checked={isAllNodesSelected}
+                            checked={props.isAllNodesSelected}
                             indeterminate={
-                                filteredNodes.length > 0 && filteredNodes.length < totalNodes.length
+                                props.filteredNodes.length > 0 && props.filteredNodes.length < props.totalNodes.length
                             }
                             />
                         </ListItemIcon>
@@ -258,10 +282,10 @@ export default function SankeyPlot(props) {
                             primary="Select All"
                         />
                         </MenuItem>
-                        {totalNodes.map((option, index) => (
-                        <MenuItem key={option} value={option} onClick={()=> handleNodeFilter(option)}>
+                        {props.totalNodes.map((option, index) => (
+                        <MenuItem key={option} value={option} onClick={()=> props.handleNodeFilter(option)}>
                             <ListItemIcon>
-                            <Checkbox checked={filteredNodes.indexOf(option) > -1} />
+                            <Checkbox checked={props.filteredNodes.indexOf(option) > -1} />
                             </ListItemIcon>
                             <ListItemText primary={option} />
                         </MenuItem>
@@ -269,15 +293,7 @@ export default function SankeyPlot(props) {
                     </>
                     }
                     
-
-
                 </AccordionDetails>
             </Accordion>
-
-        </Box>
-        </Grid>
-    </Grid>
-    </Box>
-  );
-
+    )
 }
