@@ -6,7 +6,7 @@ import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Plot from 'react-plotly.js';
-
+import IconButton from '@mui/material/IconButton';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -18,15 +18,39 @@ export default function SankeyPlot(props) {
     const [ sankeyCategory, setSankeyCategory ] = useState("v_F_Piped")
     const [ filteredNodes, setFilteredNodes ] = useState([]) 
     const [ totalNodes, setTotalNodes ] = useState([])
-    const isAllSelected = totalNodes.length > 0 && filteredNodes.length === totalNodes.length;
+    const [ filteredTimes, setFilteredTimes ] = useState([]) 
+    const [ totalTimes, setTotalTimes ] = useState([])
+    const [ filterType, setFilterType ] = useState("location")
+    const isAllNodesSelected = totalNodes.length > 0 && filteredNodes.length === totalNodes.length;
+    const isAllTimesSelected = totalTimes.length > 0 && filteredTimes.length === totalTimes.length;
     const [ plotData, setPlotData ] = useState({link: {source: [], target:[], value: [], label: []}, node: {label: []}});
     
+    const styles = {
+        iconSelected: {
+            backgroundColor:'#6094bc', 
+            color: 'white',
+            borderRadius: 10,
+            // margin:0,
+            // padding:0
+        },
+        iconUnselected: {
+            borderRadius: 10,
+            color:'black',
+            // margin:0,
+            // padding:0
+        }
+       }
+
     useEffect(()=>{
-        unpackData(true, []);
+        unpackData(true, [], []);
     }, [sankeyCategory]);
 
     const handleCategoryChange = (event) => {
         setSankeyCategory(event.target.value)
+    }
+
+    const handleFilterTypeChange = (filterType) => {
+        setFilterType(filterType)
     }
 
     const handleNodeFilter = (node) => {
@@ -45,17 +69,43 @@ export default function SankeyPlot(props) {
             }
             setFilteredNodes(tempNodes)
         }
-        unpackData(false, tempNodes)
+        unpackData(false, tempNodes, filteredTimes)
     }
 
-    const unpackData = (unpackAll, filtered) =>
+    const handleTimeFilter = (time) => {
+        var tempTimes
+        if (time === 'all') {
+            tempTimes = filteredTimes.length === totalTimes.length ? [] : totalTimes
+            setFilteredTimes(tempTimes);
+        }
+        else {
+            tempTimes = [...filteredTimes]
+            const index = tempTimes.indexOf(time);
+            if (index > -1) { // only splice array when item is found
+                tempTimes.splice(index, 1); // 2nd parameter means remove one item only
+            } else{
+                tempTimes.push(time)
+            }
+            setFilteredTimes(tempTimes)
+        }
+        unpackData(false, filteredNodes, tempTimes)
+    }
+
+    const unpackData = (unpackAll, nodes, times) =>
     {
-        if(!unpackAll) var tempFilteredNodes = filtered
-        else var tempFilteredNodes = filteredNodes
+        if(!unpackAll) {
+            var tempFilteredNodes = nodes
+            var tempFilteredTimes = times
+        }
+        else {
+            var tempFilteredNodes = filteredNodes
+            var tempFilteredTimes = filteredTimes
+        }
         console.log('unpacking data with unpackall = '+unpackAll)
         var d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
         var locationsInArray = {}
         var nodeSet = new Set()
+        var timeSet = new Set()
         for (let i = 1; i < props.data[sankeyCategory].length; i++) {
             var source = props.data[sankeyCategory][i][0]
             var target = props.data[sankeyCategory][i][1]
@@ -64,8 +114,9 @@ export default function SankeyPlot(props) {
 
             nodeSet.add(source)
             nodeSet.add(target)
+            timeSet.add(label)
 
-            if (unpackAll || (tempFilteredNodes.includes(source) && tempFilteredNodes.includes(target))) {
+            if (unpackAll || (tempFilteredNodes.includes(source) && tempFilteredNodes.includes(target) && tempFilteredTimes.includes(label))) {
                 var sourceIndex, targetIndex
                 if (d.node.label.includes(source)) {
                     sourceIndex = locationsInArray[source]
@@ -91,7 +142,11 @@ export default function SankeyPlot(props) {
             
         }
         setTotalNodes(Array.from(nodeSet))
-        if(unpackAll) setFilteredNodes(Array.from(nodeSet))
+        setTotalTimes(Array.from(timeSet))
+        if(unpackAll) {
+            setFilteredNodes(Array.from(nodeSet))
+            setFilteredTimes(Array.from(timeSet))
+        }
         console.log(d)
         setPlotData(d)
           
@@ -156,31 +211,66 @@ export default function SankeyPlot(props) {
         <Box display="flex" justifyContent="flex-end">
 
             <Accordion sx={{width:"220px"}}>
-                <AccordionSummary>
+                <AccordionSummary sx={{marginBottom: 0, paddingBottom:0}}>
                 <p style={{margin:0, fontWeight: "bold", color: "#0884b4"}}>Time & Location Filters</p>
                 </AccordionSummary>
-                <AccordionDetails sx={{ height:"500px", overflow: "scroll"}}>
-                    <MenuItem value="all" onClick={()=> handleNodeFilter("all")}>
-                    <ListItemIcon>
-                        <Checkbox
-                        checked={isAllSelected}
-                        indeterminate={
-                            filteredNodes.length > 0 && filteredNodes.length < totalNodes.length
-                        }
-                        />
-                    </ListItemIcon>
-                    <ListItemText
-                        primary="Select All"
-                    />
-                    </MenuItem>
-                    {totalNodes.map((option, index) => (
-                    <MenuItem key={option} value={option} onClick={()=> handleNodeFilter(option)}>
+                <AccordionDetails sx={{ height:"500px", overflow: "scroll", marginTop:0, paddingTop:0}}>
+                    <Button size="small" style={filterType === 'time' ? styles.iconSelected : styles.iconUnselected} onClick={() => handleFilterTypeChange('time')}>Time</Button>
+                    <Button size="small" style={filterType === 'location' ? styles.iconSelected : styles.iconUnselected} onClick={() => handleFilterTypeChange('location')}>Location</Button>
+                    
+                    {filterType === 'time' && 
+                    <>
+                        <MenuItem value="all" onClick={()=> handleTimeFilter("all")}>
                         <ListItemIcon>
-                        <Checkbox checked={filteredNodes.indexOf(option) > -1} />
+                            <Checkbox
+                            checked={isAllTimesSelected}
+                            indeterminate={
+                                filteredTimes.length > 0 && filteredTimes.length < totalTimes.length
+                            }
+                            />
                         </ListItemIcon>
-                        <ListItemText primary={option} />
-                    </MenuItem>
-                    ))}
+                        <ListItemText
+                            primary="Select All"
+                        />
+                        </MenuItem>
+                        {totalTimes.map((option, index) => (
+                        <MenuItem key={option} value={option} onClick={()=> handleTimeFilter(option)}>
+                            <ListItemIcon>
+                            <Checkbox checked={filteredTimes.indexOf(option) > -1} />
+                            </ListItemIcon>
+                            <ListItemText primary={option} />
+                        </MenuItem>
+                        ))}
+                    </>
+                }
+                    {filterType === 'location' && 
+                    <>
+                        <MenuItem value="all" onClick={()=> handleNodeFilter("all")}>
+                        <ListItemIcon>
+                            <Checkbox
+                            checked={isAllNodesSelected}
+                            indeterminate={
+                                filteredNodes.length > 0 && filteredNodes.length < totalNodes.length
+                            }
+                            />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary="Select All"
+                        />
+                        </MenuItem>
+                        {totalNodes.map((option, index) => (
+                        <MenuItem key={option} value={option} onClick={()=> handleNodeFilter(option)}>
+                            <ListItemIcon>
+                            <Checkbox checked={filteredNodes.indexOf(option) > -1} />
+                            </ListItemIcon>
+                            <ListItemText primary={option} />
+                        </MenuItem>
+                        ))}
+                    </>
+                    }
+                    
+
+
                 </AccordionDetails>
             </Accordion>
 
