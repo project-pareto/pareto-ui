@@ -65,7 +65,7 @@ export default function SankeyPlot(props) {
             nodeSet.add(source)
             nodeSet.add(target)
 
-            if (unpackAll || tempFilteredNodes.includes(source) || tempFilteredNodes.includes(target)) {
+            if (unpackAll || (tempFilteredNodes.includes(source) && tempFilteredNodes.includes(target))) {
                 var sourceIndex, targetIndex
                 if (d.node.label.includes(source)) {
                     sourceIndex = locationsInArray[source]
