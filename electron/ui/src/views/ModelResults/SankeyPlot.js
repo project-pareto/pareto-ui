@@ -211,7 +211,7 @@ export default function SankeyPlot(props) {
 }
 
 /*
-    dropdown for filtering time and nodes
+    dropdown component for filtering time and nodes
     created separate component for this to prevent rerendering of sankey diagram when changing filterType
 */
 function FilterDropdown(props) {
