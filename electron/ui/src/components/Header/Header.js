@@ -3,8 +3,6 @@ import React from 'react';
 import {useEffect, useState} from 'react';   
 import logo from "../../images/pareto-logo.png";
 import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';

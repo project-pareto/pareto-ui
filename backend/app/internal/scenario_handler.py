@@ -126,37 +126,6 @@ class ScenarioHandler:
         [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
         del frontend_parameters['Units']
 
-        # create plots
-        plots = [
-            {   'title': 'Completion Pad Demand', 
-                'paramaterName': 'CompletionsDemand', 
-                'labels': [("Completion Pad", "Time", "Demand Water (bbl/Day)")]
-            },
-            {   'title': 'Production Forecast', 
-                'paramaterName': 'PadRates', 
-                'labels': [("PW Production Forecast", "Time", "Demand Water (bbl/Day)")]
-            },
-            {   'title': 'Flowback Forecast', 
-                'paramaterName': 'FlowbackRates', 
-                'labels': [("PW Flowback Forecast", "Time", "Demand Water (bbl/Day)")]
-            },
-            ]
-        for plot in plots:
-            output_file = f"{self.outputs_path}/{id}_{plot['paramaterName']}_plot.html"
-            _log.info(f'output file for plot is: {output_file}')
-            try:
-                parameterName = plot['paramaterName']
-                args = {"plot_title": plot['title'],
-                "output_file": output_file,
-                "print_data": False}
-                input_data = {"pareto_var": df_parameters[parameterName],
-                            "labels": plot["labels"]
-                            }
-                _log.info(f'plotting bars to {output_file}')
-                plot_bars(input_data, args)
-            except Exception as e:
-                _log.error(f'unable to create completions demand plot: {e}')
-
         # convert tuple keys into dictionary values - necessary for javascript interpretation
         for key in df_parameters:
             original_value = df_parameters[key]
