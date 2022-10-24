@@ -41,7 +41,7 @@ export default function Sidebar(props) {
     return (
       Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
         <>
-        <Tooltip title={ParetoDictionary[key]} placement="right-start">
+        <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : ""} placement="right-start">
         <ListItem key={key} disablePadding>
             <ListItemButton selected={props.category===key} onClick={() => props.handleSetCategory(key)} key={key}>
             <ListItemText key={key} primary={key} />
