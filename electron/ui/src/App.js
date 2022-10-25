@@ -11,7 +11,7 @@ import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
 import {useEffect, useState} from 'react';   
 import { updateScenario } from './services/app.service'
-import { deleteScenario } from './services/scenariolist.service'
+import { deleteScenario, copyScenario } from './services/scenariolist.service'
 import { fetchScenarios } from './services/sidebar.service'
 import { checkTasks } from './services/homepage.service'
 
@@ -72,6 +72,9 @@ function App() {
 }, []);
 
   const navigateHome = () => {
+    /*
+      function for returning to scenario list and resetting scenario data
+    */   
     setScenarioData(null)
     setSection(0)
     setCategory(null)
@@ -185,7 +188,20 @@ function App() {
       console.log('deleted scenario')
       setScenarios(data.data)
     }).catch(e => {
-      console.log('error on scenario update')
+      console.log('error on scenario delete')
+      console.log(e)
+    })
+  }
+
+  const handleCopyScenario = (index) => {
+    console.log('copying scenario: ',index)
+    copyScenario(index)
+    .then(response => response.json())
+    .then((data) => {
+      console.log('copy scenario')
+      setScenarios(data.data)
+    }).catch(e => {
+      console.log('error on scenario copy')
       console.log(e)
     })
   }
@@ -210,6 +226,7 @@ function App() {
             section={section} 
             scenarios={scenarios} 
             deleteScenario={handleDeleteScenario}
+            copyScenario={handleCopyScenario}
             handleSetSection={handleSetSection} 
             />} 
         />

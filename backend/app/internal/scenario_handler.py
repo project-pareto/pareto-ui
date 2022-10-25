@@ -1,6 +1,5 @@
 import logging
-import json
-import io
+import shutil
 import os
 import datetime
 import math
@@ -153,14 +152,61 @@ class ScenarioHandler:
             time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
-        query = tinydb.Query()
-        # CHANGE HERE 2
         self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
         self.LOCKED = False
         self.update_next_id()
         self.retrieve_scenarios()
         
         return return_object
+
+    def copy_scenario(self, id):
+        _log.info(f"copying scenario with id: {id}")
+
+        try:
+            # copy scenario with given id
+            new_scenario = self.scenario_list[id].copy()
+            new_scenario_id = self.next_id
+
+            # update scenario name, id, and creation date
+            current_day = datetime.date.today()
+            date = datetime.date.strftime(current_day, "%m/%d/%Y")
+            new_scenario["name"] = new_scenario["name"]+' copy'
+            new_scenario["id"] = new_scenario_id
+            new_scenario["date"] = date
+            
+            
+
+            # create copy of excel sheet input
+            original_excel_path = "{}/{}.xlsx".format(self.excelsheets_path,id)
+            new_excel_path = "{}/{}.xlsx".format(self.excelsheets_path,new_scenario_id)
+            shutil.copyfile(original_excel_path, new_excel_path)
+
+            # create copy of excel sheet output (if it exists)
+            original_output_path = "{}/{}.xlsx".format(self.outputs_path,id)
+            new_output_path = "{}/{}.xlsx".format(self.outputs_path,new_scenario_id)
+            if (os.path.isfile(original_output_path)):
+                shutil.copyfile(original_output_path, new_output_path)
+
+            # add record in db for new scenario
+            # check if db is in use. if so, wait til its done being used
+            locked = self.LOCKED
+            while(locked):
+                time.sleep(0.5)
+                locked = self.LOCKED
+            self.LOCKED = True
+            self._db.insert({'id_': new_scenario_id, "scenario": new_scenario, 'version': self.VERSION})
+            self.LOCKED = False
+            self.update_next_id()
+            self.retrieve_scenarios()
+
+            # return updated scenario list
+            return self.scenario_list
+
+        except Exception as e:
+            _log.error(f"error copying scenario: {e}")
+            raise HTTPException(
+                    500, f"unable to make copy of scenario with id {id}: {e}"
+                )
 
     def delete_scenario(self, index):
         _log.info(f"Deleting scenario #{index}")

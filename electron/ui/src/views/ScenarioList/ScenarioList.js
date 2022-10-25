@@ -12,12 +12,17 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import EditIcon from '@mui/icons-material/Edit';
 import {  uploadExcelSheet } from '../../services/sidebar.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 
 export default function ScenarioList(props) {
     const [ showError, setShowError ] = React.useState(false)
     const [ errorMessage, setErrorMessage ] = React.useState("")
+    const [ openEditName, setOpenEditName ] = React.useState(false)
+
+    const handleOpenEditName = () => setOpenEditName(true);
+    const handleCloseEditName = () => setOpenEditName(false);
 
 const handleFileUpload = (e) => {
     console.log('handle file upload')
@@ -116,8 +121,9 @@ const handleFileUpload = (e) => {
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.date}</TableCell>
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
                 <TableCell sx={styles.bodyCell}>
+                    <IconButton onClick={handleOpenEditName}><EditIcon fontSize="small"></EditIcon></IconButton>
+                    <IconButton onClick={() => props.copyScenario(key)}><ContentCopyIcon fontSize="small"/></IconButton>
                     <IconButton onClick={() => props.deleteScenario(key)}><DeleteIcon fontSize="small"/></IconButton>
-                    {/* <IconButton><ContentCopyIcon fontSize="small"/></IconButton> */}
                 </TableCell>
                 </TableRow>
                 )
