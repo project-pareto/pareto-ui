@@ -4,6 +4,7 @@ import io
 import os
 import datetime
 import math
+import time
 from pathlib import Path
 from xml.etree.ElementTree import VERSION
 import tinydb
@@ -24,7 +25,7 @@ class ScenarioHandler:
     """Manage the saved scenarios."""
 
     SCENARIO_DB_FILE = "scenarios.json"
-    VERSION = 2
+    VERSION = 3
     LOCKED = False
 
     def __init__(self, **kwargs) -> None:
@@ -63,7 +64,7 @@ class ScenarioHandler:
         # Connect to DB
         path = self.scenarios_path
         self._db = tinydb.TinyDB(path)
-
+        self.update_next_id()
         self.retrieve_scenarios()
 
     def retrieve_scenarios(self):
@@ -71,6 +72,7 @@ class ScenarioHandler:
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
         query = tinydb.Query()
@@ -83,20 +85,8 @@ class ScenarioHandler:
             self.scenario_list=scenario_list
         else:
             self.scenario_list={}
-            
-        try:
-            _log.info(f"searching for next id")
-            next_id_list = self._db.search((query.next_id != None) & (query.version == self.VERSION))
-            if len(next_id_list) > 0:
-                self.next_id = next_id_list[0]['next_id']
-            else:
-                _log.info(f"setting next id in tinydb")
-                self._db.insert({"next_id": self.next_id, "version": self.VERSION})
-            _log.info(f"next_id is {self.next_id}")
-        except Exception as e:
-            _log.info(f"unable to find next id: {e}")
-            _log.info(f"setting next id in tinydb")
-            self._db.insert({"next_id": self.next_id, "version": self.VERSION})
+
+
         self.LOCKED = False
         
     def update_scenario(self, updatedScenario):
@@ -105,6 +95,7 @@ class ScenarioHandler:
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
         query = tinydb.Query()
@@ -159,15 +150,14 @@ class ScenarioHandler:
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
         query = tinydb.Query()
+        # CHANGE HERE 2
         self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
-        self._db.upsert(
-            {"next_id": self.next_id+1, 'version': self.VERSION},
-            ((query.next_id == self.next_id) & (query.version == self.VERSION)),
-        )
         self.LOCKED = False
+        self.update_next_id()
         self.retrieve_scenarios()
         
         return return_object
@@ -177,6 +167,7 @@ class ScenarioHandler:
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
         try:
@@ -213,6 +204,7 @@ class ScenarioHandler:
             # check if db is in use. if so, wait til its done being used
             locked = self.LOCKED
             while(locked):
+                time.sleep(0.5)
                 locked = self.LOCKED
             self.LOCKED = True
             query = tinydb.Query()
@@ -262,6 +254,24 @@ class ScenarioHandler:
         nextid = self.next_id
         return nextid
     
+    def update_next_id(self):
+        try:
+            # check if db is in use. if so, wait til its done being used
+            locked = self.LOCKED
+            while(locked):
+                time.sleep(0.5)
+                locked = self.LOCKED
+            self.LOCKED = True
+
+            el = self._db.all()[-1]
+            next_id = el.doc_id+1
+            _log.info(f'setting next id: {next_id}')
+            self.next_id = next_id
+        except Exception as e:
+            _log.info(f"no documents found; next id is 0")
+
+        self.LOCKED = False
+
     def get_background_tasks(self):
         return self.background_tasks
 
