@@ -13,6 +13,8 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
+import Tooltip from '@mui/material/Tooltip';
+
 import {  uploadExcelSheet } from '../../services/sidebar.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
@@ -21,6 +23,7 @@ export default function ScenarioList(props) {
     const [ showError, setShowError ] = React.useState(false)
     const [ errorMessage, setErrorMessage ] = React.useState("")
     const [ openEditName, setOpenEditName ] = React.useState(false)
+    const [ openDeleteModal, setOpenDeleteModal ] = React.useState(false)
     const [ name, setName ] = React.useState('')
     const [ id, setId ] = React.useState(null)
 
@@ -30,6 +33,17 @@ export default function ScenarioList(props) {
         setOpenEditName(true);
     }
     const handleCloseEditName = () => setOpenEditName(false);
+    const handleCloseDeleteModal = () => setOpenDeleteModal(false);
+    const handleOpenDeleteModal = (id) => {
+        setOpenDeleteModal(true);
+        setId(id)
+    }
+
+    const handleDelete = () => {
+        props.deleteScenario(id)
+        setOpenDeleteModal(false)
+        setId(null)
+    }
 
     const handleEditName = (event) => {
         setName(event.target.value)
@@ -138,9 +152,17 @@ export default function ScenarioList(props) {
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.date}</TableCell>
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
                 <TableCell sx={styles.bodyCell}>
-                    <IconButton onClick={() => handleOpenEditName(value.name, key)}><EditIcon fontSize="small"></EditIcon></IconButton>
-                    <IconButton onClick={() => props.copyScenario(key)}><ContentCopyIcon fontSize="small"/></IconButton>
-                    <IconButton onClick={() => props.deleteScenario(key)}><DeleteIcon fontSize="small"/></IconButton>
+                    <Tooltip title="Edit Scenario Name" enterDelay={500}>
+                        <IconButton onClick={() => handleOpenEditName(value.name, key)}><EditIcon fontSize="small"></EditIcon></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Copy Scenario" enterDelay={500}>
+                        <IconButton onClick={() => props.copyScenario(key)}><ContentCopyIcon fontSize="small"/></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Scenario" enterDelay={500}>
+                        <IconButton onClick={() => handleOpenDeleteModal(key)}><DeleteIcon fontSize="small"/></IconButton>
+                    </Tooltip>
+                    
+                    
                 </TableCell>
                 </TableRow>
                 )
@@ -159,6 +181,15 @@ export default function ScenarioList(props) {
             handleSave={handleSaveName}
             buttonText='Save'
             buttonColor='primary'
+            buttonVariant='contained'
+        />
+        <PopupModal
+            open={openDeleteModal}
+            handleClose={handleCloseDeleteModal}
+            text="Are you sure you want to delete this scenario?"
+            handleSave={handleDelete}
+            buttonText='Delete'
+            buttonColor='error'
             buttonVariant='contained'
         />
         {
