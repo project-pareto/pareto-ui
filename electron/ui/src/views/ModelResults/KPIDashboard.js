@@ -205,7 +205,7 @@ export default function KPIDashboard(props) {
         </Grid>
         
         <Grid item xs={12}>
-        <Box style={{backgroundColor:'white'}} sx={styles.box}>
+        <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.box}>
             <Grid container>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>

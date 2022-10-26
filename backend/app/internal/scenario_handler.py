@@ -1,9 +1,9 @@
 import logging
-import json
-import io
+import shutil
 import os
 import datetime
 import math
+import time
 from pathlib import Path
 from xml.etree.ElementTree import VERSION
 import tinydb
@@ -24,7 +24,7 @@ class ScenarioHandler:
     """Manage the saved scenarios."""
 
     SCENARIO_DB_FILE = "scenarios.json"
-    VERSION = 2
+    VERSION = 3
     LOCKED = False
 
     def __init__(self, **kwargs) -> None:
@@ -63,7 +63,7 @@ class ScenarioHandler:
         # Connect to DB
         path = self.scenarios_path
         self._db = tinydb.TinyDB(path)
-
+        self.update_next_id()
         self.retrieve_scenarios()
 
     def retrieve_scenarios(self):
@@ -71,6 +71,7 @@ class ScenarioHandler:
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
         query = tinydb.Query()
@@ -83,20 +84,8 @@ class ScenarioHandler:
             self.scenario_list=scenario_list
         else:
             self.scenario_list={}
-            
-        try:
-            _log.info(f"searching for next id")
-            next_id_list = self._db.search((query.next_id != None) & (query.version == self.VERSION))
-            if len(next_id_list) > 0:
-                self.next_id = next_id_list[0]['next_id']
-            else:
-                _log.info(f"setting next id in tinydb")
-                self._db.insert({"next_id": self.next_id, "version": self.VERSION})
-            _log.info(f"next_id is {self.next_id}")
-        except Exception as e:
-            _log.info(f"unable to find next id: {e}")
-            _log.info(f"setting next id in tinydb")
-            self._db.insert({"next_id": self.next_id, "version": self.VERSION})
+
+
         self.LOCKED = False
         
     def update_scenario(self, updatedScenario):
@@ -105,6 +94,7 @@ class ScenarioHandler:
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
         query = tinydb.Query()
@@ -159,24 +149,71 @@ class ScenarioHandler:
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
-        query = tinydb.Query()
         self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
-        self._db.upsert(
-            {"next_id": self.next_id+1, 'version': self.VERSION},
-            ((query.next_id == self.next_id) & (query.version == self.VERSION)),
-        )
         self.LOCKED = False
+        self.update_next_id()
         self.retrieve_scenarios()
         
         return return_object
+
+    def copy_scenario(self, id):
+        _log.info(f"copying scenario with id: {id}")
+
+        try:
+            # copy scenario with given id
+            new_scenario = self.scenario_list[id].copy()
+            new_scenario_id = self.next_id
+
+            # update scenario name, id, and creation date
+            current_day = datetime.date.today()
+            date = datetime.date.strftime(current_day, "%m/%d/%Y")
+            new_scenario["name"] = new_scenario["name"]+' copy'
+            new_scenario["id"] = new_scenario_id
+            new_scenario["date"] = date
+            
+            
+
+            # create copy of excel sheet input
+            original_excel_path = "{}/{}.xlsx".format(self.excelsheets_path,id)
+            new_excel_path = "{}/{}.xlsx".format(self.excelsheets_path,new_scenario_id)
+            shutil.copyfile(original_excel_path, new_excel_path)
+
+            # create copy of excel sheet output (if it exists)
+            original_output_path = "{}/{}.xlsx".format(self.outputs_path,id)
+            new_output_path = "{}/{}.xlsx".format(self.outputs_path,new_scenario_id)
+            if (os.path.isfile(original_output_path)):
+                shutil.copyfile(original_output_path, new_output_path)
+
+            # add record in db for new scenario
+            # check if db is in use. if so, wait til its done being used
+            locked = self.LOCKED
+            while(locked):
+                time.sleep(0.5)
+                locked = self.LOCKED
+            self.LOCKED = True
+            self._db.insert({'id_': new_scenario_id, "scenario": new_scenario, 'version': self.VERSION})
+            self.LOCKED = False
+            self.update_next_id()
+            self.retrieve_scenarios()
+
+            # return updated scenario list
+            return self.scenario_list
+
+        except Exception as e:
+            _log.error(f"error copying scenario: {e}")
+            raise HTTPException(
+                    500, f"unable to make copy of scenario with id {id}: {e}"
+                )
 
     def delete_scenario(self, index):
         _log.info(f"Deleting scenario #{index}")
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
+            time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
         try:
@@ -213,6 +250,7 @@ class ScenarioHandler:
             # check if db is in use. if so, wait til its done being used
             locked = self.LOCKED
             while(locked):
+                time.sleep(0.5)
                 locked = self.LOCKED
             self.LOCKED = True
             query = tinydb.Query()
@@ -262,6 +300,24 @@ class ScenarioHandler:
         nextid = self.next_id
         return nextid
     
+    def update_next_id(self):
+        try:
+            # check if db is in use. if so, wait til its done being used
+            locked = self.LOCKED
+            while(locked):
+                time.sleep(0.5)
+                locked = self.LOCKED
+            self.LOCKED = True
+
+            el = self._db.all()[-1]
+            next_id = el.doc_id+1
+            _log.info(f'setting next id: {next_id}')
+            self.next_id = next_id
+        except Exception as e:
+            _log.info(f"no documents found; next id is 0")
+
+        self.LOCKED = False
+
     def get_background_tasks(self):
         return self.background_tasks
 

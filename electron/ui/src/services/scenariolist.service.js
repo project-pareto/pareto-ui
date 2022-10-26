@@ -5,3 +5,10 @@ export const deleteScenario = (data) => {
         body: JSON.stringify(data)
     });
 }; 
+
+export const copyScenario = (id) => {
+    return fetch('http://localhost:8001/copy/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}; 

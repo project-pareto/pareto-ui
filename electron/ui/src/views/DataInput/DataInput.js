@@ -21,11 +21,11 @@ export default function DataInput(props) {
   const scenario = props.scenario
   const [ plotHtml, setPlotHtml ] = useState({})
   const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
-  const [ plotCategoryDictionary, setPlotCategoryDictionary ] = useState({
+  const plotCategoryDictionary  = {
                                 "CompletionsDemand": "CompletionsPads",
                                 "PadRates": "ProductionPads",
                                 "FlowbackRates": "CompletionsPads"
-                              })
+                                  }
   const styles ={
     firstCol: {
       backgroundColor: "#f4f4f4", 

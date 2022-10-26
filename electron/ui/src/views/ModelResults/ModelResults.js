@@ -17,7 +17,7 @@ import demoOutputDiagram from "../../assets/demo_figure_output.png";
 export default function ModelResults(props) {
   const scenario = props.scenario
    useEffect(()=>{
-       console.log('curr scenario',scenario)
+       console.log('curr scenario.results.data',scenario.results.data)
    }, [scenario]);
 
    const styles ={
