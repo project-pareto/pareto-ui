@@ -1,19 +1,18 @@
 import './Dashboard.css';
 import {useEffect, useState} from 'react';   
-import Grid from '@mui/material/Grid';
 import {  } from "react-router-dom";
-import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
 import ProcessToolbar from '../../components/ProcessToolbar/ProcessToolbar'
 import Bottombar from '../../components/Bottombar/Bottombar'; 
 import DataInput from '../DataInput/DataInput'
 import Optimization from '../Optimization/Optimization'
 import ModelResults from '../ModelResults/ModelResults'
 import Sidebar from '../../components/Sidebar/Sidebar'
+import PopupModal from '../../components/PopupModal/PopupModal'
 import { runModel } from '../../services/homepage.service'
-import EditIcon from '@mui/icons-material/Edit';
-import IconButton from '@mui/material/IconButton';
-import Modal from '@mui/material/Modal';
-import TextField from '@mui/material/TextField';
+
 
 
 
@@ -50,17 +49,6 @@ export default function Dashboard(props) {
       m:2, 
       marginTop:2
     },
-    modalStyle: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: 400,
-      bgcolor: 'background.paper',
-      border: '2px solid #000',
-      boxShadow: 24,
-      p: 4,
-    },
    }
 
    const handleRunModel = () => {
@@ -90,7 +78,7 @@ export default function Dashboard(props) {
    }
 
    const handleSaveName = () => {
-    props.handleEditScenarioName(name)
+    props.handleEditScenarioName(name, scenario.id, true)
     setOpenEditName(false)
   }
 
@@ -109,30 +97,18 @@ export default function Dashboard(props) {
       
     <Grid container spacing={1} sx={(props.section !== 1 && !(props.section == 2 && scenario.results.status != "complete")) && styles.shiftTextRight}>
       <Grid item xs={4} ></Grid>
-      <Modal
-          open={openEditName}
-          onClose={handleCloseEditName}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-      >
-          <Grid container sx={styles.modalStyle} spacing={1}>
-              <Grid item xs={12}>
-                  <TextField
-                      required
-                      variant="standard"
-                      id="margin-none"
-                      label="Config Name"
-                      value={name}
-                      onChange={handleEditName}
-                      fullWidth
-                  />
-              </Grid>
-              <Grid item xs={8}></Grid>
-              <Grid item xs={4}>
-                  <Button onClick={handleSaveName} variant="contained">Save</Button>
-              </Grid>
-          </Grid>
-      </Modal>
+      <PopupModal
+        input
+        open={openEditName}
+        handleClose={handleCloseEditName}
+        text={name}
+        textLabel='Config Name'
+        handleEditText={handleEditName}
+        handleSave={handleSaveName}
+        buttonText='Save'
+        buttonColor='primary'
+        buttonVariant='contained'
+      />
       <Grid item xs={4}>
       <div>
         <b id='scenarioTitle' >

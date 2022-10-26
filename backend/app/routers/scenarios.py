@@ -139,10 +139,23 @@ async def get_plots(scenario_id: int):
     return scenario_handler.get_plots(scenario_id)
 
 @router.get("/check_tasks")
-async def check_tasks(request: Request):
+async def check_tasks():
     """Get list of currently running background tasks
 
     Returns:
         List of scenario ids that are currently being optimized. 
     """
     return {'tasks' : scenario_handler.get_background_tasks()}
+
+@router.get("/copy/{scenario_id}")
+async def copy(scenario_id: int):
+    """Create a copy of scenario for given scenario id
+
+    Args:
+        scenario_id: scenario id for given completions demand plot
+
+    Returns:
+        Newly created scenario. 
+    """
+    return {'data' : scenario_handler.copy_scenario(scenario_id)}
+
