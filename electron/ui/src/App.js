@@ -162,14 +162,16 @@ function App() {
   setCategory(category)
  }
 
-  const handleEditScenarioName = (newName) => {
-    const tempScenario = {...scenarioData}
-    tempScenario.name = newName
-    console.log('updating scenario: ',tempScenario)
+  const handleEditScenarioName = (newName, id, updateScenarioData) => {
     const tempScenarios = {...scenarios}
-    tempScenarios[scenarioIndex] = tempScenario
+    const tempScenario = tempScenarios[id]
+    console.log('updating scenario: ',tempScenario)
+    tempScenario.name = newName
+    tempScenarios[id] = tempScenario
     setScenarios(tempScenarios)
-    setScenarioData(tempScenario)
+    if (updateScenarioData) {
+      setScenarioData(tempScenario)
+    }
     updateScenario({'updatedScenario': tempScenario})
     .then(response => response.json())
     .then((data) => {
