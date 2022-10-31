@@ -14,10 +14,12 @@ export default function Header(props) {
       props.handleSelection(event.target.value)
     }
     return (
-      <div id="Header">
+      <>
+      {props.showHeader ? 
+        <div id="Header">
         
         <div className="titlebar">
-          <a style={{cursor:"pointer"}} onClick={props.navigateHome}>
+          <a style={{cursor:"pointer"}} onClick={props.navigateToLandingPage}>
             <div id="pareto_logo">
               <img src={logo} alt="Pareto Logo"/>
             </div>
@@ -43,6 +45,11 @@ export default function Header(props) {
         null}
         </div>
       </div>
+        : 
+        
+        null}
+        </>
+      
     );
   
 }
