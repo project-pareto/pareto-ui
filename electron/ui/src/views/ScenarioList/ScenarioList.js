@@ -27,6 +27,10 @@ export default function ScenarioList(props) {
     const [ name, setName ] = React.useState('')
     const [ id, setId ] = React.useState(null)
 
+    React.useEffect(()=> {
+        props.setShowHeader(true)
+    }, []) 
+
     const handleOpenEditName = (name, id) => {
         setName(name)
         setId(id)

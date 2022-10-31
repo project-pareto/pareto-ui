@@ -18,6 +18,7 @@ test('test header', () => {
             index={mockIndex} 
             handleNewScenario={mockFunction} 
             handleSelection={mockFunction}
+            showHeader={true}
             /> )
 
     expect(screen.getByRole('img', {  name: /Pareto logo/i})).toBeInTheDocument();

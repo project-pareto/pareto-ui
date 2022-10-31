@@ -264,6 +264,7 @@ const navigateToLandingPage = () => {
             deleteScenario={handleDeleteScenario}
             copyScenario={handleCopyScenario}
             handleSetSection={handleSetSection} 
+            setShowHeader={setShowHeader}
             />} 
         />
 
