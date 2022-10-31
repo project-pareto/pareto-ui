@@ -13,6 +13,7 @@ export default function KPIDashboard(props) {
                 tempData[props.data[props.category][key]] = {x:[], y: []}
                 tempKeys.push(props.data[props.category][key])
             }
+
             Object.entries(props.data).map(([time, item], index ) => {
                 if(index > 0) {
                     for (var index in item){
@@ -27,7 +28,12 @@ export default function KPIDashboard(props) {
                 
             })
             let tempAreaChartData = []
-            Object.entries(tempData).map(([key, value] ) => {
+            // Object.entries(tempData).map(([key, value] ) => {
+            //     tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
+            // })
+            let keys = Object.keys(tempData).sort().reverse()
+            keys.map((key, index) => {
+                let value = tempData[key]
                 tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
             })
             setAreaChartData(tempAreaChartData)
@@ -47,10 +53,15 @@ export default function KPIDashboard(props) {
                 }
             }
             let tempAreaChartData = []
-            Object.entries(tempData).map(([key, value] ) => {
+            // Object.entries(tempData).map(([key, value] ) => {
+            //     tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
+            // })
+
+            let keys = Object.keys(tempData).sort().reverse()
+            keys.map((key, index) => {
+                let value = tempData[key]
                 tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
             })
-    
             setAreaChartData(tempAreaChartData)
         }
 
