@@ -16,13 +16,17 @@ import { runModel } from '../../services/homepage.service'
 
 
 
+
 export default function Dashboard(props) {
   const scenario = props.scenario
-  const [ openEditName, setOpenEditName ] = useState(false)
   const [ name, setName ] = useState('')
+  const [ openEditName, setOpenEditName ] = useState(false)
+  const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
+  const [ inputDataEdited, setInputDataEdited ] = useState(false) 
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
+  // const handleEditInput = (bool) => setInputDataEdited(bool)
 
   useEffect(()=>{
     try {
@@ -82,6 +86,11 @@ export default function Dashboard(props) {
     setOpenEditName(false)
   }
 
+  const handleSaveInputChanges = () => {
+    props.handleSaveInputChanges()
+    setInputDataEdited(false)
+  }
+
 
 
   return (
@@ -92,7 +101,17 @@ export default function Dashboard(props) {
         scenario={scenario}>
       </ProcessToolbar>
       {(props.section === 0 || (props.section === 2 && scenario.results.status === "complete")) && 
-        <Sidebar handleSetCategory={props.handleSetCategory} scenario={scenario} section={props.section} category={props.category}></Sidebar>
+        <Sidebar 
+          handleSetCategory={props.handleSetCategory} 
+          scenario={scenario} 
+          section={props.section} 
+          category={props.category} 
+          inputDataEdited={inputDataEdited}
+          handleUpdateExcel={props.handleUpdateExcel}
+          setInputDataEdited={setInputDataEdited}
+          resetScenarioData={props.resetScenarioData}
+          >
+        </Sidebar>
       }
       
     <Grid container spacing={1} sx={(props.section !== 1 && !(props.section == 2 && scenario.results.status != "complete")) && styles.shiftTextRight}>
@@ -119,7 +138,7 @@ export default function Dashboard(props) {
       <Grid item xs={4}>
       </Grid>
       <Grid item xs={12}>
-      {(scenario && props.section===0) ? <DataInput category={props.category} scenario={scenario}></DataInput> : null}
+      {(scenario && props.section===0) ? <DataInput handleUpdateExcel={props.handleUpdateExcel} category={props.category} scenario={scenario} edited={inputDataEdited} handleEditInput={setInputDataEdited}></DataInput> : null}
       {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario} updateScenario={props.updateScenario}></Optimization> : null}
       {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario} handleSetSection={props.handleSetSection}></ModelResults> : null}
       </Grid>

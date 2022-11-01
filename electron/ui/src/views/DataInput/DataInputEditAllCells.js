@@ -46,38 +46,29 @@ export default function DataInput(props) {
     }
   }
 
-  useEffect(()=>{
-    console.log('datainput use effect has been triggered')
-    // scenario.data_input.df_parameters[props.category]
-    let tempEditDict = {}
-    {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
-      scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
-        tempEditDict[""+ind+":"+index] = false
-      })
-    })}
-    setEditDict(tempEditDict)
-    // props.handleEditInput(false)
-    // setEdited(false)
-  }, [props.category]);
+  // useEffect(()=>{
+  //   console.log('datainput use effect has been triggered')
+  //   // scenario.data_input.df_parameters[props.category]
+  //   let tempEditDict = {}
+  //   {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
+  //     scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
+  //       tempEditDict[""+ind+":"+index] = false
+  //     })
+  //   })}
+  //   setEditDict(tempEditDict)
+  // }, [props]);
   
    const handlePlotCategoryChange = (event) => {
     setPlotCategory(event.target.value)
    }
 
-  const handleSaveChanges = () => {
-    //api call to save changes on backend
-    // setEdited(false)
-    props.handleEditInput(false)
-    props.handleUpdateExcel(scenario.id, props.category, scenario.data_input.df_parameters[props.category])
-    
-    let tempEditDict = {}
-    {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
-      scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
-        tempEditDict[""+ind+":"+index] = false
-      })
-    })}
-    setEditDict(tempEditDict)
-    
+   const handleClickEdit = () => {
+    if(editable) {
+      console.log('do you want to save changes')
+      setScenario(scenarioData)
+      //if so, add api call to update excel sheet; the real test mf
+    } 
+    setEditable(!editable)
    }
 
    const handleDoubleClick = (ind, index) => {
@@ -89,8 +80,6 @@ export default function DataInput(props) {
       let tempEditDict = {...editDict}
       tempEditDict[""+ind+":"+index] = true
       setEditDict(tempEditDict)
-      props.handleEditInput(true)
-      // setEdited(true)
     }
     
    }
@@ -103,7 +92,13 @@ export default function DataInput(props) {
     let ind = parseInt(inds[0])
     let colName = keyIndexMapping[parseInt(inds[1])]
 
-    scenarioData.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    // console.log(colName)
+    // console.log(ind)
+    // console.log(event.target.value)
+    // scenarioData.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    let tempScenario = {...scenario}
+    tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    setScenario(tempScenario)
    }
   
   const renderRow = (ind) => {
@@ -115,15 +110,13 @@ export default function DataInput(props) {
 
       return (cells.map( (value, index) => {
         return (
-          <Tooltip title={editDict[""+ind+":"+index] ? "Doubleclick to save value" : "Doubleclick to edit value"} arrow>
           <TableCell onDoubleClick={() => handleDoubleClick(ind, index)} key={index} style={index === 0 ? styles.firstCol : styles.other}>
-          {editDict[""+ind+":"+index] ? 
+          {editable ?
             index === 0 ? value : <TextField name={""+ind+":"+index} size="small" label={""} defaultValue={value} onChange={handleChangeValue}/>
             :
             value
           }
           </TableCell>
-          </Tooltip>
         )
         
       }))
@@ -201,8 +194,7 @@ export default function DataInput(props) {
           </Grid>
           <Grid item xs={6}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
-            {/* <h3><Button style={{color:"#0884b4"}} onClick={handleClickEdit}>{editable ? "Save Values" : "Edit Values"}</Button></h3> */}
-            {props.edited && <h3><Button style={{color:"#0884b4"}} onClick={handleSaveChanges}>Save Changes</Button></h3> }
+            <h3><Button style={{color:"#0884b4"}} onClick={handleClickEdit}>{editable ? "Save Values" : "Edit Values"}</Button></h3>
             </Box>
           </Grid>
         </Grid>

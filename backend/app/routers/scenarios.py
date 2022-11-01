@@ -159,3 +159,25 @@ async def copy(scenario_id: int):
     """
     return {'data' : scenario_handler.copy_scenario(scenario_id)}
 
+@router.post("/update_excel")
+async def update_excel(request: Request):
+    """Update excel sheet for given scenario and accompanying table.
+
+    Args:
+        request.json()['id']: scenario id to be updated
+        request.json()['tableKey']: key for table to be updated inside scenario
+        request.json()['updatedTable']: dictionary containing updated values
+
+    Returns:
+        Given scenario with updated status
+    """
+    data = await request.json()
+    try:
+        return scenario_handler.update_excel(data['id'], data['tableKey'], data['updatedTable'])
+        
+    except Exception as e:
+        _log.error(f"unable to find and run given excel sheet id{data['id']}: {e}")
+        raise HTTPException(
+            500, f"unable to find and run given excel sheet id: {data['id']}: {e}"
+        )
+    

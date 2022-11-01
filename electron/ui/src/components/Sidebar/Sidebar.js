@@ -9,25 +9,49 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Tooltip from '@mui/material/Tooltip';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import PopupModal from '../../components/PopupModal/PopupModal'
 
 
 const drawerWidth = 240;
 
 export default function Sidebar(props) {
+  const [ openSaveModal, setOpenSaveModal ] = React.useState(false)
+  const [ key, setKey ] =  React.useState(null)
+  const handleOpenSaveModal = () => setOpenSaveModal(true);
+  const handleCloseSaveModal = () => setOpenSaveModal(false);
 
-  React.useEffect(() => {
-    console.log('paretodictionary: ',ParetoDictionary)
-    
-},[])
+  const handleSaveModal = () => {
+    console.log('saving this thing')
+    props.handleUpdateExcel(props.scenario.id, props.category, props.scenario.data_input.df_parameters[props.category])
+    handleCloseSaveModal()
+    props.setInputDataEdited(false)
+    props.handleSetCategory(key)
+  }
+
+  const handleDiscardChanges = () => {
+    handleCloseSaveModal()
+    props.setInputDataEdited(false)
+    props.handleSetCategory(key)
+    props.resetScenarioData()
+  }
+
+  const handleClick = (key) => {
+    setKey(key)
+    if (props.inputDataEdited) {
+      handleOpenSaveModal()
+    }
+    else {
+      props.handleSetCategory(key)
+    }
+  }
 
   const renderAdditionalCategories = () => {
     let additionalCategories = props.section === 0 ? {"Plots": null, "Network Diagram": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
-    console.log('additional categories: ',additionalCategories)
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <>
         <ListItem key={key} disablePadding>
-            <ListItemButton selected={props.category===key} onClick={() => props.handleSetCategory(key)} key={key}>
+            <ListItemButton selected={props.category===key} onClick={() => handleClick(key)} key={key}>
             <ListItemText key={key} primary={key} />
             </ListItemButton>
         </ListItem>
@@ -43,7 +67,7 @@ export default function Sidebar(props) {
         <>
         <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : ""} placement="right-start">
         <ListItem key={key} disablePadding>
-            <ListItemButton selected={props.category===key} onClick={() => props.handleSetCategory(key)} key={key}>
+            <ListItemButton selected={props.category===key} onClick={() => handleClick(key)} key={key}>
             <ListItemText key={key} primary={key} />
             </ListItemButton>
         </ListItem>
@@ -86,6 +110,20 @@ export default function Sidebar(props) {
           </List>
         </Box>
       </Drawer>
+      <PopupModal
+        hasTwoButtons
+        open={openSaveModal}
+        handleClose={handleCloseSaveModal}
+        handleSave={handleSaveModal}
+        handleButtonTwoClick={handleDiscardChanges}
+        text="Do you want to save changes made to this table?"
+        buttonText='Save'
+        buttonColor='primary'
+        buttonVariant='contained'
+        buttonTwoText='Discard'
+        buttonTwoColor='error'
+        buttonTwoVariant='outlined'
+      />
     </Box>
   );
 }

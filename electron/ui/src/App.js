@@ -11,7 +11,7 @@ import Header from './components/Header/Header';
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
 import LandingPage from './views/LandingPage/LandingPage';
-import { updateScenario } from './services/app.service'
+import { updateScenario, updateExcel } from './services/app.service'
 import { deleteScenario, copyScenario } from './services/scenariolist.service'
 import { fetchScenarios } from './services/sidebar.service'
 import { checkTasks } from './services/homepage.service'
@@ -230,6 +230,24 @@ const navigateToLandingPage = () => {
     })
   }
 
+  const handleUpdateExcel = (id, tableKey, updatedTable) => {
+    updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
+    .then(response => response.json())
+    .then((data)=>{
+      console.log('return from update excel: '+data)
+      
+    })
+    .catch(e => {
+      console.error('unable to check for tasks: ',e)
+    })
+  }
+
+  const resetScenarioData = () => {
+    console.log('resetting scenario data, index is '+scenarioIndex)
+    let tempScenario = scenarios[scenarioIndex]
+    setScenarioData(tempScenario)
+  }
+
   return (
     <div className="App">  
       <Header 
@@ -274,6 +292,7 @@ const navigateToLandingPage = () => {
           path="/scenario" 
           element={
             <Dashboard 
+            handleUpdateExcel={handleUpdateExcel}
             updateScenario={handleScenarioUpdate} 
             handleEditScenarioName={handleEditScenarioName} 
             scenario={scenarioData} 
@@ -283,6 +302,7 @@ const navigateToLandingPage = () => {
             handleSetSection={handleSetSection} 
             backgroundTasks={backgroundTasks}
             navigateHome={navigateToScenarioList}
+            resetScenarioData={resetScenarioData}
             />} 
         />
         <Route
