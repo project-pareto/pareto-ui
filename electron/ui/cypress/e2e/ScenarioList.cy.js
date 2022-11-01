@@ -1,7 +1,7 @@
 describe('scenario list', () => {
     it('test that scenario list loads properly', () => {
         //load webpage
-        cy.visit('/')
+        cy.visit('/#/scenarios')
 
         //locate header logo
         cy.findByRole('img', { name: /pareto logo/i })

@@ -124,8 +124,10 @@ export default function SankeyPlot(props) {
             }
             
         }
-        setTotalNodes(Array.from(nodeSet))
-        setTotalTimes(Array.from(timeSet))
+        let totalNodes = Array.from(nodeSet).sort()
+        let totalTimes = Array.from(timeSet).sort()
+        setTotalNodes(Array.from(totalNodes))
+        setTotalTimes(Array.from(totalTimes))
         if(unpackAll) {
             setFilteredNodes(Array.from(nodeSet))
             setFilteredTimes(Array.from(timeSet))
@@ -215,7 +217,7 @@ export default function SankeyPlot(props) {
     created separate component for this to prevent rerendering of sankey diagram when changing filterType
 */
 function FilterDropdown(props) {
-    const [ filterType, setFilterType ] = useState("location")
+    const [ filterType, setFilterType ] = useState("time")
 
     const styles = {
         iconSelected: {

@@ -1,15 +1,16 @@
  
 import './App.css';
 import React from 'react';
+import {useEffect, useState} from 'react';   
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Header from './components/Header/Header'; 
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
-import {useEffect, useState} from 'react';   
+import LandingPage from './views/LandingPage/LandingPage';
 import { updateScenario } from './services/app.service'
 import { deleteScenario, copyScenario } from './services/scenariolist.service'
 import { fetchScenarios } from './services/sidebar.service'
@@ -24,6 +25,7 @@ function App() {
   const [ category, setCategory ] = useState(null)
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
   const [ backgroundTasks, setBackgroundTasks ] = useState([])
+  const [ showHeader, setShowHeader ] = useState(false)
   let navigate = useNavigate();
 
   useEffect(()=>{
@@ -71,10 +73,29 @@ function App() {
     
 }, []);
 
-  const navigateHome = () => {
+const navigateToLandingPage = () => {
+  /*
+    function for returning to landing page
+  */   
+  setShowHeader(false)
+  setScenarioData(null)
+  setSection(0)
+  setCategory(null)
+  setScenarioIndex(null)
+  fetchScenarios()
+  .then(response => response.json())
+  .then((data)=>{
+    console.log('setscenarios: ',data.data)
+    setScenarios(data.data)
+  });
+  navigate('/', {replace: true})
+}
+
+  const navigateToScenarioList = () => {
     /*
       function for returning to scenario list and resetting scenario data
     */   
+    setShowHeader(true)
     setScenarioData(null)
     setSection(0)
     setCategory(null)
@@ -85,7 +106,7 @@ function App() {
       console.log('setscenarios: ',data.data)
       setScenarios(data.data)
     });
-    navigate('/', {replace: true})
+    navigate('/scenarios', {replace: true})
   }
 
   const handleScenarioSelection = (scenario) => {
@@ -108,6 +129,7 @@ function App() {
   const handleNewScenario = (data) => {
     const temp = {...scenarios}
     temp[data.id] = data
+    setShowHeader(true)
     setScenarios(temp)
     setScenarioIndex(data.id)
     setScenarioData(data)
@@ -211,15 +233,27 @@ function App() {
   return (
     <div className="App">  
       <Header 
+        showHeader={showHeader}
         scenarios={scenarios} 
         index={scenarioIndex} 
         scenarioData={scenarioData} 
         handleSelection={handleScenarioSelection}
-        navigateHome={navigateHome}/>
+        navigateHome={navigateToScenarioList}
+        navigateToLandingPage={navigateToLandingPage}/>
         
       <Routes> 
-        <Route 
+      <Route 
           path="/" 
+          element={
+            <LandingPage
+            navigateToScenarioList={navigateToScenarioList}
+            handleNewScenario={handleNewScenario} 
+            scenarios={scenarios} 
+            />} 
+        />
+
+        <Route 
+          path="/scenarios" 
           element={
             <ScenarioList
             handleNewScenario={handleNewScenario} 
@@ -230,8 +264,12 @@ function App() {
             deleteScenario={handleDeleteScenario}
             copyScenario={handleCopyScenario}
             handleSetSection={handleSetSection} 
+            setShowHeader={setShowHeader}
             />} 
         />
+
+        
+
         <Route 
           path="/scenario" 
           element={
@@ -244,7 +282,7 @@ function App() {
             handleSetCategory={handleSetCategory} 
             handleSetSection={handleSetSection} 
             backgroundTasks={backgroundTasks}
-            navigateHome={navigateHome}
+            navigateHome={navigateToScenarioList}
             />} 
         />
         <Route
