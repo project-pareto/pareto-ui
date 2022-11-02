@@ -244,8 +244,13 @@ const navigateToLandingPage = () => {
 
   const resetScenarioData = () => {
     console.log('resetting scenario data, index is '+scenarioIndex)
-    let tempScenario = scenarios[scenarioIndex]
-    setScenarioData(tempScenario)
+    fetchScenarios()
+      .then(response => response.json())
+      .then((data)=>{
+        console.log('setscenarios: ',data.data)
+        setScenarios(data.data)
+        setScenarioData(data.data[scenarioIndex])
+      });
   }
 
   return (

@@ -129,18 +129,18 @@ export default function LandingPage(props) {
                             <TableBody>
                                 {ids.length > 0 &&
                                 <TableRow>
-                                    <TableCell sx={{borderBottom:"none"}}><b>{props.scenarios[ids[0]].name}</b></TableCell>
+                                    <TableCell sx={{borderBottom:"none", maxWidth:150, overflow: 'hidden', textOverflow: 'ellipsis'}}><b>{props.scenarios[ids[0]].name}</b></TableCell>
                                     <TableCell sx={{borderBottom:"none"}}>{props.scenarios[ids[0]].date}</TableCell>
-                                    <TableCell sx={{borderBottom:"none"}}>
+                                    <TableCell sx={{borderBottom:"none", overflow: 'hidden', textOverflow: 'ellipsis'}}>
                                         {props.scenarios[ids[0]].results.status === "complete" ? "Optimized"  : props.scenarios[ids[0]].results.status === "none" ? "Draft" : props.scenarios[ids[0]].results.status}
                                     </TableCell>
                                 </TableRow>
                                 }
                                 {ids.length > 1 &&
                                 <TableRow>
-                                    <TableCell sx={{borderBottom:"none"}}><b>{props.scenarios[ids[1]].name}</b></TableCell>
+                                    <TableCell sx={{borderBottom:"none", maxWidth:150, overflow: 'hidden', textOverflow: 'ellipsis'}}><b>{props.scenarios[ids[1]].name}</b></TableCell>
                                     <TableCell sx={{borderBottom:"none"}}>{props.scenarios[ids[1]].date}</TableCell>
-                                    <TableCell sx={{borderBottom:"none"}}>
+                                    <TableCell sx={{borderBottom:"none", overflow: 'hidden', textOverflow: 'ellipsis'}}>
                                         {props.scenarios[ids[1]].results.status === "complete" ? "Optimized"  : props.scenarios[ids[1]].results.status === "none" ? "Draft" : props.scenarios[ids[1]].results.status}
                                     </TableCell>
                                 </TableRow>

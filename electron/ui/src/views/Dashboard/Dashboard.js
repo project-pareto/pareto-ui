@@ -95,10 +95,16 @@ export default function Dashboard(props) {
 
   return (
     <>
-    <ProcessToolbar 
+      <ProcessToolbar 
         handleSelection={props.handleSetSection} 
         selected={props.section} 
-        scenario={scenario}>
+        scenario={scenario}
+        category={props.category} 
+        inputDataEdited={inputDataEdited}
+        handleUpdateExcel={props.handleUpdateExcel}
+        setInputDataEdited={setInputDataEdited}
+        resetScenarioData={props.resetScenarioData}
+      >
       </ProcessToolbar>
       {(props.section === 0 || (props.section === 2 && scenario.results.status === "complete")) && 
         <Sidebar 

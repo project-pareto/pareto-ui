@@ -22,16 +22,14 @@ import { Button } from '@mui/material';
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
   const [ editDict, setEditDict ] = useState({})
-  const [ editable, setEditable ] = useState(false)
-  const [ edited, setEdited ] = useState(false)
   const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
-  var keyIndexMapping = {}
-  var scenarioData = {...props.scenario}
   const plotCategoryDictionary  = {
                                 "CompletionsDemand": "CompletionsPads",
                                 "PadRates": "ProductionPads",
                                 "FlowbackRates": "CompletionsPads"
                                   }
+  var keyIndexMapping = {}
+
   const styles ={
     firstCol: {
       backgroundColor: "#f4f4f4", 
@@ -49,17 +47,22 @@ export default function DataInput(props) {
   useEffect(()=>{
     console.log('datainput use effect has been triggered')
     // scenario.data_input.df_parameters[props.category]
-    if (props.category != "Plots" && props.category != "Network Diagram") {
-      let tempEditDict = {}
-      {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
-        scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
-          tempEditDict[""+ind+":"+index] = false
-        })
-      })}
-      setEditDict(tempEditDict)
-      // props.handleEditInput(false)
-      // setEdited(false)
+    try {
+      if (props.category != "Plots" && props.category != "Network Diagram") {
+        let tempEditDict = {}
+        {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
+          scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
+            tempEditDict[""+ind+":"+index] = false
+          })
+        })}
+        setEditDict(tempEditDict)
+      }
+    } catch (e) {
+      console.error('unable to set edit dictionary: ',e)
     }
+    let tempScenario = {}
+    Object.assign(tempScenario, props.scenario);
+    setScenario(tempScenario)
     
   }, [props.category]);
   
@@ -99,14 +102,14 @@ export default function DataInput(props) {
    }
 
    const handleChangeValue = (event) => {
-    console.log('changed value')
     let inds = event.target.getAttribute('name').split(":")
     //ind[0] is the index inside the array
     //ind[1] corresponds with the key. need to get that key name somehow
     let ind = parseInt(inds[0])
     let colName = keyIndexMapping[parseInt(inds[1])]
-
-    scenarioData.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    let tempScenario = {...scenario}
+    tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    setScenario(tempScenario)
    }
   
   const renderRow = (ind) => {
@@ -240,7 +243,7 @@ export default function DataInput(props) {
 }
 
   return ( 
-      renderInputCategory()
+    renderInputCategory()
   );
 
 }
