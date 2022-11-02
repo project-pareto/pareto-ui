@@ -41,7 +41,7 @@ export default function LandingPage(props) {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 500,
+            width: 600,
             borderRadius: 8,
             boxShadow:'0px 5px 10px 0px rgba(0, 0, 0, 0.5)',
             p: 4,
@@ -121,7 +121,7 @@ export default function LandingPage(props) {
 
                 <Grid item xs={1}> </Grid>
                 <Grid item xs={10}> 
-                    <Box style={styles.tableBox}>
+                    <Box style={styles.tableBox} sx={{overflow:"scroll"}}>
                         <h2 style={{color:"#0884b4"}}>
                             {ids.length > 0 ? "Recent Scenarios" : "No Saved Scenarios"}
                         </h2>

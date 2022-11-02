@@ -317,8 +317,10 @@ class ScenarioHandler:
                 locked = self.LOCKED
             self.LOCKED = True
 
-            el = self._db.all()[-1]
+            query = tinydb.Query()
+            el = self._db.search((query.version == self.VERSION))[-1]
             next_id = el.doc_id+1
+            
             _log.info(f'setting next id: {next_id}')
             self.next_id = next_id
         except Exception as e:
@@ -332,7 +334,7 @@ class ScenarioHandler:
     def update_excel(self, id, table_key, updatedTable):
         _log.info(f'updating id {id} table {table_key}')
         excel_path = self.get_excelsheet_path(id)
-        wb = load_workbook(excel_path)
+        wb = load_workbook(excel_path, data_only=True)
         _log.info(f'loaded workbook from path: {excel_path}')
 
         x = 1
@@ -345,16 +347,25 @@ class ScenarioHandler:
             y = 3
             for cellValue in updatedTable[column]:
                 cellLocation = f'{get_column_letter(x)}{y}'
-                if cellValue == None:
-                    ws[cellLocation] = ""
+                originalValue = ws[cellLocation].value
+                if cellValue == "":
+                    newValue = None
                 else:
-                    ws[cellLocation] = cellValue
-                # print(f'{cellLocation}: {cellValue}')
-                # print(f'value: {ws[cellLocation].value}')
+                    try:
+                        newValue = int(cellValue)
+                    except ValueError:
+                        try:
+                            newValue = float(cellValue)
+                        except: 
+                            newValue = cellValue
+                if originalValue != newValue:
+                    print('updating value')
+                    ws[cellLocation] = newValue
                 y+=1
             x+=1
         wb.save(excel_path)
-
+        wb.close()
+        _log.info(f'saved workbook')
         # fetch scenario
         try:
             # check if db is in use. if so, wait til its done being used

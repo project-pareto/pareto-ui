@@ -268,7 +268,6 @@ def get_data(fname, set_list, parameter_list):
 
     # The data frame for Parameters is preprocessed to match the format required by Pyomo
     _df_parameters = _df_to_param(_df_parameters, data_column)
-
     return [_df_sets, _df_parameters, frontend_parameters]
 
 

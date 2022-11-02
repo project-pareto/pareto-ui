@@ -49,15 +49,18 @@ export default function DataInput(props) {
   useEffect(()=>{
     console.log('datainput use effect has been triggered')
     // scenario.data_input.df_parameters[props.category]
-    let tempEditDict = {}
-    {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
-      scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
-        tempEditDict[""+ind+":"+index] = false
-      })
-    })}
-    setEditDict(tempEditDict)
-    // props.handleEditInput(false)
-    // setEdited(false)
+    if (props.category != "Plots" && props.category != "Network Diagram") {
+      let tempEditDict = {}
+      {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
+        scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
+          tempEditDict[""+ind+":"+index] = false
+        })
+      })}
+      setEditDict(tempEditDict)
+      // props.handleEditInput(false)
+      // setEdited(false)
+    }
+    
   }, [props.category]);
   
    const handlePlotCategoryChange = (event) => {
