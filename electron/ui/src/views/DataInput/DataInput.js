@@ -18,11 +18,20 @@ import Tooltip from '@mui/material/Tooltip';
 import demoInputDiagram from "../../assets/demo_figure_input.png";
 import AreaChart from '../../components/AreaChart/AreaChart'
 import { Button } from '@mui/material';
+import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
   const [ editDict, setEditDict ] = useState({})
+  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) 
+  const [ columnNodes, setColumnNodes ] = useState([])
+  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([])
+  const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
+  const [ rowNodes, setRowNodes ] = useState([])
+  const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
   const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
+  const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
+  const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const plotCategoryDictionary  = {
                                 "CompletionsDemand": "CompletionsPads",
                                 "PadRates": "ProductionPads",
@@ -50,12 +59,31 @@ export default function DataInput(props) {
     try {
       if (props.category != "Plots" && props.category != "Network Diagram") {
         let tempEditDict = {}
+        let tempColumnNodes = {}
+        let tempColumnNodesMapping = []
+        let tempRowNodes = {}
+        let tempRowNodesMapping
         {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
+          if (ind === 0) {
+            tempRowNodesMapping = value
+            value.map ((v,i) => {
+              tempRowNodes[v] = true
+            })
+          } else {
+            tempColumnNodesMapping.push(key)
+            tempColumnNodes[key] = true
+          }
           scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
             tempEditDict[""+ind+":"+index] = false
           })
         })}
         setEditDict(tempEditDict)
+        setColumnNodes(tempColumnNodes)
+        setRowNodes(tempRowNodes)
+        setFilteredColumnNodes(tempColumnNodesMapping)
+        setFilteredRowNodes(tempRowNodesMapping)
+        setColumnNodesMapping(tempColumnNodesMapping)
+        setRowNodesMapping(tempRowNodesMapping)
       }
     } catch (e) {
       console.error('unable to set edit dictionary: ',e)
@@ -111,6 +139,71 @@ export default function DataInput(props) {
     tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
     setScenario(tempScenario)
    }
+
+   const handleColumnFilter = (col) => {
+    console.log('selected col',col)
+    var tempCols
+    let tempColumnNodes = {...columnNodes}
+    if (col === 'all') {
+      tempCols = filteredColumnNodes.length === columnNodesMapping.length ? [] : columnNodesMapping
+      if (filteredColumnNodes.length === columnNodesMapping.length) {
+        for (const [key, value] of Object.entries(tempColumnNodes)) {
+          tempColumnNodes[key] = false
+        }
+      } else {
+        for (const [key, value] of Object.entries(tempColumnNodes)) {
+          tempColumnNodes[key] = true
+        }
+      }
+      setColumnNodes(tempColumnNodes)
+      setFilteredColumnNodes(tempCols);
+    }
+    else {
+      tempCols = [...filteredColumnNodes]
+      const index = tempCols.indexOf(col);
+      if (index > -1) { // only splice array when item is found
+        tempCols.splice(index, 1); // 2nd parameter means remove one item only
+      } else{
+        tempCols.push(col)
+      }
+      tempColumnNodes[col] = !tempColumnNodes[col]
+      setColumnNodes(tempColumnNodes)
+      setFilteredColumnNodes(tempCols)
+    }
+    
+    
+}
+
+const handleRowFilter = (row) => {
+    var tempRows
+    let tempRowNodes = {...rowNodes}
+    if (row === 'all') {
+      tempRows = filteredRowNodes.length === rowNodesMapping.length ? [] : rowNodesMapping
+      if (filteredRowNodes.length === rowNodesMapping.length) {
+        for (const [key, value] of Object.entries(tempRowNodes)) {
+          tempRowNodes[key] = false
+        }
+      } else {
+        for (const [key, value] of Object.entries(tempRowNodes)) {
+          tempRowNodes[key] = true
+        }
+      }
+      setRowNodes(tempRowNodes)
+      setFilteredRowNodes(tempRows);
+    }
+    else {
+      tempRows = [...filteredRowNodes]
+        const index = tempRows.indexOf(row);
+        if (index > -1) { // only splice array when item is found
+          tempRows.splice(index, 1); // 2nd parameter means remove one item only
+        } else{
+          tempRows.push(row)
+        }
+        tempRowNodes[row] = !tempRowNodes[row]
+        setRowNodes(tempRowNodes)
+        setFilteredRowNodes(tempRows)
+    }
+}
   
   const renderRow = (ind) => {
       var cells = []
@@ -120,6 +213,11 @@ export default function DataInput(props) {
       });
 
       return (cells.map( (value, index) => {
+        /*
+          columnNodes[columnNodesMapping[index]] must be true
+          UNLESS it's the first column (index is 0)
+        */
+       if (index ===0 || columnNodes[columnNodesMapping[index - 1]]) {
         return (
           <Tooltip title={editDict[""+ind+":"+index] ? "Doubleclick to save value" : "Doubleclick to edit value"} arrow>
           <TableCell onDoubleClick={() => handleDoubleClick(ind, index)} key={index} style={index === 0 ? styles.firstCol : styles.other}>
@@ -131,6 +229,8 @@ export default function DataInput(props) {
           </TableCell>
           </Tooltip>
         )
+       }
+        
         
       }))
   }
@@ -143,7 +243,13 @@ export default function DataInput(props) {
       }
 
       return (rows.map( (value, index) => {
+         /*
+          rowNodes[rowNodesMapping[index]] must equal true
+        */
+       if (rowNodes[rowNodesMapping[index]]) {
         return <TableRow>{value}</TableRow>
+       }
+        
       }))
   }
 
@@ -200,30 +306,73 @@ export default function DataInput(props) {
         return (
           <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'10px'}}>
               <h3>{props.category}</h3>
             </Box>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={11}>
+            <Box sx={{display: 'flex', justifyContent: 'center'}}>
+            <TableContainer sx={{overflowX:'auto', marginTop:10}}>
+            <Table style={{border:"1px solid #ddd"}} size='small'>
+              <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
+              <TableRow>
+              {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], index) => {
+                keyIndexMapping[index] = key
+                if (index === 0 || columnNodes[key]) {
+                  return (
+                    index === 0 ? 
+                  <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
+                  : 
+                  <TableCell style={{color:"white"}}>{key}</TableCell>
+                  )
+                }
+                
+              })}
+              </TableRow>
+              </TableHead>
+              <TableBody>
+              {renderRows()}
+              </TableBody>
+            </Table>
+            </TableContainer>
+            </Box>
+          </Grid>
+          <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
-            {/* <h3><Button style={{color:"#0884b4"}} onClick={handleClickEdit}>{editable ? "Save Values" : "Edit Values"}</Button></h3> */}
             {props.edited && <h3><Button style={{color:"#0884b4"}} onClick={handleSaveChanges}>Save Changes</Button></h3> }
+            <FilterDropdown
+                width="200px"
+                maxHeight="300px"
+                option1="Column"
+                filtered1={filteredColumnNodes}
+                total1={columnNodesMapping}
+                isAllSelected1={isAllColumnsSelected}
+                handleFilter1={handleColumnFilter}
+                option2="Row"
+                filtered2={filteredRowNodes}
+                total2={rowNodesMapping}
+                isAllSelected2={isAllRowsSelected}
+                handleFilter2={handleRowFilter}
+            />
             </Box>
           </Grid>
         </Grid>
-        <TableContainer sx={{overflowX:'auto'}}>
+        {/* <TableContainer sx={{overflowX:'auto'}}>
         <Table style={{border:"1px solid #ddd"}} size='small'>
           <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
           <TableRow>
           {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], index) => {
             keyIndexMapping[index] = key
-            return (
-              index === 0 ? 
-             <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
-            : 
-             <TableCell style={{color:"white"}}>{key}</TableCell>
-            )
+            if (index === 0 || columnNodes[key]) {
+              return (
+                index === 0 ? 
+               <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
+              : 
+               <TableCell style={{color:"white"}}>{key}</TableCell>
+              )
+            }
+            
           })}
           </TableRow>
           </TableHead>
@@ -231,7 +380,7 @@ export default function DataInput(props) {
           {renderRows()}
           </TableBody>
         </Table>
-        </TableContainer>
+        </TableContainer> */}
         </Box>
         )
       }
