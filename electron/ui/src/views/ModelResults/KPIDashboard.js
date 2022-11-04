@@ -176,10 +176,10 @@ export default function KPIDashboard(props) {
                     {
                         type: "pie",
                         values: [
-                            kpiData.v_C_TotalSourced.value, 
-                            kpiData.v_C_TotalTreatment.value, 
-                            kpiData.v_C_TotalDisposal.value, 
-                            kpiData.v_C_TotalPiping.value,
+                            kpiData.v_C_TotalSourced.value >= 0 ? kpiData.v_C_TotalSourced.value : 0, 
+                            kpiData.v_C_TotalTreatment.value >= 0 ? kpiData.v_C_TotalTreatment.value : 0, 
+                            kpiData.v_C_TotalDisposal.value >= 0 ? kpiData.v_C_TotalDisposal.value : 0, 
+                            kpiData.v_C_TotalPiping.value >= 0 ? kpiData.v_C_TotalPiping.value : 0,
                             kpiData.v_C_TotalTrucking.value >= 0 ? kpiData.v_C_TotalTrucking.value : 0],
                         labels: [
                             "Source", 
