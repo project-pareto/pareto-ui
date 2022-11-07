@@ -1,4 +1,5 @@
 import './DataInput.css';
+import React from 'react';
 import {useEffect, useState} from 'react'; 
 import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -54,8 +55,6 @@ export default function DataInput(props) {
   }
 
   useEffect(()=>{
-    console.log('datainput use effect has been triggered')
-    // scenario.data_input.df_parameters[props.category]
     try {
       if (props.category != "Plots" && props.category != "Network Diagram") {
         let tempEditDict = {}
@@ -100,10 +99,8 @@ export default function DataInput(props) {
 
   const handleSaveChanges = () => {
     //api call to save changes on backend
-    // setEdited(false)
     props.handleEditInput(false)
     props.handleUpdateExcel(scenario.id, props.category, scenario.data_input.df_parameters[props.category])
-    
     let tempEditDict = {}
     {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
       scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
@@ -111,7 +108,6 @@ export default function DataInput(props) {
       })
     })}
     setEditDict(tempEditDict)
-    
    }
 
    const handleDoubleClick = (ind, index) => {
@@ -124,15 +120,13 @@ export default function DataInput(props) {
       tempEditDict[""+ind+":"+index] = true
       setEditDict(tempEditDict)
       props.handleEditInput(true)
-      // setEdited(true)
     }
-    
    }
 
    const handleChangeValue = (event) => {
     let inds = event.target.getAttribute('name').split(":")
     //ind[0] is the index inside the array
-    //ind[1] corresponds with the key. need to get that key name somehow
+    //ind[1] corresponds with the key
     let ind = parseInt(inds[0])
     let colName = keyIndexMapping[parseInt(inds[1])]
     let tempScenario = {...scenario}
@@ -141,7 +135,6 @@ export default function DataInput(props) {
    }
 
    const handleColumnFilter = (col) => {
-    console.log('selected col',col)
     var tempCols
     let tempColumnNodes = {...columnNodes}
     if (col === 'all') {
@@ -194,8 +187,8 @@ const handleRowFilter = (row) => {
     else {
       tempRows = [...filteredRowNodes]
         const index = tempRows.indexOf(row);
-        if (index > -1) { // only splice array when item is found
-          tempRows.splice(index, 1); // 2nd parameter means remove one item only
+        if (index > -1) {
+          tempRows.splice(index, 1);
         } else{
           tempRows.push(row)
         }
@@ -230,8 +223,6 @@ const handleRowFilter = (row) => {
           </Tooltip>
         )
        }
-        
-        
       }))
   }
 
@@ -241,7 +232,6 @@ const handleRowFilter = (row) => {
       for (let i = 0; i < len; i++) {
         rows.push(renderRow(i))
       }
-
       return (rows.map( (value, index) => {
          /*
           rowNodes[rowNodesMapping[index]] must equal true
@@ -287,7 +277,6 @@ const handleRowFilter = (row) => {
                 />
             </Box>
             )
-        
       }
       /*
         if category is network diagram, return demo image
@@ -327,7 +316,6 @@ const handleRowFilter = (row) => {
                   <TableCell style={{color:"white"}}>{key}</TableCell>
                   )
                 }
-                
               })}
               </TableRow>
               </TableHead>
@@ -358,29 +346,6 @@ const handleRowFilter = (row) => {
             </Box>
           </Grid>
         </Grid>
-        {/* <TableContainer sx={{overflowX:'auto'}}>
-        <Table style={{border:"1px solid #ddd"}} size='small'>
-          <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
-          <TableRow>
-          {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], index) => {
-            keyIndexMapping[index] = key
-            if (index === 0 || columnNodes[key]) {
-              return (
-                index === 0 ? 
-               <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
-              : 
-               <TableCell style={{color:"white"}}>{key}</TableCell>
-              )
-            }
-            
-          })}
-          </TableRow>
-          </TableHead>
-          <TableBody>
-          {renderRows()}
-          </TableBody>
-        </Table>
-        </TableContainer> */}
         </Box>
         )
       }
@@ -388,9 +353,7 @@ const handleRowFilter = (row) => {
     } catch (e) {
       console.error("unable to render input category: ",e)
     }
-    
 }
-
   return ( 
     renderInputCategory()
   );

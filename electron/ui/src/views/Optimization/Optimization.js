@@ -1,3 +1,4 @@
+import React from 'react';
 import {useEffect, useState} from 'react';   
 import Box from '@mui/material/Box';
 import Radio from '@mui/material/Radio';
@@ -11,8 +12,6 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-
-
 
 
 export default function Optimization(props) {
