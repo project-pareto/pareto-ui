@@ -32,7 +32,7 @@ export default function FilterDropdown(props) {
     return (
         <Accordion style={{width:props.width }}sx={{width:props.width}}>
                 <AccordionSummary sx={{marginBottom: 0, paddingBottom:0}} style={{justifyContent:"center"}}>
-                <Typography align="center" sx={{width: '100%',fontWeight: "bold", color: "#0884b4"}}>Filters</Typography>
+                <Typography noWrap align="center" sx={{width: '100%',fontWeight: "bold", color: "#0884b4"}}>{props.option1} & {props.option2} Filters</Typography>
                 </AccordionSummary>
                 <AccordionDetails sx={{ maxHeight:props.maxHeight, overflow: "scroll", marginTop:0, paddingTop:0}}>
                     <Button size="small" style={filterType === props.option1 ? styles.iconSelected : styles.iconUnselected} onClick={() => handleFilterTypeChange(props.option1)}>{props.option1}</Button>
