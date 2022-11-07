@@ -18,8 +18,9 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import demoInputDiagram from "../../assets/demo_figure_input.png";
 import AreaChart from '../../components/AreaChart/AreaChart'
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
+import ParetoDictionary from '../../assets/ParetoDictionary.json'
 
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
@@ -297,12 +298,14 @@ const handleRowFilter = (row) => {
         <Grid container>
           <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'10px'}}>
-              <h3>{props.category}</h3>
+              {props.edited && <h3><Button style={{color:"#0884b4"}} onClick={handleSaveChanges}><Typography noWrap>Save Changes</Typography></Button></h3> }
             </Box>
           </Grid>
           <Grid item xs={11}>
             <Box sx={{display: 'flex', justifyContent: 'center'}}>
-            <TableContainer sx={{overflowX:'auto', marginTop:10}}>
+            <TableContainer>
+            <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}</h3>
+            <TableContainer sx={{overflowX:'auto'}}>
             <Table style={{border:"1px solid #ddd"}} size='small'>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
               <TableRow>
@@ -324,11 +327,11 @@ const handleRowFilter = (row) => {
               </TableBody>
             </Table>
             </TableContainer>
+            </TableContainer>
             </Box>
           </Grid>
           <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
-            {props.edited && <h3><Button style={{color:"#0884b4"}} onClick={handleSaveChanges}>Save Changes</Button></h3> }
             <FilterDropdown
                 width="200px"
                 maxHeight="300px"

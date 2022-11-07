@@ -13,6 +13,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
 import demoOutputDiagram from "../../assets/demo_figure_output.png";
+import ParetoDictionary from '../../assets/ParetoDictionary.json'
 
 
 export default function ModelResults(props) {
@@ -92,7 +93,7 @@ export default function ModelResults(props) {
       else {
         return (
           <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
-            <h3>{props.category}</h3>
+            <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}</h3>
             <TableContainer sx={{overflowX:'auto'}}>
             <Table style={{border:"1px solid #ddd"}} size='small'>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
