@@ -1,8 +1,6 @@
 import './DataInput.css';
 import React from 'react';
-import {useEffect, useState} from 'react'; 
-import IconButton from '@mui/material/IconButton';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import {useEffect, useState} from 'react';
 import Grid from '@mui/material/Grid';  
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
