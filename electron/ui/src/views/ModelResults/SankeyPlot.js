@@ -44,6 +44,7 @@ export default function SankeyPlot(props) {
             } else{
                 tempNodes.push(node)
             }
+            tempNodes = tempNodes.sort()
             setFilteredNodes(tempNodes)
         }
         unpackData(false, tempNodes, filteredTimes)
@@ -63,8 +64,35 @@ export default function SankeyPlot(props) {
             } else{
                 tempTimes.push(time)
             }
+            tempTimes = tempTimes.sort()
             setFilteredTimes(tempTimes)
         }
+        unpackData(false, filteredNodes, tempTimes)
+    }
+
+    const handleArrowSelection = (direction) => {
+        var tempTimes
+        if(direction === 'up') {
+            if(isAllTimesSelected || filteredTimes.length===0) {
+                tempTimes=[totalTimes[totalTimes.length-1]]
+            } else if (filteredTimes[0]===totalTimes[0]) {
+                tempTimes=[...totalTimes]
+            }else {
+                let index = totalTimes.indexOf(filteredTimes[0]);
+                tempTimes=[totalTimes[index-1]]
+            }
+        } else if(direction === 'down') {
+            if(isAllTimesSelected || filteredTimes.length===0) {
+                tempTimes=[totalTimes[0]]
+            } else if (filteredTimes[filteredTimes.length-1]===totalTimes[totalTimes.length-1]){
+                tempTimes=[...totalTimes]
+            }
+            else {
+                const index = totalTimes.indexOf(filteredTimes[filteredTimes.length-1]);
+                tempTimes=[totalTimes[index+1]]
+            }
+        }
+        setFilteredTimes(tempTimes)
         unpackData(false, filteredNodes, tempTimes)
     }
 
@@ -78,7 +106,7 @@ export default function SankeyPlot(props) {
             var tempFilteredNodes = filteredNodes
             var tempFilteredTimes = filteredTimes
         }
-        console.log('unpacking data with unpackall = '+unpackAll)
+        // console.log('unpacking data with unpackall = '+unpackAll)
         var d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
         var locationsInArray = {}
         var nodeSet = new Set()
@@ -126,7 +154,7 @@ export default function SankeyPlot(props) {
             setFilteredNodes(Array.from(nodeSet))
             setFilteredTimes(Array.from(timeSet))
         }
-        console.log(d)
+        // console.log(d)
         setPlotData(d)
           
     }
@@ -201,6 +229,7 @@ export default function SankeyPlot(props) {
                 total2={totalNodes}
                 isAllSelected2={isAllNodesSelected}
                 handleFilter2={handleNodeFilter}
+                handleArrowSelection={handleArrowSelection}
             />
         </Box>
         </Grid>
