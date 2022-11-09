@@ -79,7 +79,7 @@ function App() {
       
     })
     
-}, [loadLandingPage, navigate]);
+}, [loadLandingPage]);
 
   const navigateToScenarioList = () => {
     /*
