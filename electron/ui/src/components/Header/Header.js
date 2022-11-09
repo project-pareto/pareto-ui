@@ -18,7 +18,7 @@ export default function Header(props) {
         <div id="Header">
         
         <div className="titlebar">
-          <div href="#" style={{cursor:"pointer"}} onClick={props.navigateToLandingPage}>
+          <div href="#" style={{cursor:"pointer"}} onClick={props.navigateHome}>
             <div id="pareto_logo">
               <img src={logo} alt="Pareto Logo"/>
             </div>

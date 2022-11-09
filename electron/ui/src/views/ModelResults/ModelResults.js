@@ -1,5 +1,5 @@
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import {useEffect} from 'react';   
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -43,10 +43,10 @@ export default function ModelResults(props) {
         return value
       }
     }
-    var precision = precision || 0,
-        power = Math.pow(10, precision),
-        absValue = Math.abs(Math.round(value * power)),
-        result = (value < 0 ? '-' : '') + String(Math.floor(absValue / power));
+    precision = precision || 0
+    var power = Math.pow(10, precision),
+      absValue = Math.abs(Math.round(value * power)),
+      result = (value < 0 ? '-' : '') + String(Math.floor(absValue / power));
 
     if (precision > 0) {
         var fraction = String(absValue % power),
@@ -83,7 +83,7 @@ export default function ModelResults(props) {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <img style={{height:"400px"}} src={demoOutputDiagram}></img>
+              <img alt="network diagram" style={{height:"400px"}} src={demoOutputDiagram}></img>
             </Box>
           )
         }

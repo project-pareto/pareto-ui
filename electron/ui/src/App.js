@@ -26,6 +26,7 @@ function App() {
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
   const [ backgroundTasks, setBackgroundTasks ] = useState([])
   const [ showHeader, setShowHeader ] = useState(false)
+  const [ loadLandingPage, setLoadLandingPage ] = useState(1)
   let navigate = useNavigate();
 
   useEffect(()=>{
@@ -43,6 +44,7 @@ function App() {
       fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
+        console.log('loaded landing page on try #'+loadLandingPage)
         console.log('setscenarios: ',data.data)
         /* 
         check for any scenarios that were running when the app was previously quit
@@ -65,31 +67,19 @@ function App() {
             }
         }
       setScenarios(tempScenarios)
+      navigate('/scenarios', {replace: true})
     });
     })
     .catch(e => {
-      console.error('unable to check for tasks: ',e)
+      console.error('try #'+loadLandingPage+' unable to check for tasks: ',e)
+      setTimeout(function() {
+        setLoadLandingPage(loadLandingPage+1)
+      }, 1000)
+  
+      
     })
     
-}, []);
-
-const navigateToLandingPage = () => {
-  /*
-    function for returning to landing page
-  */   
-  setShowHeader(false)
-  setScenarioData(null)
-  setSection(0)
-  setCategory(null)
-  setScenarioIndex(null)
-  fetchScenarios()
-  .then(response => response.json())
-  .then((data)=>{
-    console.log('setscenarios: ',data.data)
-    setScenarios(data.data)
-  });
-  navigate('/', {replace: true})
-}
+}, [loadLandingPage, navigate]);
 
   const navigateToScenarioList = () => {
     /*
@@ -262,7 +252,7 @@ const navigateToLandingPage = () => {
         scenarioData={scenarioData} 
         handleSelection={handleScenarioSelection}
         navigateHome={navigateToScenarioList}
-        navigateToLandingPage={navigateToLandingPage}/>
+        />
         
       <Routes> 
       <Route 

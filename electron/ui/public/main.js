@@ -72,6 +72,8 @@ function createWindow() {
       ? 'http://localhost:3000'
       : `file://${path.join(__dirname, '../build/index.html')}`
   )
+
+  return win
 }
 
 const installExtensions = () => {
@@ -183,6 +185,7 @@ app.whenReady().then(() => {
       console.log('starting electron app in dev mode')
       createWindow();
     } else {
+      let win = createWindow();
       let serverProcess
       let installationProcess = installExtensions()
       installationProcess.on('exit', code => {
@@ -200,9 +203,9 @@ app.whenReady().then(() => {
             axios.get(url).then(() => {
                 console.log(`${appName} is ready at ${url}!`)
                 log.info(`${appName} is ready at ${url}!`)
-                if (successFn) {
-                    successFn()
-                }
+                // if (successFn) {
+                //     successFn()
+                // }
             })
             .catch(async () => {
                 console.log(`Waiting to be able to connect ${appName} at ${url}...`)
@@ -216,10 +219,11 @@ app.whenReady().then(() => {
                     console.error(`Exceeded maximum trials to connect to ${appName}`)
                     log.info(`Exceeded maximum trials to connect to ${appName}`)
                     spawnedProcess.kill('SIGINT')
+                    win.close()
                 }
             });
         };
-        startUp(serverURL, 'FastAPI Server', serverProcess, createWindow)
+        startUp(serverURL, 'FastAPI Server', serverProcess)
         app.on('quit', () => {
           console.log('shutting down backend server')
           log.info('shutting down backend server')
