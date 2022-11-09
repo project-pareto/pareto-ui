@@ -50,12 +50,12 @@ export default function Sidebar(props) {
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <>
-        <ListItem key={key} disablePadding>
-            <ListItemButton selected={props.category===key} onClick={() => handleClick(key)} key={key}>
-            <ListItemText key={key} primary={key} />
+        <ListItem key={"listitem_"+key} disablePadding>
+            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
+            <ListItemText key={"listitemtext_"+key} primary={key} />
             </ListItemButton>
         </ListItem>
-        <Divider></Divider>
+        <Divider key={"divider_"+key}></Divider>
       </>
       ))
     )
@@ -66,13 +66,13 @@ export default function Sidebar(props) {
       Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
         <>
         <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : key} placement="right-start">
-        <ListItem key={key} disablePadding>
-            <ListItemButton selected={props.category===key} onClick={() => handleClick(key)} key={key}>
-            <ListItemText key={key} primary={key} />
+        <ListItem key={"listitem_"+key} disablePadding>
+            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
+            <ListItemText key={"listitemtext_"+key} primary={key} />
             </ListItemButton>
         </ListItem>
         </Tooltip>
-        <Divider></Divider>
+        <Divider key={"divider_"+key}></Divider>
       </>
       ))
     )
@@ -99,8 +99,8 @@ export default function Sidebar(props) {
         }}
         open={props.open}
       >
-        <Box sx={{ overflow: 'auto', overflowX: 'hidden'}}>
-            <List aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
+        <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
+            <List key="drawer_list" aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
             {props.scenario &&
               renderAdditionalCategories()
             }

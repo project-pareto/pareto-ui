@@ -98,13 +98,14 @@ export default function SankeyPlot(props) {
 
     const unpackData = (unpackAll, nodes, times) =>
     {
+        var tempFilteredNodes, tempFilteredTimes
         if(!unpackAll) {
-            var tempFilteredNodes = nodes
-            var tempFilteredTimes = times
+            tempFilteredNodes = nodes
+            tempFilteredTimes = times
         }
         else {
-            var tempFilteredNodes = filteredNodes
-            var tempFilteredTimes = filteredTimes
+            tempFilteredNodes = filteredNodes
+            tempFilteredTimes = filteredTimes
         }
         // console.log('unpacking data with unpackall = '+unpackAll)
         var d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}

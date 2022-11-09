@@ -6,10 +6,7 @@ import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-
 import {  uploadExcelSheet } from '../../services/sidebar.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import BackgroundPic from '../../assets/homepage-background.jpg'
@@ -21,7 +18,7 @@ export default function LandingPage(props) {
     const [ ids, setIds ] = useState([])
 
     useEffect(()=>{
-        console.log('scenarios from landing page: ',props.scenarios)
+        // console.log('scenarios from landing page: ',props.scenarios)
         let scenarioIds = [...Object.keys(props.scenarios)]
         scenarioIds.sort(function (a, b) {  return b - a;  })
         setIds(scenarioIds)
@@ -63,7 +60,6 @@ export default function LandingPage(props) {
     }
 
     const handleFileUpload = (e) => {
-        console.log('handle file upload')
         const formData = new FormData();
         formData.append('file', e.target.files[0], e.target.files[0].name);
 
@@ -95,7 +91,7 @@ export default function LandingPage(props) {
 
   return ( 
     <div style={styles.background}>
-        <img src={BackgroundPic} style={styles.bacgkroundImage}>
+        <img alt="PARETO background" src={BackgroundPic} style={styles.bacgkroundImage}>
         
         </img>
         <Box style={styles.boxStyle}>
@@ -103,7 +99,7 @@ export default function LandingPage(props) {
                 <Grid item xs={2}> </Grid>
                 <Grid item xs={8}> 
                     <Box style={{}}>
-                        <img src={FullLogo} style={{width:'100%'}}></img>
+                        <img alt="PARETO logo" src={FullLogo} style={{width:'100%'}}></img>
                     </Box>
                 </Grid>
                 <Grid item xs={2}> </Grid>

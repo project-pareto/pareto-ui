@@ -28,7 +28,7 @@ export default function ScenarioList(props) {
 
     React.useEffect(()=> {
         props.setShowHeader(true)
-    }, []) 
+    }, [props]) 
 
     const handleOpenEditName = (name, id) => {
         setName(name)
@@ -134,7 +134,7 @@ export default function ScenarioList(props) {
         <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead sx={{backgroundColor: "#6094bc", color: "white"}}>
-            <TableRow>
+            <TableRow key="headRow">
                 <TableCell sx={styles.headerCell}>Scenario Name</TableCell>
                 <TableCell sx={styles.headerCell}>Date Created</TableCell>
                 <TableCell sx={styles.headerCell}>Status</TableCell>
@@ -146,7 +146,7 @@ export default function ScenarioList(props) {
             {Object.entries(props.scenarios).map( ([key, value] ) => {
                 return( <TableRow
                 hover
-                key={value.key}
+                key={key}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } , cursor:"pointer"}}
                 >
                 <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => props.handleSelection(key)}>

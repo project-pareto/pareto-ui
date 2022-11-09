@@ -54,18 +54,23 @@ export default function DataInput(props) {
   }
 
   useEffect(()=>{
+    /*
+      when category is changed, reset the nodes for filtering (columns and rows of current table)
+    */
     try {
-      if (props.category != "Plots" && props.category != "Network Diagram") {
+      if (props.category !== "Plots" && props.category !== "Network Diagram") {
+        console.log("inside datainput useeffect")
         let tempEditDict = {}
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
         let tempRowNodesMapping
-        {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
+        Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
           if (ind === 0) {
             tempRowNodesMapping = value
             value.map ((v,i) => {
               tempRowNodes[v] = true
+              return 1
             })
           } else {
             tempColumnNodesMapping.push(key)
@@ -73,8 +78,10 @@ export default function DataInput(props) {
           }
           scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
             tempEditDict[""+ind+":"+index] = false
+            return 1
           })
-        })}
+          return 1
+        })
         setEditDict(tempEditDict)
         setColumnNodes(tempColumnNodes)
         setRowNodes(tempRowNodes)
@@ -90,7 +97,7 @@ export default function DataInput(props) {
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
     
-  }, [props.category]);
+  }, [props.category, props.scenario, scenario.data_input.df_parameters]);
   
    const handlePlotCategoryChange = (event) => {
     setPlotCategory(event.target.value)
@@ -101,11 +108,13 @@ export default function DataInput(props) {
     props.handleEditInput(false)
     props.handleUpdateExcel(scenario.id, props.category, scenario.data_input.df_parameters[props.category])
     let tempEditDict = {}
-    {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
+    Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
       scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
         tempEditDict[""+ind+":"+index] = false
+        return 1
       })
-    })}
+      return 1
+    })
     setEditDict(tempEditDict)
    }
 
@@ -139,11 +148,11 @@ export default function DataInput(props) {
     if (col === 'all') {
       tempCols = filteredColumnNodes.length === columnNodesMapping.length ? [] : columnNodesMapping
       if (filteredColumnNodes.length === columnNodesMapping.length) {
-        for (const [key, value] of Object.entries(tempColumnNodes)) {
+        for (const key of Object.keys(tempColumnNodes)) {
           tempColumnNodes[key] = false
         }
       } else {
-        for (const [key, value] of Object.entries(tempColumnNodes)) {
+        for (const key of Object.keys(tempColumnNodes)) {
           tempColumnNodes[key] = true
         }
       }
@@ -172,11 +181,11 @@ const handleRowFilter = (row) => {
     if (row === 'all') {
       tempRows = filteredRowNodes.length === rowNodesMapping.length ? [] : rowNodesMapping
       if (filteredRowNodes.length === rowNodesMapping.length) {
-        for (const [key, value] of Object.entries(tempRowNodes)) {
+        for (const key of Object.keys(tempRowNodes)) {
           tempRowNodes[key] = false
         }
       } else {
-        for (const [key, value] of Object.entries(tempRowNodes)) {
+        for (const key of Object.keys(tempRowNodes)) {
           tempRowNodes[key] = true
         }
       }
@@ -202,6 +211,7 @@ const handleRowFilter = (row) => {
 
       Object.entries(scenario.data_input.df_parameters[props.category]).forEach(function([key, value]) {
         cells.push(value[ind])
+        return 1
       });
 
       return (cells.map( (value, index) => {
@@ -211,8 +221,8 @@ const handleRowFilter = (row) => {
         */
        if (index ===0 || columnNodes[columnNodesMapping[index - 1]]) {
         return (
-          <Tooltip title={editDict[""+ind+":"+index] ? "Doubleclick to save value" : "Doubleclick to edit value"} arrow>
-          <TableCell onDoubleClick={() => handleDoubleClick(ind, index)} key={index} style={index === 0 ? styles.firstCol : styles.other}>
+          <Tooltip key={"tooltip_"+ind+":"+index} title={editDict[""+ind+":"+index] ? "Doubleclick to save value" : "Doubleclick to edit value"} arrow>
+          <TableCell onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
           {editDict[""+ind+":"+index] ? 
             index === 0 ? value : <TextField name={""+ind+":"+index} size="small" label={""} defaultValue={value} onChange={handleChangeValue}/>
             :
@@ -221,7 +231,7 @@ const handleRowFilter = (row) => {
           </TableCell>
           </Tooltip>
         )
-       }
+       } else return null
       }))
   }
 
@@ -236,8 +246,8 @@ const handleRowFilter = (row) => {
           rowNodes[rowNodesMapping[index]] must equal true
         */
        if (rowNodes[rowNodesMapping[index]]) {
-        return <TableRow>{value}</TableRow>
-       }
+        return <TableRow key={"row_"+index}>{value}</TableRow>
+       } else return null
         
       }))
   }
@@ -283,7 +293,7 @@ const handleRowFilter = (row) => {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <img style={{height:"500px"}} src={demoInputDiagram}></img>
+              <img alt="network diagram" style={{height:"500px"}} src={demoInputDiagram}></img>
             </Box>
           )
         }
@@ -306,17 +316,17 @@ const handleRowFilter = (row) => {
             <TableContainer sx={{overflowX:'auto'}}>
             <Table style={{border:"1px solid #ddd"}} size='small'>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
-              <TableRow>
+              <TableRow key="headRow">
               {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], index) => {
                 keyIndexMapping[index] = key
                 if (index === 0 || columnNodes[key]) {
                   return (
                     index === 0 ? 
-                  <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
+                  <TableCell key={key} style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
                   : 
-                  <TableCell style={{color:"white"}}>{key}</TableCell>
+                  <TableCell key={key} style={{color:"white"}}>{key}</TableCell>
                   )
-                }
+                } else return null
               })}
               </TableRow>
               </TableHead>

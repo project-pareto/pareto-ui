@@ -22,7 +22,7 @@ export default function Dashboard(props) {
   const scenario = props.scenario
   const [ name, setName ] = useState('')
   const [ openEditName, setOpenEditName ] = useState(false)
-  const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
+  // const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
   const [ inputDataEdited, setInputDataEdited ] = useState(false) 
 
   const handleOpenEditName = () => setOpenEditName(true);
@@ -34,12 +34,13 @@ export default function Dashboard(props) {
       if(!scenario) {
         props.navigateHome()
       }
+      setInputDataEdited(false)
       setName(scenario.name)
     }
     catch (e){
       console.error('unable to set scenario name: ',e)
     }
-  }, [scenario]);
+  }, [props, scenario]);
 
    const styles = {
     shiftTextLeft: {
@@ -87,12 +88,10 @@ export default function Dashboard(props) {
     setOpenEditName(false)
   }
 
-  const handleSaveInputChanges = () => {
-    props.handleSaveInputChanges()
-    setInputDataEdited(false)
-  }
-
-
+  // const handleSaveInputChanges = () => {
+  //   props.handleSaveInputChanges()
+  //   setInputDataEdited(false)
+  // }
 
   return (
     <>
@@ -121,7 +120,7 @@ export default function Dashboard(props) {
         </Sidebar>
       }
       
-    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section == 2 && scenario.results.status != "complete")) && styles.shiftTextRight}>
+    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section === 2 && scenario.results.status !== "complete")) && styles.shiftTextRight}>
       <Grid item xs={4} ></Grid>
       <PopupModal
         input

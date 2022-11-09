@@ -5,8 +5,6 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid'
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -126,24 +124,6 @@ export default function Optimization(props) {
             />
           </FormControl>
           </Grid>
-
-          {/* <Grid item xs={4} style={{marginTop: "25px"}}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Solver Selection</p>
-            </Box>
-          </Grid>
-          <Grid item xs={8} style={{marginTop: "25px"}}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small">
-            <Select
-              value={0}
-              // onChange={handleScenarioSelection}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-            >
-              <MenuItem key={0} value={0}>Strategic Model</MenuItem>
-              <MenuItem key={1} value={1}>Operational Model</MenuItem>
-            </Select>
-            </FormControl>
-          </Grid> */}
 
           <Grid item xs={4} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>

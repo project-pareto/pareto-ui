@@ -114,7 +114,7 @@ const navigateToLandingPage = () => {
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
     /*
-      if scenario is curretly running, send user to model results tab
+      if scenario is curretly running or solved, send user to model results tab
     */
     if(["Initializing", "Solving model", "Generating output", "complete"].includes(scenarios[scenario].results.status)) {
       setCategory("Dashboard")
