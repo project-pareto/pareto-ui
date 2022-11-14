@@ -5,17 +5,12 @@ import datetime
 import math
 import time
 from pathlib import Path
-from webbrowser import get
-from xml.etree.ElementTree import VERSION
 import tinydb
-from tinydb import where
 from fastapi import HTTPException
-from openpyxl import Workbook, load_workbook
+from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 import idaes.logger as idaeslog
-
-from pareto.utilities.results import plot_bars
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
