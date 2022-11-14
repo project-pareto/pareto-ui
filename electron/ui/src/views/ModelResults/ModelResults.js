@@ -1,4 +1,5 @@
-import {useEffect, useState} from 'react';   
+import React from 'react';
+import {useEffect} from 'react';   
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -12,6 +13,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
 import demoOutputDiagram from "../../assets/demo_figure_output.png";
+import ParetoDictionary from '../../assets/ParetoDictionary.json'
 
 
 export default function ModelResults(props) {
@@ -41,10 +43,10 @@ export default function ModelResults(props) {
         return value
       }
     }
-    var precision = precision || 0,
-        power = Math.pow(10, precision),
-        absValue = Math.abs(Math.round(value * power)),
-        result = (value < 0 ? '-' : '') + String(Math.floor(absValue / power));
+    precision = precision || 0
+    var power = Math.pow(10, precision),
+      absValue = Math.abs(Math.round(value * power)),
+      result = (value < 0 ? '-' : '') + String(Math.floor(absValue / power));
 
     if (precision > 0) {
         var fraction = String(absValue % power),
@@ -81,7 +83,7 @@ export default function ModelResults(props) {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <img style={{height:"400px"}} src={demoOutputDiagram}></img>
+              <img alt="network diagram" style={{height:"400px"}} src={demoOutputDiagram}></img>
             </Box>
           )
         }
@@ -91,7 +93,7 @@ export default function ModelResults(props) {
       else {
         return (
           <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
-            <h3>{props.category}</h3>
+            <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}</h3>
             <TableContainer sx={{overflowX:'auto'}}>
             <Table style={{border:"1px solid #ddd"}} size='small'>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>

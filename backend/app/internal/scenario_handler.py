@@ -5,14 +5,12 @@ import datetime
 import math
 import time
 from pathlib import Path
-from xml.etree.ElementTree import VERSION
 import tinydb
-from tinydb import where
 from fastapi import HTTPException
+from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 import idaes.logger as idaeslog
-
-from pareto.utilities.results import plot_bars
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
@@ -106,6 +104,8 @@ class ScenarioHandler:
         self.LOCKED = False
 
         self.retrieve_scenarios()
+
+        return updatedScenario
     
     def upload_excelsheet(self, output_path, filename, id):
         _log.info(f"Uploading excel sheet: {filename}")
@@ -299,6 +299,9 @@ class ScenarioHandler:
     def get_next_id(self):
         nextid = self.next_id
         return nextid
+
+    def get_excelsheet_path(self, id):
+        return f"{self.excelsheets_path}/{id}.xlsx"
     
     def update_next_id(self):
         try:
@@ -309,8 +312,10 @@ class ScenarioHandler:
                 locked = self.LOCKED
             self.LOCKED = True
 
-            el = self._db.all()[-1]
+            query = tinydb.Query()
+            el = self._db.search((query.version == self.VERSION))[-1]
             next_id = el.doc_id+1
+            
             _log.info(f'setting next id: {next_id}')
             self.next_id = next_id
         except Exception as e:
@@ -321,5 +326,56 @@ class ScenarioHandler:
     def get_background_tasks(self):
         return self.background_tasks
 
+    def update_excel(self, id, table_key, updatedTable):
+        _log.info(f'updating id {id} table {table_key}')
+        excel_path = self.get_excelsheet_path(id)
+        wb = load_workbook(excel_path, data_only=True)
+        _log.info(f'loaded workbook from path: {excel_path}')
+
+        x = 1
+        y = 3
+        ws = wb[table_key]
+        # for column in scenario["data_input"]["df_parameters"][table_key]:
+
+        # update excel sheet
+        for column in updatedTable:
+            y = 3
+            for cellValue in updatedTable[column]:
+                cellLocation = f'{get_column_letter(x)}{y}'
+                originalValue = ws[cellLocation].value
+                if cellValue == "":
+                    newValue = None
+                else:
+                    try:
+                        newValue = int(cellValue)
+                    except ValueError:
+                        try:
+                            newValue = float(cellValue)
+                        except: 
+                            newValue = cellValue
+                if originalValue != newValue:
+                    print('updating value')
+                    ws[cellLocation] = newValue
+                y+=1
+            x+=1
+        wb.save(excel_path)
+        wb.close()
+        _log.info(f'saved workbook')
+        # fetch scenario
+        try:
+            # check if db is in use. if so, wait til its done being used
+            locked = self.LOCKED
+            while(locked):
+                time.sleep(0.5)
+                locked = self.LOCKED
+            self.LOCKED = True
+            query = tinydb.Query()
+            scenario = self._db.search((query.id_ == int(id)) & (query.version == self.VERSION))[0]['scenario']
+            scenario["data_input"]["df_parameters"][table_key] = updatedTable
+        except Exception as e:
+            _log.info(f"unable to fetch scenario: {e}")
+        self.LOCKED = False
+        # update scenario
+        return self.update_scenario(scenario)
 
 scenario_handler = ScenarioHandler()

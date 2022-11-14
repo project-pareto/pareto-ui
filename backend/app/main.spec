@@ -42,9 +42,36 @@ elif sys.platform == 'linux':
 else:
     extra_data = []
 
+try:
+    print('trying to get gurobi path using os, sys, and glob')
+    import os
+    import glob
+    import sys
+    conda_prefix = os.environ['CONDA_PREFIX']
+    print(f'conda_prefix is {conda_prefix}')
+    try:
+        if sys.platform == "darwin":
+            print('darwin')
+            gurobi_path = f'{conda_prefix}/lib/python*/site-packages/pyomo/solvers/plugins/solvers'
+        elif sys.platform == "linux":
+            print('linux')
+            gurobi_path = f'{conda_prefix}/lib/python*/site-packages/pyomo/solvers/plugins/solvers'
+        else:
+            print('windows')
+            gurobi_path = f'{conda_prefix}/lib/site-packages/pyomo/solvers/plugins/solvers'
+    except Exception as e:
+        print(f'unable to get entry points src/dst: {e}') 
+    print(f'globbing from {gurobi_path}')
+    gurobi_path_glob = glob.glob(gurobi_path)[0]
+    print(f'glob is {gurobi_path_glob}')
+
+except Exception as e:
+    print(f'unable to get the gurobi path: {e}')
+    gurobi_path_glob=''
+
 a = Analysis(
     ['main.py'],
-    pathex=[],
+    pathex=[gurobi_path_glob],
     binaries=[],
     datas=extra_data,
     hiddenimports=[
@@ -53,25 +80,11 @@ a = Analysis(
     'idaes.config',
     'idaes.logger',
     'idaes.commands.util.download_bin',
-    'pyomo.contrib.ampl_function_demo.plugins',
-    'pyomo.contrib.appsi.plugins',
-    'pyomo.contrib.community_detection.plugins',
-    'pyomo.contrib.example.plugins',
-    'pyomo.contrib.fme.plugins',
-    'pyomo.contrib.gdp_bounds.plugins',
-    'pyomo.contrib.gdpopt.plugins',
-    'pyomo.contrib.gjh.plugins',
-    'pyomo.contrib.mcpp.plugins',
-    'pyomo.contrib.mindtpy.plugins',
-    'pyomo.contrib.multistart.plugins',
-    'pyomo.contrib.preprocessing.plugins',
-    'pyomo.contrib.pynumero.plugins',
-    'pyomo.contrib.trustregion.plugins',
-    'pyomo.repn.util',
-    'pyomo.contrib.gdpbb',
-    'pyomo.contrib.gdpbb.plugins',
-    'pint', 'numbers', 'pyutilib', 'pyomo', 'pyomo.environ', 'pyomo.core', 'pyomo.core.plugins', 'pyomo.dae', 'pyomo.dae.plugins', 'pyomo.gdp', 'pyomo.gdp.plugins', 'pyomo.neos', 'pyomo.neos.plugins', 'pyomo.opt', 'pyomo.opt.plugins', 'pyomo.pysp', 'pyomo.solvers.plugins', 'pyomo.solvers', 'pyomo.checker', 'pyomo.checker.plugins', 'pyomo.contrib',  'pyomo.dataportal', 'pyomo.dataportal.plugins', 'pyomo.duality', 'pyomo.duality.plugins', 'pyomo.kernel', 'pyomo.mpec', 'pyomo.mpec.plugins', 'pyomo.network', 'pyomo.network.plugins', 'pyomo.repn', 'pyomo.repn.plugins', 'pyomo.scripting', 'pyomo.scripting.plugins', 'pyomo.util', 'pyomo.common', 'pyomo.common.plugins', 'sys', 'logging', 're', 'sys', 'pyomo.core.expr.numvalue', 'pyomo.core.expr.numvalue', 'pyomo.solvers.plugins.solvers.direct_solver', 'pyomo.solvers.plugins.solvers.direct_or_persistent_solver', 'pyomo.core.kernel.component_set', 'pyomo.core.kernel.component_map', 'pyomo.opt.results.results_', 'pyomo.opt.results.solution', 'pyomo.opt.results.solver', 'pyomo.opt.base', 'pyomo.core.base.suffix', 'pyomo.core.base.var', 'pyomo.core.base.PyomoModel', 'pyomo.solvers.plugins.solvers.persistent_solver', 'pyomo.opt.base.problem', 'pyomo.opt.base.convert', 'pyomo.opt.base.formats', 'pyomo.opt.base.results', 'pyomo.core.base.block', 'pyomo.core.kernel.block', 'pyomo.core.kernel.suffix'],
-    hookspath=[],
+    'pint', 
+    'numbers', 
+    'pyutilib', 
+    'pyomo'],
+    hookspath=['extra-hooks'],
     hooksconfig={},
     runtime_hooks=[],
     excludes=['psutil','lxml'],

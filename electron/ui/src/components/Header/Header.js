@@ -1,6 +1,5 @@
 import './Header.css';
 import React from 'react';
-import {useEffect, useState} from 'react';   
 import logo from "../../images/pareto-logo.png";
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -19,11 +18,11 @@ export default function Header(props) {
         <div id="Header">
         
         <div className="titlebar">
-          <a style={{cursor:"pointer"}} onClick={props.navigateToLandingPage}>
+          <div href="#" style={{cursor:"pointer"}} onClick={props.navigateHome}>
             <div id="pareto_logo">
               <img src={logo} alt="Pareto Logo"/>
             </div>
-          </a>
+          </div>
         {props.scenarioData ? 
           <>
             <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>

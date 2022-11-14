@@ -11,7 +11,7 @@ import Header from './components/Header/Header';
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
 import LandingPage from './views/LandingPage/LandingPage';
-import { updateScenario } from './services/app.service'
+import { updateScenario, updateExcel } from './services/app.service'
 import { deleteScenario, copyScenario } from './services/scenariolist.service'
 import { fetchScenarios } from './services/sidebar.service'
 import { checkTasks } from './services/homepage.service'
@@ -26,6 +26,7 @@ function App() {
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
   const [ backgroundTasks, setBackgroundTasks ] = useState([])
   const [ showHeader, setShowHeader ] = useState(false)
+  const [ loadLandingPage, setLoadLandingPage ] = useState(1)
   let navigate = useNavigate();
 
   useEffect(()=>{
@@ -43,6 +44,7 @@ function App() {
       fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
+        console.log('loaded landing page on try #'+loadLandingPage)
         console.log('setscenarios: ',data.data)
         /* 
         check for any scenarios that were running when the app was previously quit
@@ -65,31 +67,19 @@ function App() {
             }
         }
       setScenarios(tempScenarios)
+      navigate('/scenarios', {replace: true})
     });
     })
     .catch(e => {
-      console.error('unable to check for tasks: ',e)
+      console.error('try #'+loadLandingPage+' unable to check for tasks: ',e)
+      setTimeout(function() {
+        setLoadLandingPage(loadLandingPage+1)
+      }, 1000)
+  
+      
     })
     
-}, []);
-
-const navigateToLandingPage = () => {
-  /*
-    function for returning to landing page
-  */   
-  setShowHeader(false)
-  setScenarioData(null)
-  setSection(0)
-  setCategory(null)
-  setScenarioIndex(null)
-  fetchScenarios()
-  .then(response => response.json())
-  .then((data)=>{
-    console.log('setscenarios: ',data.data)
-    setScenarios(data.data)
-  });
-  navigate('/', {replace: true})
-}
+}, [loadLandingPage]);
 
   const navigateToScenarioList = () => {
     /*
@@ -114,7 +104,7 @@ const navigateToLandingPage = () => {
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
     /*
-      if scenario is curretly running, send user to model results tab
+      if scenario is curretly running or solved, send user to model results tab
     */
     if(["Initializing", "Solving model", "Generating output", "complete"].includes(scenarios[scenario].results.status)) {
       setCategory("Dashboard")
@@ -230,6 +220,29 @@ const navigateToLandingPage = () => {
     })
   }
 
+  const handleUpdateExcel = (id, tableKey, updatedTable) => {
+    updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
+    .then(response => response.json())
+    .then((data)=>{
+      console.log('return from update excel: '+data)
+      
+    })
+    .catch(e => {
+      console.error('unable to check for tasks: ',e)
+    })
+  }
+
+  const resetScenarioData = () => {
+    console.log('resetting scenario data, index is '+scenarioIndex)
+    fetchScenarios()
+      .then(response => response.json())
+      .then((data)=>{
+        console.log('setscenarios: ',data.data)
+        setScenarios(data.data)
+        setScenarioData(data.data[scenarioIndex])
+      });
+  }
+
   return (
     <div className="App">  
       <Header 
@@ -239,7 +252,7 @@ const navigateToLandingPage = () => {
         scenarioData={scenarioData} 
         handleSelection={handleScenarioSelection}
         navigateHome={navigateToScenarioList}
-        navigateToLandingPage={navigateToLandingPage}/>
+        />
         
       <Routes> 
       <Route 
@@ -274,6 +287,7 @@ const navigateToLandingPage = () => {
           path="/scenario" 
           element={
             <Dashboard 
+            handleUpdateExcel={handleUpdateExcel}
             updateScenario={handleScenarioUpdate} 
             handleEditScenarioName={handleEditScenarioName} 
             scenario={scenarioData} 
@@ -283,6 +297,7 @@ const navigateToLandingPage = () => {
             handleSetSection={handleSetSection} 
             backgroundTasks={backgroundTasks}
             navigateHome={navigateToScenarioList}
+            resetScenarioData={resetScenarioData}
             />} 
         />
         <Route

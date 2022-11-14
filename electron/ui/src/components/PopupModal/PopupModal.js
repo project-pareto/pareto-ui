@@ -1,4 +1,5 @@
-import {useEffect, useState} from 'react';   
+import React from 'react';
+import {useEffect} from 'react';   
 import Grid from '@mui/material/Grid';
 import {  } from "react-router-dom";
 import Button from '@mui/material/Button';
@@ -61,11 +62,27 @@ export default function Dashboard(props) {
         <Grid item xs={12}>
             <p>{props.text}</p>
         </Grid>
+        {props.hasTwoButtons ? 
+        <>
+        <Grid item xs={1}></Grid>
+        <Grid item xs={4}>
+            <Button fullWidth onClick={props.handleButtonTwoClick} variant={props.buttonTwoVariant} color={props.buttonTwoColor}>{props.buttonTwoText}</Button>
+        </Grid>
+        <Grid item xs={2}></Grid>
+        <Grid item xs={4}>
+            <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor}>{props.buttonText}</Button>
+        </Grid>
+        <Grid item xs={1}></Grid>
+        </> 
+        : 
+        <>
         <Grid item xs={3}></Grid>
         <Grid item xs={6}>
             <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor}>{props.buttonText}</Button>
         </Grid>
         <Grid item xs={3}></Grid>
+        </>}
+        
         </Grid>
         }
         
