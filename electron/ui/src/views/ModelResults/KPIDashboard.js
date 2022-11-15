@@ -140,7 +140,7 @@ export default function KPIDashboard(props) {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "hidden"}}>
+                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
                     data={[
                     {

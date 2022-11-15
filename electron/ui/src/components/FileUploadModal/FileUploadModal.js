@@ -14,7 +14,7 @@ import { FileUploader } from "react-drag-drop-files";
 export default function Dashboard(props) {
     const [ scenarioName, setScenarioName ] = useState("")
     const [ showWarning, setShowWarning ] = useState(false)
-    const [ warningMessage, setWarningMessage ] = useState("Please upload a valid file")
+    const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
     const fileTypes = ["xlsx"];
 
@@ -73,16 +73,31 @@ export default function Dashboard(props) {
 
    const handleCreateScenario = () => {
     if (file === null) {
+        setWarningMessage("Please upload a valid file")
         setShowWarning(true)
+        setTimeout(function() {
+            setShowWarning(false)
+          }, 5000)
     } else if (scenarioName === "") {
-        setWarningMessage("Please provide a name for scenario")
+        setWarningMessage("Please provide a name for new scenario")
         setShowWarning(true)
+        setTimeout(function() {
+            setShowWarning(false)
+          }, 5000)
     }else {
         console.log('valid file entry')
         props.handleFileUpload(file, scenarioName)
         setShowWarning(false)
         props.setShowFileModal(false)
     }
+   }
+
+   const fileTypeError = () => {
+        setWarningMessage("Please choose a valid excel file")
+        setShowWarning(true)
+        setTimeout(function() {
+            setShowWarning(false)
+          }, 5000)
    }
 
    const fileUploaderContainer = () => {
@@ -115,6 +130,7 @@ export default function Dashboard(props) {
         name="file" 
         types={fileTypes}
         children={fileUploaderContainer()}
+        onTypeError={fileTypeError}
       />
     );
   }
