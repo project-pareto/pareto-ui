@@ -69,7 +69,7 @@ export default function Dashboard(props) {
    }
 
    const handleClose = () => {
-    console.log('closing modal ?')
+    props.setShowFileModal(false)
    }
 
    const handleCreateScenario = () => {
@@ -79,8 +79,10 @@ export default function Dashboard(props) {
         setWarningMessage("Please provide a name for scenario")
         setShowWarning(true)
     }else {
-        console.log('we good')
+        console.log('valid file entry')
+        props.handleFileUpload(file, scenarioName)
         setShowWarning(false)
+        props.setShowFileModal(false)
     }
    }
 
@@ -134,7 +136,7 @@ export default function Dashboard(props) {
         </Grid>
         <Grid item xs={3}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
-                <IconButton><CloseIcon/></IconButton>
+                <IconButton onClick={handleClose}><CloseIcon/></IconButton>
             </Box>
         </Grid>
 

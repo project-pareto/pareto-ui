@@ -17,12 +17,14 @@ import Tooltip from '@mui/material/Tooltip';
 import {  uploadExcelSheet } from '../../services/sidebar.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
+import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'
 
 export default function ScenarioList(props) {
     const [ showError, setShowError ] = React.useState(false)
     const [ errorMessage, setErrorMessage ] = React.useState("")
     const [ openEditName, setOpenEditName ] = React.useState(false)
     const [ openDeleteModal, setOpenDeleteModal ] = React.useState(false)
+    const [ showFileModal, setShowFileModal ] = React.useState(false)
     const [ name, setName ] = React.useState('')
     const [ id, setId ] = React.useState(null)
 
@@ -58,10 +60,11 @@ export default function ScenarioList(props) {
         setId(null)
     }
 
-    const handleFileUpload = (e) => {
+    const handleFileUpload = (file, name) => {
         console.log('handle file upload')
+        console.log('creating scenario with name '+name)
         const formData = new FormData();
-        formData.append('file', e.target.files[0], e.target.files[0].name);
+        formData.append('file', file, name);
 
         uploadExcelSheet(formData)
         .then(response => {
@@ -119,13 +122,8 @@ export default function ScenarioList(props) {
         </Grid>
         <Grid item xs={5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-                <h2><Button variant="contained" sx={styles.newButton} component="label" >
-                    Create New Scenario
-                    <input
-                        type="file"
-                        hidden
-                        onChange={handleFileUpload}
-                    />
+                <h2><Button variant="contained" sx={styles.newButton} component="label" onClick={() => setShowFileModal(true)}>
+                    + Create New Scenario
                     </Button>
                 </h2>
             </Box>
@@ -174,6 +172,12 @@ export default function ScenarioList(props) {
             </TableBody>
         </Table>
         </TableContainer>
+        {showFileModal && 
+        <FileUploadModal
+            setShowFileModal={setShowFileModal}
+            handleFileUpload={handleFileUpload}
+        />
+        }
         <PopupModal
             input
             open={openEditName}
