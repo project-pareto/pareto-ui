@@ -8,7 +8,6 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import { FileUploader } from "react-drag-drop-files";
-import Divider from '@mui/material/Divider';
 
 
 
