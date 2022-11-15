@@ -33,17 +33,15 @@ jobs:
       - name: Install Electron JS dependencies
         run: |
           npm --prefix electron clean-install
-
       - name: Install frontend JS dependencies
         run: |
           npm --prefix electron/ui clean-install
-
       - name: Get idaes extensions
         run: idaes get-extensions
 
       - name: Install Pareto locally
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/0.4.0rc0 -b 0.4.0 && pip install --progress-bar off .
 
       - name: Build Backend
         run: npm --prefix electron run build-backend
@@ -61,54 +59,54 @@ jobs:
             name: windows-dist
             path: |
               electron/dist/Pareto-UI_Setup.exe
-  linux-build:
-    name: Linux Build
+  # linux-build:
+  #   name: Linux Build
 
-    runs-on: ubuntu-latest
+  #   runs-on: ubuntu-latest
 
-    env: 
-      CI: false
+  #   env: 
+  #     CI: false
 
-    steps:
-      - uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          environment-file: environment.yml
-          activate-environment: pareto-ui-env
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: conda-incubator/setup-miniconda@v2
+  #       with:
+  #         environment-file: environment.yml
+  #         activate-environment: pareto-ui-env
 
-      - name: Install Electron JS dependencies
-        run: |
-          npm --prefix electron clean-install
-      - name: Install frontend JS dependencies
-        run: |
-          npm --prefix electron/ui clean-install
-      - name: Install GNU FORTRAN, GOMP, Blas, and Lapack libraries
-        run: |
-          sudo apt-get install -y libgfortran5 libgomp1 liblapack3 libblas3
-      - name: Get idaes extensions
-        run: idaes get-extensions
+  #     - name: Install Electron JS dependencies
+  #       run: |
+  #         npm --prefix electron clean-install
+  #     - name: Install frontend JS dependencies
+  #       run: |
+  #         npm --prefix electron/ui clean-install
+  #     - name: Install GNU FORTRAN, GOMP, Blas, and Lapack libraries
+  #       run: |
+  #         sudo apt-get install -y libgfortran5 libgomp1 liblapack3 libblas3
+  #     - name: Get idaes extensions
+  #       run: idaes get-extensions
 
-      - name: Install Pareto locally
-        working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+  #     - name: Install Pareto locally
+  #       working-directory: ../
+  #       run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
-      - name: Build Backend
-        run: npm --prefix electron run build-backend
+  #     - name: Build Backend
+  #       run: npm --prefix electron run build-backend
 
-      - name: Build Frontend
-        run: npm --prefix electron run build-frontend
+  #     - name: Build Frontend
+  #       run: npm --prefix electron run build-frontend
 
-      # for some reason, ico file breaks linux build. going without icon for now
-      - name: Remove ico file
-        run: rm electron/build/pareto-logo.ico
+  #     # for some reason, ico file breaks linux build. going without icon for now
+  #     - name: Remove ico file
+  #       run: rm electron/build/pareto-logo.ico
 
-      - name: Build Linux Distribution
-        run: npm --prefix electron run electron-build-lin
+  #     - name: Build Linux Distribution
+  #       run: npm --prefix electron run electron-build-lin
 
-      - name: Upload artifact for linux build
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-            name: linux-dist
-            path: |
-              electron/dist/pareto-ui_0.1.0_amd64.deb
+  #     - name: Upload artifact for linux build
+  #       uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #           name: linux-dist
+  #           path: |
+  #             electron/dist/pareto-ui_0.1.0_amd64.deb
