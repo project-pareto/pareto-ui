@@ -28,7 +28,19 @@ export default function KPIDashboard(props) {
     }, [props]);
 
     const styles = {
-          box: 
+          kpiBox: 
+          {
+            // m:2, 
+            paddingTop:2, 
+            boxShadow:3,
+            paddingBottom: "50px" 
+          },
+          pieChartBox: 
+          {
+            paddingTop:2, 
+            boxShadow:3,
+          },
+          areaChartBox: 
           {
             // m:2, 
             paddingTop:2, 
@@ -66,7 +78,7 @@ export default function KPIDashboard(props) {
     <Grid container spacing={2} sx={{marginTop:2}}>
 
         <Grid item xs={4}>
-        <Box style={{backgroundColor:'white'}} sx={styles.box}>
+        <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -84,7 +96,7 @@ export default function KPIDashboard(props) {
         </Grid>
 
         <Grid item xs={4}>
-        <Box style={{backgroundColor:'white'}} sx={styles.box}>
+        <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -102,7 +114,7 @@ export default function KPIDashboard(props) {
         </Grid>
 
         <Grid item xs={4}>
-        <Box style={{backgroundColor:'white'}} sx={styles.box}>
+        <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -120,7 +132,7 @@ export default function KPIDashboard(props) {
         </Grid>
 
         <Grid item xs={6}>
-        <Box style={{backgroundColor:'white'}} sx={styles.box}>
+        <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -130,7 +142,6 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
-                    style={{marginBottom:"-50px"}}
                     data={[
                     {
                         type: "pie",
@@ -144,15 +155,15 @@ export default function KPIDashboard(props) {
                             "Treatment", 
                             "Disposal", 
                             "Pipeline"],
-                        textinfo: "label+percent",
-                        insidetextorientation: "radial"
+                        textinfo: "percent",
+                        // insidetextorientation: "radial"
                         }
                     ]}
 
                     layout={{
                         width: 450,
-                        height: 525,
-                        showlegend: false
+                        height: 450,
+                        showlegend: true
                     }}
                 />
                 </Box>
@@ -162,7 +173,7 @@ export default function KPIDashboard(props) {
         </Grid>
 
         <Grid item xs={6}>
-        <Box style={{backgroundColor:'white'}} sx={styles.box}>
+        <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
             <Grid container>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -172,7 +183,6 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                 <Plot
-                    style={{marginBottom:"-50px"}}
                     data={[
                     {
                         type: "pie",
@@ -188,15 +198,15 @@ export default function KPIDashboard(props) {
                             "Disposal", 
                             "Piping",
                             "Trucking"],
-                        textinfo: "label+percent",
-                        insidetextorientation: "radial"
+                        textinfo: "percent",
+                        // insidetextorientation: "radial"
                         }
                     ]}
 
                     layout={{
                         width: 450,
-                        height: 525,
-                        showlegend: false
+                        height: 450,
+                        showlegend: true
                     }}
                 />
                 </Box>
@@ -206,7 +216,7 @@ export default function KPIDashboard(props) {
         </Grid>
         
         <Grid item xs={12}>
-        <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.box}>
+        <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
             <Grid container>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
