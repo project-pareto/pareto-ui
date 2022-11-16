@@ -17,6 +17,7 @@ export default function Dashboard(props) {
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
     const fileTypes = ["xlsx"];
+    const sampleFileUrl = "https://drive.google.com/uc?export=download&id=1dmcdh4sKmB73kqCkHS279pxomFGWbexP"
 
 
   useEffect(()=>{
@@ -53,7 +54,8 @@ export default function Dashboard(props) {
     },
     sampleFile:{
         color:"#0884b4",
-        cursor:"pointer"
+        textDecoration: "none",
+        fontWeight: "bold"
     },
     fileUploaderBox: {
         border: '2px dashed black',
@@ -175,7 +177,7 @@ export default function Dashboard(props) {
             {DragDrop()}
         </Grid>
         <Grid item xs={6}>
-            <p style={styles.sampleFile}>Download an Example Input File</p>
+            <p ><a style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
         </Grid>
         <Grid item xs={6}>
             {showWarning && <p style={{color:'red'}}>{warningMessage}</p>}
