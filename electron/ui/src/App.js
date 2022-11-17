@@ -11,10 +11,8 @@ import Header from './components/Header/Header';
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
 import LandingPage from './views/LandingPage/LandingPage';
-import { updateScenario, updateExcel } from './services/app.service'
+import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
 import { deleteScenario, copyScenario } from './services/scenariolist.service'
-import { fetchScenarios } from './services/sidebar.service'
-import { checkTasks } from './services/homepage.service'
 
 
 function App() {
@@ -75,7 +73,7 @@ function App() {
     .catch(e => {
       console.error('try #'+loadLandingPage+' unable to check for tasks: ',e)
       setTimeout(function() {
-        setLoadLandingPage(loadLandingPage+1)
+        setLoadLandingPage(loadLandingPage => loadLandingPage+1)
       }, 1000)
   
       
@@ -112,10 +110,11 @@ useEffect(()=> {
           /*
             set scenario data, section and scenarios; finish checking
           */
-          setScenarioData(tempScenarios[backgroundTasks[0]])
-          setScenarios(tempScenarios)
-          setSection(2)
           setCheckModelResults(0)
+          setScenarios(tempScenarios)
+          setScenarioData(tempScenarios[backgroundTasks[0]])
+          setScenarioIndex(backgroundTasks[0])
+          setSection(2)
           setCategory("Dashboard")
           navigate('/scenario', {replace: true})
         } else {
@@ -127,14 +126,14 @@ useEffect(()=> {
             setScenarios(tempScenarios)
             if(checkModelResults < 100) {
               setTimeout(function() {
-                setCheckModelResults(checkModelResults+1)
+                setCheckModelResults(checkModelResults => checkModelResults+1)
               }, TIME_BETWEEN_CALLS)
             }
         }
       } else {
         if(checkModelResults < 100) {
           setTimeout(function() {
-            setCheckModelResults(checkModelResults+1)
+            setCheckModelResults(checkModelResults => checkModelResults+1)
           }, TIME_BETWEEN_CALLS)
         }
       }
