@@ -27,6 +27,8 @@ function App() {
   const [ backgroundTasks, setBackgroundTasks ] = useState([])
   const [ showHeader, setShowHeader ] = useState(false)
   const [ loadLandingPage, setLoadLandingPage ] = useState(1)
+  const [ checkModelResults, setCheckModelResults ] = useState(0)
+  const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
 
   useEffect(()=>{
@@ -80,6 +82,67 @@ function App() {
     })
     
 }, [loadLandingPage]);
+
+useEffect(()=> {
+  /*
+    if model is running, periodically check for results 
+  */
+ if(checkModelResults > 0) {
+  /*
+    make api call to get status of each running task
+  */
+  fetchScenarios()
+    .then(response => response.json())
+    .then((data)=>{
+      let tempScenarios = data.data
+      let updated = false
+      let completed = false
+      for (var i =0; i < backgroundTasks.length; i++) {
+        let task = backgroundTasks[i]
+        let tempScenario = tempScenarios[task]
+        if(tempScenario.results.status !== scenarios[task].results.status) {
+          updated=true
+          if(tempScenario.results.status === "complete") completed = true
+        }
+      }
+      if(updated) {
+        console.log('updated')
+        if(completed) {
+          console.log('completed')
+          /*
+            set scenario data, section and scenarios; finish checking
+          */
+          setScenarioData(tempScenarios[backgroundTasks[0]])
+          setScenarios(tempScenarios)
+          setSection(2)
+          setCheckModelResults(0)
+          setCategory("Dashboard")
+          navigate('/scenario', {replace: true})
+        } else {
+          console.log('not completed')
+          /*
+            set scenarios and scenario data; keep checking
+          */
+            setScenarioData(tempScenarios[backgroundTasks[0]])
+            setScenarios(tempScenarios)
+            if(checkModelResults < 100) {
+              setTimeout(function() {
+                setCheckModelResults(checkModelResults+1)
+              }, TIME_BETWEEN_CALLS)
+            }
+        }
+      } else {
+        if(checkModelResults < 100) {
+          setTimeout(function() {
+            setCheckModelResults(checkModelResults+1)
+          }, TIME_BETWEEN_CALLS)
+        }
+      }
+    }).catch(e => {
+      console.log('unable to fetch scenarios and check results: '+e)
+    })
+ }
+}, [checkModelResults])
 
   const navigateToScenarioList = () => {
     /*
@@ -243,6 +306,13 @@ function App() {
       });
   }
 
+  const addTask = (id) => {
+    let tempBackgroudTasks = [...backgroundTasks]
+    tempBackgroudTasks.push(id)
+    setBackgroundTasks(tempBackgroudTasks)
+    setCheckModelResults(checkModelResults+1)
+  }
+
   return (
     <div className="App">  
       <Header 
@@ -281,8 +351,6 @@ function App() {
             />} 
         />
 
-        
-
         <Route 
           path="/scenario" 
           element={
@@ -298,8 +366,10 @@ function App() {
             backgroundTasks={backgroundTasks}
             navigateHome={navigateToScenarioList}
             resetScenarioData={resetScenarioData}
+            addTask={addTask}
             />} 
         />
+
         <Route
           path="*" 
           element={<Navigate replace to="/" />}

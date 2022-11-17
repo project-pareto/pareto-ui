@@ -69,6 +69,7 @@ export default function Dashboard(props) {
           console.log(data)
           props.updateScenario(data)
           props.handleSetSection(2)
+          props.addTask(scenario.id)
         }
         else if(responseCode === 500) {
           console.error('error on model run: ',data.detail)
