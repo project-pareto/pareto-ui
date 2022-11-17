@@ -14,3 +14,17 @@ export const updateExcel = (data) => {
         body: JSON.stringify(data)
     });
 }; 
+
+export const fetchScenarios = () => {
+    return fetch('http://localhost:8001/get_scenario_list/', {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}; 
+
+export const checkTasks = () => {
+    return fetch('http://localhost:8001/check_tasks/', {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}; 

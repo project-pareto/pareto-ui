@@ -165,7 +165,7 @@ export default function ModelResults(props) {
           </Box>
           
           <p>Status: <b>{props.scenario.results.status}</b></p>
-          <Button onClick={() => props.handleSetSection(2)}>Refresh Status</Button>
+          {/* <Button onClick={() => props.handleSetSection(2)}>Refresh Status</Button> */}
         </Box>
         }
       </Grid>

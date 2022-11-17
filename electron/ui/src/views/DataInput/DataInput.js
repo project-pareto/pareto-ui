@@ -82,10 +82,6 @@ export default function DataInput(props) {
           })
           return 1
         })
-        console.log('filteredcolumnnodes: ')
-        console.log(tempColumnNodesMapping)
-        console.log('filteredrownodes : ')
-        console.log(tempRowNodesMapping)
         setEditDict(tempEditDict)
         setColumnNodes(tempColumnNodes)
         setRowNodes(tempRowNodes)
