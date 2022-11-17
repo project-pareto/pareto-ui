@@ -7,13 +7,6 @@ export const runModel = (data) => {
     });
 }; 
 
-export const checkTasks = () => {
-    return fetch('http://localhost:8001/check_tasks/', {
-        method: 'GET', 
-        mode: 'cors'
-    });
-}; 
-
 export const getPlots = (id) => {
     return fetch('http://localhost:8001/get_plots/'+id, {
         method: 'GET', 
