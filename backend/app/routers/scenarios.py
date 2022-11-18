@@ -102,6 +102,11 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
     try:
         excel_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,data['scenario']['id'])
         output_path = "{}/{}.xlsx".format(scenario_handler.outputs_path,data['scenario']['id'])
+        try:
+            solver=data['scenario']['optimization']['solver']
+        except:
+            _log.info('unable to find solver selection, using none')
+            solver=None
         background_tasks.add_task(
             handle_run_strategic_model, 
             input_file=excel_path,
@@ -110,7 +115,8 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
             objective=data['scenario']['optimization']['objective'],
             runtime=data['scenario']['optimization']['runtime'],
             pipelineCost=data['scenario']['optimization']['pipelineCostCalculation'],
-            waterQuality=data['scenario']['optimization']['waterQuality']
+            waterQuality=data['scenario']['optimization']['waterQuality'],
+            solver=solver
         )
         
         # add id to scenario handler task list to keep track of running tasks

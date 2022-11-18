@@ -26,7 +26,7 @@ from app.internal.scenario_handler import (
 _log = logging.getLogger(__name__)
 
 
-def run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality):
+def run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -61,7 +61,7 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
     }
 
     _log.info(f"solving model")
-    solve_model(model=strategic_model, options=options)
+    solve_model(model=strategic_model, options=options, solver=solver)
 
     scenario = scenario_handler.get_scenario(int(id))
     results = {"data": {}, "status": "Generating output"}
@@ -85,9 +85,9 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
 
     return results_dict
 
-def handle_run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality):
+def handle_run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver):
     try:
-        results_dict = run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality)
+        results_dict = run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
         results = {"data": results_dict, "status": "complete"}
