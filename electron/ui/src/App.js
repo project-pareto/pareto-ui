@@ -173,7 +173,7 @@ useEffect(()=> {
       setSection(2)
     } else {
       setSection(0);
-      setCategory("PNA")
+      setCategory("Network Diagram")
     }
 
   };
@@ -186,7 +186,7 @@ useEffect(()=> {
     setScenarioIndex(data.id)
     setScenarioData(data)
     setSection(0);
-    setCategory("PNA")
+    setCategory("Network Diagram")
     navigate('/scenario', {replace: true})   
   }
 
@@ -219,7 +219,7 @@ useEffect(()=> {
         setScenarioData(data.data[scenarioIndex])
       });
     } else if(section === 0) {
-      setCategory("PNA")
+      setCategory("Network Diagram")
     } else {
       setCategory(null)
       checkTasks()

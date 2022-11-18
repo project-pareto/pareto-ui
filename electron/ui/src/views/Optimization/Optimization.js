@@ -15,12 +15,10 @@ import Select from '@mui/material/Select';
 export default function Optimization(props) {
   const [scenario, setScenario] = useState(props.scenario)
   const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
-  // const [pipelineCostCalculation, setPipelineCostCalculation] = useState("capacity_based")
-  // const [waterQuality, setWaterQuality] = useState("discrete")
 
-   useEffect(()=>{
-      //  console.log('curr scenario',scenario)
-   }, [scenario]);
+  //  useEffect(()=>{
+  //     //  console.log('curr scenario',scenario)
+  //  }, [scenario]);
   
    const handleObjectiveChange = (event) => {
      const tempScenario = {...scenario}
@@ -40,7 +38,6 @@ export default function Optimization(props) {
   const handlePipelineCostChange = (event) => {
     const tempScenario = {...scenario}
     tempScenario.optimization.pipelineCostCalculation = event.target.value
-    // setPipelineCostCalculation(event.target.value)
     setScenario(tempScenario)
     props.updateScenario(tempScenario)
   }
@@ -48,7 +45,13 @@ export default function Optimization(props) {
   const handleWaterQualityChange = (event) => {
     const tempScenario = {...scenario}
     tempScenario.optimization.waterQuality = event.target.value
-    // setWaterQuality(event.target.value)
+    setScenario(tempScenario)
+    props.updateScenario(tempScenario)
+  }
+
+  const handleSolverChange = (event) => {
+    const tempScenario = {...scenario}
+    tempScenario.optimization.solver = event.target.value
     setScenario(tempScenario)
     props.updateScenario(tempScenario)
   }
@@ -65,7 +68,6 @@ export default function Optimization(props) {
       optimizationSettings: 
       {
         m:3, 
-        // padding:2, 
         boxShadow:3,
         paddingBottom: "50px" 
       }
@@ -158,6 +160,25 @@ export default function Optimization(props) {
               <MenuItem key={0} value={"false"}>False</MenuItem>
               <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
               <MenuItem key={2} value={"discrete"}>Discrete</MenuItem>
+            </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={4} style={{marginTop: "25px"}}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Solver</p>
+            </Box>
+          </Grid>
+          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small">
+            <Select
+              value={scenario.optimization.solver}
+              onChange={handleSolverChange}
+              sx={{color:'#0b89b9', fontWeight: "bold"}}
+            >
+              <MenuItem key={0} value={"cbc"}>CBC</MenuItem>
+              <MenuItem key={1} value={"gurobi"}>Gurobi</MenuItem>
+              <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct</MenuItem>
             </Select>
             </FormControl>
           </Grid>
