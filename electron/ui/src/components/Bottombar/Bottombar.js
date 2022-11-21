@@ -7,11 +7,28 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-
+import PopupModal from '../../components/PopupModal/PopupModal';
 
 
 export default function Bottombar(props) {
+    const [ openSaveModal, setOpenSaveModal ] = useState(false)
     const [ disableOptimize, setDisableOptimize ] = useState(false) 
+    const [ key, setKey ] =  useState(null)
+    const handleOpenSaveModal = () => setOpenSaveModal(true);
+    const handleCloseSaveModal = () => setOpenSaveModal(false);
+    const styles = {
+        filled: {
+            backgroundColor: '#01678f',
+            '&:hover': {
+                backgroundColor: '#01678f',
+                opacity: 0.9
+            },
+        },
+        unfilled: {
+            color: '#595959'
+        }
+    }
+
     useEffect(() => {
         /*
             if the current scenario is already being optimized OR if there are multiple optimizations
@@ -29,18 +46,34 @@ export default function Bottombar(props) {
        }
         
     },[props])
-    const styles = {
-        filled: {
-            backgroundColor: '#01678f',
-            '&:hover': {
-                backgroundColor: '#01678f',
-                opacity: 0.9
-            },
-        },
-        unfilled: {
-            color: '#595959'
+    
+
+    const handleSaveModal = () => {
+        console.log('saving this thing')
+        props.handleUpdateExcel(props.scenario.id, props.category, props.scenario.data_input.df_parameters[props.category])
+        handleCloseSaveModal()
+        props.setInputDataEdited(false)
+        props.handleSelection(key)
+      }
+    
+      const handleDiscardChanges = () => {
+        handleCloseSaveModal()
+        props.setInputDataEdited(false)
+        props.handleSelection(key)
+        props.resetScenarioData()
+      }
+    
+      const handleClick = (key) => {
+        setKey(key)
+        console.log('handle click from bottom bar')
+        console.log(props.inputDataEdited)
+        if (props.inputDataEdited) {
+          handleOpenSaveModal()
         }
-    }
+        else {
+          props.handleSelection(key)
+        }
+      }
 
   return ( 
     <Box sx={{ width: 500 }}>
@@ -56,7 +89,7 @@ export default function Bottombar(props) {
                 </Grid>
                 <Grid item xs={6}>
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
-                        {props.section === 0 && <Button sx={styles.filled} onClick={() => props.handleSelection(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
+                        {props.section === 0 && <Button sx={styles.filled} onClick={() => handleClick(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
                         {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
                     </Box>
                 </Grid>
@@ -65,6 +98,20 @@ export default function Bottombar(props) {
           null}
         
       </Paper>
+      <PopupModal
+        hasTwoButtons
+        open={openSaveModal}
+        handleClose={handleCloseSaveModal}
+        handleSave={handleSaveModal}
+        handleButtonTwoClick={handleDiscardChanges}
+        text="Do you want to save changes made to this table?"
+        buttonText='Save'
+        buttonColor='primary'
+        buttonVariant='contained'
+        buttonTwoText='Discard'
+        buttonTwoColor='error'
+        buttonTwoVariant='outlined'
+      />
     </Box>
   );
 

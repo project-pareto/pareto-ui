@@ -68,7 +68,11 @@ export default function Sidebar(props) {
         <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : key} placement="right-start">
         <ListItem key={"listitem_"+key} disablePadding>
             <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
-            <ListItemText key={"listitemtext_"+key} primary={key} />
+            <ListItemText 
+              key={"listitemtext_"+key} 
+              // primary={key.replace('_dict','').replace(/vb*_[CDFLQRSTXy]_/,'')} 
+              primary={key} 
+            />
             </ListItemButton>
         </ListItem>
         </Tooltip>
