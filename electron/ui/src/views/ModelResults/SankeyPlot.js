@@ -171,9 +171,9 @@ export default function SankeyPlot(props) {
                 onChange={handleCategoryChange}
                 sx={{color:'#0b89b9', fontWeight: "bold"}}
                 >
-                <MenuItem key={0} value={"v_F_Piped"}>v_F_Piped</MenuItem>
-                <MenuItem key={1} value={"v_F_Trucked"}>v_F_Trucked</MenuItem>
-                <MenuItem key={2} value={"v_F_Sourced"}>v_F_Sourced</MenuItem>
+                <MenuItem key={0} value={"v_F_Piped"}>Piped</MenuItem>
+                <MenuItem key={1} value={"v_F_Trucked"}>Trucked</MenuItem>
+                <MenuItem key={2} value={"v_F_Sourced"}>Sourced</MenuItem>
                 </Select>
             </FormControl>
         </Box>
@@ -211,7 +211,7 @@ export default function SankeyPlot(props) {
                 },
                 // {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]},
                 ]}
-                layout={ {width: 1118,   height: 772, font: { size: 10 }, title: sankeyCategory} }
+                layout={ {width: 1118,   height: 772, font: { size: 10 }, title: sankeyCategory.replace('v_F_','')} }
             />
         </Box>
         </Grid>
