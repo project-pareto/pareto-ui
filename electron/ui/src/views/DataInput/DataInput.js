@@ -234,7 +234,7 @@ const handleKeyDown = (e) => {
           <Tooltip key={"tooltip_"+ind+":"+index} title={editDict[""+ind+":"+index] ? "" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
           <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
           {editDict[""+ind+":"+index] ? 
-            index === 0 ? value : <TextField name={""+ind+":"+index} size="small" label={""} defaultValue={value} onChange={handleChangeValue}/>
+            index === 0 ? value : <TextField autoFocus name={""+ind+":"+index} size="small" label={""} defaultValue={value} onChange={handleChangeValue}/>
             :
             value
           }
