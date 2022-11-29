@@ -11,6 +11,7 @@ import Header from './components/Header/Header';
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
 import LandingPage from './views/LandingPage/LandingPage';
+import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
 import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
 import { deleteScenario, copyScenario } from './services/scenariolist.service'
 
@@ -26,6 +27,8 @@ function App() {
   const [ showHeader, setShowHeader ] = useState(false)
   const [ loadLandingPage, setLoadLandingPage ] = useState(1)
   const [ checkModelResults, setCheckModelResults ] = useState(0)
+  const [ showCompletedOptimization, setShowCompletedOptimization ] = useState(false)
+  const [ lastCompletedScenario, setLastCompletedScenario ] = useState(null)
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
 
@@ -110,19 +113,16 @@ useEffect(()=> {
           /*
             set scenario data, section and scenarios; finish checking
           */
-          setCheckModelResults(0)
-          setScenarios(tempScenarios)
-          setScenarioData(tempScenarios[backgroundTasks[0]])
-          setScenarioIndex(backgroundTasks[0])
-          setSection(2)
-          setCategory("Dashboard")
-          navigate('/scenario', {replace: true})
+         setLastCompletedScenario(backgroundTasks[0])
+         handleCompletedOptimization(tempScenarios)
         } else {
           console.log('not completed')
           /*
             set scenarios and scenario data; keep checking
           */
-            setScenarioData(tempScenarios[backgroundTasks[0]])
+            if(scenarioIndex === backgroundTasks[0]) {
+              setScenarioData(tempScenarios[backgroundTasks[0]])
+            }
             setScenarios(tempScenarios)
             if(checkModelResults < 100) {
               setTimeout(function() {
@@ -142,6 +142,21 @@ useEffect(()=> {
     })
  }
 }, [checkModelResults])
+
+
+  const handleCompletedOptimization = (newScenarios) => {
+    setCheckModelResults(0)
+    setScenarios(newScenarios)
+    /*
+      show popup that lets user know that model has finished running
+    */
+    setShowCompletedOptimization(true)
+  }
+
+  const goToModelResults = () => {
+    setShowCompletedOptimization(false)
+    handleScenarioSelection(lastCompletedScenario)
+  }
 
   const navigateToScenarioList = () => {
     /*
@@ -208,6 +223,9 @@ useEffect(()=> {
     })
   }
 
+  /*
+    set process section (input, optimization, results)
+  */
   const handleSetSection = (section) => {
     if(section === 2) {
       setCategory("Dashboard")
@@ -232,6 +250,9 @@ useEffect(()=> {
     setSection(section)
  }
 
+ /*
+  set sidebar category
+ */
  const handleSetCategory = (category) => {
   setCategory(category)
  }
@@ -282,18 +303,23 @@ useEffect(()=> {
     })
   }
 
+  /*
+    function for updating an input table for excel sheet
+  */
   const handleUpdateExcel = (id, tableKey, updatedTable) => {
     updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
     .then(response => response.json())
     .then((data)=>{
       console.log('return from update excel: '+data)
-      
     })
     .catch(e => {
       console.error('unable to check for tasks: ',e)
     })
   }
 
+  /*
+    fetch scenarios and update frontend data
+  */
   const resetScenarioData = () => {
     console.log('resetting scenario data, index is '+scenarioIndex)
     fetchScenarios()
@@ -305,6 +331,9 @@ useEffect(()=> {
       });
   }
 
+  /*
+    add scenario id to background tasks while it's optimizing
+  */
   const addTask = (id) => {
     let tempBackgroudTasks = [...backgroundTasks]
     tempBackgroudTasks.push(id)
@@ -374,6 +403,13 @@ useEffect(()=> {
           element={<Navigate replace to="/" />}
         />
       </Routes> 
+      {showCompletedOptimization && 
+        <ModelCompletionBar
+          setShowCompletedOptimization={setShowCompletedOptimization}
+          goToModelResults={goToModelResults}
+        />
+      }
+      
     </div> 
   );
   
