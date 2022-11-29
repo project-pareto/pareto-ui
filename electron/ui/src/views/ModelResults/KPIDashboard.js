@@ -33,7 +33,8 @@ export default function KPIDashboard(props) {
             // m:2, 
             paddingTop:2, 
             boxShadow:3,
-            paddingBottom: "50px" 
+            height: "140px"
+            // paddingBottom: "50px" 
           },
           pieChartBox: 
           {
@@ -119,7 +120,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
                 <IconButton disabled><WaterIcon sx={{ color:"#59b8d6" }}/></IconButton>
-                <p style={styles.kpiTitle}>Sourced</p>
+                <p style={styles.kpiTitle}>Groundwater Sourced</p>
                 </Box>
             </Grid>
             <Grid item xs={12}>
