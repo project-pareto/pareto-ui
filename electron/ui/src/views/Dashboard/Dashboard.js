@@ -138,7 +138,13 @@ export default function Dashboard(props) {
       <Grid item xs={4}>
       <div>
         <b id='scenarioTitle' >
-        {(scenario && props.section===0)? <p>{scenario.name}<IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}}><EditIcon fontSize='inherit'></EditIcon></IconButton></p> : null}
+        {(scenario && props.section===0) && 
+        <p>{scenario.name}
+        <IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}} disabled={['complete','none','failure'].includes(scenario.results.status) ? false : true}>
+          <EditIcon fontSize='inherit'/>
+        </IconButton>
+        </p>
+        }
       </b> 
       </div>
       </Grid>

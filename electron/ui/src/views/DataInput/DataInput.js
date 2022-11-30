@@ -19,6 +19,7 @@ import AreaChart from '../../components/AreaChart/AreaChart'
 import { Button, Typography } from '@mui/material';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import ErrorBar from '../../components/ErrorBar/ErrorBar'
 
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
@@ -30,6 +31,7 @@ export default function DataInput(props) {
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
   const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
+  const [ showError, setShowError ] = useState(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const plotCategoryDictionary  = {
@@ -192,15 +194,23 @@ const handleRowFilter = (row) => {
 }
 
 const handleDoubleClick = (ind, index) => {
-  if(editDict[""+ind+":"+index]) {
-    let tempEditDict = {...editDict}
-    tempEditDict[""+ind+":"+index] = false
-    setEditDict(tempEditDict)
-  } else {
-    let tempEditDict = {...editDict}
-    tempEditDict[""+ind+":"+index] = true
-    setEditDict(tempEditDict)
-    props.handleEditInput(true)
+  if (['complete','none','failure'].includes(scenario.results.status)) {
+    if(editDict[""+ind+":"+index]) {
+      // let tempEditDict = {...editDict}
+      // tempEditDict[""+ind+":"+index] = false
+      // setEditDict(tempEditDict)
+    } else {
+      let tempEditDict = {...editDict}
+      tempEditDict[""+ind+":"+index] = true
+      setEditDict(tempEditDict)
+      props.handleEditInput(true)
+    }
+  }  
+  else {
+    setShowError(true)
+    // setTimeout(function() {
+    //   setShowError(false)
+    // }, 3000)
   }
  }
 
@@ -231,7 +241,7 @@ const handleKeyDown = (e) => {
         */
        if (index === 0 || columnNodes[columnNodesMapping[index - 1]]) {
         return (
-          <Tooltip key={"tooltip_"+ind+":"+index} title={editDict[""+ind+":"+index] ? "" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
+          <Tooltip key={"tooltip_"+ind+":"+index} title={editDict[""+ind+":"+index] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
           <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
           {editDict[""+ind+":"+index] ? 
             index === 0 ? value : 
@@ -375,6 +385,9 @@ const handleKeyDown = (e) => {
             </Box>
           </Grid>
         </Grid>
+        {
+            showError && <ErrorBar duration={2000} margin setOpen={setShowError} severity="error" errorMessage="Unable to edit values while optimization is running" />
+        }
         </Box>
         )
       }
