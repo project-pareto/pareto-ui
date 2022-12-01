@@ -19,6 +19,7 @@ import AreaChart from '../../components/AreaChart/AreaChart'
 import { Button, Typography } from '@mui/material';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import ErrorBar from '../../components/ErrorBar/ErrorBar'
 
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
@@ -30,6 +31,7 @@ export default function DataInput(props) {
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
   const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
+  const [ showError, setShowError ] = useState(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const plotCategoryDictionary  = {
@@ -118,19 +120,6 @@ export default function DataInput(props) {
     setEditDict(tempEditDict)
    }
 
-   const handleDoubleClick = (ind, index) => {
-    if(editDict[""+ind+":"+index]) {
-      let tempEditDict = {...editDict}
-      tempEditDict[""+ind+":"+index] = false
-      setEditDict(tempEditDict)
-    } else {
-      let tempEditDict = {...editDict}
-      tempEditDict[""+ind+":"+index] = true
-      setEditDict(tempEditDict)
-      props.handleEditInput(true)
-    }
-   }
-
    const handleChangeValue = (event) => {
     let inds = event.target.getAttribute('name').split(":")
     //ind[0] is the index inside the array
@@ -171,8 +160,6 @@ export default function DataInput(props) {
       setColumnNodes(tempColumnNodes)
       setFilteredColumnNodes(tempCols)
     }
-    
-    
 }
 
 const handleRowFilter = (row) => {
@@ -205,6 +192,39 @@ const handleRowFilter = (row) => {
         setFilteredRowNodes(tempRows)
     }
 }
+
+const handleDoubleClick = (ind, index) => {
+  if (['complete','none','failure'].includes(scenario.results.status)) {
+    if(editDict[""+ind+":"+index]) {
+      // let tempEditDict = {...editDict}
+      // tempEditDict[""+ind+":"+index] = false
+      // setEditDict(tempEditDict)
+    } else {
+      let tempEditDict = {...editDict}
+      tempEditDict[""+ind+":"+index] = true
+      setEditDict(tempEditDict)
+      props.handleEditInput(true)
+    }
+  }  
+  else {
+    setShowError(true)
+    // setTimeout(function() {
+    //   setShowError(false)
+    // }, 3000)
+  }
+ }
+
+const handleKeyDown = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    if(editDict[e.target.name]) {
+      let tempEditDict = {...editDict}
+      tempEditDict[e.target.name] = false
+      setEditDict(tempEditDict)
+    }
+  } 
+  
+}
   
   const renderRow = (ind) => {
       var cells = []
@@ -219,12 +239,20 @@ const handleRowFilter = (row) => {
           columnNodes[columnNodesMapping[index]] must be true
           UNLESS it's the first column (index is 0)
         */
-       if (index ===0 || columnNodes[columnNodesMapping[index - 1]]) {
+       if (index === 0 || columnNodes[columnNodesMapping[index - 1]]) {
         return (
-          <Tooltip key={"tooltip_"+ind+":"+index} title={editDict[""+ind+":"+index] ? "Doubleclick to save value" : "Doubleclick to edit value"} arrow>
-          <TableCell onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
+          <Tooltip key={"tooltip_"+ind+":"+index} title={editDict[""+ind+":"+index] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
+          <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
           {editDict[""+ind+":"+index] ? 
-            index === 0 ? value : <TextField name={""+ind+":"+index} size="small" label={""} defaultValue={value} onChange={handleChangeValue}/>
+            index === 0 ? value : 
+            <TextField 
+              autoFocus 
+              name={""+ind+":"+index} 
+              size="small" label={""} 
+              defaultValue={value} 
+              onChange={handleChangeValue} 
+              onFocus={(event) => event.target.select()}
+            />
             :
             value
           }
@@ -357,6 +385,9 @@ const handleRowFilter = (row) => {
             </Box>
           </Grid>
         </Grid>
+        {
+            showError && <ErrorBar duration={2000} margin setOpen={setShowError} severity="error" errorMessage="Unable to edit values while optimization is running" />
+        }
         </Box>
         )
       }

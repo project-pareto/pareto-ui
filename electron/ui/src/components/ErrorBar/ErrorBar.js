@@ -10,7 +10,7 @@ export default function ErrorBar(props) {
     }
 
     return ( 
-      <Snackbar open={true} autoHideDuration={props.duration} onClose={handleErrorClose}>
+      <Snackbar open={true} autoHideDuration={props.duration} onClose={handleErrorClose} style={props.margin && {marginBottom:'50px'}}>
         <Alert onClose={handleErrorClose} severity={props.severity}>
           {props.errorMessage}
         </Alert>
