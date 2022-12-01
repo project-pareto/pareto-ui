@@ -114,7 +114,7 @@ useEffect(()=> {
             set scenario data, section and scenarios; finish checking
           */
          setLastCompletedScenario(backgroundTasks[0])
-         handleCompletedOptimization(tempScenarios)
+         handleCompletedOptimization(tempScenarios, backgroundTasks[0])
         } else {
           console.log('not completed')
           /*
@@ -124,14 +124,14 @@ useEffect(()=> {
               setScenarioData(tempScenarios[backgroundTasks[0]])
             }
             setScenarios(tempScenarios)
-            if(checkModelResults < 100) {
+            if(checkModelResults < 1000) {
               setTimeout(function() {
                 setCheckModelResults(checkModelResults => checkModelResults+1)
               }, TIME_BETWEEN_CALLS)
             }
         }
       } else {
-        if(checkModelResults < 100) {
+        if(checkModelResults < 1000) {
           setTimeout(function() {
             setCheckModelResults(checkModelResults => checkModelResults+1)
           }, TIME_BETWEEN_CALLS)
@@ -144,13 +144,18 @@ useEffect(()=> {
 }, [checkModelResults])
 
 
-  const handleCompletedOptimization = (newScenarios) => {
+  const handleCompletedOptimization = (newScenarios, id) => {
     setCheckModelResults(0)
     setScenarios(newScenarios)
     /*
       show popup that lets user know that model has finished running
     */
+   if(id === scenarioIndex && section === 2){
+    setScenarioData(newScenarios[id])
+   }else {
     setShowCompletedOptimization(true)
+   }
+    
   }
 
   const goToModelResults = () => {
