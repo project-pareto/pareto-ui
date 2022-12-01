@@ -58,14 +58,15 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
         "scaling_factor": 1000,
         "running_time": runtime,
         "gap": 0,
+        "solver": solver,
     }
 
-    _log.info(f"solving model")
-    try:
-        solve_model(model=strategic_model, options=options, solver=solver)
-    except:
-        _log.info('solver not an option for solve model')
-        solve_model(model=strategic_model, options=options)
+    _log.info(f"solving model with solver: {solver}")
+    # try:
+    #     solve_model(model=strategic_model, options=options, solver=solver)
+    # except:
+    #     _log.info('solver not an option for solve model')
+    solve_model(model=strategic_model, options=options)
     scenario = scenario_handler.get_scenario(int(id))
     results = {"data": {}, "status": "Generating output"}
     scenario["results"] = results

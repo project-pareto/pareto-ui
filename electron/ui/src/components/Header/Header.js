@@ -1,5 +1,6 @@
 import './Header.css';
 import React from 'react';
+import {useEffect, useState} from 'react';   
 import logo from "../../images/pareto-logo.png";
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -9,9 +10,19 @@ import Select from '@mui/material/Select';
  
 
 export default function Header(props) {  
+  const [ location, setLocation ] = useState("")
+
     const handleScenarioSelection = (event) => {
       props.handleSelection(event.target.value)
     }
+
+    useEffect(() => {
+      let tempLocationSplit = window.location.href.split('/')
+      let tempLocation = tempLocationSplit[tempLocationSplit.length-1]
+      console.log('tempLocation = '+tempLocation)
+      setLocation(tempLocation)
+    }, [window.location.href])
+
     return (
       <>
       {props.showHeader ? 
@@ -23,7 +34,7 @@ export default function Header(props) {
               <img src={logo} alt="Pareto Logo"/>
             </div>
           </div>
-        {props.scenarioData ? 
+        {location === "scenario" &&
           <>
             <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>
             <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
@@ -40,8 +51,7 @@ export default function Header(props) {
             
             <Button id='user-name' sx={{color: "#0b89b9"}} onClick={props.navigateHome}>View Scenario List</Button>
           </>
-        : 
-        null}
+        }
         </div>
       </div>
         : 

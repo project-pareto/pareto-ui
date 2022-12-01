@@ -15,10 +15,11 @@ import Select from '@mui/material/Select';
 export default function Optimization(props) {
   const [scenario, setScenario] = useState(props.scenario)
   const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
+  const [ disabled, setDisabled ] = useState(false)
 
-  //  useEffect(()=>{
-  //     //  console.log('curr scenario',scenario)
-  //  }, [scenario]);
+   useEffect(()=>{
+    setDisabled(!['complete','none','failure'].includes(scenario.results.status))
+   }, [scenario]);
   
    const handleObjectiveChange = (event) => {
      const tempScenario = {...scenario}
@@ -93,7 +94,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={8} style={{marginTop: "25px"}}>
-          <FormControl>
+          <FormControl disabled={disabled}>
             <RadioGroup
               aria-labelledby="objectives-select"
               value={scenario.optimization.objective}
@@ -113,7 +114,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={8} style={{marginTop: "25px"}}>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small">
+          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
             <OutlinedInput
               id="outlined-adornment-sec"
               value={runtime}
@@ -133,7 +134,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={8} style={{marginTop: "25px"}}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small">
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
               value={scenario.optimization.pipelineCostCalculation}
               onChange={handlePipelineCostChange}
@@ -151,7 +152,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={8} style={{marginTop: "25px"}}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small">
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
               value={scenario.optimization.waterQuality}
               onChange={handleWaterQualityChange}
@@ -170,7 +171,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={8} style={{marginTop: "25px"}}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small">
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
               value={scenario.optimization.solver}
               onChange={handleSolverChange}
