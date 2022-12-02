@@ -107,6 +107,12 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         except:
             _log.info('unable to find solver selection, using none')
             solver=None
+        try:
+            build_units=data['scenario']['optimization']['build_units']
+        except:
+            _log.info('unable to get build units, using user_units')
+            build_units = "user_units"
+        _log.info(f"build units is {build_units}")
         background_tasks.add_task(
             handle_run_strategic_model, 
             input_file=excel_path,
@@ -116,7 +122,8 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
             runtime=data['scenario']['optimization']['runtime'],
             pipelineCost=data['scenario']['optimization']['pipelineCostCalculation'],
             waterQuality=data['scenario']['optimization']['waterQuality'],
-            solver=solver
+            solver=solver,
+            build_units=build_units
         )
         
         # add id to scenario handler task list to keep track of running tasks
