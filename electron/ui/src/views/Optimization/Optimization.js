@@ -57,6 +57,13 @@ export default function Optimization(props) {
     props.updateScenario(tempScenario)
   }
 
+  const handleUnitsChange = (event) => {
+    const tempScenario = {...scenario}
+    tempScenario.optimization.build_units = event.target.value
+    setScenario(tempScenario)
+    props.updateScenario(tempScenario)
+  }
+
   const styles = {
     objectiveSelection: 
       {
@@ -183,6 +190,24 @@ export default function Optimization(props) {
             </Select>
             </FormControl>
           </Grid>
+          
+          {/* <Grid item xs={4} style={{marginTop: "25px"}}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Scale Model Units</p>
+            </Box>
+          </Grid>
+          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
+            <Select
+              value={scenario.optimization.units}
+              onChange={handleUnitsChange}
+              sx={{color:'#0b89b9', fontWeight: "bold"}}
+            >
+              <MenuItem key={"user_units"} value={"user_units"}>No</MenuItem>
+              <MenuItem key={"scaled_units"} value={"scaled_units"}>Yes</MenuItem>
+            </Select>
+            </FormControl>
+          </Grid> */}
 
         </Grid>
       </Box>

@@ -103,7 +103,7 @@ useEffect(()=> {
         let tempScenario = tempScenarios[task]
         if(tempScenario.results.status !== scenarios[task].results.status) {
           updated=true
-          if(tempScenario.results.status === "complete") completed = true
+          if(tempScenario.results.status === "complete" || tempScenario.results.status === "failure") completed = true
         }
       }
       if(updated) {
@@ -188,7 +188,7 @@ useEffect(()=> {
     /*
       if scenario is curretly running or solved, send user to model results tab
     */
-    if(["Initializing", "Solving model", "Generating output", "complete"].includes(scenarios[scenario].results.status)) {
+    if(["Initializing", "Solving model", "Generating output", "complete", "failure"].includes(scenarios[scenario].results.status)) {
       setCategory("Dashboard")
       setSection(2)
     } else {

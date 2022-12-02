@@ -108,7 +108,11 @@ export default function ModelResults(props) {
               {props.scenario.results.data[props.category].slice(1).map((value, index) => {
                 return (<TableRow>
                 {value.map((cellValue, i)=> {
-                  return <TableCell align={(i === (value.length - 1)) ? "right" : "left"} key={"" + index + i} style={i === 0 ? styles.firstCol : styles.other}>{(i === (value.length - 1)) ? toFixed(cellValue, 2) : cellValue}</TableCell>
+                  return <TableCell 
+                            align={(i === (value.length - 1)) ? "right" : "left"} 
+                            key={"" + index + i} 
+                            style={i === 0 ? styles.firstCol : styles.other}>{(i === (value.length - 1)) ? cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : cellValue}
+                          </TableCell>
                 })}
                 </TableRow>)
               })}
