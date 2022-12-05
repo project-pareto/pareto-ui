@@ -295,17 +295,17 @@ useEffect(()=> {
     })
   }
 
-  const handleCopyScenario = (index) => {
-    // console.log('copying scenario: ',index)
-    copyScenario(index)
-    .then(response => response.json())
-    .then((data) => {
-      setScenarios(data.data)
-    }).catch(e => {
-      console.error('error on scenario copy')
-      console.error(e)
-    })
-  }
+  // const handleCopyScenario = (index) => {
+  //   // console.log('copying scenario: ',index)
+  //   copyScenario(index)
+  //   .then(response => response.json())
+  //   .then((data) => {
+  //     setScenarios(data.data)
+  //   }).catch(e => {
+  //     console.error('error on scenario copy')
+  //     console.error(e)
+  //   })
+  // }
 
   /*
     function for updating an input table for excel sheet
@@ -376,7 +376,7 @@ useEffect(()=> {
             section={section} 
             scenarios={scenarios} 
             deleteScenario={handleDeleteScenario}
-            copyScenario={handleCopyScenario}
+            setScenarios={setScenarios}
             handleSetSection={handleSetSection} 
             setShowHeader={setShowHeader}
             />} 

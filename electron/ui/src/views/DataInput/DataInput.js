@@ -140,7 +140,7 @@ export default function DataInput(props) {
     //ind[0] is the index inside the array
     //ind[1] corresponds with the key
     let ind = parseInt(inds[0])
-    let colName = keyIndexMapping[parseInt(inds[1])]
+    let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
     let tempScenario = {...scenario}
     tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
     setScenario(tempScenario)
