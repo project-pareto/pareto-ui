@@ -47,8 +47,8 @@ function App() {
       fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
-        console.log('loaded landing page on try #'+loadLandingPage)
-        console.log('setscenarios: ',data.data)
+        // console.log('loaded landing page on try #'+loadLandingPage)
+        // console.log('setscenarios: ',data.data)
         /* 
         check for any scenarios that were running when the app was previously quit
         reset the status of these scenarios so that they can be treated as drafts again
@@ -64,8 +64,8 @@ function App() {
               .then((data) => {
                 console.log('reset scenario')
               }).catch(e => {
-                console.log('error on scenario update')
-                console.log(e)
+                console.error('error on scenario update')
+                console.error(e)
               })
             }
         }
@@ -107,20 +107,20 @@ useEffect(()=> {
         }
       }
       if(updated) {
-        console.log('updated')
+        // console.log('updated')
         if(completed) {
-          console.log('completed')
+          // console.log('completed')
           /*
             set scenario data, section and scenarios; finish checking
           */
          setLastCompletedScenario(backgroundTasks[0])
          handleCompletedOptimization(tempScenarios, backgroundTasks[0])
         } else {
-          console.log('not completed')
+          // console.log('not completed')
           /*
             set scenarios and scenario data; keep checking
           */
-            if(scenarioIndex === backgroundTasks[0]) {
+            if(""+scenarioIndex === ""+backgroundTasks[0]) {
               setScenarioData(tempScenarios[backgroundTasks[0]])
             }
             setScenarios(tempScenarios)
@@ -138,24 +138,27 @@ useEffect(()=> {
         }
       }
     }).catch(e => {
-      console.log('unable to fetch scenarios and check results: '+e)
+      console.error('unable to fetch scenarios and check results: '+e)
     })
  }
 }, [checkModelResults])
 
-
   const handleCompletedOptimization = (newScenarios, id) => {
     setCheckModelResults(0)
     setScenarios(newScenarios)
+    checkTasks()
+      .then(response => response.json())
+      .then((data)=>{
+        setBackgroundTasks(data.tasks)
+      });
     /*
-      show popup that lets user know that model has finished running
+      if not on model results tab, show popup that lets user know that model has finished running
     */
-   if(id === scenarioIndex && section === 2){
+   if(""+id === ""+scenarioIndex && section === 2){
     setScenarioData(newScenarios[id])
    }else {
     setShowCompletedOptimization(true)
    }
-    
   }
 
   const goToModelResults = () => {
@@ -216,15 +219,15 @@ useEffect(()=> {
     console.log('updating scenario: ',updateScenario)
     setScenarios(temp)
     setScenarioData({...updatedScenario})
-    console.log('new scenario: ')
-    console.log({...updatedScenario})
+    // console.log('new scenario: ')
+    // console.log({...updatedScenario})
     updateScenario({'updatedScenario': {...updatedScenario}})
     .then(response => response.json())
     .then((data) => {
-      console.log('updated scenarios on backend')
+      // console.log('updated scenarios on backend')
     }).catch(e => {
-      console.log('error on scenario update')
-      console.log(e)
+      console.error('error on scenario update')
+      console.error(e)
     })
   }
 
@@ -248,7 +251,6 @@ useEffect(()=> {
       checkTasks()
       .then(response => response.json())
       .then((data)=>{
-        console.log('background tasks: ',data.tasks)
         setBackgroundTasks(data.tasks)
       });
     }
@@ -265,7 +267,6 @@ useEffect(()=> {
   const handleEditScenarioName = (newName, id, updateScenarioData) => {
     const tempScenarios = {...scenarios}
     const tempScenario = tempScenarios[id]
-    console.log('updating scenario: ',tempScenario)
     tempScenario.name = newName
     tempScenarios[id] = tempScenario
     setScenarios(tempScenarios)
@@ -275,38 +276,36 @@ useEffect(()=> {
     updateScenario({'updatedScenario': tempScenario})
     .then(response => response.json())
     .then((data) => {
-      console.log('updated scenarios on backend')
+      // console.log('updated scenarios on backend')
     }).catch(e => {
-      console.log('error on scenario update')
-      console.log(e)
+      console.error('error on scenario update')
+      console.error(e)
     })
   }
 
   const handleDeleteScenario = (index) => {
-    console.log('deleting scenario: ',index)
+    // console.log('deleting scenario: ',index)
     deleteScenario({'id': index})
     .then(response => response.json())
     .then((data) => {
-      console.log('deleted scenario')
       setScenarios(data.data)
     }).catch(e => {
-      console.log('error on scenario delete')
-      console.log(e)
+      console.error('error on scenario delete')
+      console.error(e)
     })
   }
 
-  const handleCopyScenario = (index) => {
-    console.log('copying scenario: ',index)
-    copyScenario(index)
-    .then(response => response.json())
-    .then((data) => {
-      console.log('copy scenario')
-      setScenarios(data.data)
-    }).catch(e => {
-      console.log('error on scenario copy')
-      console.log(e)
-    })
-  }
+  // const handleCopyScenario = (index) => {
+  //   // console.log('copying scenario: ',index)
+  //   copyScenario(index)
+  //   .then(response => response.json())
+  //   .then((data) => {
+  //     setScenarios(data.data)
+  //   }).catch(e => {
+  //     console.error('error on scenario copy')
+  //     console.error(e)
+  //   })
+  // }
 
   /*
     function for updating an input table for excel sheet
@@ -315,7 +314,7 @@ useEffect(()=> {
     updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
     .then(response => response.json())
     .then((data)=>{
-      console.log('return from update excel: '+data)
+      // console.log('return from update excel: '+data)
     })
     .catch(e => {
       console.error('unable to check for tasks: ',e)
@@ -326,11 +325,10 @@ useEffect(()=> {
     fetch scenarios and update frontend data
   */
   const resetScenarioData = () => {
-    console.log('resetting scenario data, index is '+scenarioIndex)
+    // console.log('resetting scenario data, index is '+scenarioIndex)
     fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
-        console.log('setscenarios: ',data.data)
         setScenarios(data.data)
         setScenarioData(data.data[scenarioIndex])
       });
@@ -378,7 +376,7 @@ useEffect(()=> {
             section={section} 
             scenarios={scenarios} 
             deleteScenario={handleDeleteScenario}
-            copyScenario={handleCopyScenario}
+            setScenarios={setScenarios}
             handleSetSection={handleSetSection} 
             setShowHeader={setShowHeader}
             />} 

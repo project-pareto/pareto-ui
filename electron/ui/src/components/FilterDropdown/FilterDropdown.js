@@ -86,7 +86,8 @@ export default function FilterDropdown(props) {
                             <ListItemIcon>
                             <Checkbox checked={props.filtered1.indexOf(option) > -1} />
                             </ListItemIcon>
-                            <ListItemText primary={option} />
+                            
+                            <ListItemText primary={option.includes('::') ? option.split("::")[1] : option} />
                         </MenuItem>
                         ))}
                     </>
@@ -111,7 +112,7 @@ export default function FilterDropdown(props) {
                             <ListItemIcon>
                             <Checkbox checked={props.filtered2.indexOf(option) > -1} />
                             </ListItemIcon>
-                            <ListItemText primary={option} />
+                            <ListItemText primary={option.includes('::') ? option.split("::")[1] : option} />
                         </MenuItem>
                         ))}
                     </>

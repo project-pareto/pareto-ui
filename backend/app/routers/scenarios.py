@@ -170,7 +170,8 @@ async def copy(scenario_id: int):
     Returns:
         Newly created scenario. 
     """
-    return {'data' : scenario_handler.copy_scenario(scenario_id)}
+    scenarios, new_id = scenario_handler.copy_scenario(scenario_id)
+    return {"scenarios": scenarios, "new_id": new_id}
 
 @router.post("/update_excel")
 async def update_excel(request: Request):

@@ -200,7 +200,7 @@ class ScenarioHandler:
             self.retrieve_scenarios()
 
             # return updated scenario list
-            return self.scenario_list
+            return self.scenario_list, new_scenario_id
 
         except Exception as e:
             _log.error(f"error copying scenario: {e}")

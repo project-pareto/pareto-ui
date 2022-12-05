@@ -66,17 +66,18 @@ export default function DataInput(props) {
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
-        let tempRowNodesMapping
+        let tempRowNodesMapping = []
         Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
           if (ind === 0) {
-            tempRowNodesMapping = value
+            // tempRowNodesMapping = value
             value.map ((v,i) => {
-              tempRowNodes[v] = true
+              tempRowNodesMapping.push(i+"::"+v)
+              tempRowNodes[i+"::"+v] = true
               return 1
             })
           } else {
-            tempColumnNodesMapping.push(key)
-            tempColumnNodes[key] = true
+            tempColumnNodesMapping.push(ind+"::"+key)
+            tempColumnNodes[ind+"::"+key] = true
           }
           scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
             tempEditDict[""+ind+":"+index] = false
@@ -90,7 +91,15 @@ export default function DataInput(props) {
         setFilteredColumnNodes(tempColumnNodesMapping)
         setFilteredRowNodes(tempRowNodesMapping)
         setColumnNodesMapping(tempColumnNodesMapping)
-        setRowNodesMapping(tempRowNodesMapping)
+        setRowNodesMapping(tempRowNodesMapping) 
+        // console.log("tempColumnNodesMapping")
+        // console.log(tempColumnNodesMapping)
+        // console.log("tempRowNodesMapping")
+        // console.log(tempRowNodesMapping)
+        console.log("tempColumnNodes")
+        console.log(tempColumnNodes)
+        console.log("tempRowNodes")
+        console.log(tempRowNodes)
       }
     } catch (e) {
       console.error('unable to set edit dictionary: ',e)
@@ -100,6 +109,12 @@ export default function DataInput(props) {
     setScenario(tempScenario)
     
   }, [props.category, props.scenario, scenario.data_input.df_parameters]);
+
+  useEffect(()=>{
+    console.log('keyindex mapping: ')
+    console.log(keyIndexMapping)
+    
+  }, [keyIndexMapping]);
   
    const handlePlotCategoryChange = (event) => {
     setPlotCategory(event.target.value)
@@ -125,7 +140,7 @@ export default function DataInput(props) {
     //ind[0] is the index inside the array
     //ind[1] corresponds with the key
     let ind = parseInt(inds[0])
-    let colName = keyIndexMapping[parseInt(inds[1])]
+    let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
     let tempScenario = {...scenario}
     tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
     setScenario(tempScenario)
@@ -346,8 +361,8 @@ const handleKeyDown = (e) => {
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
               <TableRow key="headRow">
               {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], index) => {
-                keyIndexMapping[index] = key
-                if (index === 0 || columnNodes[key]) {
+                keyIndexMapping[index] = index+"::"+key
+                if (index === 0 || columnNodes[index+"::"+key]) {
                   return (
                     index === 0 ? 
                   <TableCell key={key} style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
