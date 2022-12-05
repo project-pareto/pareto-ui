@@ -14,7 +14,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
 import Tooltip from '@mui/material/Tooltip';
-import {  uploadExcelSheet } from '../../services/sidebar.service'
+import { uploadExcelSheet } from '../../services/sidebar.service'
+import { copyScenario } from '../../services/scenariolist.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
 import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'
@@ -49,6 +50,21 @@ export default function ScenarioList(props) {
         setOpenDeleteModal(false)
         setId(null)
     }
+
+    const handleCopyScenario = (index) => {
+        // console.log('copying scenario: ',index)
+        copyScenario(index)
+        .then(response => response.json())
+        .then((data) => {
+          props.setScenarios(data.scenarios)
+          setId(data.new_id)
+          setOpenEditName(true)
+          setName(data.scenarios[data.new_id].name)
+        }).catch(e => {
+          console.error('error on scenario copy')
+          console.error(e)
+        })
+      }
 
     const handleEditName = (event) => {
         setName(event.target.value)
@@ -159,7 +175,7 @@ export default function ScenarioList(props) {
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Copy Scenario" enterDelay={500}>
-                        <IconButton onClick={() => props.copyScenario(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleCopyScenario(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
                             <ContentCopyIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
