@@ -19,7 +19,7 @@ import ParetoDictionary from '../../assets/ParetoDictionary.json'
 export default function ModelResults(props) {
   const scenario = props.scenario
    useEffect(()=>{
-       console.log('curr scenario.results.data',scenario.results.data)
+      //  console.log('curr scenario.results.data',scenario.results.data)
    }, [scenario]);
 
    const styles ={
