@@ -55,7 +55,7 @@ describe('scenario testing', () => {
         cy.contains(/cypress test/i).click()
         cy.wait(2000)
         cy.screenshot('clicked on scenario')
-        
+
         cy.contains(/cypress test/i).click()
         cy.wait(2000)
         cy.screenshot('clicked on scenario second time')
@@ -71,7 +71,7 @@ describe('scenario testing', () => {
             Solution: wait for 2 minutes. should be enough time, while not taking egregiously long
         */
         cy.wait(120000)
-
+        cy.screenshot('finished optimizing')
 
         //validate results
         cy.contains(/recycling rate/i).should('be.visible')
@@ -79,8 +79,6 @@ describe('scenario testing', () => {
         cy.contains(/groundwater source/i).should('be.visible')
         cy.contains(/capex/i).should('be.visible')
         cy.contains(/opex/i).should('be.visible')
-
-        cy.screenshot('end-test')
     })
 
     it('copies existing scenario', () => {
@@ -90,12 +88,11 @@ describe('scenario testing', () => {
         //copy scenario and save
         cy.findAllByRole('button', {  name: /copy scenario/i}).eq(-1).click()
         cy.contains(/save/i).click()
+        cy.wait(1000)
         cy.screenshot('copied scenario')
 
         //validate results
         cy.contains(/copy/i).should('be.visible')
-
-        cy.screenshot('end-test')
     })
 
     it('deletes existing scenario', () => {
@@ -108,11 +105,10 @@ describe('scenario testing', () => {
         cy.wait(1000)
         cy.screenshot('clicked delete scenario')
         cy.findByRole('button', {name: /delete/i}).click()
+        cy.wait(1000)
         cy.screenshot('deleted scenario')
 
         //validate results
         // cy.contains(/copy/i).should('be.visible')
-
-        cy.screenshot('end-test')
     })
 })
