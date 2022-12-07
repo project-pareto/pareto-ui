@@ -2,7 +2,7 @@ describe('scenario testing', () => {
     it('creates a new scenario by uploading excel sheet', () => {
         //load webpage
         cy.visit('/#/scenarios')
-        cy.screenshot('loaded homepage')
+        cy.screenshot('loaded homepage 1')
 
         //click create new scenario
         cy.findByRole('button', {name: /\+ create new scenario/i}).click()
@@ -13,7 +13,7 @@ describe('scenario testing', () => {
             doc.addEventListener('click', () => {
               // this adds a listener that reloads your page 
               // after 5 seconds from clicking the download button
-              setTimeout(function () { doc.location.reload() }, 10000)
+              setTimeout(function () { doc.location.reload() }, 12000)
             })
             cy.get("[data-cy=excel-download").click()
           })
@@ -49,16 +49,17 @@ describe('scenario testing', () => {
     it('runs an optimization and validates model results', () => {
         //load webpage
         cy.visit('/#/scenarios')
-        cy.screenshot('loaded homepage')
+        cy.screenshot('loaded homepage 2')
+        cy.wait(1000)
 
         //load scnenario
         cy.contains(/cypress test/i).click()
         cy.wait(2000)
         cy.screenshot('clicked on scenario')
 
-        cy.contains(/cypress test/i).click()
-        cy.wait(2000)
-        cy.screenshot('clicked on scenario second time')
+        // cy.contains(/cypress test/i).click()
+        // cy.wait(2000)
+        // cy.screenshot('clicked on scenario second time')
 
         //run optimization with default settings
         cy.findByRole('button', {name: /continue to optimization/i}).click()
@@ -84,6 +85,7 @@ describe('scenario testing', () => {
     it('copies existing scenario', () => {
         //load webpage
         cy.visit('/#/scenarios')
+        cy.screenshot('loaded homepage 3')
 
         //copy scenario and save
         cy.findAllByRole('button', {  name: /copy scenario/i}).eq(-1).click()
@@ -99,6 +101,7 @@ describe('scenario testing', () => {
         //load webpage
         cy.visit('/#/scenarios')
         cy.wait(1000)
+        cy.screenshot('loaded homepage 2')
 
         //delete scenario and click confirm delete
         cy.findAllByRole('button', {  name: /delete scenario/i}).eq(-1).click()
