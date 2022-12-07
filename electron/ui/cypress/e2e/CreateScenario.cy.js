@@ -57,10 +57,6 @@ describe('scenario testing', () => {
         cy.wait(2000)
         cy.screenshot('clicked on scenario')
 
-        // cy.contains(/cypress test/i).click()
-        // cy.wait(2000)
-        // cy.screenshot('clicked on scenario second time')
-
         //run optimization with default settings
         cy.findByRole('button', {name: /continue to optimization/i}).click()
         cy.findByRole('button', {name: /optimize/i}).click()
