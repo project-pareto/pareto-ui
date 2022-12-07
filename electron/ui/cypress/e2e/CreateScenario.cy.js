@@ -67,7 +67,11 @@ describe('scenario testing', () => {
             so we can't wait on api return. 
             Solution: wait for 2 minutes. should be enough time, while not taking egregiously long
         */
-        cy.wait(120000)
+        // cy.wait(120000)
+        // cy.contains('Running Optimization', {timeout: 240000}).should('not.be.visible')
+        cy.wait(2000)
+        cy.findByRole('heading', {name: /running optimization/i}).should('exist')
+        cy.findByRole('heading', {name: /running optimization/i, timeout: 240000}).should('not.exist')
         cy.screenshot('finished optimizing')
 
         //validate results
