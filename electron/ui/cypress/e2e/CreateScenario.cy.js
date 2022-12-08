@@ -11,8 +11,7 @@ describe('scenario testing', () => {
         //download sample excel sheet
         cy.window().document().then(function (doc) {
             doc.addEventListener('click', () => {
-              // this adds a listener that reloads your page 
-              // after 5 seconds from clicking the download button
+              // reloads after 12 seconds from clicking the download button
               setTimeout(function () { doc.location.reload() }, 12000)
             })
             cy.get("[data-cy=excel-download").click()
@@ -62,13 +61,8 @@ describe('scenario testing', () => {
         cy.findByRole('button', {name: /optimize/i}).click()
 
         /*
-            wait for optimization to finish.
-            api call returns immediately while optimization runs in the background
-            so we can't wait on api return. 
-            Solution: wait for 2 minutes. should be enough time, while not taking egregiously long
+            wait for optimization to finish. times out after 4 minutes
         */
-        // cy.wait(120000)
-        // cy.contains('Running Optimization', {timeout: 240000}).should('not.be.visible')
         cy.wait(2000)
         cy.findByRole('heading', {name: /running optimization/i}).should('exist')
         cy.findByRole('heading', {name: /running optimization/i, timeout: 240000}).should('not.exist')
