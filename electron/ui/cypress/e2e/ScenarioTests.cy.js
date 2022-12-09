@@ -67,10 +67,18 @@ describe('scenario testing', () => {
         cy.screenshot('finished creating scenario')
     })
 
+    
+
     it('copies existing scenario', () => {
         //load webpage
         cy.visit('/#/scenarios')
         cy.screenshot('loaded homepage 3')
+
+        //count the amount of scenarios
+        let scenarioListLength
+        cy.findAllByRole('button', {  name: /copy scenario/i}).then((value) => {
+            scenarioListLength = Cypress.$(value).length;
+        })
 
         //copy scenario and save
         cy.findAllByRole('button', {  name: /copy scenario/i}).eq(-1).click()
@@ -80,6 +88,9 @@ describe('scenario testing', () => {
 
         //validate results
         cy.contains(/copy/i).should('be.visible')
+        cy.findAllByRole('button', {  name: /copy scenario/i}).then((value) => {
+            expect(value).to.have.length(scenarioListLength + 1);
+        })
     })
 
     it('deletes existing scenario', () => {
@@ -87,6 +98,12 @@ describe('scenario testing', () => {
         cy.visit('/#/scenarios')
         cy.wait(1000)
         cy.screenshot('loaded homepage 2')
+
+        //count the amount of scenarios
+        let scenarioListLength
+        cy.findAllByRole('button', {  name: /copy scenario/i}).then((value) => {
+            scenarioListLength = Cypress.$(value).length;
+        })
 
         //delete scenario and click confirm delete
         cy.findAllByRole('button', {  name: /delete scenario/i}).eq(-1).click()
@@ -97,7 +114,9 @@ describe('scenario testing', () => {
         cy.screenshot('deleted scenario')
 
         //validate results
-        // cy.contains(/copy/i).should('be.visible')
+        cy.findAllByRole('button', {  name: /copy scenario/i}).then((value) => {
+            expect(value).to.have.length(scenarioListLength - 1);
+        })
     })
 
     it('runs an optimization and validates model results', () => {
