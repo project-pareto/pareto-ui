@@ -1,4 +1,26 @@
 describe('scenario testing', () => {
+    it('test that scenario list loads properly', () => {
+        //load webpage
+        cy.visit('/#/scenarios')
+
+        //locate header logo
+        cy.findByRole('img', { name: /pareto logo/i })
+
+        //locate heading
+        cy.findByRole('heading', {  name: /scenarios/i})
+
+        //locate new scenario button
+        cy.findByRole('button', { name: /create new scenario/i})
+
+        //locate table headers
+        cy.findByRole('columnheader', {  name: /scenario name/i})
+        cy.findByRole('columnheader', {  name: /date created/i})
+        cy.findByRole('columnheader', {  name: /status/i})
+        cy.findByRole('columnheader', {  name: /actions/i})
+        
+        cy.screenshot('end-test')
+    })
+
     it('creates a new scenario by uploading excel sheet', () => {
         //load webpage
         cy.visit('/#/scenarios')
@@ -45,37 +67,6 @@ describe('scenario testing', () => {
         cy.screenshot('finished creating scenario')
     })
 
-    it('runs an optimization and validates model results', () => {
-        //load webpage
-        cy.visit('/#/scenarios')
-        cy.screenshot('loaded homepage 2')
-        cy.wait(1000)
-
-        //load scnenario
-        cy.contains(/cypress test/i).click()
-        cy.wait(2000)
-        cy.screenshot('clicked on scenario')
-
-        //run optimization with default settings
-        cy.findByRole('button', {name: /continue to optimization/i}).click()
-        cy.findByRole('button', {name: /optimize/i}).click()
-
-        /*
-            wait for optimization to finish. times out after 4 minutes
-        */
-        cy.wait(2000)
-        cy.findByRole('heading', {name: /running optimization/i}).should('exist')
-        cy.findByRole('heading', {name: /running optimization/i, timeout: 240000}).should('not.exist')
-        cy.screenshot('finished optimizing')
-
-        //validate results
-        cy.contains(/recycling rate/i).should('be.visible')
-        cy.contains(/annual disposal/i).should('be.visible')
-        cy.contains(/groundwater source/i).should('be.visible')
-        cy.contains(/capex/i).should('be.visible')
-        cy.contains(/opex/i).should('be.visible')
-    })
-
     it('copies existing scenario', () => {
         //load webpage
         cy.visit('/#/scenarios')
@@ -107,5 +98,36 @@ describe('scenario testing', () => {
 
         //validate results
         // cy.contains(/copy/i).should('be.visible')
+    })
+
+    it('runs an optimization and validates model results', () => {
+        //load webpage
+        cy.visit('/#/scenarios')
+        cy.screenshot('loaded homepage 2')
+        cy.wait(1000)
+
+        //load scnenario
+        cy.contains(/cypress test/i).click()
+        cy.wait(2000)
+        cy.screenshot('clicked on scenario')
+
+        //run optimization with default settings
+        cy.findByRole('button', {name: /continue to optimization/i}).click()
+        cy.findByRole('button', {name: /optimize/i}).click()
+
+        /*
+            wait for optimization to finish. times out after 4 minutes
+        */
+        cy.wait(2000)
+        cy.findByRole('heading', {name: /running optimization/i}).should('exist')
+        cy.findByRole('heading', {name: /running optimization/i, timeout: 240000}).should('not.exist')
+        cy.screenshot('finished optimizing')
+
+        //validate results
+        cy.contains(/recycling rate/i).should('be.visible')
+        cy.contains(/annual disposal/i).should('be.visible')
+        cy.contains(/groundwater source/i).should('be.visible')
+        cy.contains(/capex/i).should('be.visible')
+        cy.contains(/opex/i).should('be.visible')
     })
 })
