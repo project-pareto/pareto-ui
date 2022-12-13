@@ -177,7 +177,7 @@ export default function Dashboard(props) {
             {DragDrop()}
         </Grid>
         <Grid item xs={6}>
-            <p ><a style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
+            <p ><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
         </Grid>
         <Grid item xs={6}>
             {showWarning && <p style={{color:'red'}}>{warningMessage}</p>}

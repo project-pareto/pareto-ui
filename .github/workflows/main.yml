@@ -37,6 +37,10 @@ jobs:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
 
+      - name: Install correct branch of pareto
+        working-directory: ../
+        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.4.0v2 && pip install --progress-bar off .
+
       - name: Install electron JS dependencies
         run: |
           npm --prefix electron clean-install
@@ -45,8 +49,16 @@ jobs:
         run: |
           npm --prefix electron/ui clean-install
 
+      # - name: get idaes extensions
+      #   run: idaes get-extensions
+
       - name: get idaes extensions
-        run: idaes get-extensions
+        run: |
+         if [ "$RUNNER_OS" == "Linux" ]; then
+              idaes get-extensions --platform ubuntu2104
+         else
+              idaes get-extensions
+         fi
 
       - name: run component tests
         run: npm --prefix electron/ui test
