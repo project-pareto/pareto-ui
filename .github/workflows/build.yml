@@ -40,9 +40,14 @@ jobs:
       - name: Get idaes extensions
         run: idaes get-extensions
 
+      # - name: Install Pareto locally
+      #   working-directory: ../
+      #   run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.4.0v2 && pip install --progress-bar off .
+
+      # my fokr is caught up with Main repo december release updates
       - name: Install Pareto locally
         working-directory: ../
-        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.4.0v2 && pip install --progress-bar off .
+        run: git clone https://github.com/MichaelPesce/project-pareto.git && pip install --progress-bar off .
 
       - name: Build Backend
         run: npm --prefix electron run build-backend
