@@ -47,7 +47,7 @@ jobs:
       # my fokr is caught up with Main repo december release updates
       - name: Install Pareto locally
         working-directory: ../
-        run: git clone https://github.com/MichaelPesce/project-pareto.git && pip install --progress-bar off .
+        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
       - name: Build Backend
         run: npm --prefix electron run build-backend
