@@ -10,12 +10,38 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import IconButton from '@mui/material/IconButton';
+import InfoIcon from '@mui/icons-material/Info';
+import Tooltip from '@mui/material/Tooltip';
 
 
 export default function Optimization(props) {
   const [scenario, setScenario] = useState(props.scenario)
   const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
   const [ disabled, setDisabled ] = useState(false)
+  const columnWidths = [5,7]
+  const descriptions = {
+    objective: <div>Select what you would like to solve for.</div>,
+    runtime:  <div> 
+                  This setting limits the runtime for the solver to find a solution. 
+                  Note that this time does not include time to build the model and process output.
+              </div>,
+    pipelineCost: <div>
+                        There are two ways pipeline capacity expansion costs can be calculated:<br/>
+                        -Distance based:  Uses pipeline distance, diameter and  $/inch-mile rate<br/>
+                        -Capacity based: Uses pipeline capacity and $/bbl rate
+                  </div>,
+    waterQuality: <div>
+                      PARETO can also consider water quality in the model, select how you would like to include it in the model:<br/>
+                      -False: Model does not consider water quality.<br/>
+                      -Post Process: Calculates the water quality after optimization. The model cannot impose quality restrictions.<br/>
+                      -Discrete: Utilize a discrete model to incorporate water quality into decisions. This model can impose quality restrictions. For example, a maximum TDS allowed at a treatment facility.
+                  </div>,
+    solver: <div>
+              Select the solver you would like to use. Note: Gurobi requires a license. 
+              If you do not have a Gurobi licence, select "CBC", an open source solver.
+            </div>,
+  }
 
    useEffect(()=>{
     setDisabled(!['complete','none','failure'].includes(scenario.results.status))
@@ -95,12 +121,15 @@ export default function Optimization(props) {
             <p>OPTIMIZATION SETTINGS</p>
           </Box>
           </Grid>
-          <Grid item xs={4} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Objective Selection</p>
+              <p>
+                Objective Selection
+                <Tooltip title={descriptions.objective} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+                </p>
             </Box>
           </Grid>
-          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl disabled={disabled}>
             <RadioGroup
               aria-labelledby="objectives-select"
@@ -115,12 +144,14 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          <Grid item xs={4} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Maximum program runtime</p>
+              <p>Maximum program runtime
+              <Tooltip title={descriptions.runtime} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              </p>
             </Box>
           </Grid>
-          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
             <OutlinedInput
               id="outlined-adornment-sec"
@@ -135,12 +166,14 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          <Grid item xs={4} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Pipeline Cost Calculation</p>
+              <p>Pipeline Cost Calculation
+              <Tooltip title={descriptions.pipelineCost} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              </p>
             </Box>
           </Grid>
-          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
               value={scenario.optimization.pipelineCostCalculation}
@@ -153,12 +186,14 @@ export default function Optimization(props) {
             </FormControl>
           </Grid>
 
-          <Grid item xs={4} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Water Quality</p>
+              <p>Water Quality
+              <Tooltip title={descriptions.waterQuality} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              </p>
             </Box>
           </Grid>
-          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
               value={scenario.optimization.waterQuality}
@@ -172,12 +207,14 @@ export default function Optimization(props) {
             </FormControl>
           </Grid>
 
-          <Grid item xs={4} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Solver</p>
+              <p>Solver
+              <Tooltip title={descriptions.solver} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              </p>
             </Box>
           </Grid>
-          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
               value={scenario.optimization.solver}
