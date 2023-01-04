@@ -71,7 +71,18 @@ export default function Sidebar(props) {
             <ListItemText 
               key={"listitemtext_"+key} 
               // primary={key.replace('_dict','').replace(/vb*_[CDFLQRSTXy]_/,'')} 
-              primary={key} 
+              primary={key.replace('_dict','')
+                          .replace('v_F_','')
+                          .replace('v_C_','Cost ')
+                          .replace('v_R_','Credit ')
+                          .replace('v_L_','Water Level ')
+                          .replace('v_S_','Slack ')
+                          .replace('v_D_','Disposal ')
+                          .replace('v_X_','Storage ')
+                          .replace('v_T_','Treatment ')
+                          .replace('vb_y_Flow','Directional Flow')
+                          .replace('vb_y_','New ')} 
+              // primary={key} 
             />
             </ListItemButton>
         </ListItem>

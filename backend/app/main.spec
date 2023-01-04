@@ -42,6 +42,8 @@ elif sys.platform == 'linux':
 else:
     extra_data = []
 
+extra_data.append(('GUROBI_RUN.py','.'))
+
 try:
     print('trying to get gurobi path using os, sys, and glob')
     import os
