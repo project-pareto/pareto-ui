@@ -46,7 +46,7 @@ export default function Sidebar(props) {
   }
 
   const renderAdditionalCategories = () => {
-    let additionalCategories = props.section === 0 ? {"Plots": null, "Network Diagram": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
+    let additionalCategories = props.section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <>

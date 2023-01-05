@@ -16,10 +16,11 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import demoInputDiagram from "../../assets/demo_figure_input.png";
 import AreaChart from '../../components/AreaChart/AreaChart'
-import { Button, Typography } from '@mui/material';
+import { Button, Input, Typography } from '@mui/material';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
+import InputSummary from '../../components/InputSummary/InputSummary'
 
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
@@ -60,7 +61,7 @@ export default function DataInput(props) {
       when category is changed, reset the nodes for filtering (columns and rows of current table)
     */
     try {
-      if (props.category !== "Plots" && props.category !== "Network Diagram") {
+      if (props.category !== "Plots" && props.category !== "Network Diagram" && props.category !== "Input Summary") {
         console.log("inside datainput useeffect")
         let tempEditDict = {}
         let tempColumnNodes = {}
@@ -337,6 +338,22 @@ const handleKeyDown = (e) => {
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
               <img alt="network diagram" style={{height:"500px"}} src={demoInputDiagram}></img>
+            </Box>
+          )
+        }
+      /*
+        if category is input summary, return input summary tables
+      */
+        else if(props.category === "Input Summary"){
+          return (
+            <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
+              <InputSummary 
+                completionsDemand={scenario.data_input.df_parameters['CompletionsDemand']}
+                padRates={scenario.data_input.df_parameters['PadRates']}
+                flowbackRates={scenario.data_input.df_parameters['FlowbackRates']}
+                initialDisposalCapacity={scenario.data_input.df_parameters['InitialDisposalCapacity']}
+                initialTreatmentCapacity={scenario.data_input.df_parameters['InitialTreatmentCapacity']}
+              />
             </Box>
           )
         }
