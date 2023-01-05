@@ -196,7 +196,7 @@ useEffect(()=> {
       setSection(2)
     } else {
       setSection(0);
-      setCategory("Network Diagram")
+      setCategory("Input Summary")
     }
 
   };
@@ -209,7 +209,7 @@ useEffect(()=> {
     setScenarioIndex(data.id)
     setScenarioData(data)
     setSection(0);
-    setCategory("Network Diagram")
+    setCategory("Input Summary")
     navigate('/scenario', {replace: true})   
   }
 
@@ -245,7 +245,7 @@ useEffect(()=> {
         setScenarioData(data.data[scenarioIndex])
       });
     } else if(section === 0) {
-      setCategory("Network Diagram")
+      setCategory("Input Summary")
     } else {
       setCategory(null)
       checkTasks()
