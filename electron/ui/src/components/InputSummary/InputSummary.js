@@ -10,6 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import Typography from '@mui/material/Typography';
 
 
 export default function InputSummary(props) {
@@ -28,7 +29,13 @@ export default function InputSummary(props) {
     }) 
     const styles = {
         headerCell: {color: 'white'},
-        headerCell2: {color: 'white'}
+        firstCol: {
+            backgroundColor: "#f4f4f4", 
+            border:"1px solid #ddd",
+            position: 'sticky',
+            left: 0,
+      
+          },
     }
 
     useEffect(()=>{
@@ -146,7 +153,7 @@ export default function InputSummary(props) {
                     {sumValues.map((v,i) => {
                         return (
                             <TableRow>
-                                <TableCell>{v.statistic}</TableCell>
+                                <TableCell style={styles.firstCol}><Typography noWrap={true}>{v.statistic}</Typography></TableCell>
                                 <TableCell align="right">{v.value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                                 <TableCell align="right">{v.units}</TableCell>
                             </TableRow>
@@ -163,7 +170,7 @@ export default function InputSummary(props) {
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key="headRow2">
                     {Object.entries(props.completionsDemand).map(([key,value], index) => {
-                        return <TableCell align="right" style={index > 0 ? styles.headerCell : styles.headerCell2}>{index > 0 ? key : ""}</TableCell>
+                        return <TableCell align="right" style={index > 0 ? styles.headerCell : styles.headerCell}>{index > 0 ? key : ""}</TableCell>
                     })}
                 </TableRow>
                 </TableHead>
@@ -176,7 +183,7 @@ export default function InputSummary(props) {
                             index > 0 ? 
                             <TableCell align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                             :
-                            <TableCell>{key}</TableCell>
+                            <TableCell style={styles.firstCol}><Typography noWrap={true}>{key}</Typography></TableCell>
                             )
                         })}
                     </TableRow>
