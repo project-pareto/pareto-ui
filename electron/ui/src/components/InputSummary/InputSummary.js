@@ -26,6 +26,11 @@ export default function InputSummary(props) {
         'Initial Disposal Capacity': [],
         'Initial Treatment Capacity': [],
     }) 
+    const styles = {
+        headerCell: {color: 'white'},
+        headerCell2: {color: 'white'}
+    }
+
     useEffect(()=>{
         /* 
             calculate total completions demand, total produced water, 
@@ -121,9 +126,6 @@ export default function InputSummary(props) {
         console.log(tempTimeSumValues)
       }, [props]);
 
-    const styles = {
-        headerCell: {color: 'white'}
-    }
 
     const handleTableTypeChange = (event) => {
         setTableType(event.target.value)
@@ -135,7 +137,7 @@ export default function InputSummary(props) {
             <Table style={{border:"1px solid #ddd"}} size='small'>
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key="headRow1">
-                    <TableCell width="25%" style={styles.headerCell}>Input Summary Statistic</TableCell>
+                    <TableCell width="25%" style={styles.headerCell}>Statistic</TableCell>
                     <TableCell align="right" style={styles.headerCell}>Value</TableCell>
                     <TableCell align="right" style={styles.headerCell}>Units</TableCell>
                 </TableRow>
@@ -161,7 +163,7 @@ export default function InputSummary(props) {
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key="headRow2">
                     {Object.entries(props.completionsDemand).map(([key,value], index) => {
-                        return <TableCell align="right" style={styles.headerCell}>{index > 0 ? key : ""}</TableCell>
+                        return <TableCell align="right" style={index > 0 ? styles.headerCell : styles.headerCell2}>{index > 0 ? key : ""}</TableCell>
                     })}
                 </TableRow>
                 </TableHead>
