@@ -8,8 +8,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Tooltip from '@mui/material/Tooltip';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
+import Subcategories from '../../assets/Subcategories.json'
 import PopupModal from '../../components/PopupModal/PopupModal'
 
 
@@ -18,8 +22,18 @@ const drawerWidth = 240;
 export default function Sidebar(props) {
   const [ openSaveModal, setOpenSaveModal ] = React.useState(false)
   const [ key, setKey ] =  React.useState(null)
+  const [ openDynamic, setOpenDynamic ] = React.useState(true)
+  const [ openStatic, setOpenStatic ] = React.useState(false)
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
+  const styles = {
+    topLevelCategory: {
+      paddingLeft: "0px"
+    },
+    subcategory: {
+      paddingLeft: "10px"
+    }
+  }
 
   const handleSaveModal = () => {
     console.log('saving this thing')
@@ -59,6 +73,105 @@ export default function Sidebar(props) {
         <Divider key={"divider_"+key}></Divider>
       </>
       ))
+    )
+  }
+
+  const renderTopLevelCategories = () => {
+    return (
+      <>
+      <ListItem key={"listitem_dynamic"} disablePadding>
+            <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenDynamic(!openDynamic)}>
+            <ListItemText key={"listitemtext_dynamic"} primary={"Dynamic Inputs"} />
+            {openDynamic ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+        </ListItem>
+        <Divider key={"divider_dynamic"}></Divider>
+        {renderDynamicCategories()}
+        <ListItem key={"listitem_static"} disablePadding>
+            <ListItemButton key={"listitembutton_static"} selected={false} onClick={() => setOpenStatic(!openStatic)}>
+            <ListItemText key={"listitemtext_static"} primary={"Static Inputs"} />
+            {openStatic ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+        </ListItem>
+        <Divider key={"divider_static"}></Divider>
+        {renderStaticCategories()}
+        </>
+    )
+  }
+
+  const renderDynamicCategories = () => {
+    return (
+      <Collapse in={openDynamic} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+      {Subcategories.Dynamic.map( (value,index) => {
+        return(
+            <>
+            <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
+            <ListItem key={"listitem_"+value} disablePadding>
+                <ListItemButton key={"listitembutton_"+value} selected={props.category===value} onClick={() => handleClick(value)}>
+                <ListItemText 
+                  style={styles.subcategory}
+                  key={"listitemtext_"+value} 
+                  primary={CategoryNames[value] ? CategoryNames[value] :
+                    value.replace('_dict','')
+                          .replace('v_F_','')
+                          .replace('v_C_','Cost ')
+                          .replace('v_R_','Credit ')
+                          .replace('v_L_','Water Level ')
+                          .replace('v_S_','Slack ')
+                          .replace('v_D_','Disposal ')
+                          .replace('v_X_','Storage ')
+                          .replace('v_T_','Treatment ')
+                          .replace('vb_y_Flow','Directional Flow')
+                          .replace('vb_y_','New ')} 
+                />
+                </ListItemButton>
+            </ListItem>
+            </Tooltip>
+            <Divider key={"divider_"+value}></Divider>
+          </>
+        )
+      })}
+     </List>
+      </Collapse>
+    )
+  }
+
+  const renderStaticCategories = () => {
+    return (
+      <Collapse in={openStatic} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+      {Subcategories.Static.map( (value,index) => {
+        return (
+            <>
+            <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
+            <ListItem key={"listitem_"+value} disablePadding>
+                <ListItemButton key={"listitembutton_"+value} selected={props.category===value} onClick={() => handleClick(value)}>
+                <ListItemText 
+                  style={styles.subcategory}
+                  key={"listitemtext_"+value} 
+                  primary={CategoryNames[value] ? CategoryNames[value] :
+                    value.replace('_dict','')
+                          .replace('v_F_','')
+                          .replace('v_C_','Cost ')
+                          .replace('v_R_','Credit ')
+                          .replace('v_L_','Water Level ')
+                          .replace('v_S_','Slack ')
+                          .replace('v_D_','Disposal ')
+                          .replace('v_X_','Storage ')
+                          .replace('v_T_','Treatment ')
+                          .replace('vb_y_Flow','Directional Flow')
+                          .replace('vb_y_','New ')} 
+                />
+                </ListItemButton>
+            </ListItem>
+            </Tooltip>
+            <Divider key={"divider_"+value}></Divider>
+          </>
+        )
+      })}
+     </List>
+      </Collapse>
     )
   }
 
@@ -119,7 +232,10 @@ export default function Sidebar(props) {
             {props.scenario &&
               renderAdditionalCategories()
             }
-            {props.scenario &&
+            {props.scenario && props.section === 0 &&
+              renderTopLevelCategories()
+            }
+            {props.scenario && props.section === 2 &&
               renderTable()
             }
           </List>
