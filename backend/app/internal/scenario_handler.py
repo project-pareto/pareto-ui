@@ -142,7 +142,16 @@ class ScenarioHandler:
             "id": self.next_id, 
             "date": date,
             "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, 
-            "optimization": {"objective":"cost", "runtime": 180, "pipelineCostCalculation": "distance_based", "waterQuality": "false", "solver": "cbc","build_units": "user_units"}, 
+            "optimization": 
+                {
+                    "objective":"cost", 
+                    "runtime": 180, 
+                    "pipelineCostCalculation": "distance_based", 
+                    "waterQuality": "false", 
+                    "solver": "cbc",
+                    "build_units": "user_units",
+                    "optimalityGap": 0
+                }, 
             "results": {"status": "none", "data": {}}
             }
 

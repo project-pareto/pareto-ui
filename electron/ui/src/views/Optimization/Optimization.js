@@ -17,7 +17,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 export default function Optimization(props) {
   const [scenario, setScenario] = useState(props.scenario)
-  const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
+  // const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
   const [ disabled, setDisabled ] = useState(false)
   const columnWidths = [5,7]
   const descriptions = {
@@ -31,6 +31,9 @@ export default function Optimization(props) {
                         -Distance based:  Uses pipeline distance, diameter and  $/inch-mile rate<br/>
                         -Capacity based: Uses pipeline capacity and $/bbl rate
                   </div>,
+    optimalityGap: <div>
+                  Needs description
+            </div>,
     waterQuality: <div>
                       PARETO can also consider water quality in the model, select how you would like to include it in the model:<br/>
                       -False: Model does not consider water quality.<br/>
@@ -55,11 +58,12 @@ export default function Optimization(props) {
    }
 
    const handleRuntimeChange = (event) => {
-    const tempScenario = {...scenario}
-    tempScenario.optimization.runtime = event.target.value
-    setRuntime(event.target.value)
-    setScenario(tempScenario)
-    props.updateScenario(tempScenario)
+    if (!isNaN(event.target.value)) {
+      const tempScenario = {...scenario}
+      tempScenario.optimization.runtime = Number(event.target.value)
+      setScenario(tempScenario)
+      props.updateScenario(tempScenario)
+    }
   }
 
   const handlePipelineCostChange = (event) => {
@@ -67,6 +71,15 @@ export default function Optimization(props) {
     tempScenario.optimization.pipelineCostCalculation = event.target.value
     setScenario(tempScenario)
     props.updateScenario(tempScenario)
+  }
+
+  const handleOptimalityGapChange = (event) => {
+    if (!isNaN(event.target.value)) {
+      const tempScenario = {...scenario}
+      tempScenario.optimization.optimalityGap = Number(event.target.value)
+      setScenario(tempScenario)
+      props.updateScenario(tempScenario)
+    }
   }
 
   const handleWaterQualityChange = (event) => {
@@ -146,7 +159,7 @@ export default function Optimization(props) {
 
           <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Maximum program runtime
+              <p>Maximum Runtime
               <Tooltip title={descriptions.runtime} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
@@ -155,7 +168,7 @@ export default function Optimization(props) {
           <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
             <OutlinedInput
               id="outlined-adornment-sec"
-              value={runtime}
+              value={scenario.optimization.runtime}
               onChange={handleRuntimeChange}
               endAdornment={<InputAdornment position="end">sec</InputAdornment>}
               aria-describedby="outlined-weight-helper-text"
@@ -166,7 +179,7 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+          {/* <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Pipeline Cost Calculation
               <Tooltip title={descriptions.pipelineCost} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
@@ -184,6 +197,28 @@ export default function Optimization(props) {
               <MenuItem key={1} value={"capacity_based"}>Capacity Based</MenuItem>
             </Select>
             </FormControl>
+          </Grid> */}
+
+          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Optimality Gap
+              <Tooltip title={descriptions.optimalityGap} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              </p>
+            </Box>
+          </Grid>
+          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
+            <OutlinedInput
+              id="outlined-adornment-sec"
+              value={scenario.optimization.optimalityGap}
+              onChange={handleOptimalityGapChange}
+              endAdornment={<InputAdornment position="end">%</InputAdornment>}
+              aria-describedby="outlined-weight-helper-text"
+              inputProps={{
+                'aria-label': 'sec',
+              }}
+            />
+          </FormControl>
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>

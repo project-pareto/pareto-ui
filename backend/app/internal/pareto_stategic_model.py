@@ -26,7 +26,7 @@ from app.internal.scenario_handler import (
 _log = logging.getLogger(__name__)
 
 
-def run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units):
+def run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units, optimalityGap):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -57,7 +57,7 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
         "scale_model": True,
         "scaling_factor": 1000,
         "running_time": runtime,
-        "gap": 0,
+        "gap": optimalityGap,
         "solver": solver,
         "build_units": build_units
     }
@@ -90,9 +90,9 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
 
     return results_dict
 
-def handle_run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units):
+def handle_run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units, optimalityGap):
     try:
-        results_dict = run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units)
+        results_dict = run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units, optimalityGap)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
         results = {"data": results_dict, "status": "complete"}
