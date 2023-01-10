@@ -19,6 +19,7 @@ import AreaChart from '../../components/AreaChart/AreaChart'
 import { Button, Input, Typography } from '@mui/material';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import CategoryNames from '../../assets/CategoryNames.json'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import InputSummary from '../../components/InputSummary/InputSummary'
 
@@ -380,7 +381,7 @@ const handleKeyDown = (e) => {
           <Grid item xs={11}>
             <Box sx={{display: 'flex', justifyContent: 'center'}}>
             <TableContainer>
-            <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}</h3>
+            <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
             <TableContainer sx={{overflowX:'auto'}}>
             <Table style={{border:"1px solid #ddd"}} size='small'>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>

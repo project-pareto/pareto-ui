@@ -212,7 +212,7 @@ export default function SankeyPlot(props) {
                 },
                 // {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]},
                 ]}
-                layout={ {width: 1118,   height: 772, font: { size: 10 }, title: sankeyCategory.replace('v_F_','')} }
+                layout={ {width: 1118,   height: 772, font: { size: 10 }} }
             />
         </Box>
         </Grid>
