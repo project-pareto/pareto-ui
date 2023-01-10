@@ -122,7 +122,7 @@ export default function SankeyPlot(props) {
             nodeSet.add(target)
             timeSet.add(label)
 
-            if (unpackAll || (tempFilteredTimes.includes(label) && (tempFilteredNodes.includes(source) || tempFilteredNodes.includes(target)))) {
+            if ((unpackAll && label==='T01') || (tempFilteredTimes.includes(label) && (tempFilteredNodes.includes(source) || tempFilteredNodes.includes(target)))) {
                 var sourceIndex, targetIndex
                 if (d.node.label.includes(source)) {
                     sourceIndex = locationsInArray[source]
@@ -153,7 +153,8 @@ export default function SankeyPlot(props) {
         setTotalTimes(Array.from(totalTimes))
         if(unpackAll) {
             setFilteredNodes(Array.from(nodeSet))
-            setFilteredTimes(Array.from(timeSet))
+            if(timeSet.has('T01')) setFilteredTimes(['T01'])
+            else setFilteredTimes(Array.from(timeSet))
         }
         // console.log(d)
         setPlotData(d)
