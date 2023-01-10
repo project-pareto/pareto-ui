@@ -9,6 +9,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Tooltip from '@mui/material/Tooltip';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import CategoryNames from '../../assets/CategoryNames.json'
 import PopupModal from '../../components/PopupModal/PopupModal'
 
 
@@ -70,19 +71,18 @@ export default function Sidebar(props) {
             <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
             <ListItemText 
               key={"listitemtext_"+key} 
-              // primary={key.replace('_dict','').replace(/vb*_[CDFLQRSTXy]_/,'')} 
-              primary={key.replace('_dict','')
-                          .replace('v_F_','')
-                          .replace('v_C_','Cost ')
-                          .replace('v_R_','Credit ')
-                          .replace('v_L_','Water Level ')
-                          .replace('v_S_','Slack ')
-                          .replace('v_D_','Disposal ')
-                          .replace('v_X_','Storage ')
-                          .replace('v_T_','Treatment ')
-                          .replace('vb_y_Flow','Directional Flow')
-                          .replace('vb_y_','New ')} 
-              // primary={key} 
+              primary={CategoryNames[key] ? CategoryNames[key] :
+                  key.replace('_dict','')
+                      .replace('v_F_','')
+                      .replace('v_C_','Cost ')
+                      .replace('v_R_','Credit ')
+                      .replace('v_L_','Water Level ')
+                      .replace('v_S_','Slack ')
+                      .replace('v_D_','Disposal ')
+                      .replace('v_X_','Storage ')
+                      .replace('v_T_','Treatment ')
+                      .replace('vb_y_Flow','Directional Flow')
+                      .replace('vb_y_','New ')} 
             />
             </ListItemButton>
         </ListItem>

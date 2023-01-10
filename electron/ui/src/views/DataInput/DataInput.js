@@ -97,10 +97,10 @@ export default function DataInput(props) {
         // console.log(tempColumnNodesMapping)
         // console.log("tempRowNodesMapping")
         // console.log(tempRowNodesMapping)
-        console.log("tempColumnNodes")
-        console.log(tempColumnNodes)
-        console.log("tempRowNodes")
-        console.log(tempRowNodes)
+        // console.log("tempColumnNodes")
+        // console.log(tempColumnNodes)
+        // console.log("tempRowNodes")
+        // console.log(tempRowNodes)
       }
     } catch (e) {
       console.error('unable to set edit dictionary: ',e)
@@ -112,8 +112,8 @@ export default function DataInput(props) {
   }, [props.category, props.scenario, scenario.data_input.df_parameters]);
 
   useEffect(()=>{
-    console.log('keyindex mapping: ')
-    console.log(keyIndexMapping)
+    // console.log('keyindex mapping: ')
+    // console.log(keyIndexMapping)
     
   }, [keyIndexMapping]);
   
@@ -143,7 +143,12 @@ export default function DataInput(props) {
     let ind = parseInt(inds[0])
     let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
     let tempScenario = {...scenario}
-    tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    if (isNaN(event.target.value)) {
+      tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    }else {
+      tempScenario.data_input.df_parameters[props.category][colName][ind] = Number(event.target.value)
+    }
+    
     setScenario(tempScenario)
    }
 
@@ -262,7 +267,7 @@ const handleKeyDown = (e) => {
           {editDict[""+ind+":"+index] ? 
             index === 0 ? value : 
             <TextField 
-              autoFocus 
+              autoFocus
               name={""+ind+":"+index} 
               size="small" label={""} 
               defaultValue={value} 
@@ -270,7 +275,10 @@ const handleKeyDown = (e) => {
               onFocus={(event) => event.target.select()}
             />
             :
-            value
+            props.category === 'PadRates' || props.category === 'FlowbackRates' ?
+            value.toLocaleString('en-US', {maximumFractionDigits:0})
+            :
+            value.toLocaleString('en-US', {maximumFractionDigits:2})
           }
           </TableCell>
           </Tooltip>

@@ -30,6 +30,13 @@ export default function Dashboard(props) {
   // const handleEditInput = (bool) => setInputDataEdited(bool)
 
   useEffect(()=>{
+    let guy = "{"
+    Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
+      guy+=`"${key}":"${key}",\n`
+      
+    ))
+    guy+="}"
+    console.log(guy)
     try {
       if(!scenario) {
         props.navigateHome()
@@ -121,7 +128,7 @@ export default function Dashboard(props) {
         </Sidebar>
       }
       
-    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section === 2 && scenario.results.status !== "complete")) && styles.shiftTextRight}>
+    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section === 2 && scenario.results.status !== "complete")) ? styles.shiftTextRight : {}}>
       <Grid item xs={4} ></Grid>
       <PopupModal
         input

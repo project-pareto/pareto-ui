@@ -126,11 +126,6 @@ export default function InputSummary(props) {
             'Initial Treatment Capacity': treatmentCapacityByTime,
         }
         setTimeSumValues(tempTimeSumValues)
-
-        console.log('new sum values : ')
-        console.log(tempSumValues)
-        console.log('new timesum values : ')
-        console.log(tempTimeSumValues)
       }, [props]);
 
 
@@ -139,7 +134,6 @@ export default function InputSummary(props) {
        }
 
     const renderInputSummaryTable = () => {
-        console.log(sumValues)
         return (
             <Table style={{border:"1px solid #ddd"}} size='small'>
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
