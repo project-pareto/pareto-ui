@@ -256,9 +256,9 @@ export default function Optimization(props) {
               onChange={handleSolverChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={0} value={"cbc"}>CBC</MenuItem>
-              <MenuItem key={1} value={"gurobi"}>Gurobi</MenuItem>
-              <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct</MenuItem>
+              <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
+              <MenuItem key={1} value={"gurobi_direct"}>Gurobi (Commercial)</MenuItem>
+              {/* <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct</MenuItem> */}
             </Select>
             </FormControl>
           </Grid>
