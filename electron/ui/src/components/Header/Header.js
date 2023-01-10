@@ -31,7 +31,7 @@ export default function Header(props) {
         <div className="titlebar">
           <div href="#" style={{cursor:"pointer"}} onClick={props.navigateHome}>
             <div id="pareto_logo">
-              <img src={logo} alt="Pareto Logo"/>
+              <img src={logo} alt="PARETO Logo"/>
             </div>
           </div>
         {location === "scenario" &&
