@@ -28,10 +28,12 @@ export default function Sidebar(props) {
   const handleCloseSaveModal = () => setOpenSaveModal(false);
   const styles = {
     topLevelCategory: {
-      paddingLeft: "0px"
+      paddingLeft: "0px",
+      fontWeight: "500",
+
     },
     subcategory: {
-      paddingLeft: "10px"
+      paddingLeft: "10px",
     }
   }
 
@@ -67,7 +69,7 @@ export default function Sidebar(props) {
         <>
         <ListItem key={"listitem_"+key} disablePadding>
             <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
-            <ListItemText key={"listitemtext_"+key} primary={key} />
+            <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_"+key} primary={key} />
             </ListItemButton>
         </ListItem>
         <Divider key={"divider_"+key}></Divider>
@@ -81,7 +83,7 @@ export default function Sidebar(props) {
       <>
       <ListItem key={"listitem_dynamic"} disablePadding>
             <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenDynamic(!openDynamic)}>
-            <ListItemText key={"listitemtext_dynamic"} primary={"Dynamic Inputs"} />
+            <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_dynamic"} primary={"Dynamic Inputs"} />
             {openDynamic ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
         </ListItem>
@@ -89,7 +91,7 @@ export default function Sidebar(props) {
         {renderDynamicCategories()}
         <ListItem key={"listitem_static"} disablePadding>
             <ListItemButton key={"listitembutton_static"} selected={false} onClick={() => setOpenStatic(!openStatic)}>
-            <ListItemText key={"listitemtext_static"} primary={"Static Inputs"} />
+            <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_static"} primary={"Static Inputs"} />
             {openStatic ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
         </ListItem>
@@ -145,7 +147,7 @@ export default function Sidebar(props) {
         return (
             <>
             <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
-            <ListItem key={"listitem_"+value} disablePadding>
+            <ListItem style={{fontWeight:'bold'}} key={"listitem_"+value} disablePadding>
                 <ListItemButton key={"listitembutton_"+value} selected={props.category===value} onClick={() => handleClick(value)}>
                 <ListItemText 
                   style={styles.subcategory}
