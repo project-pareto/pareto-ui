@@ -24,6 +24,7 @@ export default function Sidebar(props) {
   const [ key, setKey ] =  React.useState(null)
   const [ openDynamic, setOpenDynamic ] = React.useState(true)
   const [ openStatic, setOpenStatic ] = React.useState(false)
+  const [ openResultsTables, setOpenResultsTables ] = React.useState(false)
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
   const styles = {
@@ -79,26 +80,41 @@ export default function Sidebar(props) {
   }
 
   const renderTopLevelCategories = () => {
-    return (
-      <>
-      <ListItem key={"listitem_dynamic"} disablePadding>
-            <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenDynamic(!openDynamic)}>
-            <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_dynamic"} primary={"Dynamic Inputs"} />
-            {openDynamic ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-        </ListItem>
-        <Divider key={"divider_dynamic"}></Divider>
-        {renderDynamicCategories()}
-        <ListItem key={"listitem_static"} disablePadding>
-            <ListItemButton key={"listitembutton_static"} selected={false} onClick={() => setOpenStatic(!openStatic)}>
-            <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_static"} primary={"Static Inputs"} />
-            {openStatic ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-        </ListItem>
-        <Divider key={"divider_static"}></Divider>
-        {renderStaticCategories()}
-        </>
-    )
+    if (props.section === 0) {
+      return (
+        <>
+        <ListItem key={"listitem_dynamic"} disablePadding>
+              <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenDynamic(!openDynamic)}>
+              <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_dynamic"} primary={"Dynamic Inputs"} />
+              {openDynamic ? <ExpandLess /> : <ExpandMore />}
+              </ListItemButton>
+          </ListItem>
+          <Divider key={"divider_dynamic"}></Divider>
+          {renderDynamicCategories()}
+          <ListItem key={"listitem_static"} disablePadding>
+              <ListItemButton key={"listitembutton_static"} selected={false} onClick={() => setOpenStatic(!openStatic)}>
+              <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_static"} primary={"Static Inputs"} />
+              {openStatic ? <ExpandLess /> : <ExpandMore />}
+              </ListItemButton>
+          </ListItem>
+          <Divider key={"divider_static"}></Divider>
+          {renderStaticCategories()}
+          </>
+      ) 
+    }else if (props.section ===2) {
+      return (
+        <>
+        <ListItem key={"listitem_dynamic"} disablePadding>
+              <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenResultsTables(!openResultsTables)}>
+              <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_resultsTables"} primary={"Results Tables"} />
+              {openResultsTables ? <ExpandLess /> : <ExpandMore />}
+              </ListItemButton>
+          </ListItem>
+          <Divider key={"divider_resultsTables"}></Divider>
+          {renderResultsTables()}
+          </>
+      ) 
+    }
   }
 
   const renderDynamicCategories = () => {
@@ -176,6 +192,40 @@ export default function Sidebar(props) {
       </Collapse>
     )
   }
+  const renderResultsTables = () => {
+    return (
+      <Collapse in={openResultsTables} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+      {Object.entries(props.scenario.results.data).map( ([key, value]) => ( 
+        <>
+        <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : CategoryNames[key] ? CategoryNames[key] : key} placement="right-start">
+        <ListItem key={"listitem_"+key} disablePadding>
+            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
+            <ListItemText 
+              key={"listitemtext_"+key} 
+              primary={CategoryNames[key] ? CategoryNames[key] :
+                  key.replace('_dict','')
+                      .replace('v_F_','')
+                      .replace('v_C_','Cost ')
+                      .replace('v_R_','Credit ')
+                      .replace('v_L_','Water Level ')
+                      .replace('v_S_','Slack ')
+                      .replace('v_D_','Disposal ')
+                      .replace('v_X_','Storage ')
+                      .replace('v_T_','Treatment ')
+                      .replace('vb_y_Flow','Directional Flow')
+                      .replace('vb_y_','New ')} 
+            />
+            </ListItemButton>
+        </ListItem>
+        </Tooltip>
+        <Divider key={"divider_"+key}></Divider>
+      </>
+      ))}
+     </List>
+      </Collapse>
+    )
+  }
 
   const renderTable = () => {
     return (
@@ -234,12 +284,12 @@ export default function Sidebar(props) {
             {props.scenario &&
               renderAdditionalCategories()
             }
-            {props.scenario && props.section === 0 &&
+            {props.scenario &&
               renderTopLevelCategories()
             }
-            {props.scenario && props.section === 2 &&
+            {/* {props.scenario && props.section === 2 &&
               renderTable()
-            }
+            } */}
           </List>
         </Box>
       </Drawer>
