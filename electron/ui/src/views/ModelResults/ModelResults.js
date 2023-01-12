@@ -98,9 +98,18 @@ export default function ModelResults(props) {
             <Table style={{border:"1px solid #ddd"}} size='small'>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
               <TableRow>
-              {props.scenario.results.data[props.category][0].map((value, index) => {
+              {props.category === "v_F_Overview_dict" ? 
+              <>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>KPI</TableCell> 
+                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Units</TableCell> 
+                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Value</TableCell> 
+              </>
+              :
+              props.scenario.results.data[props.category][0].map((value, index) => {
                 return <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>{value}</TableCell>
-              })}
+              })
+              }
+              
               </TableRow>
               </TableHead>
               {props.category === "v_F_Overview_dict" ? 
@@ -108,11 +117,19 @@ export default function ModelResults(props) {
               {props.scenario.results.data[props.category].slice(1).map((value, index) => {
                 return (<TableRow>
                 {value.map((cellValue, i)=> {
-                  return <TableCell 
-                            align={(i === (value.length - 1)) ? "right" : "left"} 
-                            key={"" + index + i} 
-                            style={i === 0 ? styles.firstCol : styles.other}>{(i === (value.length - 1)) ? cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : cellValue}
-                          </TableCell>
+                  return (i !== 1 &&
+                     <TableCell 
+                      align={(i === (value.length - 1)) ? "right" : "left"} 
+                      key={"" + index + i} 
+                      style={i === 0 ? styles.firstCol : styles.other}>
+                        {(i === (value.length - 1)) ? 
+                        cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : 
+                        cellValue ? cellValue.replace('v_F_','').replace('v_C_','Cost ')
+                        : null
+                      }
+                  </TableCell>
+                  )
+                  
                 })}
                 </TableRow>)
               })}
@@ -126,7 +143,7 @@ export default function ModelResults(props) {
                           align={(i === (value.length - 1)) ? "right" : "left"} 
                           key={"" + index + i} 
                           style={i === 0 ? styles.firstCol : styles.other}>
-                            {cellValue.toLocaleString('en-US', {maximumFractionDigits:2})}
+                            {cellValue.toLocaleString('en-US', {maximumFractionDigits:0})}
                           </TableCell>
                 })}
                 </TableRow>)
