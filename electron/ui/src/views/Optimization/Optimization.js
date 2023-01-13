@@ -3,6 +3,7 @@ import {useEffect, useState} from 'react';
 import Box from '@mui/material/Box';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
+import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid'
@@ -144,16 +145,18 @@ export default function Optimization(props) {
           </Grid>
           <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl disabled={disabled}>
-            <RadioGroup
+            {/* <RadioGroup
               aria-labelledby="objectives-select"
               value={scenario.optimization.objective}
               name="objectives-select"
               onChange={handleObjectiveChange}
-              // row
             >
               <FormControlLabel value="cost" control={<Radio />} label="Minimize Cost" />
               <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
-            </RadioGroup>
+            </RadioGroup> */}
+            <FormControlLabel control={<Checkbox defaultChecked />} label="Minimize Cost" />
+            <FormControlLabel control={<Checkbox />} label="Maximize Reuse" />
+            <FormControlLabel control={<Checkbox />} label="Maximize Profits" />
           </FormControl>
           </Grid>
 
