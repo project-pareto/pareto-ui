@@ -30,13 +30,13 @@ export default function Dashboard(props) {
   // const handleEditInput = (bool) => setInputDataEdited(bool)
 
   useEffect(()=>{
-    let guy = "["
-    Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
-      guy+=`"${key}",`
+    // let guy = "["
+    // Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
+    //   guy+=`"${key}",`
       
-    ))
-    guy+="]"
-    console.log(guy)
+    // ))
+    // guy+="]"
+    // console.log(guy)
     try {
       if(!scenario) {
         props.navigateHome()

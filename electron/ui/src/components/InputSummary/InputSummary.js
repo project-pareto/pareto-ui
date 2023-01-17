@@ -146,7 +146,7 @@ export default function InputSummary(props) {
                 <TableBody>
                     {sumValues.map((v,i) => {
                         return (
-                            <TableRow>
+                            <TableRow key={""+v+i}>
                                 <TableCell style={styles.firstCol}><Typography noWrap={true}>{v.statistic}</Typography></TableCell>
                                 <TableCell align="right">{v.value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                                 <TableCell align="right">{v.units}</TableCell>
@@ -171,7 +171,7 @@ export default function InputSummary(props) {
                 <TableBody>
                 {Object.entries(timeSumValues).map(([key,statistic]) => {
                     return (
-                    <TableRow>
+                    <TableRow key={""+key+statistic}>
                         {statistic.map((value, index) => {
                             return (
                             index > 0 ? 

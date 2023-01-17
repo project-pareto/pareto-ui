@@ -20,6 +20,7 @@ function App() {
   
   const [ scenarioData, setScenarioData ] = useState(null);
   const [ scenarios, setScenarios ] = useState({}); 
+  const [ scenarioStates, setScenarioStates ] = useState({})
   const [ section, setSection ] = useState(0)
   const [ category, setCategory ] = useState(null)
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
@@ -191,13 +192,14 @@ useEffect(()=> {
     /*
       if scenario is curretly running or solved, send user to model results tab
     */
-    if(["Initializing", "Solving model", "Generating output", "complete", "failure"].includes(scenarios[scenario].results.status)) {
-      setCategory("Dashboard")
-      setSection(2)
-    } else {
-      setSection(0);
-      setCategory("Input Summary")
-    }
+    // if(["Initializing", "Solving model", "Generating output", "complete", "failure"].includes(scenarios[scenario].results.status)) {
+    //   setCategory("Dashboard")
+    //   setSection(2)
+    // } else {
+    //   setSection(0);
+    //   setCategory("Input Summary")
+    // }
+    updateScenarioStates({action: 'select'}, scenario)
 
   };
 
@@ -208,8 +210,9 @@ useEffect(()=> {
     setScenarios(temp)
     setScenarioIndex(data.id)
     setScenarioData(data)
-    setSection(0);
-    setCategory("Input Summary")
+    // setSection(0);
+    // setCategory("Input Summary")
+    updateScenarioStates({action:'new'}, data.id)
     navigate('/scenario', {replace: true})   
   }
 
@@ -235,33 +238,35 @@ useEffect(()=> {
     set process section (input, optimization, results)
   */
   const handleSetSection = (section) => {
-    if(section === 2) {
-      setCategory("Dashboard")
-      fetchScenarios()
-      .then(response => response.json())
-      .then((data)=>{
-        console.log('setscenarios: ',data.data)
-        setScenarios(data.data)
-        setScenarioData(data.data[scenarioIndex])
-      });
-    } else if(section === 0) {
-      setCategory("Input Summary")
-    } else {
-      setCategory(null)
-      checkTasks()
-      .then(response => response.json())
-      .then((data)=>{
-        setBackgroundTasks(data.tasks)
-      });
-    }
-    setSection(section)
+    // if(section === 2) {
+    //   setCategory("Dashboard")
+    //   fetchScenarios()
+    //   .then(response => response.json())
+    //   .then((data)=>{
+    //     console.log('setscenarios: ',data.data)
+    //     setScenarios(data.data)
+    //     setScenarioData(data.data[scenarioIndex])
+    //   });
+    // } else if(section === 0) {
+    //   setCategory("Input Summary")
+    // } else {
+    //   setCategory(null)
+    //   checkTasks()
+    //   .then(response => response.json())
+    //   .then((data)=>{
+    //     setBackgroundTasks(data.tasks)
+    //   });
+    // }
+    // setSection(section)
+    updateScenarioStates({action:'section',section:section},scenarioIndex)
  }
 
  /*
   set sidebar category
  */
  const handleSetCategory = (category) => {
-  setCategory(category)
+  // setCategory(category)
+  updateScenarioStates({action:'category',category:category},scenarioIndex)
  }
 
   const handleEditScenarioName = (newName, id, updateScenarioData) => {
@@ -289,6 +294,7 @@ useEffect(()=> {
     .then(response => response.json())
     .then((data) => {
       setScenarios(data.data)
+      updateScenarioStates({action:'delete'},index)
     }).catch(e => {
       console.error('error on scenario delete')
       console.error(e)
@@ -342,6 +348,68 @@ useEffect(()=> {
     tempBackgroudTasks.push(id)
     setBackgroundTasks(tempBackgroudTasks)
     setCheckModelResults(checkModelResults+1)
+  }
+
+  const updateScenarioStates = (action, index) => {
+    if (action.action === 'select') {
+      console.log('state: select')
+      let tempSection
+      let tempCategory
+      if (index in scenarioStates) {
+        console.log('index found')
+        tempSection = scenarioStates[index].section
+        tempCategory = scenarioStates[index].category
+        console.log('section is '+tempSection)
+        console.log('category is '+tempCategory)
+      } else {
+        console.log('index NOT found')
+        if(["Initializing", "Solving model", "Generating output", "complete", "failure"].includes(scenarios[index].results.status)) {
+          tempSection = 2
+        } else {
+          tempSection = 0
+        }
+        tempCategory = {0: "Input Summary", 1: null, 2: "Dashboard"}
+        let tempState = {section: tempSection, category: tempCategory}
+        let tempStates = {...scenarioStates}
+        tempStates[index] = tempState
+        setScenarioStates(tempStates)
+      }
+      setSection(tempSection)
+      setCategory(tempCategory[tempSection])
+    } else if (action.action === 'new') {
+      console.log('state: new')
+      let tempSection = 0
+      let tempCategory = {0: "Input Summary", 1: null, 2: "Dashboard"}
+      let tempState = {section: tempSection, category: tempCategory}
+      let tempStates = {...scenarioStates}
+      tempStates[index] = tempState
+      setScenarioStates(tempStates)
+      setSection(tempSection)
+      setCategory(tempCategory[tempSection])
+    } else if (action.action === 'delete') {
+      console.log('state: delete')
+      let tempStates = {...scenarioStates}
+      delete tempStates[index]
+    } else if (action.action === 'section') {
+      console.log('state: section')
+      let tempStates = {...scenarioStates}
+      let tempState = tempStates[index]
+      tempState.section = action.section
+      tempStates[index] = tempState
+      setScenarioStates(tempStates)
+      setSection(action.section)
+      setCategory(tempState.category[action.section])
+    }else if (action.action === 'category') {
+      console.log('state: category')
+      console.log(' section is '+section)
+      console.log( 'category is '+action.category)
+      let tempStates = {...scenarioStates}
+      let tempState = tempStates[index]
+      tempState.category[section] = action.category
+      tempStates[index] = tempState
+      setScenarioStates(tempStates)
+      setCategory(action.category)
+    }
   }
 
   return (
