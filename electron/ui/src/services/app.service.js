@@ -28,3 +28,18 @@ export const checkTasks = () => {
         mode: 'cors'
     });
 }; 
+
+export const fetchDiagram = (id) => {
+    return fetch('http://localhost:8001/get_diagram/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}
+
+export const uploadDiagarm = (data, id) => {
+    return fetch('http://localhost:8001/upload_diagram/'+id, {
+        method: 'POST', 
+        mode: 'cors',
+        body: data
+    });
+}; 

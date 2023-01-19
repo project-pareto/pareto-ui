@@ -37,6 +37,7 @@ class ScenarioHandler:
         self.scenarios_path = os.path.join(self.data_directory_path, self.SCENARIO_DB_FILE)
         self.excelsheets_path = self.data_directory_path / "excelsheets"
         self.outputs_path = self.data_directory_path / "outputs"
+        self.diagrams_path = self.data_directory_path / "input_diagrams"
 
         _log.info(f"app directory: {os.path.dirname(os.path.abspath(__file__))}")
         _log.info(f"currently operating in directory: {os.getcwd()}")
@@ -57,6 +58,9 @@ class ScenarioHandler:
 
         _log.info(f"making directory: {self.outputs_path}")
         self.outputs_path.mkdir(parents=True, exist_ok=True)
+
+        _log.info(f"making directory: {self.diagrams_path}")
+        self.diagrams_path.mkdir(parents=True, exist_ok=True)
 
         # Connect to DB
         path = self.scenarios_path
@@ -311,7 +315,16 @@ class ScenarioHandler:
 
     def get_excelsheet_path(self, id):
         return f"{self.excelsheets_path}/{id}.xlsx"
-    
+
+    def get_diagram(self, id):
+        diagramFileType = self.scenario_list[id]['diagramFileType']
+        diagramLocation = f"{scenario_handler.diagrams_path}/{id}.{diagramFileType}"
+        if os.path.isfile(diagramLocation):
+            return diagramLocation
+        else:
+            _log.error(f"unable to find diagram for id {id}")
+            raise HTTPException(400, detail=f"no diagram found")
+        
     def update_next_id(self):
         try:
             # check if db is in use. if so, wait til its done being used
@@ -386,5 +399,25 @@ class ScenarioHandler:
         self.LOCKED = False
         # update scenario
         return self.update_scenario(scenario)
+
+    def upload_diagram(self, output_path, id):
+        # check if db is in use. if so, wait til its done being used
+        locked = self.LOCKED
+        while(locked):
+            time.sleep(0.5)
+            locked = self.LOCKED
+        self.LOCKED = True
+        query = tinydb.Query()
+        scenario = self._db.search((query.id_ == int(id)) & (query.version == self.VERSION))[0]['scenario']
+        scenario["diagram"] = True
+        scenario["diagramFileType"] = output_path.split('.')[-1]
+        self._db.upsert(
+            {"scenario": scenario, 'id_': scenario['id'], 'version': self.VERSION},
+            ((query.id_ == scenario['id']) & (query.version == self.VERSION)),
+        )
+        self.LOCKED = False
+        self.retrieve_scenarios()
+        
+        return
 
 scenario_handler = ScenarioHandler()

@@ -22,6 +22,7 @@ import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import InputSummary from '../../components/InputSummary/InputSummary'
+import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
@@ -346,7 +347,7 @@ const handleKeyDown = (e) => {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <img alt="network diagram" style={{height:"500px"}} src={demoInputDiagram}></img>
+              <NetworkDiagram scenario={props.scenario}></NetworkDiagram>
             </Box>
           )
         }

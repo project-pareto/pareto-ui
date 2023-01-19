@@ -350,19 +350,17 @@ useEffect(()=> {
     setCheckModelResults(checkModelResults+1)
   }
 
+  /*
+    update the section or category and cache the values
+  */
   const updateScenarioState = (action, index) => {
     if (action.action === 'select') {
-      console.log('state: select')
       let tempSection
       let tempCategory
       if (index in scenarioStates) {
-        console.log('index found')
         tempSection = scenarioStates[index].section
         tempCategory = scenarioStates[index].category
-        console.log('section is '+tempSection)
-        console.log('category is '+tempCategory)
       } else {
-        console.log('index NOT found')
         if(["Initializing", "Solving model", "Generating output", "complete", "failure"].includes(scenarios[index].results.status)) {
           tempSection = 2
         } else {
@@ -377,7 +375,6 @@ useEffect(()=> {
       setSection(tempSection)
       setCategory(tempCategory[tempSection])
     } else if (action.action === 'new') {
-      console.log('state: new')
       let tempSection = 0
       let tempCategory = {0: "Input Summary", 1: null, 2: "Dashboard"}
       let tempState = {section: tempSection, category: tempCategory}
@@ -387,11 +384,9 @@ useEffect(()=> {
       setSection(tempSection)
       setCategory(tempCategory[tempSection])
     } else if (action.action === 'delete') {
-      console.log('state: delete')
       let tempStates = {...scenarioStates}
       delete tempStates[index]
     } else if (action.action === 'section') {
-      console.log('state: section')
       let tempStates = {...scenarioStates}
       let tempState = tempStates[index]
       tempState.section = action.section
@@ -400,9 +395,6 @@ useEffect(()=> {
       setSection(action.section)
       setCategory(tempState.category[action.section])
     }else if (action.action === 'category') {
-      console.log('state: category')
-      console.log(' section is '+section)
-      console.log( 'category is '+action.category)
       let tempStates = {...scenarioStates}
       let tempState = tempStates[index]
       tempState.category[section] = action.category
