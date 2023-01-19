@@ -199,7 +199,7 @@ useEffect(()=> {
     //   setSection(0);
     //   setCategory("Input Summary")
     // }
-    updateScenarioStates({action: 'select'}, scenario)
+    updateScenarioState({action: 'select'}, scenario)
 
   };
 
@@ -212,7 +212,7 @@ useEffect(()=> {
     setScenarioData(data)
     // setSection(0);
     // setCategory("Input Summary")
-    updateScenarioStates({action:'new'}, data.id)
+    updateScenarioState({action:'new'}, data.id)
     navigate('/scenario', {replace: true})   
   }
 
@@ -258,7 +258,7 @@ useEffect(()=> {
     //   });
     // }
     // setSection(section)
-    updateScenarioStates({action:'section',section:section},scenarioIndex)
+    updateScenarioState({action:'section',section:section},scenarioIndex)
  }
 
  /*
@@ -266,7 +266,7 @@ useEffect(()=> {
  */
  const handleSetCategory = (category) => {
   // setCategory(category)
-  updateScenarioStates({action:'category',category:category},scenarioIndex)
+  updateScenarioState({action:'category',category:category},scenarioIndex)
  }
 
   const handleEditScenarioName = (newName, id, updateScenarioData) => {
@@ -294,7 +294,7 @@ useEffect(()=> {
     .then(response => response.json())
     .then((data) => {
       setScenarios(data.data)
-      updateScenarioStates({action:'delete'},index)
+      updateScenarioState({action:'delete'},index)
     }).catch(e => {
       console.error('error on scenario delete')
       console.error(e)
@@ -350,7 +350,7 @@ useEffect(()=> {
     setCheckModelResults(checkModelResults+1)
   }
 
-  const updateScenarioStates = (action, index) => {
+  const updateScenarioState = (action, index) => {
     if (action.action === 'select') {
       console.log('state: select')
       let tempSection
@@ -466,6 +466,7 @@ useEffect(()=> {
             navigateHome={navigateToScenarioList}
             resetScenarioData={resetScenarioData}
             addTask={addTask}
+            scenarioStates={scenarioStates}
             />} 
         />
 

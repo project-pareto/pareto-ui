@@ -8,9 +8,6 @@ import Select from '@mui/material/Select';
 import Plot from 'react-plotly.js';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 
-
-
-
 export default function SankeyPlot(props) {
     const [ sankeyCategory, setSankeyCategory ] = useState("v_F_Piped")
     const [ filteredNodes, setFilteredNodes ] = useState([]) 
@@ -23,7 +20,16 @@ export default function SankeyPlot(props) {
 
 
     useEffect(()=>{
-        unpackData(true, [], []);
+        if (props.scenarioStates[props.scenarioId].sankeyFilters) {
+            console.log('found sankey filters')
+            let tempNodes = props.scenarioStates[props.scenarioId].sankeyFilters.nodes
+            let tempTimes = props.scenarioStates[props.scenarioId].sankeyFilters.times
+            unpackData(true, tempNodes, tempTimes);
+        } else {
+            console.log('did not find sankey filters')
+            unpackData(true, [], []);
+        }
+        
     }, [sankeyCategory]);
 
     const handleCategoryChange = (event) => {
@@ -31,7 +37,7 @@ export default function SankeyPlot(props) {
     }
 
     const handleNodeFilter = (node) => {
-        var tempNodes
+        let tempNodes
         if (node === 'all') {
             tempNodes = filteredNodes.length === totalNodes.length ? [] : totalNodes
             setFilteredNodes(tempNodes);
@@ -51,7 +57,7 @@ export default function SankeyPlot(props) {
     }
 
     const handleTimeFilter = (time) => {
-        var tempTimes
+        let tempTimes
         if (time === 'all') {
             tempTimes = filteredTimes.length === totalTimes.length ? [] : totalTimes
             setFilteredTimes(tempTimes);
@@ -71,7 +77,7 @@ export default function SankeyPlot(props) {
     }
 
     const handleArrowSelection = (direction) => {
-        var tempTimes
+        let tempTimes
         if(direction === 'up') {
             if(isAllTimesSelected || filteredTimes.length===0) {
                 tempTimes=[totalTimes[totalTimes.length-1]]
@@ -98,7 +104,7 @@ export default function SankeyPlot(props) {
 
     const unpackData = (unpackAll, nodes, times) =>
     {
-        var tempFilteredNodes, tempFilteredTimes
+        let tempFilteredNodes, tempFilteredTimes
         if(!unpackAll) {
             tempFilteredNodes = nodes
             tempFilteredTimes = times
@@ -108,22 +114,22 @@ export default function SankeyPlot(props) {
             tempFilteredTimes = filteredTimes
         }
         // console.log('unpacking data with unpackall = '+unpackAll)
-        var d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
-        var locationsInArray = {}
-        var nodeSet = new Set()
-        var timeSet = new Set()
+        let d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
+        let locationsInArray = {}
+        let nodeSet = new Set()
+        let timeSet = new Set()
         for (let i = 1; i < props.data[sankeyCategory].length; i++) {
-            var source = props.data[sankeyCategory][i][0]
-            var target = props.data[sankeyCategory][i][1]
-            var label = props.data[sankeyCategory][i][2]
-            var value = props.data[sankeyCategory][i][3]
+            let source = props.data[sankeyCategory][i][0]
+            let target = props.data[sankeyCategory][i][1]
+            let label = props.data[sankeyCategory][i][2]
+            let value = props.data[sankeyCategory][i][3]
 
             nodeSet.add(source)
             nodeSet.add(target)
             timeSet.add(label)
 
             if ((unpackAll && label==='T01') || (tempFilteredTimes.includes(label) && (tempFilteredNodes.includes(source) || tempFilteredNodes.includes(target)))) {
-                var sourceIndex, targetIndex
+                let sourceIndex, targetIndex
                 if (d.node.label.includes(source)) {
                     sourceIndex = locationsInArray[source]
                 } 

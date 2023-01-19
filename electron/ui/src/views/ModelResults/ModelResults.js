@@ -64,7 +64,7 @@ export default function ModelResults(props) {
       if (props.category === "Sankey") {
         let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"], "v_F_Sourced": props.scenario.results.data["v_F_Sourced_dict"]}
         return (
-            <SankeyPlot data={sankeyData} />
+            <SankeyPlot data={sankeyData} scenarioStates={props.scenarioStates} scenarioId={scenario.id}/>
         )
       }
       /*
