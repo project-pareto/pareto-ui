@@ -170,7 +170,7 @@ export default function SankeyPlot(props) {
   return ( 
     <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: 'scroll'}}>
     <Grid container direction="row">
-        <Grid item sm={2} direction="row">
+        <Grid item sm={2}>
         <Box display="flex" justifyContent="flex-start">
             <FormControl sx={{ width: "25ch" }} size="small">
                 <Select
@@ -185,7 +185,7 @@ export default function SankeyPlot(props) {
             </FormControl>
         </Box>
         </Grid>
-        <Grid item sm="8">
+        <Grid item sm={8}>
         <Box display="flex" justifyContent="center" sx={{paddingTop:'50px'}}>
             <Plot
                 data={[
@@ -222,7 +222,7 @@ export default function SankeyPlot(props) {
             />
         </Box>
         </Grid>
-        <Grid item sm={2} direction="row">
+        <Grid item sm={2}>
         <Box display="flex" justifyContent="flex-end">
             <FilterDropdown
                 width="220px"
