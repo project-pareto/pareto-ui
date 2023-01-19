@@ -107,7 +107,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed.value.toLocaleString()+" "+kpiData.v_F_TotalDisposed.unit}</p>
+                <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalDisposed.unit}</p>
                 </Box>
             </Grid>
             </Grid>
@@ -125,7 +125,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced.value.toLocaleString()+" "+kpiData.v_F_TotalSourced.unit}</p>
+                <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalSourced.unit}</p>
                 </Box>
             </Grid>
             </Grid>
