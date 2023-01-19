@@ -201,8 +201,8 @@ async def update_excel(request: Request):
             500, f"unable to find and run given excel sheet id: {data['id']}: {e}"
         )
     
-@router.get("/get_diagram/{id}")
-async def get_diagram(id: int):
+@router.get("/get_diagram/{diagram_type}/{id}")
+async def get_diagram(diagram_type: str, id: int):
     """Fetch network diagram
 
     Args:
@@ -211,12 +211,12 @@ async def get_diagram(id: int):
     Returns:
         Network diagram
     """
-    data = scenario_handler.get_diagram(id)
+    data = scenario_handler.get_diagram(diagram_type, id)
     return {"data":data}
     # return StreamingResponse(io.BytesIO(data), media_type=f"image/{diagramFileType}")
 
-@router.post("/upload_diagram/{id}")
-async def upload_diagram(id: int, file: UploadFile = File(...)):
+@router.post("/upload_diagram/{diagram_type}/{id}")
+async def upload_diagram(diagram_type: str, id: int, file: UploadFile = File(...)):
     """Upload a network diagram.
 
     Args:
@@ -226,13 +226,16 @@ async def upload_diagram(id: int, file: UploadFile = File(...)):
         New scenario data
     """
     diagram_extension = file.filename.split('.')[-1]
-    output_path = f"{scenario_handler.diagrams_path}/{id}.{diagram_extension}"
+    if diagram_type == "input":
+        output_path = f"{scenario_handler.input_diagrams_path}/{id}.{diagram_extension}"
+    elif diagram_type == "output":
+        output_path = f"{scenario_handler.output_diagrams_path}/{id}.{diagram_extension}"
     try:
     # get file contents
         async with aiofiles.open(output_path, 'wb') as out_file:
             content = await file.read()  # async read
             await out_file.write(content) 
-        return scenario_handler.upload_diagram(output_path=output_path, id=id)
+        return scenario_handler.upload_diagram(output_path=output_path, id=id, diagram_type=diagram_type)
 
     except Exception as e:
         _log.error(f"error on file upload: {str(e)}")

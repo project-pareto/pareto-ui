@@ -14,6 +14,7 @@ import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
 import demoOutputDiagram from "../../assets/demo_figure_output.png";
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 
 
 export default function ModelResults(props) {
@@ -83,7 +84,7 @@ export default function ModelResults(props) {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <img alt="network diagram" style={{height:"400px"}} src={demoOutputDiagram}></img>
+              <NetworkDiagram scenario={props.scenario} type={"output"}></NetworkDiagram>
             </Box>
           )
         }

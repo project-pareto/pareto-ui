@@ -29,15 +29,15 @@ export const checkTasks = () => {
     });
 }; 
 
-export const fetchDiagram = (id) => {
-    return fetch('http://localhost:8001/get_diagram/'+id, {
+export const fetchDiagram = (type, id) => {
+    return fetch('http://localhost:8001/get_diagram/'+type+'/'+id, {
         method: 'GET', 
         mode: 'cors'
     });
 }
 
-export const uploadDiagarm = (data, id) => {
-    return fetch('http://localhost:8001/upload_diagram/'+id, {
+export const uploadDiagarm = (data, type, id) => {
+    return fetch('http://localhost:8001/upload_diagram/'+type+'/'+id, {
         method: 'POST', 
         mode: 'cors',
         body: data

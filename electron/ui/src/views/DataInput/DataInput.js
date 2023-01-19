@@ -347,7 +347,7 @@ const handleKeyDown = (e) => {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <NetworkDiagram scenario={props.scenario}></NetworkDiagram>
+              <NetworkDiagram scenario={props.scenario} type={"input"}></NetworkDiagram>
             </Box>
           )
         }

@@ -34,7 +34,7 @@ export default function NetworkDiagram(props) {
       }
 
        const fetchNetworkDiagram = () => {
-        fetchDiagram(props.scenario.id)
+        fetchDiagram(props.type, props.scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
@@ -59,7 +59,7 @@ export default function NetworkDiagram(props) {
         formData.append('file', file, name);
 
 
-        uploadDiagarm(formData, props.scenario.id)
+        uploadDiagarm(formData, props.type, props.scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
