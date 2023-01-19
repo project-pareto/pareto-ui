@@ -59,6 +59,7 @@
     "CCT":"CCT",
     "CKT":"CKT",
 
+    "vb_y_overview": "Infrastructure Buildout",
     "v_F_PadStorageIn_dict":"Pad Storage In",
     "v_F_PadStorageOut_dict":"Pad Storage Out",
     "v_F_ReuseDestination_dict":"Reuse Destination",
