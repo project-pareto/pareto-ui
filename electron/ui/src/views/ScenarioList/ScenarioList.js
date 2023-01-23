@@ -222,6 +222,12 @@ export default function ScenarioList(props) {
         {
             showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
         }
+        <Box sx={{display: 'flex', justifyContent: 'flex-start'}}>
+        <h3 style={{color: '#0083b5'}}>Unfamiliar with PARETO? Check out the documentation <a href="https://pareto.readthedocs.io/en/stable/" target="_blank">here</a>.</h3>
+        </Box>
+
+
+
     </Grid>
     </Box>
   );
