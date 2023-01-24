@@ -17,7 +17,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 
 export default function Optimization(props) {
-  const [scenario, setScenario] = useState(props.scenario)
+  const [scenario, setScenario] = useState({...props.scenario})
   // const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
   const [ disabled, setDisabled ] = useState(false)
   const columnWidths = [5,7]
@@ -45,62 +45,66 @@ export default function Optimization(props) {
               Select the solver you would like to use. Note: Gurobi requires a license. 
               If you do not have a Gurobi licence, select "CBC", an open source solver.
             </div>,
+    units: <div>
+            Choose whether you would like to scale the model units.
+          </div>,
   }
 
    useEffect(()=>{
-    setDisabled(!['complete','none','failure'].includes(scenario.results.status))
-   }, [scenario]);
+    setDisabled(!['complete','none','failure'].includes(props.scenario.results.status))
+    // setScenario(props.scenario)
+   }, [props.scenario]);
   
    const handleObjectiveChange = (event) => {
-     const tempScenario = {...scenario}
+     const tempScenario = {...props.scenario}
      tempScenario.optimization.objective = event.target.value
-     setScenario(tempScenario)
+    //  setScenario(tempScenario)
      props.updateScenario(tempScenario)
    }
 
    const handleRuntimeChange = (event) => {
     if (!isNaN(event.target.value)) {
-      const tempScenario = {...scenario}
+      const tempScenario = {...props.scenario}
       tempScenario.optimization.runtime = Number(event.target.value)
-      setScenario(tempScenario)
+      // setScenario(tempScenario)
       props.updateScenario(tempScenario)
     }
   }
 
   const handlePipelineCostChange = (event) => {
-    const tempScenario = {...scenario}
+    const tempScenario = {...props.scenario}
     tempScenario.optimization.pipelineCostCalculation = event.target.value
-    setScenario(tempScenario)
+    // setScenario(tempScenario)
     props.updateScenario(tempScenario)
   }
 
   const handleOptimalityGapChange = (event) => {
     if (!isNaN(event.target.value)) {
-      const tempScenario = {...scenario}
+      const tempScenario = {...props.scenario}
       tempScenario.optimization.optimalityGap = Number(event.target.value)
-      setScenario(tempScenario)
+      // setScenario(tempScenario)
       props.updateScenario(tempScenario)
     }
   }
 
   const handleWaterQualityChange = (event) => {
-    const tempScenario = {...scenario}
+    const tempScenario = {...props.scenario}
     tempScenario.optimization.waterQuality = event.target.value
-    setScenario(tempScenario)
+    // setScenario(tempScenario)
     props.updateScenario(tempScenario)
   }
 
   const handleSolverChange = (event) => {
-    const tempScenario = {...scenario}
+    const tempScenario = {...props.scenario}
     tempScenario.optimization.solver = event.target.value
-    setScenario(tempScenario)
+    // setScenario(tempScenario)
     props.updateScenario(tempScenario)
   }
 
   const handleUnitsChange = (event) => {
-    const tempScenario = {...scenario}
+    const tempScenario = {...props.scenario}
     tempScenario.optimization.build_units = event.target.value
-    setScenario(tempScenario)
+    // setScenario(tempScenario)
     props.updateScenario(tempScenario)
   }
 
@@ -147,7 +151,7 @@ export default function Optimization(props) {
           <FormControl disabled={disabled}>
             {/* <RadioGroup
               aria-labelledby="objectives-select"
-              value={scenario.optimization.objective}
+              value={props.scenario.optimization.objective}
               name="objectives-select"
               onChange={handleObjectiveChange}
             >
@@ -171,7 +175,7 @@ export default function Optimization(props) {
           <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
             <OutlinedInput
               id="outlined-adornment-sec"
-              value={scenario.optimization.runtime}
+              value={props.scenario.optimization.runtime}
               onChange={handleRuntimeChange}
               endAdornment={<InputAdornment position="end">sec</InputAdornment>}
               aria-describedby="outlined-weight-helper-text"
@@ -192,7 +196,7 @@ export default function Optimization(props) {
           <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
-              value={scenario.optimization.pipelineCostCalculation}
+              value={props.scenario.optimization.pipelineCostCalculation}
               onChange={handlePipelineCostChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
@@ -213,7 +217,7 @@ export default function Optimization(props) {
           <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
             <OutlinedInput
               id="outlined-adornment-sec"
-              value={scenario.optimization.optimalityGap}
+              value={props.scenario.optimization.optimalityGap}
               onChange={handleOptimalityGapChange}
               endAdornment={<InputAdornment position="end">%</InputAdornment>}
               aria-describedby="outlined-weight-helper-text"
@@ -234,7 +238,7 @@ export default function Optimization(props) {
           <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
-              value={scenario.optimization.waterQuality}
+              value={props.scenario.optimization.waterQuality}
               onChange={handleWaterQualityChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
@@ -255,7 +259,7 @@ export default function Optimization(props) {
           <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
-              value={scenario.optimization.solver}
+              value={props.scenario.optimization.solver}
               onChange={handleSolverChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
@@ -266,15 +270,16 @@ export default function Optimization(props) {
             </FormControl>
           </Grid>
           
-          {/* <Grid item xs={4} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Scale Model Units</p>
+              <Tooltip title={descriptions.units} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
             </Box>
           </Grid>
-          <Grid item xs={8} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
-              value={scenario.optimization.units}
+              value={props.scenario.optimization.build_units}
               onChange={handleUnitsChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
@@ -282,7 +287,7 @@ export default function Optimization(props) {
               <MenuItem key={"scaled_units"} value={"scaled_units"}>Yes</MenuItem>
             </Select>
             </FormControl>
-          </Grid> */}
+          </Grid>
 
         </Grid>
       </Box>
