@@ -38,7 +38,7 @@ class ScenarioHandler:
         self.excelsheets_path = self.data_directory_path / "excelsheets"
         self.outputs_path = self.data_directory_path / "outputs"
         self.input_diagrams_path = self.data_directory_path / "input_diagrams"
-        self.output_diagrams_path = self.data_directory_path / "input_diagrams"
+        self.output_diagrams_path = self.data_directory_path / "output_diagrams"
 
         _log.info(f"app directory: {os.path.dirname(os.path.abspath(__file__))}")
         _log.info(f"currently operating in directory: {os.getcwd()}")
@@ -333,6 +333,7 @@ class ScenarioHandler:
                 _log.error(f"unable to find diagram for id {id}")
                 raise HTTPException(400, detail=f"no diagram found")
         except Exception as e:
+            _log.error(f"error: unable to find diagram for id {id}: {e}")
             raise HTTPException(400, detail=f"no diagram found: {e}")
         
     def update_next_id(self):
