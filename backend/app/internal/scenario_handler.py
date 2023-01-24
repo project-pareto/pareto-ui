@@ -252,12 +252,30 @@ class ScenarioHandler:
         except Exception as e:
             _log.error(f"unable to remove output for #{index}: {e}")
 
-        # remove completions demand plot
+        # remove diagram images (if they exist)
         try:
-            plot_file = "{}/{}_plot.html".format(self.outputs_path,index)
-            os.remove(plot_file)
+            diagramFileType = self.scenario_list[index]['inputDiagramExtension']
+            input_diagram = f"{self.input_diagrams_path}/{index}.{diagramFileType}"
+            _log.info(f'removing input diagram from location: {input_diagram}')
+            if os.path.isfile(input_diagram):
+                os.remove(input_diagram)
         except Exception as e:
-            _log.error(f"unable to delete completions demand plot for #{index}: {e}")
+            _log.error(f"unable to remove input diagram for #{index}: {e}")
+        try:
+            diagramFileType = self.scenario_list[index]['outputDiagramExtension']
+            output_diagram = f"{self.output_diagrams_path}/{index}.{diagramFileType}"
+            _log.info(f'removing output diagram from location: {output_diagram}')
+            if os.path.isfile(output_diagram):
+                os.remove(output_diagram)
+        except Exception as e:
+            _log.error(f"unable to remove output diagram for #{index}: {e}")
+
+        # # remove completions demand plot
+        # try:
+        #     plot_file = "{}/{}_plot.html".format(self.outputs_path,index)
+        #     os.remove(plot_file)
+        # except Exception as e:
+        #     _log.error(f"unable to delete completions demand plot for #{index}: {e}")
 
         # update scenario list
         self.retrieve_scenarios()

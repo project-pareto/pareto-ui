@@ -122,11 +122,14 @@ export default function Optimization(props) {
         m:3, 
         boxShadow:3,
         paddingBottom: "50px" 
+      },
+      gridContainer: {
+        marginBottom: "100px"
       }
   }
 
   return ( 
-    <Grid container spacing={2}>
+    <Grid container spacing={2} style={styles.gridContainer}>
       <Grid item xs={3}>
 
       </Grid>
