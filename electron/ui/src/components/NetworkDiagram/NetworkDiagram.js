@@ -14,7 +14,7 @@ export default function NetworkDiagram(props) {
     const [ warningMessage, setWarningMessage ] = useState("")
     useEffect(()=>{
         fetchNetworkDiagram()
-    }, []);
+    }, [props.scenario]);
 
     const fileTypeError = () => {
         setWarningMessage("Please choose a valid image file (png, jpg, jpeg)")
@@ -43,10 +43,12 @@ export default function NetworkDiagram(props) {
                 console.log(data.data)
                 setDiagramImage(data.data)
             }).catch((err)=>{
+                setDiagramImage(null)
                 console.error("error fetching diagram: ",err)
             })
         }
         else {
+            setDiagramImage(null)
             console.error("error fetching diagram: ",response.statusText)
         }
         })

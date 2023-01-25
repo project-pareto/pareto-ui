@@ -35,7 +35,10 @@ export default function Optimization(props) {
                         -Capacity based: Uses pipeline capacity and $/bbl rate
                   </div>,
     optimalityGap: <div>
-                  Needs description
+                  Measure of optimality guaranteed 
+                  (example: 0% gap is the mathematically proven best possible solution, 3% optimality 
+                  gap ensures that the reported solution is within 3% of the best theoretically possible solution). 
+                  Please note that runtime limits may supersede the optimality gap settings.
             </div>,
     waterQuality: <div>
                       PARETO can also consider water quality in the model, select how you would like to include it in the model:<br/>
@@ -48,7 +51,7 @@ export default function Optimization(props) {
               If you do not have a Gurobi licence, select "CBC", an open source solver.
             </div>,
     units: <div>
-            Choose whether you would like to build model units or use user units.
+            Choose whether you would like to build the model with scaled units or user units.
           </div>,
     scaleModel: <div>
             Choose whether you would like to scale the model or not.
