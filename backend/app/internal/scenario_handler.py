@@ -343,9 +343,9 @@ class ScenarioHandler:
         try:
             diagramFileType = self.scenario_list[id][f'{diagram_type}DiagramExtension']
             if diagram_type == "input":
-                diagramLocation = f"{scenario_handler.input_diagrams_path}/{id}.{diagramFileType}"
+                diagramLocation = f"{self.input_diagrams_path}/{id}.{diagramFileType}"
             elif diagram_type == "output":
-                diagramLocation = f"{scenario_handler.output_diagrams_path}/{id}.{diagramFileType}"
+                diagramLocation = f"{self.output_diagrams_path}/{id}.{diagramFileType}"
             if os.path.isfile(diagramLocation):
                 return diagramLocation
             else:
@@ -448,5 +448,20 @@ class ScenarioHandler:
         self.retrieve_scenarios()
         
         return
+    
+    def delete_diagram(self, diagram_type, index):
+        try:
+            diagramFileType = self.scenario_list[index][f'{diagram_type}DiagramExtension']
+            if diagram_type == "input":
+                diagram = f"{self.input_diagrams_path}/{index}.{diagramFileType}"
+            elif diagram_type == "output":
+                diagram = f"{self.output_diagrams_path}/{index}.{diagramFileType}"
+            _log.info(f'removing diagram from location: {diagram}')
+            if os.path.isfile(diagram):
+                os.remove(diagram)
+        except Exception as e:
+            _log.error(f"unable to remove diagram for #{index}: {e}")
+            raise HTTPException(400, detail=f"unable to remove diagram: {e}")
+        return self.scenario_list[index]
 
 scenario_handler = ScenarioHandler()

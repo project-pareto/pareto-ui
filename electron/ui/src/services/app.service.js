@@ -43,3 +43,10 @@ export const uploadDiagarm = (data, type, id) => {
         body: data
     });
 }; 
+
+export const deleteDiagram = (type, id) => {
+    return fetch('http://localhost:8001/delete_diagram/'+type+'/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}

@@ -3,8 +3,10 @@ import {useEffect, useState} from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
 import { FileUploader } from "react-drag-drop-files";
-import { fetchDiagram, uploadDiagarm } from '../../services/app.service';
+import { fetchDiagram, uploadDiagarm, deleteDiagram } from '../../services/app.service';
 
 export default function NetworkDiagram(props) {
     const [ file, setFile ] = useState(null)
@@ -12,6 +14,14 @@ export default function NetworkDiagram(props) {
     const [ diagramImage, setDiagramImage ] = useState(null)
     const [ showWarning, setShowWarning ] = useState(false)
     const [ warningMessage, setWarningMessage ] = useState("")
+    const styles = {
+        fileUploaderBox: {
+            border: '2px dashed black',
+            borderRadius:2,
+            p:10,
+            cursor: "pointer"
+        }
+      }
     useEffect(()=>{
         fetchNetworkDiagram()
     }, [props.scenario]);
@@ -24,35 +34,46 @@ export default function NetworkDiagram(props) {
           }, 5000)
    }
 
-    const styles = {
-        fileUploaderBox: {
-            border: '2px dashed black',
-            borderRadius:2,
-            p:10,
-            cursor: "pointer"
-        }
-      }
-
-       const fetchNetworkDiagram = () => {
-        fetchDiagram(props.type, props.scenario.id)
+    const handleDelete = () => {
+        deleteDiagram(props.type, props.scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
             .then((data)=>{
-                console.log('setting diagram image to :')
-                console.log(data.data)
-                setDiagramImage(data.data)
+                setDiagramImage(null)
+                console.log('successfully removed diagram')
             }).catch((err)=>{
                 setDiagramImage(null)
-                console.error("error fetching diagram: ",err)
+                console.error("error removing diagram: ",err)
             })
         }
         else {
             setDiagramImage(null)
-            console.error("error fetching diagram: ",response.statusText)
+            console.error("error deleting diagram: ",response.statusText)
         }
         })
-       }
+    }
+
+    const fetchNetworkDiagram = () => {
+    fetchDiagram(props.type, props.scenario.id)
+    .then(response => {
+    if (response.status === 200) {
+        response.json()
+        .then((data)=>{
+            console.log('setting diagram image to :')
+            console.log(data.data)
+            setDiagramImage(data.data)
+        }).catch((err)=>{
+            setDiagramImage(null)
+            console.error("error fetching diagram: ",err)
+        })
+    }
+    else {
+        setDiagramImage(null)
+        console.error("error fetching diagram: ",response.statusText)
+    }
+    })
+    }
 
       const handleDiagramUpload = (file, name) => {
         console.log('handle diagram upload')
@@ -123,7 +144,15 @@ export default function NetworkDiagram(props) {
   return ( 
     <Box >
         {diagramImage ? 
-        <img alt="network diagram" style={{height:"500px"}} src={`file://${diagramImage}`}></img>
+        <Grid container>
+            <Grid item xs ={0.5}>
+            <IconButton onClick={() => handleDelete()}><CloseIcon/></IconButton>
+            </Grid>
+            <Grid item xs ={11.5}>
+            <img alt="network diagram" style={{height:"500px"}} src={`file://${diagramImage}`}></img>
+            </Grid>
+        </Grid>
+        
         : 
         <>
         {UploadBox()}

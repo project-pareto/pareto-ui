@@ -245,3 +245,16 @@ async def upload_diagram(diagram_type: str, id: int, file: UploadFile = File(...
     except Exception as e:
         _log.error(f"error on file upload: {str(e)}")
         raise HTTPException(400, detail=f"File upload failed: {e}")
+
+@router.get("/delete_diagram/{diagram_type}/{id}")
+async def delete_diagram(diagram_type: str, id: int):
+    """Delete network diagram
+
+    Args:
+        id: scenario id
+
+    Returns:
+        Scenario
+    """
+    data = scenario_handler.delete_diagram(diagram_type, id)
+    return {"data":data}
