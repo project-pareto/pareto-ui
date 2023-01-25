@@ -102,34 +102,39 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
     try:
         excel_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,data['scenario']['id'])
         output_path = "{}/{}.xlsx".format(scenario_handler.outputs_path,data['scenario']['id'])
-        try:
-            solver=data['scenario']['optimization']['solver']
-        except:
-            _log.info('unable to find solver selection, using none')
-            solver=None
-        try:
-            build_units=data['scenario']['optimization']['build_units']
-        except:
-            _log.info('unable to get build units, using user_units')
-            build_units = "user_units"
-        try:
-            optimalityGap = data['scenario']['optimization']['optimalityGap']
-        except:
-            _log.info('unable to get optimality gap, using 0%')
-            optimalityGap = 0
-        _log.info(f"build units is {build_units}")
+        modelParameters = {
+            "objective": data['scenario']['optimization']['objective'],
+            "runtime": data['scenario']['optimization']['runtime'],
+            "pipelineCost": data['scenario']['optimization']['pipelineCostCalculation'],
+            "waterQuality": data['scenario']['optimization']['waterQuality']
+        }
+        defaultParams = {'solver': None, 'build_units': 'user_units', 'optimalityGap': 0, 'scale_model': True}
+        for param in ['solver', 'build_units', 'optimalityGap', 'scale_model']:
+            try:
+                modelParameters[param]=data['scenario']['optimization'][param]
+            except:
+                _log.error(f'unable to find {param}, using {defaultParams[param]}')
+                modelParameters[param]=defaultParams[param]
+
+        # modelParameters = {
+        #     "objective": data['scenario']['optimization']['objective'],
+        #     "runtime": data['scenario']['optimization']['runtime'],
+        #     "pipelineCost": data['scenario']['optimization']['pipelineCostCalculation'],
+        #     "waterQuality": data['scenario']['optimization']['waterQuality'],
+        #     "solver": solver,
+        #     "build_units": build_units,
+        #     "optimalityGap": optimalityGap,
+        #     "scale_model": scale_model
+        # }
+
+        _log.info(f"modelParameters: {modelParameters}")
+
         background_tasks.add_task(
             handle_run_strategic_model, 
             input_file=excel_path,
             output_file=output_path,
             id=data['scenario']['id'],
-            objective=data['scenario']['optimization']['objective'],
-            runtime=data['scenario']['optimization']['runtime'],
-            pipelineCost=data['scenario']['optimization']['pipelineCostCalculation'],
-            waterQuality=data['scenario']['optimization']['waterQuality'],
-            solver=solver,
-            build_units=build_units,
-            optimalityGap=optimalityGap
+            modelParameters=modelParameters
         )
         
         # add id to scenario handler task list to keep track of running tasks

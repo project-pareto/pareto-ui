@@ -14,12 +14,14 @@ import Select from '@mui/material/Select';
 import IconButton from '@mui/material/IconButton';
 import InfoIcon from '@mui/icons-material/Info';
 import Tooltip from '@mui/material/Tooltip';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 
 
 export default function Optimization(props) {
-  const [scenario, setScenario] = useState({...props.scenario})
-  // const [runtime, setRuntime] = useState(props.scenario.optimization.runtime)
   const [ disabled, setDisabled ] = useState(false)
+  const [ showAdvancedOptions, setShowAdvancedOptions ] = useState(false) 
   const columnWidths = [5,7]
   const descriptions = {
     objective: <div>Select what you would like to solve for.</div>,
@@ -46,68 +48,12 @@ export default function Optimization(props) {
               If you do not have a Gurobi licence, select "CBC", an open source solver.
             </div>,
     units: <div>
-            Choose whether you would like to scale the model units.
+            Choose whether you would like to build model units or use user units.
+          </div>,
+    scaleModel: <div>
+            Choose whether you would like to scale the model or not.
           </div>,
   }
-
-   useEffect(()=>{
-    setDisabled(!['complete','none','failure'].includes(props.scenario.results.status))
-    // setScenario(props.scenario)
-   }, [props.scenario]);
-  
-   const handleObjectiveChange = (event) => {
-     const tempScenario = {...props.scenario}
-     tempScenario.optimization.objective = event.target.value
-    //  setScenario(tempScenario)
-     props.updateScenario(tempScenario)
-   }
-
-   const handleRuntimeChange = (event) => {
-    if (!isNaN(event.target.value)) {
-      const tempScenario = {...props.scenario}
-      tempScenario.optimization.runtime = Number(event.target.value)
-      // setScenario(tempScenario)
-      props.updateScenario(tempScenario)
-    }
-  }
-
-  const handlePipelineCostChange = (event) => {
-    const tempScenario = {...props.scenario}
-    tempScenario.optimization.pipelineCostCalculation = event.target.value
-    // setScenario(tempScenario)
-    props.updateScenario(tempScenario)
-  }
-
-  const handleOptimalityGapChange = (event) => {
-    if (!isNaN(event.target.value)) {
-      const tempScenario = {...props.scenario}
-      tempScenario.optimization.optimalityGap = Number(event.target.value)
-      // setScenario(tempScenario)
-      props.updateScenario(tempScenario)
-    }
-  }
-
-  const handleWaterQualityChange = (event) => {
-    const tempScenario = {...props.scenario}
-    tempScenario.optimization.waterQuality = event.target.value
-    // setScenario(tempScenario)
-    props.updateScenario(tempScenario)
-  }
-
-  const handleSolverChange = (event) => {
-    const tempScenario = {...props.scenario}
-    tempScenario.optimization.solver = event.target.value
-    // setScenario(tempScenario)
-    props.updateScenario(tempScenario)
-  }
-
-  const handleUnitsChange = (event) => {
-    const tempScenario = {...props.scenario}
-    tempScenario.optimization.build_units = event.target.value
-    // setScenario(tempScenario)
-    props.updateScenario(tempScenario)
-  }
-
   const styles = {
     objectiveSelection: 
       {
@@ -125,8 +71,34 @@ export default function Optimization(props) {
       },
       gridContainer: {
         marginBottom: "100px"
+      }, 
+      gridItems: {
+        marginTop: "5px"
+      },
+      advancedOptions: {
+        color: "#0083b5",
+        // "&:hover": {
+        //   backgroundColor: "black"
+        // },
       }
   }
+
+   useEffect(()=>{
+    setDisabled(!['complete','none','failure'].includes(props.scenario.results.status))
+    // setScenario(props.scenario)
+   }, [props.scenario]);
+
+   const handleChange = (event) => {
+     const name = event.target.name
+     if ( (name === "runtime" || name === "optimalityGap") && isNaN(event.target.value) ) {
+      console.log('tried entering nonnumerical characters for runtime or optimality gap')
+     }
+     else {
+      const tempScenario = {...props.scenario}
+      tempScenario.optimization[name] = event.target.value
+      props.updateScenario(tempScenario)
+     }
+   }
 
   return ( 
     <Grid container spacing={2} style={styles.gridContainer}>
@@ -142,7 +114,7 @@ export default function Optimization(props) {
             <p>OPTIMIZATION SETTINGS</p>
           </Box>
           </Grid>
-          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>
                 Objective Selection
@@ -150,9 +122,10 @@ export default function Optimization(props) {
                 </p>
             </Box>
           </Grid>
-          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <FormControl disabled={disabled}>
             {/* <RadioGroup
+              name="objective"
               aria-labelledby="objectives-select"
               value={props.scenario.optimization.objective}
               name="objectives-select"
@@ -167,19 +140,20 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Maximum Runtime
               <Tooltip title={descriptions.runtime} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
-          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
             <OutlinedInput
+              name="runtime"  
               id="outlined-adornment-sec"
               value={props.scenario.optimization.runtime}
-              onChange={handleRuntimeChange}
+              onChange={handleChange}
               endAdornment={<InputAdornment position="end">sec</InputAdornment>}
               aria-describedby="outlined-weight-helper-text"
               inputProps={{
@@ -189,16 +163,17 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          {/* <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+          {/* <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Pipeline Cost Calculation
               <Tooltip title={descriptions.pipelineCost} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
-          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
+              name="pipelineCostCalculation"
               value={props.scenario.optimization.pipelineCostCalculation}
               onChange={handlePipelineCostChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
@@ -209,19 +184,20 @@ export default function Optimization(props) {
             </FormControl>
           </Grid> */}
 
-          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Optimality Gap
               <Tooltip title={descriptions.optimalityGap} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
-          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
             <OutlinedInput
+              name="optimalityGap"
               id="outlined-adornment-sec"
               value={props.scenario.optimization.optimalityGap}
-              onChange={handleOptimalityGapChange}
+              onChange={handleChange}
               endAdornment={<InputAdornment position="end">%</InputAdornment>}
               aria-describedby="outlined-weight-helper-text"
               inputProps={{
@@ -231,18 +207,19 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Water Quality
               <Tooltip title={descriptions.waterQuality} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
-          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
+              name="waterQuality"
               value={props.scenario.optimization.waterQuality}
-              onChange={handleWaterQualityChange}
+              onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
               <MenuItem key={0} value={"false"}>False</MenuItem>
@@ -252,18 +229,19 @@ export default function Optimization(props) {
             </FormControl>
           </Grid>
 
-          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Solver
               <Tooltip title={descriptions.solver} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
-          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
+              name="solver"
               value={props.scenario.optimization.solver}
-              onChange={handleSolverChange}
+              onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
               <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
@@ -272,24 +250,64 @@ export default function Optimization(props) {
             </Select>
             </FormControl>
           </Grid>
-          
-          <Grid item xs={columnWidths[0]} style={{marginTop: "25px"}}>
+
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Scale Model Units</p>
-              <Tooltip title={descriptions.units} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              <p style={styles.advancedOptions}>
+                Advanced User Options 
+                <IconButton onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>{showAdvancedOptions ? <ExpandLess /> : <ExpandMore />}</IconButton>
+              </p>
             </Box>
           </Grid>
-          <Grid item xs={columnWidths[1]} style={{marginTop: "25px"}}>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
+          </Grid>
+          
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
+          <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Model Build Units</p>
+              <Tooltip title={descriptions.units} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            </Collapse>
+          </Grid>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
+          <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
           <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
             <Select
+              name="build_units"
               value={props.scenario.optimization.build_units}
-              onChange={handleUnitsChange}
+              onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={"user_units"} value={"user_units"}>No</MenuItem>
-              <MenuItem key={"scaled_units"} value={"scaled_units"}>Yes</MenuItem>
+              <MenuItem key={"user_units"} value={"user_units"}>User Units</MenuItem>
+              <MenuItem key={"scaled_units"} value={"scaled_units"}>Scaled Units</MenuItem>
             </Select>
             </FormControl>
+            </Collapse>
+          </Grid>
+
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
+          <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Scale Model</p>
+              <Tooltip title={descriptions.scaleModel} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            </Collapse>
+          </Grid>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
+          <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
+            <Select
+              name="scale_model"
+              value={props.scenario.optimization.scale_model}
+              onChange={handleChange}
+              sx={{color:'#0b89b9', fontWeight: "bold"}}
+            >
+              <MenuItem key={"false"} value={false}>No</MenuItem>
+              <MenuItem key={"true"} value={true}>Yes</MenuItem>
+            </Select>
+            </FormControl>
+            </Collapse>
           </Grid>
 
         </Grid>

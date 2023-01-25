@@ -10,6 +10,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     PipelineCost,
     PipelineCapacity,
     WaterQuality,
+    BuildUnits
 )
 # from .get_data import get_data
 from pareto.utilities.get_data import get_data
@@ -26,7 +27,7 @@ from app.internal.scenario_handler import (
 _log = logging.getLogger(__name__)
 
 
-def run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units, optimalityGap):
+def run_strategic_model(input_file, output_file, id, modelParameters):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -39,11 +40,12 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
         df_sets,
         df_parameters,
         default={
-            "objective": Objectives[objective],
-            "pipeline_cost": PipelineCost[pipelineCost],
+            "objective": Objectives[modelParameters["objective"]],
+            "pipeline_cost": PipelineCost[modelParameters["pipelineCost"]],
             "pipeline_capacity": PipelineCapacity.input,
             "node_capacity": True,
-            "water_quality": WaterQuality[waterQuality],
+            "water_quality": WaterQuality[modelParameters["waterQuality"]],
+            "build_units": BuildUnits[modelParameters["build_units"]]
         },
     )
     
@@ -54,15 +56,14 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
 
     options = {
         "deactivate_slacks": True,
-        "scale_model": True,
+        "scale_model": modelParameters["scale_model"],
         "scaling_factor": 1000,
-        "running_time": runtime,
-        "gap": optimalityGap,
-        "solver": solver,
-        "build_units": build_units
+        "running_time": modelParameters["runtime"],
+        "gap": modelParameters["optimalityGap"],
+        "solver": modelParameters["solver"]
     }
 
-    _log.info(f"solving model with solver: {solver}")
+    _log.info(f"solving model with solver: {modelParameters['solver']}")
     # try:
     #     solve_model(model=strategic_model, options=options, solver=solver)
     # except:
@@ -90,9 +91,9 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
 
     return results_dict
 
-def handle_run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units, optimalityGap):
+def handle_run_strategic_model(input_file, output_file, id, modelParameters):
     try:
-        results_dict = run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units, optimalityGap)
+        results_dict = run_strategic_model(input_file, output_file, id, modelParameters)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
         results = {"data": results_dict, "status": "complete"}

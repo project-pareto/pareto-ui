@@ -158,7 +158,8 @@ class ScenarioHandler:
                     "waterQuality": "false", 
                     "solver": "cbc",
                     "build_units": "user_units",
-                    "optimalityGap": 0
+                    "optimalityGap": 0,
+                    "scale_model": True
                 }, 
             "results": {"status": "none", "data": {}}
             }
