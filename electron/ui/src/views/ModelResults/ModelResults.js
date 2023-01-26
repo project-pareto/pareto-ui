@@ -11,6 +11,7 @@ import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 
 export default function ModelResults(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
+  const [ terminationCondition, setTerminationCondition ] = useState(null)
   const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) 
   const [ columnNodes, setColumnNodes ] = useState([])
   const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([])
@@ -54,8 +55,23 @@ export default function ModelResults(props) {
     let tempScenario = {}
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
+    console.log(`termination condition is ${tempScenario.results.terminationCondition}`)
+    if (typeof(tempScenario.results.terminationCondition) === 'undefined') {
+      console.log('term condition is undefined, rolling forward as good')
+      setTerminationCondition('good')
+    }else {
+      if (["locallyOptimal", "globallyOptimal", "optimal"].includes(tempScenario.results.terminationCondition)) {
+        setTerminationCondition('good')
+      } else if (["maxTimeLimit", "maxIterations", "userInterrupt", "resourceInterrupt", "maxEvaluations"].includes(tempScenario.results.terminationCondition)) {
+        setTerminationCondition('unsure')
+      }else {
+        setTerminationCondition('bad')
+      }
+    }
     
-  }, [props.category, props.scenario, scenario.data_input.df_parameters]);
+    
+    
+  }, [props.category, props.scenario, props.scenario.data_input.df_parameters]);
 
    const styles ={
     firstCol: {
@@ -139,7 +155,7 @@ const handleRowFilter = (row) => {
       if (props.category === "Sankey") {
         let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"], "v_F_Sourced": props.scenario.results.data["v_F_Sourced_dict"]}
         return (
-            <SankeyPlot data={sankeyData} appState={props.appState} scenarioId={scenario.id}/>
+            <SankeyPlot data={sankeyData} appState={props.appState} scenarioId={props.scenario.id}/>
         )
       }
       /*
@@ -172,7 +188,7 @@ const handleRowFilter = (row) => {
             <Grid item xs={11.5}>
               <DataTable 
                 section="output"
-                scenario={scenario}
+                scenario={props.scenario}
                 setScenario={setScenario}
                 columnNodesMapping={columnNodesMapping}
                 columnNodes={columnNodes}
@@ -219,7 +235,7 @@ const handleRowFilter = (row) => {
       if a scenario has been optimized, show outputs
       otherwise, display the status of the optimization
     */}
-    {props.scenario.results.status === "complete" ? 
+    {props.scenario.results.status === "complete" && terminationCondition === "good" ? 
       renderOutputCategory()
     : 
     <Grid container alignItems="center" justifyContent="center">
@@ -233,7 +249,13 @@ const handleRowFilter = (row) => {
           <p>Error: <b>{props.scenario.results.error}</b></p>
         </Box> 
         : 
-        
+        props.scenario.results.status === "complete" ?
+        <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+          <h2>Unoptimal termination</h2>
+          <p>Termination condition: <b>{props.scenario.results.terminationCondition}</b></p>
+          <p>Please try increasing optimization runtime</p>
+        </Box> 
+        :
         <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
           <h2>Running Optimization</h2>
           <p>This process could take several minutes</p>

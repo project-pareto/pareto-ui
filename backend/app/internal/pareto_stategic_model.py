@@ -12,7 +12,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     WaterQuality,
     BuildUnits
 )
-# from .get_data import get_data
+from pyomo.opt import TerminationCondition
 from pareto.utilities.get_data import get_data
 from pareto.utilities.results import generate_report, PrintValues, OutputUnits
 import idaes.logger as idaeslog
@@ -64,13 +64,16 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
     }
 
     _log.info(f"solving model with solver: {modelParameters['solver']}")
-    # try:
-    #     solve_model(model=strategic_model, options=options, solver=solver)
-    # except:
-    #     _log.info('solver not an option for solve model')
-    solve_model(model=strategic_model, options=options)
+
+    model_results = solve_model(model=strategic_model, options=options)
+    termination_condition = model_results.solver.termination_condition
+    # potential termination conditions: 
+    # ( locallyOptimal, globallyOptimal, optimal ) -> Good
+    # ( maxTimeLimit, maxIterations, userInterrupt, resourceInterrupt, maxEvaluations ) -> we don't know if the solution is good or not
+    # the rest -> these are real failures
+
     scenario = scenario_handler.get_scenario(int(id))
-    results = {"data": {}, "status": "Generating output"}
+    results = {"data": {}, "status": "Generating output", "terminationCondition": termination_condition}
     scenario["results"] = results
     scenario_handler.update_scenario(scenario)
 
@@ -96,7 +99,10 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters):
         results_dict = run_strategic_model(input_file, output_file, id, modelParameters)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
-        results = {"data": results_dict, "status": "complete"}
+        # results = {"data": results_dict, "status": "complete"}
+        results = scenario["results"]
+        results['data'] = results_dict
+        results['status'] = 'complete'
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
     except Exception as e:
