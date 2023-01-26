@@ -38,14 +38,30 @@ export default function DataInputTable(props) {
 
 
 const handleDoubleClick = (ind, index) => {
+  /*
+    ind: row number, starting at 0, excluding header row
+    index: column number, starting at 0
+  */
   if (['complete','none','failure'].includes(props.scenario.results.status)) {
-    if(props.editDict[""+ind+":"+index]) {
-    } else {
-      let tempEditDict = {...props.editDict}
-      tempEditDict[""+ind+":"+index] = true
-      props.setEditDict(tempEditDict)
+    if(index === 0) //when double clicking column index, set all numerical values in that row to 0
+    { 
+      let tempScenario = {...props.scenario}
+      Object.entries(props.scenario.data_input.df_parameters[props.category]).map(([key, value], i) => {
+        if (i > 0 && value[ind] !== "" && !isNaN(value[ind])) {
+          value[ind] = 0
+        }
+      })
       props.handleEditInput(true)
+      props.setScenario(tempScenario)
+    }else {
+      if(!props.editDict[""+ind+":"+index]) {
+        let tempEditDict = {...props.editDict}
+        tempEditDict[""+ind+":"+index] = true
+        props.setEditDict(tempEditDict)
+        props.handleEditInput(true)
+      }
     }
+    
   }  
   else {
     props.setShowError(true)
