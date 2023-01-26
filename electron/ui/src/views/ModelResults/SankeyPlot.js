@@ -20,17 +20,23 @@ export default function SankeyPlot(props) {
 
 
     useEffect(()=>{
-        if (props.scenarioStates[props.scenarioId].sankeyFilters) {
+        if (props.appState.sankeyFilters) {
             console.log('found sankey filters')
-            let tempNodes = props.scenarioStates[props.scenarioId].sankeyFilters.nodes
-            let tempTimes = props.scenarioStates[props.scenarioId].sankeyFilters.times
-            unpackData(true, tempNodes, tempTimes);
+            try {
+                let tempNodes = props.scenarioStates[props.scenarioId].sankeyFilters.nodes
+                let tempTimes = props.scenarioStates[props.scenarioId].sankeyFilters.times
+                unpackData(true, tempNodes, tempTimes);
+            } catch (e) {
+                console.error('unable to apply sankey filters')
+                unpackData(true, [], []);
+            }
+            
         } else {
             console.log('did not find sankey filters')
             unpackData(true, [], []);
         }
         
-    }, [sankeyCategory]);
+    }, [sankeyCategory, props.scenarioId]);
 
     const handleCategoryChange = (event) => {
         setSankeyCategory(event.target.value)

@@ -25,7 +25,6 @@ export default function ModelResults(props) {
     */
     try {
       if (props.category !== "Dashboard" && props.category !== "Network Diagram" && props.category !== "Sankey") {
-        console.log("inside modelresults useeffect")
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
@@ -35,7 +34,6 @@ export default function ModelResults(props) {
           tempColumnNodesMapping.push(columnNode)
           tempColumnNodes[columnNode] = true
         }
-        console.log(tempColumnNodes)
         let i = 0
         for (let each of scenario.results.data[props.category].slice(1)) {
           let rowNode = `${i}::${each[0]}`
@@ -43,7 +41,6 @@ export default function ModelResults(props) {
           tempRowNodes[rowNode] = true
           i+=1
         }
-        console.log(tempRowNodes)
         setColumnNodes(tempColumnNodes)
         setRowNodes(tempRowNodes)
         setFilteredColumnNodes(tempColumnNodesMapping)
@@ -142,7 +139,7 @@ const handleRowFilter = (row) => {
       if (props.category === "Sankey") {
         let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"], "v_F_Sourced": props.scenario.results.data["v_F_Sourced_dict"]}
         return (
-            <SankeyPlot data={sankeyData} scenarioStates={props.scenarioStates} scenarioId={scenario.id}/>
+            <SankeyPlot data={sankeyData} appState={props.appState} scenarioId={scenario.id}/>
         )
       }
       /*

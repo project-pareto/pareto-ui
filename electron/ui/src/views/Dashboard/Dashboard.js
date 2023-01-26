@@ -160,7 +160,7 @@ export default function Dashboard(props) {
       <Grid item xs={12}>
       {(scenario && props.section===0) ? <DataInput handleUpdateExcel={props.handleUpdateExcel} category={props.category} scenario={scenario} edited={inputDataEdited} handleEditInput={setInputDataEdited}></DataInput> : null}
       {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario} updateScenario={props.updateScenario}></Optimization> : null}
-      {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario} handleSetSection={props.handleSetSection} scenarioStates={props.scenarioStates}></ModelResults> : null}
+      {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario} handleSetSection={props.handleSetSection} appState={props.appState}></ModelResults> : null}
       </Grid>
     </Grid>
     <Bottombar 
