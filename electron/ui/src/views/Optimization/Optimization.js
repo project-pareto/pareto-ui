@@ -105,11 +105,11 @@ export default function Optimization(props) {
 
   return ( 
     <Grid container spacing={2} style={styles.gridContainer}>
-      <Grid item xs={3}>
+      <Grid item xs={2.5}>
 
       </Grid>
 
-      <Grid item xs={6}>
+      <Grid item xs={7}>
       <Box style={{backgroundColor:'white'}} sx={styles.optimizationSettings}>
         <Grid container>
           <Grid item xs={12} style={{backgroundColor:'#6094bc', color:"white", fontWeight:"bold"}} >
@@ -268,7 +268,7 @@ export default function Optimization(props) {
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Model Build Units</p>
+              <p>Model Build Units of Measure</p>
               <Tooltip title={descriptions.units} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
             </Box>
             </Collapse>
@@ -316,7 +316,7 @@ export default function Optimization(props) {
         </Grid>
       </Box>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={2.5}>
 
       </Grid>
     </Grid>
