@@ -157,9 +157,9 @@ class ScenarioHandler:
                     "pipelineCostCalculation": "distance_based", 
                     "waterQuality": "false", 
                     "solver": "cbc",
-                    "build_units": "user_units",
+                    "build_units": "scaled_units",
                     "optimalityGap": 0,
-                    "scale_model": True
+                    "scale_model": False
                 }, 
             "results": {"status": "none", "data": {}}
             }
