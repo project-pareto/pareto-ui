@@ -19,8 +19,12 @@ export default function KPIDashboard(props) {
                 if(index > 0) {
                     for (var ind in item){
                         var value = item[ind]
+                        if(value === "") value = 0
                         var key = tempKeys[ind]
                         if (value) {
+                            tempData[key].x.push(parseInt(time.substring(1)))
+                            tempData[key].y.push(value)
+                        }else if (value === 0){
                             tempData[key].x.push(parseInt(time.substring(1)))
                             tempData[key].y.push(value)
                         }
