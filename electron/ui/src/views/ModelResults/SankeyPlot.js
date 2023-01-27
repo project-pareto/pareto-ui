@@ -185,7 +185,6 @@ export default function SankeyPlot(props) {
                 >
                 <MenuItem key={0} value={"v_F_Piped"}>Piped</MenuItem>
                 <MenuItem key={1} value={"v_F_Trucked"}>Trucked</MenuItem>
-                <MenuItem key={2} value={"v_F_Sourced"}>Sourced</MenuItem>
                 </Select>
             </FormControl>
         </Box>

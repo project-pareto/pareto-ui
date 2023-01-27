@@ -155,7 +155,7 @@ const handleRowFilter = (row) => {
         if category is sankey, return sankey plot
       */
       if (props.category === "Sankey") {
-        let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"], "v_F_Sourced": props.scenario.results.data["v_F_Sourced_dict"]}
+        let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"]}
         return (
             <SankeyPlot data={sankeyData} appState={props.appState} scenarioId={props.scenario.id}/>
         )
