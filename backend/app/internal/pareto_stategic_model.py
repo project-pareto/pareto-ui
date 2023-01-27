@@ -53,13 +53,17 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
     results = {"data": {}, "status": "Solving model"}
     scenario["results"] = results
     scenario_handler.update_scenario(scenario)
-
+    try:
+        optimality_gap = int(modelParameters["optimalityGap"])/100
+    except:
+        optimality_gap = 0
+    _log.info(f'optimality gap is {optimality_gap}')
     options = {
         "deactivate_slacks": True,
         "scale_model": modelParameters["scale_model"],
         "scaling_factor": 1000,
         "running_time": modelParameters["runtime"],
-        "gap": (modelParameters["optimalityGap"]/100),
+        "gap": optimality_gap,
         "solver": modelParameters["solver"]
     }
 
@@ -99,10 +103,9 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters):
         results_dict = run_strategic_model(input_file, output_file, id, modelParameters)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
-        # results = {"data": results_dict, "status": "complete"}
         results = scenario["results"]
         results['data'] = results_dict
-        results['status'] = 'complete'
+        results['status'] = 'Optimized'
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
     except Exception as e:

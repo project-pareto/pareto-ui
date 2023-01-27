@@ -237,7 +237,7 @@ const handleRowFilter = (row) => {
       if a scenario has been optimized, show outputs
       otherwise, display the status of the optimization
     */}
-    {props.scenario.results.status === "complete" && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
+    {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
       {terminationCondition === "unsure" && showDisclaimer()}
       <Box sx={props.category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
@@ -256,7 +256,7 @@ const handleRowFilter = (row) => {
           <p>Error: <b>{props.scenario.results.error}</b></p>
         </Box> 
         : 
-        props.scenario.results.status === "complete" ?
+        props.scenario.results.status.includes("Optimized") ?
         <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
           <h2>Unoptimal termination</h2>
           <p>Termination condition: <b>{props.scenario.results.terminationCondition}</b></p>

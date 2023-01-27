@@ -75,7 +75,7 @@ export default function Dashboard(props) {
           console.log('run model successful: ')
           console.log(data)
           props.updateScenario(data)
-          props.handleSetSection(2)
+          props.updateAppState({action:'section',section:2},scenario.id)
           props.addTask(scenario.id)
         }
         else if(responseCode === 500) {
@@ -114,7 +114,7 @@ export default function Dashboard(props) {
         resetScenarioData={props.resetScenarioData}
       >
       </ProcessToolbar>
-      {(props.section === 0 || (props.section === 2 && scenario.results.status === "complete")) && 
+      {(props.section === 0 || (props.section === 2 && scenario.results.status.includes("Optimized"))) && 
         <Sidebar 
           handleSetCategory={props.handleSetCategory} 
           scenario={scenario} 
@@ -128,7 +128,7 @@ export default function Dashboard(props) {
         </Sidebar>
       }
       
-    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section === 2 && scenario.results.status !== "complete")) ? styles.shiftTextRight : {}}>
+    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section === 2 && !scenario.results.status.includes("Optimized"))) ? styles.shiftTextRight : {}}>
       <Grid item xs={4} ></Grid>
       <PopupModal
         input
@@ -147,7 +147,7 @@ export default function Dashboard(props) {
         <b id='scenarioTitle' >
         {(scenario && props.section===0) && 
         <p>{scenario.name}
-        <IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}} disabled={['complete','none','failure'].includes(scenario.results.status) ? false : true}>
+        <IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}} disabled={['Optimized','Draft','failure', 'Not Optimized'].includes(scenario.results.status) ? false : true}>
           <EditIcon fontSize='inherit'/>
         </IconButton>
         </p>

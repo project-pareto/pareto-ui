@@ -21,8 +21,8 @@ _log = logging.getLogger(__name__)
 class ScenarioHandler:
     """Manage the saved scenarios."""
 
-    SCENARIO_DB_FILE = "scenarios.json"
-    VERSION = 3
+    VERSION = 4
+    SCENARIO_DB_FILE = f"scenarios{VERSION}.json"
     LOCKED = False
 
     def __init__(self, **kwargs) -> None:
@@ -34,11 +34,11 @@ class ScenarioHandler:
         self.next_id = 0
         self.background_tasks = []
         self.data_directory_path = self.app_settings.data_basedir
-        self.scenarios_path = os.path.join(self.data_directory_path, self.SCENARIO_DB_FILE)
-        self.excelsheets_path = self.data_directory_path / "excelsheets"
-        self.outputs_path = self.data_directory_path / "outputs"
-        self.input_diagrams_path = self.data_directory_path / "input_diagrams"
-        self.output_diagrams_path = self.data_directory_path / "output_diagrams"
+        self.scenarios_path = self.data_directory_path / self.SCENARIO_DB_FILE
+        self.excelsheets_path = self.data_directory_path / "excelsheets" / f"v{self.VERSION}"
+        self.outputs_path = self.data_directory_path / "outputs" / f"v{self.VERSION}"
+        self.input_diagrams_path = self.data_directory_path / "input_diagrams" / f"v{self.VERSION}"
+        self.output_diagrams_path = self.data_directory_path / "output_diagrams" / f"v{self.VERSION}"
 
         _log.info(f"app directory: {os.path.dirname(os.path.abspath(__file__))}")
         _log.info(f"currently operating in directory: {os.getcwd()}")
@@ -161,7 +161,7 @@ class ScenarioHandler:
                     "optimalityGap": 5,
                     "scale_model": False
                 }, 
-            "results": {"status": "none", "data": {}}
+            "results": {"status": "Draft", "data": {}}
             }
 
         # check if db is in use. if so, wait til its done being used

@@ -20,7 +20,6 @@ function App() {
   
   const [ scenarioData, setScenarioData ] = useState(null);
   const [ scenarios, setScenarios ] = useState({}); 
-  const [ scenarioStates, setScenarioStates ] = useState({})
   const [ appState, setAppState ] = useState(null)
   const [ section, setSection ] = useState(0)
   const [ category, setCategory ] = useState(null)
@@ -59,8 +58,8 @@ function App() {
           for (var key in data.data){
             let scenario = {...data.data[key]}
             tempScenarios[key] = scenario
-            if (!['complete','none','failure'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
-              scenario.results.status = 'none'
+            if (!['Optimized','Draft','failure', 'Not Optimized', 'complete', 'none'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
+              scenario.results.status = 'Draft'
               updateScenario({'updatedScenario': {...scenario}})
               .then(response => response.json())
               .then((data) => {
@@ -103,22 +102,16 @@ useEffect(()=> {
       for (var i =0; i < backgroundTasks.length; i++) {
         let task = backgroundTasks[i]
         let tempScenario = tempScenarios[task]
-        if(tempScenario.results.status !== scenarios[task].results.status) {
-          updated=true
-          if(tempScenario.results.status === "complete" || tempScenario.results.status === "failure") completed = true
-        }
+        if(tempScenario.results.status !== scenarios[task].results.status) updated=true
+        if(tempScenario.results.status === "Optimized" || tempScenario.results.status === "failure") completed = true
       }
-      if(updated) {
-        // console.log('updated')
-        if(completed) {
-          // console.log('completed')
+      if (completed) {
           /*
             set scenario data, section and scenarios; finish checking
           */
-         setLastCompletedScenario(backgroundTasks[0])
-         handleCompletedOptimization(tempScenarios, backgroundTasks[0])
-        } else {
-          // console.log('not completed')
+            setLastCompletedScenario(backgroundTasks[0])
+            handleCompletedOptimization(tempScenarios, backgroundTasks[0])
+      } else if (updated) {
           /*
             set scenarios and scenario data; keep checking
           */
@@ -131,7 +124,6 @@ useEffect(()=> {
                 setCheckModelResults(checkModelResults => checkModelResults+1)
               }, TIME_BETWEEN_CALLS)
             }
-        }
       } else {
         if(checkModelResults < 1000) {
           setTimeout(function() {
@@ -166,6 +158,7 @@ useEffect(()=> {
   const goToModelResults = () => {
     setShowCompletedOptimization(false)
     handleScenarioSelection(lastCompletedScenario)
+
   }
 
   const navigateToScenarioList = () => {
@@ -206,9 +199,12 @@ useEffect(()=> {
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
+    if (updatedScenario.results.status==='Optimized') {
+      updatedScenario.results.status = "Not Optimized"
+    }
     const temp = {...scenarios}
     temp[scenarioIndex] = {...updatedScenario}
-    console.log('updating scenario: ',updateScenario)
+    console.log('updating scenario: ',updatedScenario)
     setScenarios(temp)
     setScenarioData({...updatedScenario})
     // console.log('new scenario: ')
@@ -313,7 +309,7 @@ useEffect(()=> {
       let tempSection
       let tempCategory
       if (appState) {
-        if (scenarios[index].results.status === "none" && appState.section === 2) {
+        if (scenarios[index].results.status === "Draft" && appState.section === 2) {
           tempSection = 0
           tempCategory = appState.category
         } else {
@@ -322,7 +318,7 @@ useEffect(()=> {
         }
       } else {
         console.log('in else')
-        if(["Initializing", "Solving model", "Generating output", "complete", "failure"].includes(scenarios[index].results.status)) {
+        if(["Initializing", "Solving model", "Generating output", "Optimized", "failure"].includes(scenarios[index].results.status)) {
           tempSection = 2
         } else {
           tempSection = 0
@@ -409,6 +405,7 @@ useEffect(()=> {
             resetScenarioData={resetScenarioData}
             addTask={addTask}
             appState={appState}
+            updateAppState={updateAppState}
             />} 
         />
 

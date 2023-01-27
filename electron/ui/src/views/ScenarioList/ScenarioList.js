@@ -170,17 +170,17 @@ export default function ScenarioList(props) {
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
                 <TableCell sx={styles.bodyCell}>
                     <Tooltip title="Edit Scenario Name" enterDelay={500}>
-                        <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={['Optimized','Draft','failure', 'Not Optimized'].includes(value.results.status) ? false : true}>
                             <EditIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Copy Scenario" enterDelay={500}>
-                        <IconButton onClick={() => handleCopyScenario(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleCopyScenario(key)} disabled={['Optimized','Draft','failure', 'Not Optimized'].includes(value.results.status) ? false : true}>
                             <ContentCopyIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete Scenario" enterDelay={500}>
-                        <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={['Optimized','Draft','failure', 'Not Optimized'].includes(value.results.status) ? false : true}>
                             <DeleteIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>

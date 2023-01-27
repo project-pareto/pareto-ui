@@ -42,7 +42,7 @@ const handleDoubleClick = (ind, index) => {
     ind: row number, starting at 0, excluding header row
     index: column number, starting at 0
   */
-  if (['complete','none','failure'].includes(props.scenario.results.status)) {
+  if (['Optimized','Draft','failure', 'Not Optimized'].includes(props.scenario.results.status)) {
     if(index === 0) //when double clicking column index, set all numerical values in that row to 0
     { 
       let tempScenario = {...props.scenario}
