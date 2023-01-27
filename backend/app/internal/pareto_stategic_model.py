@@ -59,7 +59,7 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
         "scale_model": modelParameters["scale_model"],
         "scaling_factor": 1000,
         "running_time": modelParameters["runtime"],
-        "gap": modelParameters["optimalityGap"],
+        "gap": (modelParameters["optimalityGap"]/100),
         "solver": modelParameters["solver"]
     }
 
