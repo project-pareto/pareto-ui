@@ -74,7 +74,7 @@ export default function KPIDashboard(props) {
       }
 
   return ( 
-    <Box sx={{ marginLeft: 10, marginRight: 10 }} >
+    <Box>
     {kpiData && 
     <Grid container spacing={2} sx={{marginTop:2}}>
 

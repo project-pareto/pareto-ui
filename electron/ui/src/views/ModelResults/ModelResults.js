@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Box, Grid, LinearProgress } from '@mui/material';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
-import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import TerminationConditions from '../../assets/TerminationConditions.json'
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
@@ -20,6 +20,20 @@ export default function ModelResults(props) {
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
+  const styles ={
+    resultsBox: {
+      backgroundColor:'white', 
+      m:3, 
+      padding:2, 
+      boxShadow:3, 
+      overflow:"scroll"
+    },
+    kpiDashboardBox: {
+      marginLeft: 10, 
+      marginRight: 10
+    }
+  }
+
   useEffect(()=>{
     /*
       when category is changed, reset the nodes for filtering (columns and rows of current table)
@@ -72,18 +86,6 @@ export default function ModelResults(props) {
     
     
   }, [props.category, props.scenario, props.scenario.data_input.df_parameters]);
-
-   const styles ={
-    firstCol: {
-      backgroundColor: "#f4f4f4", 
-      border:"1px solid #ddd",
-      position: 'sticky',
-      left: 0,
-    },
-    other: {
-      border:"1px solid #ddd"
-    }
-  }
 
   const handleColumnFilter = (col) => {
     var tempCols
@@ -173,9 +175,7 @@ const handleRowFilter = (row) => {
       */
         else if(props.category === "Network Diagram"){
           return (
-            <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
               <NetworkDiagram scenario={props.scenario} type={"output"}></NetworkDiagram>
-            </Box>
           )
         }
       /*
@@ -183,7 +183,6 @@ const handleRowFilter = (row) => {
       */
       else {
         return (
-          <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
           <Grid container>
             <Grid item xs={11.5}>
               <DataTable 
@@ -220,12 +219,15 @@ const handleRowFilter = (row) => {
             </Box>
           </Grid>
           </Grid>
-          </Box>
         )
       }
     } catch (e) {
       console.log('unable to render table for this category: ',e)
     }
+  }
+
+  const showDisclaimer = () => {
+    return (<h3 style={{color: 'red'}}>*{TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.</h3>)
   }
 
 
@@ -235,8 +237,13 @@ const handleRowFilter = (row) => {
       if a scenario has been optimized, show outputs
       otherwise, display the status of the optimization
     */}
-    {props.scenario.results.status === "complete" && terminationCondition === "good" ? 
-      renderOutputCategory()
+    {props.scenario.results.status === "complete" && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
+    <Box>
+      {terminationCondition === "unsure" && showDisclaimer()}
+      <Box sx={props.category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
+        {renderOutputCategory()}
+      </Box>
+    </Box>
     : 
     <Grid container alignItems="center" justifyContent="center">
       <Grid item xs={3}>

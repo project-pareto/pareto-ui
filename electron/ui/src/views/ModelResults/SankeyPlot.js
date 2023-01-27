@@ -174,7 +174,6 @@ export default function SankeyPlot(props) {
     }
 
   return ( 
-    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: 'scroll'}}>
     <Grid container direction="row">
         <Grid item sm={2}>
         <Box display="flex" justifyContent="flex-start">
@@ -248,7 +247,6 @@ export default function SankeyPlot(props) {
         </Box>
         </Grid>
     </Grid>
-    </Box>
   );
 
 }
