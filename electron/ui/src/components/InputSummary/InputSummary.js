@@ -16,10 +16,10 @@ import Typography from '@mui/material/Typography';
 export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
     const [ sumValues, setSumValues ] = useState([
-        {statistic: 'Total Completions Demand', value: 0, units: 'volume/time'},
-        {statistic: 'Total Produced Water', value: 0, units: 'volume'},
-        {statistic: 'Total Starting Disposal Capacity', value: 0, units: 'volume/time'},
-        {statistic: 'Total Starting Treatment Capacity', value: 0, units: 'volume/time'},
+        {statistic: 'Total Completions Demand', value: 0, units: 'bbl'},
+        {statistic: 'Total Produced Water', value: 0, units: 'bbl'},
+        {statistic: 'Total Starting Disposal Capacity', value: 0, units: 'bbl'},
+        {statistic: 'Total Starting Treatment Capacity', value: 0, units: 'bbl'},
     ]) 
     const [ timeSumValues, setTimeSumValues ] = useState({
         'Completions Demand': [],
@@ -46,20 +46,20 @@ export default function InputSummary(props) {
             calculate totals for each time segment as well
         */
 
-        let totDisposalCapacity = 0
+        let disposalCapacity = 0
         for (let each in props.initialDisposalCapacity) {
             for (let value of props.initialDisposalCapacity[each]) {
                 if (!isNaN(value)) {
-                    totDisposalCapacity+=Number(value)
+                    disposalCapacity+=Number(value)
                 }
             }
         }
 
-        let totTreatmentCapacity = 0
+        let treatmentCapacity = 0
         for (let each in props.initialTreatmentCapacity) {
             for (let value of props.initialTreatmentCapacity[each]) {
                 if (!isNaN(value)) {
-                    totTreatmentCapacity+=Number(value)
+                    treatmentCapacity+=Number(value)
                 }
             }
         }
@@ -67,7 +67,11 @@ export default function InputSummary(props) {
         let totCompletionsDemand = 0
         let completionsDemandByTime = []
         let disposalCapacityByTime = []
-        let treatmentCapacityByTime = []        
+        let treatmentCapacityByTime = []      
+        /*
+            start weeks at -1 because the first record is the index, so after incrementing the index we are at 0
+        */  
+        let totWeeks = -1
         for (let each in props.completionsDemand) {
             let nextTime = 0
             for (let value of props.completionsDemand[each]) {
@@ -77,8 +81,9 @@ export default function InputSummary(props) {
                 }
             }
             completionsDemandByTime.push(nextTime)
-            disposalCapacityByTime.push(totDisposalCapacity)
-            treatmentCapacityByTime.push(totTreatmentCapacity)
+            disposalCapacityByTime.push(disposalCapacity)
+            treatmentCapacityByTime.push(treatmentCapacity)
+            totWeeks += 1
         }
 
         let totProducedWater = 0
@@ -112,10 +117,10 @@ export default function InputSummary(props) {
         }
 
         let tempSumValues = [
-            {statistic: 'Total Completions Demand', value: totCompletionsDemand, units: 'volume/time'},
-            {statistic: 'Total Produced Water', value: totProducedWater, units: 'volume'},
-            {statistic: 'Total Starting Disposal Capacity', value: totDisposalCapacity, units: 'volume/time'},
-            {statistic: 'Total Starting Treatment Capacity', value: totTreatmentCapacity, units: 'volume/time'},
+            {statistic: 'Total Completions Demand', value: totCompletionsDemand, units: 'bbl'},
+            {statistic: 'Total Produced Water', value: totProducedWater, units: 'bbl'},
+            {statistic: 'Total Starting Disposal Capacity', value: (disposalCapacity * totWeeks), units: 'bbl'},
+            {statistic: 'Total Starting Treatment Capacity', value: (treatmentCapacity * totWeeks), units: 'bbl'},
         ]
         setSumValues(tempSumValues)
 
