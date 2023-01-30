@@ -132,7 +132,8 @@ describe('scenario testing', () => {
 
         //run optimization with default settings
         cy.findByRole('button', {name: /continue to optimization/i}).click()
-        cy.findByRole('button', {name: /optimize/i}).click()
+        // cy.findByRole('button', {name: /optimize/i}).click()
+        cy.findAllByRole('button', {name: /optimize/i}).eq(0).click()
 
         /*
             wait for optimization to finish. times out after 4 minutes
