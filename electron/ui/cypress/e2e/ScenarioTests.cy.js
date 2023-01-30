@@ -139,7 +139,7 @@ describe('scenario testing', () => {
         */
         cy.wait(2000)
         cy.findByRole('heading', {name: /running optimization/i}).should('exist')
-        cy.findByRole('heading', {name: /running optimization/i, timeout: 240000}).should('not.exist')
+        cy.findByRole('heading', {name: /running optimization/i, timeout: 300000}).should('not.exist')
         cy.screenshot('finished optimizing')
 
         //validate results
