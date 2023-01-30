@@ -173,6 +173,7 @@ export default function Dashboard(props) {
           category={props.category} 
           scenario={scenario} 
           updateScenario={props.updateScenario}
+          handleRunModel={handleRunModel}
         />
       }
       {(scenario && props.section===2) && 

@@ -45,7 +45,7 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
             "pipeline_capacity": PipelineCapacity.input,
             "node_capacity": True,
             "water_quality": WaterQuality[modelParameters["waterQuality"]],
-            "build_units": BuildUnits[modelParameters["build_units"]]
+            # "build_units": BuildUnits[modelParameters["build_units"]]
         },
     )
     

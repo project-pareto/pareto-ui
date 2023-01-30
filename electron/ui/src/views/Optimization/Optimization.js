@@ -17,6 +17,8 @@ import Tooltip from '@mui/material/Tooltip';
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import Button from '@mui/material/Button';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 
 export default function Optimization(props) {
@@ -69,8 +71,7 @@ export default function Optimization(props) {
       optimizationSettings: 
       {
         m:3, 
-        boxShadow:3,
-        paddingBottom: "50px" 
+        boxShadow:3
       },
       gridContainer: {
         marginBottom: "100px"
@@ -83,7 +84,14 @@ export default function Optimization(props) {
         // "&:hover": {
         //   backgroundColor: "black"
         // },
-      }
+      },
+      filled: {
+        backgroundColor: '#01678f',
+        '&:hover': {
+            backgroundColor: '#01678f',
+            opacity: 0.9
+        },
+      },
   }
 
    useEffect(()=>{
@@ -265,7 +273,7 @@ export default function Optimization(props) {
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           </Grid>
           
-          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
+          {/* <Grid item xs={columnWidths[0]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Model Build Units of Measure</p>
@@ -287,7 +295,7 @@ export default function Optimization(props) {
             </Select>
             </FormControl>
             </Collapse>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
@@ -312,12 +320,18 @@ export default function Optimization(props) {
             </FormControl>
             </Collapse>
           </Grid>
-
         </Grid>
+
+        <Grid item xs={12} style={styles.gridItems}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'40px', paddingTop: '25px',paddingBottom: '25px'}}>
+            <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disabled} endIcon={<ArrowForwardIcon />}> Optimize </Button>
+            </Box>
+        </Grid>
+
       </Box>
       </Grid>
+      
       <Grid item xs={2.5}>
-
       </Grid>
     </Grid>
   );
