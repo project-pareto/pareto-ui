@@ -11,6 +11,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 import idaes.logger as idaeslog
+from pareto.utilities.get_data import get_display_units
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
@@ -122,6 +123,13 @@ class ScenarioHandler:
 
         # read in data from uploaded excel sheet
         [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
+        
+        try:
+            display_units = get_display_units(parameter_list, df_parameters["Units"])
+        except Exception as e:
+            _log.error(f'unable to get units: {e}')
+            display_units = {}
+
         del frontend_parameters['Units']
 
         # convert tuple keys into dictionary values - necessary for javascript interpretation
@@ -149,7 +157,7 @@ class ScenarioHandler:
             "name": filename, 
             "id": self.next_id, 
             "date": date,
-            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, 
+            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units}, 
             "optimization": 
                 {
                     "objective":"cost", 

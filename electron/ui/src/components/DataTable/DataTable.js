@@ -141,7 +141,10 @@ const handleKeyDown = (e) => {
     try {
         return (
             <TableContainer>
-            <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
+            <h3>
+              {CategoryNames[props.category] ? CategoryNames[props.category] : ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}
+              {props.scenario.data_input.display_units && props.scenario.data_input.display_units[props.category] && ` (${props.scenario.data_input.display_units[props.category]})`}
+            </h3>
             <TableContainer sx={{overflowX:'auto'}}>
             <Table style={{border:"1px solid #ddd"}} size='small'>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
