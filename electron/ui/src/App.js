@@ -199,7 +199,9 @@ useEffect(()=> {
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
+    console.log('inside handle scenario update')
     if (updatedScenario.results.status==='Optimized') {
+      console.log('changing status to not optimized')
       updatedScenario.results.status = "Not Optimized"
     }
     const temp = {...scenarios}
@@ -272,10 +274,15 @@ useEffect(()=> {
     updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
     .then(response => response.json())
     .then((data)=>{
-      // console.log('return from update excel: '+data)
+      console.log('return from update excel: ')
+      console.log(data)
+      if (data.results.status === 'Optimized') {
+        data.results.status = "Not Optimized"
+        handleScenarioUpdate(data)
+      }
     })
     .catch(e => {
-      console.error('unable to check for tasks: ',e)
+      console.error('unable to update excel: ',e)
     })
   }
 
