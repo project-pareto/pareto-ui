@@ -17,7 +17,7 @@ export default function Dashboard(props) {
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
     const fileTypes = ["xlsx"];
-    const sampleFileUrl = "https://drive.google.com/uc?export=download&id=1dmcdh4sKmB73kqCkHS279pxomFGWbexP"
+    const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.6_rel/pareto/case_studies/strategic_small_case_study.xlsx"
 
 
   useEffect(()=>{
