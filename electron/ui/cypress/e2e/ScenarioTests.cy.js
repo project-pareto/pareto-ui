@@ -44,7 +44,7 @@ describe('scenario testing', () => {
         cy.findByRole('button', {name: /\+ create new scenario/i}).click()
         cy.screenshot('clicked create new scenario2')
         cy.findByRole('textbox').type('cypress test')
-        cy.get('input[type=file]').selectFile('./cypress/downloads/small_strategic_case_study.xlsx', {
+        cy.get('input[type=file]').selectFile('./cypress/downloads/strategic_small_case_study.xlsx', {
             action: 'drag-drop',
             force: true
           })
