@@ -50,7 +50,7 @@ export default function Sidebar(props) {
     handleCloseSaveModal()
     props.setInputDataEdited(false)
     props.handleSetCategory(key)
-    props.resetScenarioData()
+    props.syncScenarioData()
   }
 
   const handleClick = (key) => {

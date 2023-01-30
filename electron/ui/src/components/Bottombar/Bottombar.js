@@ -60,7 +60,7 @@ export default function Bottombar(props) {
         handleCloseSaveModal()
         props.setInputDataEdited(false)
         props.handleSelection(key)
-        props.resetScenarioData()
+        props.syncScenarioData()
       }
     
       const handleClick = (key) => {

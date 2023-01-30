@@ -111,7 +111,7 @@ export default function Dashboard(props) {
         inputDataEdited={inputDataEdited}
         handleUpdateExcel={props.handleUpdateExcel}
         setInputDataEdited={setInputDataEdited}
-        resetScenarioData={props.resetScenarioData}
+        syncScenarioData={props.syncScenarioData}
       >
       </ProcessToolbar>
       {(props.section === 0 || (props.section === 2 && scenario.results.status.includes("Optimized"))) && 
@@ -123,7 +123,7 @@ export default function Dashboard(props) {
           inputDataEdited={inputDataEdited}
           handleUpdateExcel={props.handleUpdateExcel}
           setInputDataEdited={setInputDataEdited}
-          resetScenarioData={props.resetScenarioData}
+          syncScenarioData={props.syncScenarioData}
           >
         </Sidebar>
       }
@@ -158,9 +158,32 @@ export default function Dashboard(props) {
       <Grid item xs={4}>
       </Grid>
       <Grid item xs={12}>
-      {(scenario && props.section===0) ? <DataInput handleUpdateExcel={props.handleUpdateExcel} category={props.category} scenario={scenario} edited={inputDataEdited} handleEditInput={setInputDataEdited}></DataInput> : null}
-      {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario} updateScenario={props.updateScenario}></Optimization> : null}
-      {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario} handleSetSection={props.handleSetSection} appState={props.appState}></ModelResults> : null}
+      {(scenario && props.section===0) &&
+        <DataInput 
+          handleUpdateExcel={props.handleUpdateExcel} 
+          category={props.category} 
+          scenario={scenario} 
+          edited={inputDataEdited} 
+          handleEditInput={setInputDataEdited}
+          syncScenarioData={props.syncScenarioData}
+        />
+      }
+      {(scenario && props.section===1) && 
+        <Optimization 
+          category={props.category} 
+          scenario={scenario} 
+          updateScenario={props.updateScenario}
+        />
+      }
+      {(scenario && props.section===2) && 
+        <ModelResults 
+          category={props.category} 
+          scenario={scenario} 
+          handleSetSection={props.handleSetSection} 
+          appState={props.appState}
+          syncScenarioData={props.syncScenarioData}
+        />
+      }
       </Grid>
     </Grid>
     <Bottombar 
@@ -172,7 +195,7 @@ export default function Dashboard(props) {
       handleUpdateExcel={props.handleUpdateExcel}
       inputDataEdited={inputDataEdited}
       setInputDataEdited={setInputDataEdited}
-      resetScenarioData={props.resetScenarioData}
+      syncScenarioData={props.syncScenarioData}
       handleRunModel={handleRunModel}
       />
     </>

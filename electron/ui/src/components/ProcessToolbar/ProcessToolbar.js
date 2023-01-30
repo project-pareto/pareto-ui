@@ -28,7 +28,7 @@ export default function ProcessToolbar(props) {
     handleCloseSaveModal()
     props.setInputDataEdited(false)
     props.handleSelection(key)
-    props.resetScenarioData()
+    props.syncScenarioData()
   }
 
   const handleClick = (key) => {

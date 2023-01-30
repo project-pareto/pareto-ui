@@ -175,7 +175,7 @@ const handleRowFilter = (row) => {
       */
         else if(props.category === "Network Diagram"){
           return (
-              <NetworkDiagram scenario={props.scenario} type={"output"}></NetworkDiagram>
+              <NetworkDiagram scenario={props.scenario} type={"output"} syncScenarioData={props.syncScenarioData}></NetworkDiagram>
           )
         }
       /*

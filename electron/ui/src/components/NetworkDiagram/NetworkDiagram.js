@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import { FileUploader } from "react-drag-drop-files";
-import { fetchDiagram, uploadDiagarm, deleteDiagram } from '../../services/app.service';
+import { fetchDiagram, uploadDiagram, deleteDiagram } from '../../services/app.service';
 
 export default function NetworkDiagram(props) {
     const [ file, setFile ] = useState(null)
@@ -82,13 +82,13 @@ export default function NetworkDiagram(props) {
         formData.append('file', file, name);
 
 
-        uploadDiagarm(formData, props.type, props.scenario.id)
+        uploadDiagram(formData, props.type, props.scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
             .then((data)=>{
                 console.log('diagram upload successful: ',data)
-                fetchNetworkDiagram()
+                props.syncScenarioData()
             }).catch((err)=>{
                 console.error("error on diagram upload: ",err)
             })

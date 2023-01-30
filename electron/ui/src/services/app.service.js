@@ -36,7 +36,7 @@ export const fetchDiagram = (type, id) => {
     });
 }
 
-export const uploadDiagarm = (data, type, id) => {
+export const uploadDiagram = (data, type, id) => {
     return fetch('http://localhost:8001/upload_diagram/'+type+'/'+id, {
         method: 'POST', 
         mode: 'cors',

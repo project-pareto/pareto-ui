@@ -289,7 +289,7 @@ useEffect(()=> {
   /*
     fetch scenarios and update frontend data
   */
-  const resetScenarioData = () => {
+  const syncScenarioData = () => {
     fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
@@ -409,7 +409,7 @@ useEffect(()=> {
             handleSetSection={handleSetSection} 
             backgroundTasks={backgroundTasks}
             navigateHome={navigateToScenarioList}
-            resetScenarioData={resetScenarioData}
+            syncScenarioData={syncScenarioData}
             addTask={addTask}
             appState={appState}
             updateAppState={updateAppState}

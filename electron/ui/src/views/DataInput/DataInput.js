@@ -204,7 +204,7 @@ const handleRowFilter = (row) => {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <NetworkDiagram scenario={props.scenario} type={"input"}></NetworkDiagram>
+              <NetworkDiagram scenario={props.scenario} type={"input"} syncScenarioData={props.syncScenarioData}></NetworkDiagram>
             </Box>
           )
         }
