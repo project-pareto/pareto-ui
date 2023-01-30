@@ -365,13 +365,19 @@ class ScenarioHandler:
             self.LOCKED = True
 
             query = tinydb.Query()
-            el = self._db.search((query.version == self.VERSION))[-1]
-            next_id = el.doc_id+1
-            
+            # el = self._db.search((query.version == self.VERSION))[-1]
+            # next_id = el.doc_id+1
+            db_items = self._db.search((query.version == self.VERSION))
+            highest_id = 0
+            for each in db_items:
+                if each["id_"] > highest_id:
+                    highest_id = each["id_"]
+            next_id = highest_id + 1
             _log.info(f'setting next id: {next_id}')
             self.next_id = next_id
         except Exception as e:
             _log.info(f"no documents found; next id is 0")
+            _log.error(f"{e}")
 
         self.LOCKED = False
 
