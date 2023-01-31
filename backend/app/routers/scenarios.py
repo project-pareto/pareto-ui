@@ -116,16 +116,8 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
                 _log.error(f'unable to find {param}, using {defaultParams[param]}')
                 modelParameters[param]=defaultParams[param]
 
-        # modelParameters = {
-        #     "objective": data['scenario']['optimization']['objective'],
-        #     "runtime": data['scenario']['optimization']['runtime'],
-        #     "pipelineCost": data['scenario']['optimization']['pipelineCostCalculation'],
-        #     "waterQuality": data['scenario']['optimization']['waterQuality'],
-        #     "solver": solver,
-        #     "build_units": build_units,
-        #     "optimalityGap": optimalityGap,
-        #     "scale_model": scale_model
-        # }
+        if modelParameters['solver']:
+            modelParameters['solver'] = eval(modelParameters['solver'])
 
         _log.info(f"modelParameters: {modelParameters}")
 

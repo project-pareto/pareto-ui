@@ -101,12 +101,14 @@ export default function Optimization(props) {
 
    const handleChange = (event) => {
      const name = event.target.name
-     if ( (name === "runtime" || name === "optimalityGap") && isNaN(event.target.value) ) {
+     const value = event.target.value
+     if ( (name === "runtime" || name === "optimalityGap") && isNaN(value) ) {
       console.log('tried entering nonnumerical characters for runtime or optimality gap')
      }
      else {
       const tempScenario = {...props.scenario}
-      tempScenario.optimization[name] = event.target.value
+      tempScenario.optimization[name] = value
+      // console.log(`setting ${name} = ${value}`)
       props.updateScenario(tempScenario)
      }
    }
@@ -255,8 +257,8 @@ export default function Optimization(props) {
               onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
-              <MenuItem key={1} value={"gurobi_direct"}>Gurobi (Commercial)</MenuItem>
+              <MenuItem key={0} value={"'cbc'"}>CBC (Free)</MenuItem>
+              <MenuItem key={1} value={"('gurobi_direct', 'gurobi')"}>Gurobi (Commercial)</MenuItem>
               {/* <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct</MenuItem> */}
             </Select>
             </FormControl>
