@@ -119,8 +119,8 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         if modelParameters['solver']:
             try:
                 modelParameters['solver'] = eval(modelParameters['solver'])
-            except:
-                _log.error(f'unable to evaluate solver: {e}')
+            except Exception as err:
+                _log.error(f'unable to evaluate solver: {err}')
 
         _log.info(f"modelParameters: {modelParameters}")
 
