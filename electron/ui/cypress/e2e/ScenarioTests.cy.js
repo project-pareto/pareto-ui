@@ -66,7 +66,8 @@ describe('scenario testing', () => {
             method: "POST",
             url: "http://localhost:8001/**",
         }).as("createScenario");
-        cy.findByRole('button', {name: /create scenario/i}).click()
+        // cy.findByRole('button', {name: /create scenario/i}).click()
+        cy.get('button[id="create-scenario-button"]').click()
         cy.wait("@createScenario");
         cy.screenshot(`${sc_count}_clicked create scenario`)
         sc_count+=1

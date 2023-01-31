@@ -183,7 +183,7 @@ export default function Dashboard(props) {
             {showWarning && <p style={{color:'red'}}>{warningMessage}</p>}
         </Grid>
         <Grid item xs={12}>
-            <Button style={styles.button} onClick={handleCreateScenario}>Create Scenario</Button>
+            <Button id="create-scenario-button" style={styles.button} onClick={handleCreateScenario}>Create Scenario</Button>
         </Grid>
         </Grid>
     </Modal>
