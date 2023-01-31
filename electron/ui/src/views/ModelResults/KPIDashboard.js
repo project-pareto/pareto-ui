@@ -156,6 +156,15 @@ export default function KPIDashboard(props) {
                             "Treatment", 
                             "Disposal", 
                             "Pipeline"],
+                        marker: {
+                                colors: [
+                                    'rgb(255, 127, 19)',
+                                    'rgb(148, 103, 189)',
+                                    'rgb(64, 159, 44)',
+                                    'rgb(214, 39, 40)',
+                                    // 'rgb(30, 119, 180)',
+                                ]
+                              },
                         textinfo: "percent",
                         // insidetextorientation: "radial"
                         }
@@ -199,6 +208,15 @@ export default function KPIDashboard(props) {
                             "Disposal", 
                             "Piping",
                             "Trucking"],
+                        marker: {
+                            colors: [
+                                'rgb(255, 127, 19)',
+                                'rgb(148, 103, 189)',
+                                'rgb(64, 159, 44)',
+                                'rgb(214, 39, 40)',
+                                'rgb(30, 119, 180)',
+                            ]
+                            },
                         textinfo: "percent",
                         // insidetextorientation: "radial"
                         }
