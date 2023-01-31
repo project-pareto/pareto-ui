@@ -28,8 +28,6 @@ describe('scenario testing', () => {
     })
 
     it('creates a new scenario by uploading excel sheet', () => {
-        cy.once('uncaught:exception', () => false);
-
         //load webpage
         cy.visit('/#/scenarios')
         cy.screenshot(`${sc_count}_loaded homepage`)
