@@ -213,6 +213,20 @@ class ScenarioHandler:
             if (os.path.isfile(original_output_path)):
                 shutil.copyfile(original_output_path, new_output_path)
 
+            # create copy of input diagram (if it exists)
+            input_diagramFileType = self.scenario_list[id][f'inputDiagramExtension']
+            original_input_diagram_path = f"{self.input_diagrams_path}/{id}.{input_diagramFileType}"
+            new_input_diagram_path = f"{self.input_diagrams_path}/{new_scenario_id}.{input_diagramFileType}"
+            if (os.path.isfile(original_input_diagram_path)):
+                shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+
+            # create copy of output diagram (if it exists)
+            output_diagramFileType = self.scenario_list[id][f'outputDiagramExtension']
+            original_output_diagram_path = f"{self.output_diagrams_path}/{id}.{output_diagramFileType}"
+            new_output_diagram_path = f"{self.output_diagrams_path}/{new_scenario_id}.{output_diagramFileType}"
+            if (os.path.isfile(original_output_diagram_path)):
+                shutil.copyfile(original_output_diagram_path, new_output_diagram_path)
+
             # add record in db for new scenario
             # check if db is in use. if so, wait til its done being used
             locked = self.LOCKED
