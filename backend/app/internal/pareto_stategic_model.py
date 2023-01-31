@@ -9,8 +9,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     solve_model,
     PipelineCost,
     PipelineCapacity,
-    WaterQuality,
-    BuildUnits
+    WaterQuality
 )
 from pyomo.opt import TerminationCondition
 from pareto.utilities.get_data import get_data
