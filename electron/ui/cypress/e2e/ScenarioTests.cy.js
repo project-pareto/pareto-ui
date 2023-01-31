@@ -86,6 +86,7 @@ describe('scenario testing', () => {
     it('copies existing scenario', () => {
         //load webpage
         cy.visit('/#/scenarios')
+        cy.wait(2000)
         cy.screenshot(`${sc_count}_loaded homepage`)
         sc_count+=1
 
@@ -112,7 +113,7 @@ describe('scenario testing', () => {
     it('deletes existing scenario', () => {
         //load webpage
         cy.visit('/#/scenarios')
-        cy.wait(1000)
+        cy.wait(2000)
         cy.screenshot(`${sc_count}_loaded homepage`)
         sc_count+=1
 
@@ -141,9 +142,10 @@ describe('scenario testing', () => {
     it('runs an optimization and validates model results', () => {
         //load webpage
         cy.visit('/#/scenarios')
+        cy.wait(2000)
         cy.screenshot(`${sc_count}_loaded homepage`)
         sc_count+=1
-        cy.wait(1000)
+        
 
         //load scnenario
         cy.contains(/cypress test/i).click()
