@@ -39,7 +39,7 @@ jobs:
 
       - name: Install correct branch of pareto
         working-directory: ../
-        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.4.0v2 && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
       - name: Install electron JS dependencies
         run: |
