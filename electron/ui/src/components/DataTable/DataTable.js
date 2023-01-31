@@ -211,7 +211,8 @@ const renderOutputTable = () => {
                   style={i === 0 ? styles.firstCol : styles.other}>
                     {(i === (value.length - 1)) ? 
                     cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : 
-                    cellValue ? cellValue.replace('v_F_','').replace('v_C_','Cost ')
+                    cellValue ? CategoryNames[cellValue] ? CategoryNames[cellValue] :
+                    cellValue.replace('v_F_','').replace('v_C_','Cost ').replace(/([A-Z])/g, ' $1').replace('Cap Ex', 'CapEx').trim()
                     : null
                   }
               </TableCell>

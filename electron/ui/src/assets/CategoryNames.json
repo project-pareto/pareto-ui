@@ -92,5 +92,12 @@
     "v_S_StorageCapacity_dict":"Slack Storage Capacity",
     "v_S_DisposalCapacity_dict":"Slack Disposal Capacity",
     "v_S_TreatmentCapacity_dict":"Slack reatment Capacity",
-    "v_S_ReuseCapacity_dict":"Slack Reuse Capacity"
+    "v_S_ReuseCapacity_dict":"Slack Reuse Capacity",
+
+    "v_Z": "Objective",
+    "v_R_TotalStorage": "Credit Total Storage",
+    "reuse_WaterKPI": "Produced Water Recycle Rate",
+    "disposal_WaterKPI": "Produced Water Disposal Rate",
+    "fresh_CompletionsDemandKPI": "Completions Demand Freshwater Rate",
+    "reuse_CompletionsDemandKPI": "Recycle Rate"
 }

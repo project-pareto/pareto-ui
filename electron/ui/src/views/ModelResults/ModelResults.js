@@ -1,6 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Box, Grid, LinearProgress } from '@mui/material';
+import { Box, Grid, LinearProgress } from '@mui/material';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
 import TerminationConditions from '../../assets/TerminationConditions.json'
