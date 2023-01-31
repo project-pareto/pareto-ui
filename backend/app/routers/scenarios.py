@@ -117,7 +117,10 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
                 modelParameters[param]=defaultParams[param]
 
         if modelParameters['solver']:
-            modelParameters['solver'] = eval(modelParameters['solver'])
+            try:
+                modelParameters['solver'] = eval(modelParameters['solver'])
+            except:
+                _log.error(f'unable to evaluate solver: {e}')
 
         _log.info(f"modelParameters: {modelParameters}")
 
