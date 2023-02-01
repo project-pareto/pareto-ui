@@ -45,8 +45,8 @@ async def update(request: Request):
 
     return {"data": updated_scenario}
 
-@router.post("/upload")
-async def upload(file: UploadFile = File(...)):
+@router.post("/upload/{scenario_name}")
+async def upload(scenario_name: str, file: UploadFile = File(...)):
     """Upload an excel sheet and create corresponding scenario.
 
     Args:
@@ -57,13 +57,12 @@ async def upload(file: UploadFile = File(...)):
     """
     new_id = scenario_handler.get_next_id()
     output_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
-
     try:
     # get file contents
         async with aiofiles.open(output_path, 'wb') as out_file:
             content = await file.read()  # async read
             await out_file.write(content) 
-        return scenario_handler.upload_excelsheet(output_path=output_path, filename=file.filename, id=new_id)
+        return scenario_handler.upload_excelsheet(output_path=output_path, scenarioName=scenario_name, filename=file.filename)
 
     except Exception as e:
         _log.error(f"error on file upload: {str(e)}")

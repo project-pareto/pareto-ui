@@ -9,6 +9,7 @@ import tinydb
 from fastapi import HTTPException
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from importlib.resources import files
 
 import idaes.logger as idaeslog
 from pareto.utilities.get_data import get_display_units
@@ -116,8 +117,8 @@ class ScenarioHandler:
 
         return updatedScenario
     
-    def upload_excelsheet(self, output_path, filename, id):
-        _log.info(f"Uploading excel sheet: {filename}")
+    def upload_excelsheet(self, output_path, scenarioName, filename):
+        _log.info(f"Uploading excel sheet: {scenarioName}")
 
         [set_list, parameter_list] = get_input_lists()
 
@@ -154,7 +155,7 @@ class ScenarioHandler:
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
         return_object = {
-            "name": filename, 
+            "name": scenarioName, 
             "id": self.next_id, 
             "date": date,
             "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units}, 
@@ -180,10 +181,34 @@ class ScenarioHandler:
         self.LOCKED = True
         self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
         self.LOCKED = False
+        
+        self.check_for_diagram(self.next_id, filename.split('.')[0])
+
         self.update_next_id()
         self.retrieve_scenarios()
         
         return return_object
+    
+    def check_for_diagram(self, id, filename = None):
+        scenario = self.get_scenario(id)
+        extension = "png"
+        if filename:
+            diagramType = "input"
+            diagramIdentifier = filename
+            scenario_diagram_path = f"{self.input_diagrams_path}/{id}.{extension}"
+        else:
+            diagramType = "output"
+            diagramIdentifier = scenario['name']
+            scenario_diagram_path = f"{self.output_diagrams_path}/{id}.{extension}"
+        try:
+            diagram_path = files('app').joinpath(f"internal/assets/{diagramIdentifier}.{extension}")
+            _log.info('diagram_path has been attained')
+            scenario[f"{diagramType}DiagramExtension"] = extension
+            shutil.copyfile(diagram_path, scenario_diagram_path)
+        except Exception as e:
+            _log.info(f'unable to find diagram_path: {e}')
+        return self.update_scenario(scenario)
+
 
     def copy_scenario(self, id):
         _log.info(f"copying scenario with id: {id}")
@@ -199,8 +224,6 @@ class ScenarioHandler:
             new_scenario["name"] = new_scenario["name"]+' copy'
             new_scenario["id"] = new_scenario_id
             new_scenario["date"] = date
-            
-            
 
             # create copy of excel sheet input
             original_excel_path = "{}/{}.xlsx".format(self.excelsheets_path,id)

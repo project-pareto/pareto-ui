@@ -80,9 +80,9 @@ export default function ScenarioList(props) {
         console.log('handle file upload')
         console.log('creating scenario with name '+name)
         const formData = new FormData();
-        formData.append('file', file, name);
+        formData.append('file', file, file.name);
 
-        uploadExcelSheet(formData)
+        uploadExcelSheet(formData, name)
         .then(response => {
         if (response.status === 200) {
             response.json()
@@ -223,7 +223,7 @@ export default function ScenarioList(props) {
             showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
         }
         <Box sx={{display: 'flex', justifyContent: 'flex-start'}}>
-        <h3 style={{color: '#0083b5'}}>Unfamiliar with PARETO? Check out the documentation <a href="https://pareto.readthedocs.io/en/stable/" target="_blank">here</a>.</h3>
+        <h3 style={{color: '#0083b5'}}>PARETO documentation can be found <a href="https://pareto.readthedocs.io/en/stable/" target="_blank">here</a>.</h3>
         </Box>
 
 
