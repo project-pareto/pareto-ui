@@ -3,26 +3,10 @@ from pathlib import Path
 import re
 
 datas = []
-# for package in ["pareto"]:
-#     pkg = importlib.import_module(package)
-    
-#     try:
-#         pkg_path = Path(pkg.__file__).parent.parent
-#     except TypeError:  # missing __init__.py perhaps
-#         print(
-#             f"Cannot find package '{package}' directory, possibly "
-#             f"missing an '__init__.py' file"
-#         )
-#     if not pkg_path.is_dir():
-#         print(
-#             f"Cannot load from package '{package}': "
-#             f"path '{pkg_path}' not a directory"
-#         )
 
 skip_expr = re.compile(r"_test|test_|__")
 
 # add all png files to pyinstaller data
-# pkg = "../../../project-pareto/docs/img"
 pkg = "../../../project-pareto/docs/img"
 pkg_path = Path(f'{pkg}')
 dst_name = f"docs/img"
