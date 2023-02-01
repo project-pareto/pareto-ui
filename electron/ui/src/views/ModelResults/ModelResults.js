@@ -39,7 +39,7 @@ export default function ModelResults(props) {
       when category is changed, reset the nodes for filtering (columns and rows of current table)
     */
     try {
-      if (props.category !== "Dashboard" && props.category !== "Network Diagram" && props.category !== "Sankey") {
+      if (props.category !== "Dashboard" && props.category !== "Network Diagram" && props.category !== "Sankey" && scenario.results.status==="Optimized") {
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
@@ -85,7 +85,7 @@ export default function ModelResults(props) {
     
     
     
-  }, [props.category, props.scenario, props.scenario.data_input.df_parameters]);
+  }, [props.category, props.scenario, props.scenario.results.status, props.scenario.data_input.df_parameters, props.scenario.results.data]);
 
   const handleColumnFilter = (col) => {
     var tempCols
