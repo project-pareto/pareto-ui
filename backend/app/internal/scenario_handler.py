@@ -201,8 +201,8 @@ class ScenarioHandler:
             diagramIdentifier = scenario['name']
             scenario_diagram_path = f"{self.output_diagrams_path}/{id}.{extension}"
         try:
-            diagram_path = files('app').joinpath(f"internal/assets/{diagramIdentifier}.{extension}")
-            _log.info('diagram_path has been attained')
+            diagram_path = files('pareto').parent.joinpath(f"docs/img/{diagramIdentifier}.{extension}")
+            _log.info(f'diagram_path is : {diagram_path}')
             scenario[f"{diagramType}DiagramExtension"] = extension
             shutil.copyfile(diagram_path, scenario_diagram_path)
         except Exception as e:

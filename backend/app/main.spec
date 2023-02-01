@@ -44,36 +44,9 @@ else:
 
 extra_data.append(('GUROBI_RUN.py','.'))
 
-try:
-    print('trying to get gurobi path using os, sys, and glob')
-    import os
-    import glob
-    import sys
-    conda_prefix = os.environ['CONDA_PREFIX']
-    print(f'conda_prefix is {conda_prefix}')
-    try:
-        if sys.platform == "darwin":
-            print('darwin')
-            gurobi_path = f'{conda_prefix}/lib/python*/site-packages/pyomo/solvers/plugins/solvers'
-        elif sys.platform == "linux":
-            print('linux')
-            gurobi_path = f'{conda_prefix}/lib/python*/site-packages/pyomo/solvers/plugins/solvers'
-        else:
-            print('windows')
-            gurobi_path = f'{conda_prefix}/lib/site-packages/pyomo/solvers/plugins/solvers'
-    except Exception as e:
-        print(f'unable to get entry points src/dst: {e}') 
-    print(f'globbing from {gurobi_path}')
-    gurobi_path_glob = glob.glob(gurobi_path)[0]
-    print(f'glob is {gurobi_path_glob}')
-
-except Exception as e:
-    print(f'unable to get the gurobi path: {e}')
-    gurobi_path_glob=''
-
 a = Analysis(
     ['main.py'],
-    pathex=[gurobi_path_glob],
+    pathex=[],
     binaries=[],
     datas=extra_data,
     hiddenimports=[
