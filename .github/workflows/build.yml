@@ -28,7 +28,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: environment.yml
-          activate-environment: pareto-ui-env
+          activate-environment: pareto-ui
 
       - name: Install Electron JS dependencies
         run: |
