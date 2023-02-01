@@ -1,4 +1,4 @@
-name: pareto-ui
+name: pareto-ui-env
 channels:
   - conda-forge
 dependencies:
