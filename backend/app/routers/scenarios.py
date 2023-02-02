@@ -115,12 +115,6 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
                 _log.error(f'unable to find {param}, using {defaultParams[param]}')
                 modelParameters[param]=defaultParams[param]
 
-        if modelParameters['solver']:
-            try:
-                modelParameters['solver'] = eval(modelParameters['solver'])
-            except Exception as err:
-                _log.error(f'unable to evaluate solver: {err}')
-
         _log.info(f"modelParameters: {modelParameters}")
 
         background_tasks.add_task(

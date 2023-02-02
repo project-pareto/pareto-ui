@@ -257,8 +257,8 @@ export default function Optimization(props) {
               onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={0} value={"'cbc'"}>CBC (Free)</MenuItem>
-              <MenuItem key={1} value={"('gurobi_direct', 'gurobi')"}>Gurobi (Commercial)</MenuItem>
+              <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
+              <MenuItem key={1} value={"gurobi"}>Gurobi (Commercial)</MenuItem>
               {/* <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct</MenuItem> */}
             </Select>
             </FormControl>

@@ -66,7 +66,10 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
         "solver": modelParameters["solver"]
     }
 
-    _log.info(f"solving model with solver: {modelParameters['solver']}")
+    if options["solver"] != "cbc":
+        del options["solver"]
+
+    _log.info(f"solving model with options: {options}")
 
     model_results = solve_model(model=strategic_model, options=options)
     with nostdout():
