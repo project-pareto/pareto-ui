@@ -1,6 +1,6 @@
 {
   "name": "pareto-ui",
-  "version": "0.6.0v3",
+  "version": "0.6.0",
   "author": "Michael Pesce",
   "private": true,
   "main": "build/main.js",
