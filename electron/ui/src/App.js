@@ -58,7 +58,7 @@ function App() {
           for (var key in data.data){
             let scenario = {...data.data[key]}
             tempScenarios[key] = scenario
-            if (!['Optimized','Draft','failure', 'Not Optimized', 'complete', 'none'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
+            if (!['Optimized','Draft','failure', 'Not Optimized', 'complete', 'none', 'Infeasible'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
               scenario.results.status = 'Draft'
               updateScenario({'updatedScenario': {...scenario}})
               .then(response => response.json())
@@ -103,7 +103,7 @@ useEffect(()=> {
         let task = backgroundTasks[i]
         let tempScenario = tempScenarios[task]
         if(tempScenario.results.status !== scenarios[task].results.status) updated=true
-        if(tempScenario.results.status === "Optimized" || tempScenario.results.status === "failure") completed = true
+        if(tempScenario.results.status === "Optimized" || tempScenario.results.status === "failure" || tempScenario.results.status === "Infeasible") completed = true
       }
       if (completed) {
           /*

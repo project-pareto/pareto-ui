@@ -95,7 +95,7 @@ export default function Optimization(props) {
   }
 
    useEffect(()=>{
-    setDisabled(!['Optimized','Draft','failure', 'Not Optimized'].includes(props.scenario.results.status))
+    setDisabled(!['Optimized','Draft','failure', 'Not Optimized', 'Infeasible'].includes(props.scenario.results.status))
     // setScenario(props.scenario)
    }, [props.scenario]);
 

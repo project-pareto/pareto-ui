@@ -24,6 +24,7 @@ export default function Dashboard(props) {
   const [ openEditName, setOpenEditName ] = useState(false)
   // const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
   const [ inputDataEdited, setInputDataEdited ] = useState(false) 
+  const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
@@ -147,7 +148,7 @@ export default function Dashboard(props) {
         <b id='scenarioTitle' >
         {(scenario && props.section===0) && 
         <p>{scenario.name}
-        <IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}} disabled={['Optimized','Draft','failure', 'Not Optimized'].includes(scenario.results.status) ? false : true}>
+        <IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}} disabled={enabledStatusList.includes(scenario.results.status) ? false : true}>
           <EditIcon fontSize='inherit'/>
         </IconButton>
         </p>

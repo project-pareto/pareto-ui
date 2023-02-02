@@ -13,7 +13,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
 )
 from pyomo.opt import TerminationCondition
 from pareto.utilities.get_data import get_data
-from pareto.utilities.results import generate_report, PrintValues, OutputUnits
+from pareto.utilities.results import generate_report, PrintValues, OutputUnits, is_feasible, nostdout
 import idaes.logger as idaeslog
 
 from app.internal.get_data import get_input_lists
@@ -69,11 +69,16 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
     _log.info(f"solving model with solver: {modelParameters['solver']}")
 
     model_results = solve_model(model=strategic_model, options=options)
-    termination_condition = model_results.solver.termination_condition
-    # potential termination conditions: 
-    # ( locallyOptimal, globallyOptimal, optimal ) -> Good
-    # ( maxTimeLimit, maxIterations, userInterrupt, resourceInterrupt, maxEvaluations ) -> we don't know if the solution is good or not
-    # the rest -> these are real failures
+    with nostdout():
+        feasibility_status = is_feasible(strategic_model)
+
+    if not feasibility_status:
+        _log.error(f"feasibility status check failed, setting termination condition to infeasible")
+        termination_condition = "infeasible"
+    else:
+        print("\nModel results validated and found to pass feasibility tests\n" + "-" * 60)
+        termination_condition = model_results.solver.termination_condition
+
 
     scenario = scenario_handler.get_scenario(int(id))
     results = {"data": {}, "status": "Generating output", "terminationCondition": termination_condition}
@@ -87,11 +92,12 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
     """
     [model, results_dict] = generate_report(
         strategic_model,
+        results_obj=model_results,
         is_print=[PrintValues.essential],
         output_units=OutputUnits.user_units,
         fname=output_file,
     )
-    
+
     total_time = datetime.datetime.now() - start_time
     _log.info(f"total process took {total_time.seconds} seconds")
 
@@ -104,7 +110,10 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters):
         scenario = scenario_handler.get_scenario(int(id))
         results = scenario["results"]
         results['data'] = results_dict
-        results['status'] = 'Optimized'
+        if results['terminationCondition'] == "infeasible":
+            results['status'] = 'Infeasible'
+        else:
+            results['status'] = 'Optimized'
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
         scenario_handler.check_for_diagram(id)

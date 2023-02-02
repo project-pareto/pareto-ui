@@ -263,6 +263,12 @@ const handleRowFilter = (row) => {
           <p>Please try increasing optimization runtime</p>
         </Box> 
         :
+        props.scenario.results.status === "Infeasible" ?
+        <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
+          <h2>Optimization Infeasible</h2>
+          <p>Please try increasing optimization runtime</p>
+        </Box> 
+        :
         <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
           <h2>Running Optimization</h2>
           <p>This process could take several minutes</p>
