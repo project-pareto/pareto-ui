@@ -182,7 +182,7 @@ class ScenarioHandler:
         self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
         self.LOCKED = False
         
-        self.check_for_diagram(self.next_id, filename.split('.')[0])
+        return_object = self.check_for_diagram(self.next_id, filename.split('.')[0])
 
         self.update_next_id()
         self.retrieve_scenarios()
@@ -203,11 +203,13 @@ class ScenarioHandler:
         try:
             diagram_path = files('pareto').parent.joinpath(f"docs/img/{diagramIdentifier}.{extension}")
             _log.info(f'diagram_path is : {diagram_path}')
-            scenario[f"{diagramType}DiagramExtension"] = extension
             shutil.copyfile(diagram_path, scenario_diagram_path)
+            scenario[f"{diagramType}DiagramExtension"] = extension
+            return self.update_scenario(scenario)
         except Exception as e:
             _log.info(f'unable to find diagram_path: {e}')
-        return self.update_scenario(scenario)
+            return scenario
+        
 
 
     def copy_scenario(self, id):
