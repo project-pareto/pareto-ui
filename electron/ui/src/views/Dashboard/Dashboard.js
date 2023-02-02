@@ -175,6 +175,7 @@ export default function Dashboard(props) {
           scenario={scenario} 
           updateScenario={props.updateScenario}
           handleRunModel={handleRunModel}
+          backgroundTasks={props.backgroundTasks} 
         />
       }
       {(scenario && props.section===2) && 

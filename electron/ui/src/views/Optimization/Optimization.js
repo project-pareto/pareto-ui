@@ -323,10 +323,17 @@ export default function Optimization(props) {
             </Collapse>
           </Grid>
         </Grid>
-
         <Grid item xs={12} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'40px', paddingTop: '25px',paddingBottom: '25px'}}>
-            <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disabled} endIcon={<ArrowForwardIcon />}> Optimize </Button>
+            <Button 
+              onClick={props.handleRunModel} 
+              sx={styles.filled} 
+              variant="contained" 
+              size="large" 
+              disabled={props.backgroundTasks.length > 0 || disabled} 
+              endIcon={<ArrowForwardIcon />}> 
+              Optimize 
+            </Button>
             </Box>
         </Grid>
 
