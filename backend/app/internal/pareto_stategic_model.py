@@ -66,7 +66,8 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
         "solver": modelParameters["solver"]
     }
 
-    if options["solver"] != "cbc":
+    if options["solver"] not in ["cbc", "gurobi", "gurobi_direct"]:
+        _log.info('deleting solver as it doesnt match any of the proper solver names')
         del options["solver"]
 
     _log.info(f"solving model with options: {options}")

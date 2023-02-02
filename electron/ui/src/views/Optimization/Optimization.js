@@ -259,7 +259,7 @@ export default function Optimization(props) {
             >
               <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
               <MenuItem key={1} value={"gurobi"}>Gurobi (Commercial)</MenuItem>
-              {/* <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct</MenuItem> */}
+              <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct (Commercial)</MenuItem>
             </Select>
             </FormControl>
           </Grid>
