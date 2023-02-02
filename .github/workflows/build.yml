@@ -47,7 +47,7 @@ jobs:
       #   working-directory: ../
       #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/0.6.0rc0 -b 0.6.0 && pip install --progress-bar off .
 
-            - name: Install Pareto locally
+      - name: Install Pareto locally
         working-directory: ../
         run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
