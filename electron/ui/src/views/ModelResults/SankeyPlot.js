@@ -112,7 +112,7 @@ export default function SankeyPlot(props) {
         }
         let totalNodes = Array.from(nodeSet).sort()
         let totalTimes = Array.from(timeSet).sort()
-        let tempFilteredTimes = unpackAllTimes ? timeSet : timeSet.has('T01') ? ["T01"] : timeSet
+        let tempFilteredTimes = unpackAllTimes ? timeSet : timeSet.has('T01') ? ["T01"] : Array.from(timeSet)
         console.log(`filtered times is ${tempFilteredTimes}`)
         setTotalNodes(Array.from(totalNodes))
         setTotalTimes(Array.from(totalTimes))
@@ -144,7 +144,6 @@ export default function SankeyPlot(props) {
             let target = props.data[sankeyCategory][i][1]
             let label = props.data[sankeyCategory][i][2]
             let value = props.data[sankeyCategory][i][3]
-
             if ((unpackAll) || (tempFilteredTimes.includes(label) && (tempFilteredNodes.includes(source) || tempFilteredNodes.includes(target)))) {
                 let sourceIndex, targetIndex
                 if (d.node.label.includes(source)) {
