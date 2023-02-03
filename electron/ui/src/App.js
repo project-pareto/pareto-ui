@@ -123,12 +123,16 @@ useEffect(()=> {
               setTimeout(function() {
                 setCheckModelResults(checkModelResults => checkModelResults+1)
               }, TIME_BETWEEN_CALLS)
+            } else{
+              setCheckModelResults(0)
             }
       } else {
         if(checkModelResults < 1000) {
           setTimeout(function() {
             setCheckModelResults(checkModelResults => checkModelResults+1)
           }, TIME_BETWEEN_CALLS)
+        }else{
+          setCheckModelResults(0)
         }
       }
     }).catch(e => {
