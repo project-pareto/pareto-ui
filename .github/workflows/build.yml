@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - feb-release
+      - prod-build
 
 defaults:
   run:

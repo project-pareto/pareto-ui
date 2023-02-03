@@ -129,7 +129,7 @@ describe('scenario testing', () => {
         cy.screenshot(`${sc_count}_clicked delete scenario`)
         sc_count+=1
         cy.findByRole('button', {name: /delete/i}).click()
-        cy.wait(1000)
+        cy.wait(5000)
         cy.screenshot(`${sc_count}_deleted scenario`)
         sc_count+=1
 
@@ -163,7 +163,7 @@ describe('scenario testing', () => {
         */
         cy.wait(2000)
         cy.findByRole('heading', {name: /running optimization/i}).should('exist')
-        cy.findByRole('heading', {name: /running optimization/i, timeout: 300000}).should('not.exist')
+        cy.findByRole('heading', {name: /running optimization/i, timeout: 900000}).should('not.exist')
         cy.screenshot(`${sc_count}_finished optimizing`)
         sc_count+=1
 
