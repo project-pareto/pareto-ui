@@ -63,6 +63,7 @@ jobs:
             name: windows-dist
             path: |
               electron/dist/Pareto-UI_Setup.exe
+  
   # linux-build:
   #   name: Linux Build
 
