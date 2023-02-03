@@ -73,7 +73,7 @@ jobs:
 
       - name: Cypress e2e tests
         working-directory: electron/ui
-        timeout-minutes: 20
+        timeout-minutes: 24
         run: |
           "$(npm bin)"/cypress run
       - name: Upload artifact for screenshots & videos
