@@ -52,6 +52,11 @@ class ScenarioHandler:
         except Exception as e:
             _log.info(f"unable to change to app directroy: {e}")
 
+        ### check for data directory
+        has_data = os.path.isdir(self.data_directory_path / f"v{self.VERSION}")
+        _log.info(f'has_data is {has_data}')
+
+
         # create data directories
         _log.info(f"making directory: {self.data_directory_path}")
         self.data_directory_path.mkdir(parents=True, exist_ok=True)
@@ -68,11 +73,37 @@ class ScenarioHandler:
         _log.info(f"making directory: {self.output_diagrams_path}")
         self.output_diagrams_path.mkdir(parents=True, exist_ok=True)
 
+        if not has_data:
+            _log.info('importing default data')
+            try:
+                self.import_default_data()
+            except Exception as e:
+                _log.error(f'unable to import default data: {e}')
+
         # Connect to DB
         path = self.scenarios_path
         self._db = tinydb.TinyDB(path)
         self.update_next_id()
         self.retrieve_scenarios()
+
+    def import_default_data(self):
+        default_ids = [1,2,3,4,5]
+        default_directories = [("excelsheets", "xlsx"), ("input_diagrams", "png"), ("output_diagrams", "png"), ("outputs", "xlsx")]
+        default_data_path = files('app').joinpath(f"internal/assets/v{self.VERSION}_default")
+        destination_directory = self.data_directory_path / f"v{self.VERSION}"
+        for directory in default_directories:
+            d_name = directory[0]
+            d_ext  = directory[1]
+            for each in default_ids:
+                f_path = default_data_path.joinpath(f"{d_name}/{each}.{d_ext}")
+                destination_path = destination_directory.joinpath(f"{d_name}/{each}.{d_ext}")
+                _log.info(f'moving {f_path} to {destination_path}')
+                shutil.copyfile(f_path, destination_path)
+        ### copy over scenarios.json files
+        f_path = default_data_path.joinpath(f"scenarios.json")
+        destination_path = destination_directory.joinpath(f"scenarios.json")
+        _log.info(f'moving {f_path} to {destination_path}')
+        shutil.copyfile(f_path, destination_path)
 
     def retrieve_scenarios(self):
         _log.info(f"retrieving scenarios")
