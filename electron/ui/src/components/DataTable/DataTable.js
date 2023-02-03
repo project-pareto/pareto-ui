@@ -99,7 +99,7 @@ const handleKeyDown = (e) => {
           props.columnNodes[props.columnNodesMapping[index]] must be true
           UNLESS it's the first column (index is 0)
         */
-       if (index === 0 || props.columnNodes[props.columnNodesMapping[index - 1]] || props.columnNodes.length === 0) {
+       if (index === 0 || props.columnNodes[props.columnNodesMapping[index - 1]] || Object.keys(props.columnNodes).length === 0) {
         return (
           <Tooltip key={"tooltip_"+ind+":"+index} title={props.editDict[""+ind+":"+index] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
           <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
@@ -136,7 +136,7 @@ const handleKeyDown = (e) => {
          /*
           props.rowNodes[props.rowNodesMapping[index]] must equal true
         */
-       if (props.rowNodes[props.rowNodesMapping[index]] || props.rowNodes.length === 0) {
+       if (props.rowNodes[props.rowNodesMapping[index]] || Object.keys(props.rowNodes).length === 0) {
         return <TableRow key={"row_"+index}>{value}</TableRow>
        } else return null
         
@@ -157,7 +157,7 @@ const handleKeyDown = (e) => {
               <TableRow key="headRow">
               {Object.entries(props.data[props.category]).map( ([key, value], index) => {
                 keyIndexMapping[index] = index+"::"+key
-                if (index === 0 || props.columnNodes[index+"::"+key] || props.columnNodes.length === 0) {
+                if (index === 0 || props.columnNodes[index+"::"+key] || Object.keys(props.columnNodes).length === 0) {
                   return (
                     index === 0 ? 
                   <TableCell key={key} style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
@@ -184,8 +184,6 @@ const renderOutputTable = () => {
 
   try {
       console.log('rendering output table')
-      console.log(`columnNodes is:`)
-      console.log(props.columnNodes)
       return (
         <TableContainer>
         <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
@@ -201,7 +199,7 @@ const renderOutputTable = () => {
           </>
           :
           props.data[props.category][0].map((value, index) => {
-            if (props.columnNodes.length === 0 || props.columnNodes[props.columnNodesMapping[index]]){
+            if (Object.keys(props.columnNodes).length === 0 || props.columnNodes[props.columnNodesMapping[index]]){
               return <TableCell key={`${value}_${index}`} style={{backgroundColor:"#6094bc", color:"white"}}>{value}</TableCell>
             }
           })
@@ -235,10 +233,10 @@ const renderOutputTable = () => {
           : 
           <TableBody>
           {props.data[props.category].slice(1).map((value, index) => {
-            if (props.rowNodes.length === 0 || props.rowNodes[props.rowNodesMapping[index]]) {
+            if (Object.keys(props.rowNodes).length === 0 || props.rowNodes[props.rowNodesMapping[index]]) {
             return (<TableRow key={`row_${value}_${index}`}>
             {value.map((cellValue, i)=> {
-              if (props.columnNodes.length === 0 || props.columnNodes[props.columnNodesMapping[i]]) {
+              if (Object.keys(props.columnNodes).length === 0 || props.columnNodes[props.columnNodesMapping[i]]) {
               return <TableCell 
                       align={(i === (value.length - 1)) ? "right" : "left"} 
                       key={"" + index + i} 
