@@ -193,13 +193,13 @@ class ScenarioHandler:
             "optimization": 
                 {
                     "objective":"cost", 
-                    "runtime": 180, 
+                    "runtime": 900, 
                     "pipelineCostCalculation": "distance_based", 
                     "waterQuality": "false", 
                     "solver": "cbc",
                     "build_units": "scaled_units",
                     "optimalityGap": 0,
-                    "scale_model": False
+                    "scale_model": True
                 }, 
             "results": {"status": "Draft", "data": {}}
             }

@@ -25,6 +25,8 @@ export default function Optimization(props) {
   const [ disabled, setDisabled ] = useState(false)
   const [ showAdvancedOptions, setShowAdvancedOptions ] = useState(false) 
   const columnWidths = [5,7]
+  const defaultRuntimes = {"cbc": 900, "gurobi": 180}
+  const defaultScaleModel = {"cbc": true, "gurobi": false}
   const descriptions = {
     objective: <div>Select what you would like to solve for.</div>,
     runtime:  <div> 
@@ -104,11 +106,28 @@ export default function Optimization(props) {
      const value = event.target.value
      if ( (name === "runtime" || name === "optimalityGap") && isNaN(value) ) {
       console.log('tried entering nonnumerical characters for runtime or optimality gap')
+     } 
+     /*
+      update runtime and scalemodel settings when changing solver
+     */
+     else if (name === "solver"){
+      if(value === "cbc") {
+        const tempScenario = {...props.scenario}
+        tempScenario.optimization[name] = value
+        tempScenario.optimization.runtime = defaultRuntimes["cbc"]
+        tempScenario.optimization.scale_model = defaultScaleModel["cbc"]
+        props.updateScenario(tempScenario)
+      } else if (value === "gurobi_direct") {
+        const tempScenario = {...props.scenario}
+        tempScenario.optimization[name] = value
+        tempScenario.optimization.runtime = defaultRuntimes["gurobi"]
+        tempScenario.optimization.scale_model = defaultScaleModel["gurobi"]
+        props.updateScenario(tempScenario)
+      }
      }
      else {
       const tempScenario = {...props.scenario}
       tempScenario.optimization[name] = value
-      // console.log(`setting ${name} = ${value}`)
       props.updateScenario(tempScenario)
      }
    }
@@ -151,6 +170,28 @@ export default function Optimization(props) {
             <FormControlLabel control={<Checkbox />} label="Maximize Reuse" />
             <FormControlLabel control={<Checkbox />} label="Maximize Profits" />
           </FormControl>
+          </Grid>
+
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Solver
+              <Tooltip title={descriptions.solver} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              </p>
+            </Box>
+          </Grid>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
+            <Select
+              name="solver"
+              value={props.scenario.optimization.solver}
+              onChange={handleChange}
+              sx={{color:'#0b89b9', fontWeight: "bold"}}
+            >
+              <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
+              <MenuItem key={1} value={"gurobi_direct"}>Gurobi (Commercial)</MenuItem>
+              {/* <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct (Commercial)</MenuItem> */}
+            </Select>
+            </FormControl>
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
@@ -238,28 +279,6 @@ export default function Optimization(props) {
               <MenuItem key={0} value={"false"}>False</MenuItem>
               <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
               <MenuItem key={2} value={"discrete"}>Discrete</MenuItem>
-            </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Solver
-              <Tooltip title={descriptions.solver} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-              </p>
-            </Box>
-          </Grid>
-          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
-            <Select
-              name="solver"
-              value={props.scenario.optimization.solver}
-              onChange={handleChange}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-            >
-              <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
-              <MenuItem key={1} value={"gurobi_direct"}>Gurobi (Commercial)</MenuItem>
-              {/* <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct (Commercial)</MenuItem> */}
             </Select>
             </FormControl>
           </Grid>
