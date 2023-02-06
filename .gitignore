@@ -133,7 +133,6 @@ node_modules
 
 # backend data stuff
 example_results_dict.json
-scenarios.json
 scenarios2.json
 strategic_optimization_results_test.xlsx
 input_data_generic_strategic_case_study_Treatment_Demo.xlsx

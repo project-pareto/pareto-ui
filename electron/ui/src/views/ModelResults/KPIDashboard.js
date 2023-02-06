@@ -74,7 +74,7 @@ export default function KPIDashboard(props) {
       }
 
   return ( 
-    <Box sx={{ marginLeft: 10, marginRight: 10 }} >
+    <Box>
     {kpiData && 
     <Grid container spacing={2} sx={{marginTop:2}}>
 
@@ -107,7 +107,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed.value.toLocaleString()+" "+kpiData.v_F_TotalDisposed.unit}</p>
+                <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalDisposed.unit}</p>
                 </Box>
             </Grid>
             </Grid>
@@ -125,7 +125,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced.value.toLocaleString()+" "+kpiData.v_F_TotalSourced.unit}</p>
+                <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalSourced.unit}</p>
                 </Box>
             </Grid>
             </Grid>
@@ -156,6 +156,15 @@ export default function KPIDashboard(props) {
                             "Treatment", 
                             "Disposal", 
                             "Pipeline"],
+                        marker: {
+                                colors: [
+                                    'rgb(255, 127, 19)',
+                                    'rgb(148, 103, 189)',
+                                    'rgb(64, 159, 44)',
+                                    'rgb(214, 39, 40)',
+                                    // 'rgb(30, 119, 180)',
+                                ]
+                              },
                         textinfo: "percent",
                         // insidetextorientation: "radial"
                         }
@@ -199,6 +208,15 @@ export default function KPIDashboard(props) {
                             "Disposal", 
                             "Piping",
                             "Trucking"],
+                        marker: {
+                            colors: [
+                                'rgb(255, 127, 19)',
+                                'rgb(148, 103, 189)',
+                                'rgb(64, 159, 44)',
+                                'rgb(214, 39, 40)',
+                                'rgb(30, 119, 180)',
+                            ]
+                            },
                         textinfo: "percent",
                         // insidetextorientation: "radial"
                         }

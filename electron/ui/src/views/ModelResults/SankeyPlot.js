@@ -8,9 +8,6 @@ import Select from '@mui/material/Select';
 import Plot from 'react-plotly.js';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 
-
-
-
 export default function SankeyPlot(props) {
     const [ sankeyCategory, setSankeyCategory ] = useState("v_F_Piped")
     const [ filteredNodes, setFilteredNodes ] = useState([]) 
@@ -23,15 +20,17 @@ export default function SankeyPlot(props) {
 
 
     useEffect(()=>{
-        unpackData(true, [], []);
-    }, [sankeyCategory]);
+
+        unpackNodes(false)
+        
+    }, [sankeyCategory, props.scenarioId]);
 
     const handleCategoryChange = (event) => {
         setSankeyCategory(event.target.value)
     }
 
     const handleNodeFilter = (node) => {
-        var tempNodes
+        let tempNodes
         if (node === 'all') {
             tempNodes = filteredNodes.length === totalNodes.length ? [] : totalNodes
             setFilteredNodes(tempNodes);
@@ -51,7 +50,7 @@ export default function SankeyPlot(props) {
     }
 
     const handleTimeFilter = (time) => {
-        var tempTimes
+        let tempTimes
         if (time === 'all') {
             tempTimes = filteredTimes.length === totalTimes.length ? [] : totalTimes
             setFilteredTimes(tempTimes);
@@ -71,7 +70,7 @@ export default function SankeyPlot(props) {
     }
 
     const handleArrowSelection = (direction) => {
-        var tempTimes
+        let tempTimes
         if(direction === 'up') {
             if(isAllTimesSelected || filteredTimes.length===0) {
                 tempTimes=[totalTimes[totalTimes.length-1]]
@@ -96,9 +95,39 @@ export default function SankeyPlot(props) {
         unpackData(false, filteredNodes, tempTimes)
     }
 
+    const unpackNodes = (unpackAllTimes) =>
+    {
+        let nodeSet = new Set()
+        let timeSet = new Set()
+        for (let i = 1; i < props.data[sankeyCategory].length; i++) {
+            let source = props.data[sankeyCategory][i][0]
+            let target = props.data[sankeyCategory][i][1]
+            let label = props.data[sankeyCategory][i][2]
+            let value = props.data[sankeyCategory][i][3]
+            
+            nodeSet.add(source)
+            nodeSet.add(target)
+            timeSet.add(label)
+            
+        }
+        let totalNodes = Array.from(nodeSet).sort()
+        let totalTimes = Array.from(timeSet).sort()
+        let tempFilteredTimes = unpackAllTimes ? timeSet : timeSet.has('T01') ? ["T01"] : Array.from(timeSet)
+        console.log(`filtered times is ${tempFilteredTimes}`)
+        setTotalNodes(Array.from(totalNodes))
+        setTotalTimes(Array.from(totalTimes))
+        setFilteredNodes(Array.from(nodeSet))
+        setFilteredTimes(Array.from(tempFilteredTimes))
+        
+        // console.log(d)
+        unpackData(false, totalNodes, tempFilteredTimes)
+          
+    }
+
+
     const unpackData = (unpackAll, nodes, times) =>
     {
-        var tempFilteredNodes, tempFilteredTimes
+        let tempFilteredNodes, tempFilteredTimes
         if(!unpackAll) {
             tempFilteredNodes = nodes
             tempFilteredTimes = times
@@ -108,22 +137,15 @@ export default function SankeyPlot(props) {
             tempFilteredTimes = filteredTimes
         }
         // console.log('unpacking data with unpackall = '+unpackAll)
-        var d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
-        var locationsInArray = {}
-        var nodeSet = new Set()
-        var timeSet = new Set()
+        let d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
+        let locationsInArray = {}
         for (let i = 1; i < props.data[sankeyCategory].length; i++) {
-            var source = props.data[sankeyCategory][i][0]
-            var target = props.data[sankeyCategory][i][1]
-            var label = props.data[sankeyCategory][i][2]
-            var value = props.data[sankeyCategory][i][3]
-
-            nodeSet.add(source)
-            nodeSet.add(target)
-            timeSet.add(label)
-
-            if (unpackAll || (tempFilteredTimes.includes(label) && (tempFilteredNodes.includes(source) || tempFilteredNodes.includes(target)))) {
-                var sourceIndex, targetIndex
+            let source = props.data[sankeyCategory][i][0]
+            let target = props.data[sankeyCategory][i][1]
+            let label = props.data[sankeyCategory][i][2]
+            let value = props.data[sankeyCategory][i][3]
+            if ((unpackAll) || (tempFilteredTimes.includes(label) && (tempFilteredNodes.includes(source) || tempFilteredNodes.includes(target)))) {
+                let sourceIndex, targetIndex
                 if (d.node.label.includes(source)) {
                     sourceIndex = locationsInArray[source]
                 } 
@@ -147,23 +169,13 @@ export default function SankeyPlot(props) {
             }
             
         }
-        let totalNodes = Array.from(nodeSet).sort()
-        let totalTimes = Array.from(timeSet).sort()
-        setTotalNodes(Array.from(totalNodes))
-        setTotalTimes(Array.from(totalTimes))
-        if(unpackAll) {
-            setFilteredNodes(Array.from(nodeSet))
-            setFilteredTimes(Array.from(timeSet))
-        }
-        // console.log(d)
         setPlotData(d)
           
     }
 
   return ( 
-    <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: 'scroll'}}>
     <Grid container direction="row">
-        <Grid item sm={2} direction="row">
+        <Grid item sm={2}>
         <Box display="flex" justifyContent="flex-start">
             <FormControl sx={{ width: "25ch" }} size="small">
                 <Select
@@ -173,12 +185,11 @@ export default function SankeyPlot(props) {
                 >
                 <MenuItem key={0} value={"v_F_Piped"}>Piped</MenuItem>
                 <MenuItem key={1} value={"v_F_Trucked"}>Trucked</MenuItem>
-                <MenuItem key={2} value={"v_F_Sourced"}>Sourced</MenuItem>
                 </Select>
             </FormControl>
         </Box>
         </Grid>
-        <Grid item sm="8">
+        <Grid item sm={8}>
         <Box display="flex" justifyContent="center" sx={{paddingTop:'50px'}}>
             <Plot
                 data={[
@@ -211,11 +222,11 @@ export default function SankeyPlot(props) {
                 },
                 // {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]},
                 ]}
-                layout={ {width: 1118,   height: 772, font: { size: 10 }, title: sankeyCategory.replace('v_F_','')} }
+                layout={ {width: 1118,   height: 772, font: { size: 10 }} }
             />
         </Box>
         </Grid>
-        <Grid item sm={2} direction="row">
+        <Grid item sm={2}>
         <Box display="flex" justifyContent="flex-end">
             <FilterDropdown
                 width="220px"
@@ -235,7 +246,6 @@ export default function SankeyPlot(props) {
         </Box>
         </Grid>
     </Grid>
-    </Box>
   );
 
 }

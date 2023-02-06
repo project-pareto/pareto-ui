@@ -1,25 +1,13 @@
 import './DataInput.css';
 import React from 'react';
 import {useEffect, useState} from 'react';
-import Grid from '@mui/material/Grid';  
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableContainer from '@mui/material/TableContainer';
-import FormControl from '@mui/material/FormControl';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import TextField from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
-import demoInputDiagram from "../../assets/demo_figure_input.png";
+import { Grid, Box, FormControl, MenuItem, Select, Button, Typography } from '@mui/material';
 import AreaChart from '../../components/AreaChart/AreaChart'
-import { Button, Typography } from '@mui/material';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
-import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
+import InputSummary from '../../components/InputSummary/InputSummary'
+import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
+import DataTable from '../../components/DataTable/DataTable';
 
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
@@ -41,26 +29,12 @@ export default function DataInput(props) {
                                   }
   var keyIndexMapping = {}
 
-  const styles ={
-    firstCol: {
-      backgroundColor: "#f4f4f4", 
-      border:"1px solid #ddd",
-      position: 'sticky',
-      left: 0,
-
-    },
-    other: {
-      minWidth: 100,
-      border:"1px solid #ddd"
-    }
-  }
-
   useEffect(()=>{
     /*
       when category is changed, reset the nodes for filtering (columns and rows of current table)
     */
     try {
-      if (props.category !== "Plots" && props.category !== "Network Diagram") {
+      if (props.category !== "Plots" && props.category !== "Network Diagram" && props.category !== "Input Summary") {
         console.log("inside datainput useeffect")
         let tempEditDict = {}
         let tempColumnNodes = {}
@@ -92,14 +66,6 @@ export default function DataInput(props) {
         setFilteredRowNodes(tempRowNodesMapping)
         setColumnNodesMapping(tempColumnNodesMapping)
         setRowNodesMapping(tempRowNodesMapping) 
-        // console.log("tempColumnNodesMapping")
-        // console.log(tempColumnNodesMapping)
-        // console.log("tempRowNodesMapping")
-        // console.log(tempRowNodesMapping)
-        console.log("tempColumnNodes")
-        console.log(tempColumnNodes)
-        console.log("tempRowNodes")
-        console.log(tempRowNodes)
       }
     } catch (e) {
       console.error('unable to set edit dictionary: ',e)
@@ -111,8 +77,8 @@ export default function DataInput(props) {
   }, [props.category, props.scenario, scenario.data_input.df_parameters]);
 
   useEffect(()=>{
-    console.log('keyindex mapping: ')
-    console.log(keyIndexMapping)
+    // console.log('keyindex mapping: ')
+    // console.log(keyIndexMapping)
     
   }, [keyIndexMapping]);
   
@@ -133,17 +99,6 @@ export default function DataInput(props) {
       return 1
     })
     setEditDict(tempEditDict)
-   }
-
-   const handleChangeValue = (event) => {
-    let inds = event.target.getAttribute('name').split(":")
-    //ind[0] is the index inside the array
-    //ind[1] corresponds with the key
-    let ind = parseInt(inds[0])
-    let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
-    let tempScenario = {...scenario}
-    tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
-    setScenario(tempScenario)
    }
 
    const handleColumnFilter = (col) => {
@@ -208,93 +163,6 @@ const handleRowFilter = (row) => {
     }
 }
 
-const handleDoubleClick = (ind, index) => {
-  if (['complete','none','failure'].includes(scenario.results.status)) {
-    if(editDict[""+ind+":"+index]) {
-      // let tempEditDict = {...editDict}
-      // tempEditDict[""+ind+":"+index] = false
-      // setEditDict(tempEditDict)
-    } else {
-      let tempEditDict = {...editDict}
-      tempEditDict[""+ind+":"+index] = true
-      setEditDict(tempEditDict)
-      props.handleEditInput(true)
-    }
-  }  
-  else {
-    setShowError(true)
-    // setTimeout(function() {
-    //   setShowError(false)
-    // }, 3000)
-  }
- }
-
-const handleKeyDown = (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    if(editDict[e.target.name]) {
-      let tempEditDict = {...editDict}
-      tempEditDict[e.target.name] = false
-      setEditDict(tempEditDict)
-    }
-  } 
-  
-}
-  
-  const renderRow = (ind) => {
-      var cells = []
-
-      Object.entries(scenario.data_input.df_parameters[props.category]).forEach(function([key, value]) {
-        cells.push(value[ind])
-        return 1
-      });
-
-      return (cells.map( (value, index) => {
-        /*
-          columnNodes[columnNodesMapping[index]] must be true
-          UNLESS it's the first column (index is 0)
-        */
-       if (index === 0 || columnNodes[columnNodesMapping[index - 1]]) {
-        return (
-          <Tooltip key={"tooltip_"+ind+":"+index} title={editDict[""+ind+":"+index] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
-          <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
-          {editDict[""+ind+":"+index] ? 
-            index === 0 ? value : 
-            <TextField 
-              autoFocus 
-              name={""+ind+":"+index} 
-              size="small" label={""} 
-              defaultValue={value} 
-              onChange={handleChangeValue} 
-              onFocus={(event) => event.target.select()}
-            />
-            :
-            value
-          }
-          </TableCell>
-          </Tooltip>
-        )
-       } else return null
-      }))
-  }
-
-  const renderRows = () => {
-      const rows = []
-      let len = scenario.data_input.df_parameters[props.category][Object.keys(scenario.data_input.df_parameters[props.category])[0]].length
-      for (let i = 0; i < len; i++) {
-        rows.push(renderRow(i))
-      }
-      return (rows.map( (value, index) => {
-         /*
-          rowNodes[rowNodesMapping[index]] must equal true
-        */
-       if (rowNodes[rowNodesMapping[index]]) {
-        return <TableRow key={"row_"+index}>{value}</TableRow>
-       } else return null
-        
-      }))
-  }
-
   const renderInputCategory = () => {
     try {
       /*
@@ -336,7 +204,23 @@ const handleKeyDown = (e) => {
         else if(props.category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <img alt="network diagram" style={{height:"500px"}} src={demoInputDiagram}></img>
+              <NetworkDiagram scenario={props.scenario} type={"input"} syncScenarioData={props.syncScenarioData}></NetworkDiagram>
+            </Box>
+          )
+        }
+      /*
+        if category is input summary, return input summary tables
+      */
+        else if(props.category === "Input Summary"){
+          return (
+            <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
+              <InputSummary 
+                completionsDemand={scenario.data_input.df_parameters['CompletionsDemand']}
+                padRates={scenario.data_input.df_parameters['PadRates']}
+                flowbackRates={scenario.data_input.df_parameters['FlowbackRates']}
+                initialDisposalCapacity={scenario.data_input.df_parameters['InitialDisposalCapacity']}
+                initialTreatmentCapacity={scenario.data_input.df_parameters['InitialTreatmentCapacity']}
+              />
             </Box>
           )
         }
@@ -353,38 +237,28 @@ const handleKeyDown = (e) => {
             </Box>
           </Grid>
           <Grid item xs={11}>
-            <Box sx={{display: 'flex', justifyContent: 'center'}}>
-            <TableContainer>
-            <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}</h3>
-            <TableContainer sx={{overflowX:'auto'}}>
-            <Table style={{border:"1px solid #ddd"}} size='small'>
-              <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
-              <TableRow key="headRow">
-              {Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], index) => {
-                keyIndexMapping[index] = index+"::"+key
-                if (index === 0 || columnNodes[index+"::"+key]) {
-                  return (
-                    index === 0 ? 
-                  <TableCell key={key} style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
-                  : 
-                  <TableCell key={key} style={{color:"white"}}>{key}</TableCell>
-                  )
-                } else return null
-              })}
-              </TableRow>
-              </TableHead>
-              <TableBody>
-              {renderRows()}
-              </TableBody>
-            </Table>
-            </TableContainer>
-            </TableContainer>
-            </Box>
+            <DataTable
+              section="input"
+              editDict={editDict}
+              setEditDict={setEditDict}
+              scenario={scenario}
+              setScenario={setScenario}
+              columnNodesMapping={columnNodesMapping}
+              columnNodes={columnNodes}
+              filteredColumnNodes={filteredColumnNodes}
+              rowNodesMapping={rowNodesMapping}
+              rowNodes={rowNodes}
+              filteredRowNodes={filteredRowNodes}
+              setShowError={setShowError}
+              category={props.category}
+              handleEditInput={props.handleEditInput}
+              data={props.scenario.data_input.df_parameters}
+            />
           </Grid>
           <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
             <FilterDropdown
-                width="200px"
+                width="300px"
                 maxHeight="300px"
                 option1="Column"
                 filtered1={filteredColumnNodes}

@@ -1,0 +1,16 @@
+{
+    "Dynamic": [
+        "CompletionsDemand","DisposalOperationalCost","TreatmentOperationalCost","CompletionsPadOutsideSystem",
+        "DesalinationTechnologies","DesalinationSites","TruckingTime","PadRates","FlowbackRates","NodeCapacities",
+        "InitialPipelineCapacity","InitialDisposalCapacity","InitialTreatmentCapacity","FreshwaterSourcingAvailability",
+        "PadOffloadingCapacity","CompletionsPadStorage","ReuseOperationalCost","PipelineOperationalCost",
+        "FreshSourcingCost","TruckingHourlyCost","PipelineDiameterValues","DisposalCapacityIncrements",
+        "InitialStorageCapacity","StorageCapacityIncrements","TreatmentCapacityIncrements","TreatmentEfficiency",
+        "DisposalExpansionCost","StorageExpansionCost","TreatmentExpansionCost","PipelineCapexDistanceBased",
+        "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","Hydraulics",
+        "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity"
+    ],
+    "Static": [
+        "PNA","CNA","CCA","NNA","NCA","NKA","NRA","NSA","FCA","RCA","RNA","RSA","SCA","SNA","PCT","PKT","FCT","CST","CCT","CKT"
+    ]
+}

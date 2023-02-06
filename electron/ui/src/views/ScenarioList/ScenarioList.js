@@ -28,6 +28,7 @@ export default function ScenarioList(props) {
     const [ showFileModal, setShowFileModal ] = React.useState(false)
     const [ name, setName ] = React.useState('')
     const [ id, setId ] = React.useState(null)
+    const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
 
     React.useEffect(()=> {
         props.setShowHeader(true)
@@ -80,9 +81,9 @@ export default function ScenarioList(props) {
         console.log('handle file upload')
         console.log('creating scenario with name '+name)
         const formData = new FormData();
-        formData.append('file', file, name);
+        formData.append('file', file, file.name);
 
-        uploadExcelSheet(formData)
+        uploadExcelSheet(formData, name)
         .then(response => {
         if (response.status === 200) {
             response.json()
@@ -170,17 +171,17 @@ export default function ScenarioList(props) {
                 <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
                 <TableCell sx={styles.bodyCell}>
                     <Tooltip title="Edit Scenario Name" enterDelay={500}>
-                        <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
                             <EditIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Copy Scenario" enterDelay={500}>
-                        <IconButton onClick={() => handleCopyScenario(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleCopyScenario(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
                             <ContentCopyIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete Scenario" enterDelay={500}>
-                        <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
                             <DeleteIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
@@ -222,6 +223,12 @@ export default function ScenarioList(props) {
         {
             showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
         }
+        <Box sx={{display: 'flex', justifyContent: 'flex-start'}}>
+        <h3 style={{color: '#0083b5'}}>PARETO documentation can be found <a href="https://pareto.readthedocs.io/en/stable/" target="_blank">here</a>.</h3>
+        </Box>
+
+
+
     </Grid>
     </Box>
   );

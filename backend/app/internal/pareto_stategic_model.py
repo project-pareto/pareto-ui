@@ -9,11 +9,11 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     solve_model,
     PipelineCost,
     PipelineCapacity,
-    WaterQuality,
+    WaterQuality
 )
-# from .get_data import get_data
+from pyomo.opt import TerminationCondition
 from pareto.utilities.get_data import get_data
-from pareto.utilities.results import generate_report, PrintValues, OutputUnits
+from pareto.utilities.results import generate_report, PrintValues, OutputUnits, is_feasible, nostdout
 import idaes.logger as idaeslog
 
 from app.internal.get_data import get_input_lists
@@ -26,7 +26,7 @@ from app.internal.scenario_handler import (
 _log = logging.getLogger(__name__)
 
 
-def run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units):
+def run_strategic_model(input_file, output_file, id, modelParameters):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -39,11 +39,12 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
         df_sets,
         df_parameters,
         default={
-            "objective": Objectives[objective],
-            "pipeline_cost": PipelineCost[pipelineCost],
+            "objective": Objectives[modelParameters["objective"]],
+            "pipeline_cost": PipelineCost[modelParameters["pipelineCost"]],
             "pipeline_capacity": PipelineCapacity.input,
             "node_capacity": True,
-            "water_quality": WaterQuality[waterQuality],
+            "water_quality": WaterQuality[modelParameters["waterQuality"]],
+            # "build_units": BuildUnits[modelParameters["build_units"]]
         },
     )
     
@@ -51,25 +52,40 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
     results = {"data": {}, "status": "Solving model"}
     scenario["results"] = results
     scenario_handler.update_scenario(scenario)
-
+    try:
+        optimality_gap = int(modelParameters["optimalityGap"])/100
+    except:
+        optimality_gap = 0
+    _log.info(f'optimality gap is {optimality_gap}')
     options = {
         "deactivate_slacks": True,
-        "scale_model": True,
+        "scale_model": modelParameters["scale_model"],
         "scaling_factor": 1000,
-        "running_time": runtime,
-        "gap": 0,
-        "solver": solver,
-        "build_units": build_units
+        "running_time": modelParameters["runtime"],
+        "gap": optimality_gap,
+        "solver": modelParameters["solver"]
     }
 
-    _log.info(f"solving model with solver: {solver}")
-    # try:
-    #     solve_model(model=strategic_model, options=options, solver=solver)
-    # except:
-    #     _log.info('solver not an option for solve model')
-    solve_model(model=strategic_model, options=options)
+    if options["solver"] not in ["cbc", "gurobi", "gurobi_direct"]:
+        _log.info('deleting solver as it doesnt match any of the proper solver names')
+        del options["solver"]
+
+    _log.info(f"solving model with options: {options}")
+
+    model_results = solve_model(model=strategic_model, options=options)
+    with nostdout():
+        feasibility_status = is_feasible(strategic_model)
+
+    if not feasibility_status:
+        _log.error(f"feasibility status check failed, setting termination condition to infeasible")
+        termination_condition = "infeasible"
+    else:
+        print("\nModel results validated and found to pass feasibility tests\n" + "-" * 60)
+        termination_condition = model_results.solver.termination_condition
+
+
     scenario = scenario_handler.get_scenario(int(id))
-    results = {"data": {}, "status": "Generating output"}
+    results = {"data": {}, "status": "Generating output", "terminationCondition": termination_condition}
     scenario["results"] = results
     scenario_handler.update_scenario(scenario)
 
@@ -80,24 +96,31 @@ def run_strategic_model(input_file, output_file, id, objective, runtime, pipelin
     """
     [model, results_dict] = generate_report(
         strategic_model,
+        results_obj=model_results,
         is_print=[PrintValues.essential],
         output_units=OutputUnits.user_units,
         fname=output_file,
     )
-    
+
     total_time = datetime.datetime.now() - start_time
     _log.info(f"total process took {total_time.seconds} seconds")
 
     return results_dict
 
-def handle_run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units):
+def handle_run_strategic_model(input_file, output_file, id, modelParameters):
     try:
-        results_dict = run_strategic_model(input_file, output_file, id, objective, runtime, pipelineCost, waterQuality, solver, build_units)
+        results_dict = run_strategic_model(input_file, output_file, id, modelParameters)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
-        results = {"data": results_dict, "status": "complete"}
+        results = scenario["results"]
+        results['data'] = results_dict
+        if results['terminationCondition'] == "infeasible":
+            results['status'] = 'Infeasible'
+        else:
+            results['status'] = 'Optimized'
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
+        scenario_handler.check_for_diagram(id)
     except Exception as e:
         _log.error(f"unable to run strategic model: {e}")
         time.sleep(2)

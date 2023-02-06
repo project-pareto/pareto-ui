@@ -44,7 +44,7 @@ export default function FilterDropdown(props) {
     }
 
     return (
-        <Accordion style={{width:props.width }}sx={{width:props.width}}>
+        <Accordion style={{minWidth:props.width }}sx={{minWidth:props.width}}>
                 <AccordionSummary sx={{marginBottom: 0, paddingBottom:0}} style={{justifyContent:"center"}}>
                 <Typography noWrap align="center" sx={{width: '100%',fontWeight: "bold", color: "#0884b4"}}>{props.option1} & {props.option2} Filters</Typography>
                 </AccordionSummary>

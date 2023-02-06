@@ -17,7 +17,8 @@ export default function Dashboard(props) {
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
     const fileTypes = ["xlsx"];
-    const sampleFileUrl = "https://drive.google.com/uc?export=download&id=1dmcdh4sKmB73kqCkHS279pxomFGWbexP"
+    // const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.6_rel/pareto/case_studies/strategic_small_case_study.xlsx"
+    const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_permian_demo.xlsx"
 
 
   useEffect(()=>{
@@ -183,7 +184,7 @@ export default function Dashboard(props) {
             {showWarning && <p style={{color:'red'}}>{warningMessage}</p>}
         </Grid>
         <Grid item xs={12}>
-            <Button style={styles.button} onClick={handleCreateScenario}>Create Scenario</Button>
+            <Button id="create-scenario-button" style={styles.button} onClick={handleCreateScenario}>Create Scenario</Button>
         </Grid>
         </Grid>
     </Modal>

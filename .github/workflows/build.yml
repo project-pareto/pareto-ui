@@ -3,8 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - electron-build
-      - nm-demo-updates
+      - prod-build
 
 defaults:
   run:
@@ -40,9 +39,13 @@ jobs:
       - name: Get idaes extensions
         run: idaes get-extensions
 
+      # - name: Install Pareto locally
+      #   working-directory: ../
+      #   run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.5.0_release && pip install --progress-bar off .
+
       - name: Install Pareto locally
         working-directory: ../
-        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.5.0_release && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/0.6.0 -b 0.6.0 && pip install --progress-bar off .
 
       - name: Build Backend
         run: npm --prefix electron run build-backend
@@ -60,6 +63,7 @@ jobs:
             name: windows-dist
             path: |
               electron/dist/Pareto-UI_Setup.exe
+  
   # linux-build:
   #   name: Linux Build
 

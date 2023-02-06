@@ -24,12 +24,20 @@ export default function Dashboard(props) {
   const [ openEditName, setOpenEditName ] = useState(false)
   // const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
   const [ inputDataEdited, setInputDataEdited ] = useState(false) 
+  const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
   // const handleEditInput = (bool) => setInputDataEdited(bool)
 
   useEffect(()=>{
+    // let guy = "["
+    // Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
+    //   guy+=`"${key}",`
+      
+    // ))
+    // guy+="]"
+    // console.log(guy)
     try {
       if(!scenario) {
         props.navigateHome()
@@ -68,7 +76,7 @@ export default function Dashboard(props) {
           console.log('run model successful: ')
           console.log(data)
           props.updateScenario(data)
-          props.handleSetSection(2)
+          props.updateAppState({action:'section',section:2},scenario.id)
           props.addTask(scenario.id)
         }
         else if(responseCode === 500) {
@@ -104,10 +112,10 @@ export default function Dashboard(props) {
         inputDataEdited={inputDataEdited}
         handleUpdateExcel={props.handleUpdateExcel}
         setInputDataEdited={setInputDataEdited}
-        resetScenarioData={props.resetScenarioData}
+        syncScenarioData={props.syncScenarioData}
       >
       </ProcessToolbar>
-      {(props.section === 0 || (props.section === 2 && scenario.results.status === "complete")) && 
+      {(props.section === 0 || (props.section === 2 && scenario.results.status.includes("Optimized"))) && 
         <Sidebar 
           handleSetCategory={props.handleSetCategory} 
           scenario={scenario} 
@@ -116,12 +124,12 @@ export default function Dashboard(props) {
           inputDataEdited={inputDataEdited}
           handleUpdateExcel={props.handleUpdateExcel}
           setInputDataEdited={setInputDataEdited}
-          resetScenarioData={props.resetScenarioData}
+          syncScenarioData={props.syncScenarioData}
           >
         </Sidebar>
       }
       
-    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section === 2 && scenario.results.status !== "complete")) && styles.shiftTextRight}>
+    <Grid container spacing={1} sx={(props.section !== 1 && !(props.section === 2 && !scenario.results.status.includes("Optimized"))) ? styles.shiftTextRight : {}}>
       <Grid item xs={4} ></Grid>
       <PopupModal
         input
@@ -140,7 +148,7 @@ export default function Dashboard(props) {
         <b id='scenarioTitle' >
         {(scenario && props.section===0) && 
         <p>{scenario.name}
-        <IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}} disabled={['complete','none','failure'].includes(scenario.results.status) ? false : true}>
+        <IconButton onClick={handleOpenEditName} style={{fontSize:"15px", zIndex:'0'}} disabled={enabledStatusList.includes(scenario.results.status) ? false : true}>
           <EditIcon fontSize='inherit'/>
         </IconButton>
         </p>
@@ -151,9 +159,34 @@ export default function Dashboard(props) {
       <Grid item xs={4}>
       </Grid>
       <Grid item xs={12}>
-      {(scenario && props.section===0) ? <DataInput handleUpdateExcel={props.handleUpdateExcel} category={props.category} scenario={scenario} edited={inputDataEdited} handleEditInput={setInputDataEdited}></DataInput> : null}
-      {(scenario && props.section===1) ? <Optimization category={props.category} scenario={scenario} updateScenario={props.updateScenario}></Optimization> : null}
-      {(scenario && props.section===2) ? <ModelResults category={props.category} scenario={scenario} handleSetSection={props.handleSetSection}></ModelResults> : null}
+      {(scenario && props.section===0) &&
+        <DataInput 
+          handleUpdateExcel={props.handleUpdateExcel} 
+          category={props.category} 
+          scenario={scenario} 
+          edited={inputDataEdited} 
+          handleEditInput={setInputDataEdited}
+          syncScenarioData={props.syncScenarioData}
+        />
+      }
+      {(scenario && props.section===1) && 
+        <Optimization 
+          category={props.category} 
+          scenario={scenario} 
+          updateScenario={props.updateScenario}
+          handleRunModel={handleRunModel}
+          backgroundTasks={props.backgroundTasks} 
+        />
+      }
+      {(scenario && props.section===2) && 
+        <ModelResults 
+          category={props.category} 
+          scenario={scenario} 
+          handleSetSection={props.handleSetSection} 
+          appState={props.appState}
+          syncScenarioData={props.syncScenarioData}
+        />
+      }
       </Grid>
     </Grid>
     <Bottombar 
@@ -165,7 +198,7 @@ export default function Dashboard(props) {
       handleUpdateExcel={props.handleUpdateExcel}
       inputDataEdited={inputDataEdited}
       setInputDataEdited={setInputDataEdited}
-      resetScenarioData={props.resetScenarioData}
+      syncScenarioData={props.syncScenarioData}
       handleRunModel={handleRunModel}
       />
     </>

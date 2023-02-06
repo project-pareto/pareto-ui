@@ -9,8 +9,10 @@ import tinydb
 from fastapi import HTTPException
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from importlib.resources import files
 
 import idaes.logger as idaeslog
+from pareto.utilities.get_data import get_display_units
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
@@ -21,8 +23,8 @@ _log = logging.getLogger(__name__)
 class ScenarioHandler:
     """Manage the saved scenarios."""
 
-    SCENARIO_DB_FILE = "scenarios.json"
-    VERSION = 3
+    VERSION = 1
+    SCENARIO_DB_FILE = f"scenarios.json"
     LOCKED = False
 
     def __init__(self, **kwargs) -> None:
@@ -34,9 +36,11 @@ class ScenarioHandler:
         self.next_id = 0
         self.background_tasks = []
         self.data_directory_path = self.app_settings.data_basedir
-        self.scenarios_path = os.path.join(self.data_directory_path, self.SCENARIO_DB_FILE)
-        self.excelsheets_path = self.data_directory_path / "excelsheets"
-        self.outputs_path = self.data_directory_path / "outputs"
+        self.scenarios_path = self.data_directory_path / f"v{self.VERSION}" / self.SCENARIO_DB_FILE
+        self.excelsheets_path = self.data_directory_path / f"v{self.VERSION}" / "excelsheets"
+        self.outputs_path = self.data_directory_path / f"v{self.VERSION}" / "outputs"
+        self.input_diagrams_path = self.data_directory_path / f"v{self.VERSION}" / "input_diagrams"
+        self.output_diagrams_path = self.data_directory_path / f"v{self.VERSION}" / "output_diagrams"
 
         _log.info(f"app directory: {os.path.dirname(os.path.abspath(__file__))}")
         _log.info(f"currently operating in directory: {os.getcwd()}")
@@ -48,6 +52,11 @@ class ScenarioHandler:
         except Exception as e:
             _log.info(f"unable to change to app directroy: {e}")
 
+        ### check for data directory
+        has_data = os.path.isdir(self.data_directory_path / f"v{self.VERSION}")
+        _log.info(f'has_data is {has_data}')
+
+
         # create data directories
         _log.info(f"making directory: {self.data_directory_path}")
         self.data_directory_path.mkdir(parents=True, exist_ok=True)
@@ -58,11 +67,43 @@ class ScenarioHandler:
         _log.info(f"making directory: {self.outputs_path}")
         self.outputs_path.mkdir(parents=True, exist_ok=True)
 
+        _log.info(f"making directory: {self.input_diagrams_path}")
+        self.input_diagrams_path.mkdir(parents=True, exist_ok=True)
+
+        _log.info(f"making directory: {self.output_diagrams_path}")
+        self.output_diagrams_path.mkdir(parents=True, exist_ok=True)
+
+        if not has_data:
+            _log.info('importing default data')
+            try:
+                self.import_default_data()
+            except Exception as e:
+                _log.error(f'unable to import default data: {e}')
+
         # Connect to DB
         path = self.scenarios_path
         self._db = tinydb.TinyDB(path)
         self.update_next_id()
         self.retrieve_scenarios()
+
+    def import_default_data(self):
+        default_ids = [1,2,3,4,5]
+        default_directories = [("excelsheets", "xlsx"), ("input_diagrams", "png"), ("output_diagrams", "png"), ("outputs", "xlsx")]
+        default_data_path = files('app').joinpath(f"internal/assets/v{self.VERSION}_default")
+        destination_directory = self.data_directory_path / f"v{self.VERSION}"
+        for directory in default_directories:
+            d_name = directory[0]
+            d_ext  = directory[1]
+            for each in default_ids:
+                f_path = default_data_path.joinpath(f"{d_name}/{each}.{d_ext}")
+                destination_path = destination_directory.joinpath(f"{d_name}/{each}.{d_ext}")
+                _log.info(f'moving {f_path} to {destination_path}')
+                shutil.copyfile(f_path, destination_path)
+        ### copy over scenarios.json files
+        f_path = default_data_path.joinpath(f"scenarios.json")
+        destination_path = destination_directory.joinpath(f"scenarios.json")
+        _log.info(f'moving {f_path} to {destination_path}')
+        shutil.copyfile(f_path, destination_path)
 
     def retrieve_scenarios(self):
         _log.info(f"retrieving scenarios")
@@ -107,13 +148,20 @@ class ScenarioHandler:
 
         return updatedScenario
     
-    def upload_excelsheet(self, output_path, filename, id):
-        _log.info(f"Uploading excel sheet: {filename}")
+    def upload_excelsheet(self, output_path, scenarioName, filename):
+        _log.info(f"Uploading excel sheet: {scenarioName}")
 
         [set_list, parameter_list] = get_input_lists()
 
         # read in data from uploaded excel sheet
         [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
+        
+        try:
+            display_units = get_display_units(parameter_list, df_parameters["Units"])
+        except Exception as e:
+            _log.error(f'unable to get units: {e}')
+            display_units = {}
+
         del frontend_parameters['Units']
 
         # convert tuple keys into dictionary values - necessary for javascript interpretation
@@ -138,12 +186,22 @@ class ScenarioHandler:
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
         return_object = {
-            "name": filename, 
+            "name": scenarioName, 
             "id": self.next_id, 
             "date": date,
-            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters}, 
-            "optimization": {"objective":"cost", "runtime": 180, "pipelineCostCalculation": "distance_based", "waterQuality": "false", "solver": "cbc","build_units": "user_units"}, 
-            "results": {"status": "none", "data": {}}
+            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units}, 
+            "optimization": 
+                {
+                    "objective":"cost", 
+                    "runtime": 900, 
+                    "pipelineCostCalculation": "distance_based", 
+                    "waterQuality": "false", 
+                    "solver": "cbc",
+                    "build_units": "scaled_units",
+                    "optimalityGap": 0,
+                    "scale_model": True
+                }, 
+            "results": {"status": "Draft", "data": {}}
             }
 
         # check if db is in use. if so, wait til its done being used
@@ -154,10 +212,36 @@ class ScenarioHandler:
         self.LOCKED = True
         self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
         self.LOCKED = False
+        
+        return_object = self.check_for_diagram(self.next_id, filename.split('.')[0])
+
         self.update_next_id()
         self.retrieve_scenarios()
         
         return return_object
+    
+    def check_for_diagram(self, id, filename = None):
+        scenario = self.get_scenario(id)
+        extension = "png"
+        if filename:
+            diagramType = "input"
+            diagramIdentifier = filename
+            scenario_diagram_path = f"{self.input_diagrams_path}/{id}.{extension}"
+        else:
+            diagramType = "output"
+            diagramIdentifier = scenario['name']
+            scenario_diagram_path = f"{self.output_diagrams_path}/{id}.{extension}"
+        try:
+            diagram_path = files('pareto').parent.joinpath(f"docs/img/{diagramIdentifier}.{extension}")
+            _log.info(f'diagram_path is : {diagram_path}')
+            shutil.copyfile(diagram_path, scenario_diagram_path)
+            scenario[f"{diagramType}DiagramExtension"] = extension
+            return self.update_scenario(scenario)
+        except Exception as e:
+            _log.info(f'unable to find diagram_path: {e}')
+            return scenario
+        
+
 
     def copy_scenario(self, id):
         _log.info(f"copying scenario with id: {id}")
@@ -173,8 +257,6 @@ class ScenarioHandler:
             new_scenario["name"] = new_scenario["name"]+' copy'
             new_scenario["id"] = new_scenario_id
             new_scenario["date"] = date
-            
-            
 
             # create copy of excel sheet input
             original_excel_path = "{}/{}.xlsx".format(self.excelsheets_path,id)
@@ -186,6 +268,26 @@ class ScenarioHandler:
             new_output_path = "{}/{}.xlsx".format(self.outputs_path,new_scenario_id)
             if (os.path.isfile(original_output_path)):
                 shutil.copyfile(original_output_path, new_output_path)
+
+            # create copy of input diagram (if it exists)
+            try:
+                input_diagramFileType = self.scenario_list[id][f'inputDiagramExtension']
+                original_input_diagram_path = f"{self.input_diagrams_path}/{id}.{input_diagramFileType}"
+                new_input_diagram_path = f"{self.input_diagrams_path}/{new_scenario_id}.{input_diagramFileType}"
+                if (os.path.isfile(original_input_diagram_path)):
+                    shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+            except:
+                _log.info('unable to copy input network diagram')
+
+            # create copy of output diagram (if it exists)
+            try:
+                output_diagramFileType = self.scenario_list[id][f'outputDiagramExtension']
+                original_output_diagram_path = f"{self.output_diagrams_path}/{id}.{output_diagramFileType}"
+                new_output_diagram_path = f"{self.output_diagrams_path}/{new_scenario_id}.{output_diagramFileType}"
+                if (os.path.isfile(original_output_diagram_path)):
+                    shutil.copyfile(original_output_diagram_path, new_output_diagram_path)
+            except:
+                _log.info('unable to copy input network diagram')
 
             # add record in db for new scenario
             # check if db is in use. if so, wait til its done being used
@@ -235,12 +337,30 @@ class ScenarioHandler:
         except Exception as e:
             _log.error(f"unable to remove output for #{index}: {e}")
 
-        # remove completions demand plot
+        # remove diagram images (if they exist)
         try:
-            plot_file = "{}/{}_plot.html".format(self.outputs_path,index)
-            os.remove(plot_file)
+            diagramFileType = self.scenario_list[index]['inputDiagramExtension']
+            input_diagram = f"{self.input_diagrams_path}/{index}.{diagramFileType}"
+            _log.info(f'removing input diagram from location: {input_diagram}')
+            if os.path.isfile(input_diagram):
+                os.remove(input_diagram)
         except Exception as e:
-            _log.error(f"unable to delete completions demand plot for #{index}: {e}")
+            _log.error(f"unable to remove input diagram for #{index}: {e}")
+        try:
+            diagramFileType = self.scenario_list[index]['outputDiagramExtension']
+            output_diagram = f"{self.output_diagrams_path}/{index}.{diagramFileType}"
+            _log.info(f'removing output diagram from location: {output_diagram}')
+            if os.path.isfile(output_diagram):
+                os.remove(output_diagram)
+        except Exception as e:
+            _log.error(f"unable to remove output diagram for #{index}: {e}")
+
+        # # remove completions demand plot
+        # try:
+        #     plot_file = "{}/{}_plot.html".format(self.outputs_path,index)
+        #     os.remove(plot_file)
+        # except Exception as e:
+        #     _log.error(f"unable to delete completions demand plot for #{index}: {e}")
 
         # update scenario list
         self.retrieve_scenarios()
@@ -302,7 +422,23 @@ class ScenarioHandler:
 
     def get_excelsheet_path(self, id):
         return f"{self.excelsheets_path}/{id}.xlsx"
-    
+
+    def get_diagram(self, diagram_type, id):
+        try:
+            diagramFileType = self.scenario_list[id][f'{diagram_type}DiagramExtension']
+            if diagram_type == "input":
+                diagramLocation = f"{self.input_diagrams_path}/{id}.{diagramFileType}"
+            elif diagram_type == "output":
+                diagramLocation = f"{self.output_diagrams_path}/{id}.{diagramFileType}"
+            if os.path.isfile(diagramLocation):
+                return diagramLocation
+            else:
+                _log.error(f"unable to find diagram for id {id}")
+                raise HTTPException(400, detail=f"no diagram found")
+        except Exception as e:
+            _log.error(f"error: unable to find diagram for id {id}: {e}")
+            raise HTTPException(400, detail=f"no diagram found: {e}")
+        
     def update_next_id(self):
         try:
             # check if db is in use. if so, wait til its done being used
@@ -313,13 +449,19 @@ class ScenarioHandler:
             self.LOCKED = True
 
             query = tinydb.Query()
-            el = self._db.search((query.version == self.VERSION))[-1]
-            next_id = el.doc_id+1
-            
+            # el = self._db.search((query.version == self.VERSION))[-1]
+            # next_id = el.doc_id+1
+            db_items = self._db.search((query.version == self.VERSION))
+            highest_id = 0
+            for each in db_items:
+                if each["id_"] > highest_id:
+                    highest_id = each["id_"]
+            next_id = highest_id + 1
             _log.info(f'setting next id: {next_id}')
             self.next_id = next_id
         except Exception as e:
             _log.info(f"no documents found; next id is 0")
+            _log.error(f"{e}")
 
         self.LOCKED = False
 
@@ -377,5 +519,39 @@ class ScenarioHandler:
         self.LOCKED = False
         # update scenario
         return self.update_scenario(scenario)
+
+    def upload_diagram(self, output_path, id, diagram_type):
+        # check if db is in use. if so, wait til its done being used
+        locked = self.LOCKED
+        while(locked):
+            time.sleep(0.5)
+            locked = self.LOCKED
+        self.LOCKED = True
+        query = tinydb.Query()
+        scenario = self._db.search((query.id_ == int(id)) & (query.version == self.VERSION))[0]['scenario']
+        scenario[f"{diagram_type}DiagramExtension"] = output_path.split('.')[-1]
+        self._db.upsert(
+            {"scenario": scenario, 'id_': scenario['id'], 'version': self.VERSION},
+            ((query.id_ == scenario['id']) & (query.version == self.VERSION)),
+        )
+        self.LOCKED = False
+        self.retrieve_scenarios()
+        
+        return
+    
+    def delete_diagram(self, diagram_type, index):
+        try:
+            diagramFileType = self.scenario_list[index][f'{diagram_type}DiagramExtension']
+            if diagram_type == "input":
+                diagram = f"{self.input_diagrams_path}/{index}.{diagramFileType}"
+            elif diagram_type == "output":
+                diagram = f"{self.output_diagrams_path}/{index}.{diagramFileType}"
+            _log.info(f'removing diagram from location: {diagram}')
+            if os.path.isfile(diagram):
+                os.remove(diagram)
+        except Exception as e:
+            _log.error(f"unable to remove diagram for #{index}: {e}")
+            raise HTTPException(400, detail=f"unable to remove diagram: {e}")
+        return self.scenario_list[index]
 
 scenario_handler = ScenarioHandler()

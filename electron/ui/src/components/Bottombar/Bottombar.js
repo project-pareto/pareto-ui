@@ -36,7 +36,7 @@ export default function Bottombar(props) {
         */
        try{
         let tasks = props.backgroundTasks
-        if ((tasks.length > 0) || (!["none", "failure", "complete"].includes(props.scenario.results.status))) {
+        if ((tasks.length > 0) || (!["Draft", "failure", "Optimized", "Not Optimized", "Infeasible"].includes(props.scenario.results.status))) {
             setDisableOptimize(true)
         } else {
             setDisableOptimize(false)
@@ -60,7 +60,7 @@ export default function Bottombar(props) {
         handleCloseSaveModal()
         props.setInputDataEdited(false)
         props.handleSelection(key)
-        props.resetScenarioData()
+        props.syncScenarioData()
       }
     
       const handleClick = (key) => {
