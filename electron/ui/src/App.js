@@ -152,17 +152,24 @@ useEffect(()=> {
     /*
       if not on model results tab, show popup that lets user know that model has finished running
     */
-   if(""+id === ""+scenarioIndex && section === 2){
+   if(""+id === ""+scenarioIndex){
     setScenarioData(newScenarios[id])
-   }else {
+   }
+   if (section !== 2) {
     setShowCompletedOptimization(true)
    }
   }
 
   const goToModelResults = () => {
+    handleSetSection(2)
     setShowCompletedOptimization(false)
-    handleScenarioSelection(lastCompletedScenario)
+    setScenarioData(scenarios[lastCompletedScenario]);
+    setScenarioIndex(lastCompletedScenario)
+  }
 
+  const handleCloseFinishedOptimizationDialog = () => {
+    console.log('inside handleCloseFinishedOptimizationDialog')
+    setShowCompletedOptimization(false)
   }
 
   const navigateToScenarioList = () => {
@@ -427,7 +434,7 @@ useEffect(()=> {
       </Routes> 
       {showCompletedOptimization && 
         <ModelCompletionBar
-          setShowCompletedOptimization={setShowCompletedOptimization}
+          handleCloseFinishedOptimizationDialog={handleCloseFinishedOptimizationDialog}
           goToModelResults={goToModelResults}
         />
       }
