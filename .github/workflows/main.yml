@@ -51,16 +51,16 @@ jobs:
         run: |
           npm --prefix electron/ui clean-install
 
-      # - name: get idaes extensions
-      #   run: idaes get-extensions
-
       - name: get idaes extensions
-        run: |
-         if [ "$RUNNER_OS" == "Linux" ]; then
-              idaes get-extensions --platform ubuntu2104
-         else
-              idaes get-extensions
-         fi
+        run: idaes get-extensions
+
+      # - name: get idaes extensions
+      #   run: |
+      #    if [ "$RUNNER_OS" == "Linux" ]; then
+      #         idaes get-extensions --platform ubuntu2104
+      #    else
+      #         idaes get-extensions
+      #    fi
 
       - name: run component tests
         run: npm --prefix electron/ui test
