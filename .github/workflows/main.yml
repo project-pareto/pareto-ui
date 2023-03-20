@@ -75,7 +75,7 @@ jobs:
         working-directory: electron/ui
         timeout-minutes: 24
         run: |
-          "$(npm bin)"/cypress run
+          npx cypress run
       - name: Upload artifact for screenshots & videos
         uses: actions/upload-artifact@v3
         if: always()
