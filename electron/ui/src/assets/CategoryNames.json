@@ -38,6 +38,7 @@
     "StorageInitialWaterQuality":"Storage Initial Water Quality",
     "PadStorageInitialWaterQuality":"Pad Storage Initial Water Quality",
     "DisposalOperatingCapacity":"Disposal Operating Capacity",
+    "RemovalEfficiency": "Removal Efficiency",
     "PNA":"PNA",
     "CNA":"CNA",
     "CCA":"CCA",
