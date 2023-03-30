@@ -6,10 +6,3 @@ export const runModel = (data) => {
         body: JSON.stringify(data)
     });
 }; 
-
-export const getPlots = (id) => {
-    return fetch('http://localhost:8001/get_plots/'+id, {
-        method: 'GET', 
-        mode: 'cors'
-    });
-}; 

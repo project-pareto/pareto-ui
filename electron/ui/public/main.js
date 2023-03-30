@@ -13,17 +13,12 @@ require('dotenv').config()
 
 const axios = require('axios').default;
 const isDev = require('electron-is-dev')
-const { spawn, execFile } = require("child_process")
+const { spawn } = require("child_process")
 
 // Python server parameters
-const PY_HOST = "127.0.0.1";
 const PY_PORT = 8001;
-const UI_PORT = 3000;
-const PY_LOG_LEVEL = "info";
-let uiReady = false
 
 const serverURL = `http://localhost:${PY_PORT}`
-const uiURL = `http://localhost:${UI_PORT}`
 
 require('@electron/remote/main').initialize()
 
@@ -42,7 +37,6 @@ function getWindowSettings () {
 function saveBounds (bounds) {
   storage.set("win-size", bounds)
 }
-
 
 function createWindow() {
   
@@ -96,11 +90,9 @@ const installExtensions = () => {
 
     log.info("installation started");
     console.log("installation started");
-
       var scriptOutput = "";
       installationProcess.stdout.setEncoding('utf8');
       installationProcess.stdout.on('data', function(data) {
-          // console.log('stdout: ' + data);
           log.info('stdout: ' + data);
           data=data.toString();
           scriptOutput+=data;
@@ -108,7 +100,6 @@ const installExtensions = () => {
 
       installationProcess.stderr.setEncoding('utf8');
       installationProcess.stderr.on('data', function(data) {
-          // console.log('stderr: ' + data);
           log.info('stderr: ' + data);
           data=data.toString();
           scriptOutput+=data;
@@ -120,7 +111,6 @@ const installExtensions = () => {
     return installationProcess;
   }
   
-
 const startServer = () => {
     if (isDev) {
 
@@ -136,14 +126,7 @@ const startServer = () => {
         {
             cwd: '../backend/app'
         }
-      );
-
-      // backendProcess = spawn(
-      //   path.join(__dirname, "../py_dist/main/main"),
-      //   [
-      //     ""
-      //   ]
-      // );
+      )
 
       log.info("Python Started in dev mode");
       console.log("Python Started in dev mode");
@@ -164,10 +147,8 @@ const startServer = () => {
             data=data.toString();
             scriptOutput+=data;
         });
-
         backendProcess.stderr.setEncoding('utf8');
         backendProcess.stderr.on('data', function(data) {
-            // console.log('stderr: ' + data);
             log.info('stderr: ' + data);
             data=data.toString();
             scriptOutput+=data;
@@ -202,18 +183,13 @@ app.whenReady().then(() => {
         log.info('starting server')
         console.log('starting server')
         serverProcess = startServer()
-  
-        // let uiProcess = startUI()
         let noTrails = 0
+
         // Start Window 
         var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=5) => {
-            
             axios.get(url).then(() => {
                 console.log(`${appName} is ready at ${url}!`)
                 log.info(`${appName} is ready at ${url}!`)
-                // if (successFn) {
-                //     successFn()
-                // }
             })
             .catch(async () => {
                 console.log(`Waiting to be able to connect ${appName} at ${url}...`)
@@ -240,13 +216,9 @@ app.whenReady().then(() => {
       })
     }
 
-    
-    
-
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
-
 
 })
 

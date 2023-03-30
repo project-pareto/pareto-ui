@@ -26,13 +26,6 @@ app.add_middleware(
 
 app.include_router(scenarios.router)
 
-@app.get("/")
-async def root():
-    return {"message": "Hello Pareto"}
-
-
-
-
 if __name__ == '__main__':
     if('i' in sys.argv or 'install' in sys.argv):
         _log.info('running get_extensions()')
