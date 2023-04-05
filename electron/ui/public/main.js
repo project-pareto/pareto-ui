@@ -226,8 +226,8 @@ app.whenReady().then(() => {
                 else {
                     console.error(`Exceeded maximum trials to connect to ${appName}`)
                     log.info(`Exceeded maximum trials to connect to ${appName}`)
-                    spawnedProcess.kill('SIGINT')
-                    win.close()
+                    // spawnedProcess.kill('SIGINT')
+                    // win.close()
                 }
             });
         };
@@ -254,5 +254,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
-
-

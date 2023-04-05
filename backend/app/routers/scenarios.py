@@ -138,18 +138,6 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         )
     return scenario
 
-@router.get("/get_plots/{scenario_id}")
-async def get_plots(scenario_id: int):
-    """Get completions demand plot
-
-    Args:
-        scenario_id: scenario id for given completions demand plot
-
-    Returns:
-        Raw html of completions demand plot
-    """
-    return scenario_handler.get_plots(scenario_id)
-
 @router.get("/check_tasks")
 async def check_tasks():
     """Get list of currently running background tasks

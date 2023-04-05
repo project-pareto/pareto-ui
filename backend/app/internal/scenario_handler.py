@@ -23,7 +23,7 @@ _log = logging.getLogger(__name__)
 class ScenarioHandler:
     """Manage the saved scenarios."""
 
-    VERSION = 1
+    VERSION = 2
     SCENARIO_DB_FILE = f"scenarios.json"
     LOCKED = False
 
@@ -73,12 +73,12 @@ class ScenarioHandler:
         _log.info(f"making directory: {self.output_diagrams_path}")
         self.output_diagrams_path.mkdir(parents=True, exist_ok=True)
 
-        if not has_data:
-            _log.info('importing default data')
-            try:
-                self.import_default_data()
-            except Exception as e:
-                _log.error(f'unable to import default data: {e}')
+        # if not has_data:
+        #     _log.info('importing default data')
+        #     try:
+        #         self.import_default_data()
+        #     except Exception as e:
+        #         _log.error(f'unable to import default data: {e}')
 
         # Connect to DB
         path = self.scenarios_path
