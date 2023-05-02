@@ -410,20 +410,21 @@ useEffect(()=> {
           path="/scenario" 
           element={
             <Dashboard 
-            handleUpdateExcel={handleUpdateExcel}
-            updateScenario={handleScenarioUpdate} 
-            handleEditScenarioName={handleEditScenarioName} 
-            scenario={scenarioData} 
-            section={section} 
-            category={category} 
-            handleSetCategory={handleSetCategory} 
-            handleSetSection={handleSetSection} 
-            backgroundTasks={backgroundTasks}
-            navigateHome={navigateToScenarioList}
-            syncScenarioData={syncScenarioData}
-            addTask={addTask}
-            appState={appState}
-            updateAppState={updateAppState}
+              handleUpdateExcel={handleUpdateExcel}
+              updateScenario={handleScenarioUpdate} 
+              handleEditScenarioName={handleEditScenarioName} 
+              scenario={scenarioData} 
+              section={section} 
+              category={category} 
+              handleSetCategory={handleSetCategory} 
+              handleSetSection={handleSetSection} 
+              backgroundTasks={backgroundTasks}
+              navigateHome={navigateToScenarioList}
+              syncScenarioData={syncScenarioData}
+              addTask={addTask}
+              appState={appState}
+              updateAppState={updateAppState}
+              scenarios={scenarios}
             />} 
         />
 

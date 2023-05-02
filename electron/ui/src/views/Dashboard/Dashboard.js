@@ -185,6 +185,7 @@ export default function Dashboard(props) {
           handleSetSection={props.handleSetSection} 
           appState={props.appState}
           syncScenarioData={props.syncScenarioData}
+          scenarios={props.scenarios}
         />
       }
       </Grid>
