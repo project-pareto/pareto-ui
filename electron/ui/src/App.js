@@ -10,6 +10,7 @@ import '@fontsource/roboto/700.css';
 import Header from './components/Header/Header'; 
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
+import ScenarioCompare from './views/ScenarioCompare/ScenarioCompare';
 import LandingPage from './views/LandingPage/LandingPage';
 import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
 import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
@@ -425,6 +426,14 @@ useEffect(()=> {
               appState={appState}
               updateAppState={updateAppState}
               scenarios={scenarios}
+            />} 
+        />
+
+        <Route
+          path="/compare" 
+          element={
+            <ScenarioCompare
+              scenarios={scenarios} 
             />} 
         />
 
