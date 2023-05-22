@@ -15,18 +15,34 @@ import Plot from 'react-plotly.js';
 
 
 export default function ScenarioCompare(props) {
-  const {scenarios} = props
-  const [ primaryScenarioIndex, setPrimaryScenarioIndex ] = useState(4)
-  const [ referenceScenarioIndex, setReferenceScenarioIndex ] = useState(6)
+  const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes} = props
+  const [ primaryScenarioIndex, setPrimaryScenarioIndex ] = useState(null)
+  const [ referenceScenarioIndex, setReferenceScenarioIndex ] = useState(null)
 //   const [ kpiData, setKpiData ] = useState(null)
   const [ kpiDataPrimary, setKpiDataPrimary ] = useState(null)
   const [ kpiDataReference, setKpiDataReference ] = useState(null)
 
   useEffect(()=>{
+    //check for indexes
+    let tempIndexes = []
+    if(compareScenarioIndexes.length === 0) {
+        let scenarioIds = Object.keys(scenarios)
+        tempIndexes[0] = scenarioIds[0]
+        tempIndexes[1] = scenarioIds[1]
+        setPrimaryScenarioIndex(scenarioIds[0])
+        setReferenceScenarioIndex(scenarioIds[1])
+        setCompareScenarioIndexes([scenarioIds[0],scenarioIds[1]])
+    } else {
+        tempIndexes[0] = compareScenarioIndexes[0]
+        tempIndexes[1] = compareScenarioIndexes[1]
+        setPrimaryScenarioIndex(compareScenarioIndexes[0])
+        setReferenceScenarioIndex(compareScenarioIndexes[1])
+    }
+
+    // organize kpi data
     let tempData = {}
-    // organize results dict data
-    for (var index in scenarios[primaryScenarioIndex].results.data['v_F_Overview_dict']) {
-        let item = scenarios[primaryScenarioIndex].results.data['v_F_Overview_dict'][index]
+    for (var index in scenarios[tempIndexes[0]].results.data['v_F_Overview_dict']) {
+        let item = scenarios[tempIndexes[0]].results.data['v_F_Overview_dict'][index]
         let key = item[0]
         let description = item[1]
         let unit = item[2]
@@ -36,8 +52,8 @@ export default function ScenarioCompare(props) {
     console.log(tempData)
     setKpiDataPrimary(tempData)
     tempData = {}
-    for (var index in scenarios[referenceScenarioIndex].results.data['v_F_Overview_dict']) {
-        let item = scenarios[referenceScenarioIndex].results.data['v_F_Overview_dict'][index]
+    for (var index in scenarios[tempIndexes[1]].results.data['v_F_Overview_dict']) {
+        let item = scenarios[tempIndexes[1]].results.data['v_F_Overview_dict'][index]
         let key = item[0]
         let description = item[1]
         let unit = item[2]
@@ -47,7 +63,9 @@ export default function ScenarioCompare(props) {
     console.log(tempData)
     setKpiDataReference(tempData)
 
-}, [scenarios]);
+    
+
+}, [compareScenarioIndexes]);
 
    const styles = {
     titleDivider: {

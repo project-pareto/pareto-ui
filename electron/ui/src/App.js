@@ -31,6 +31,7 @@ function App() {
   const [ checkModelResults, setCheckModelResults ] = useState(0)
   const [ showCompletedOptimization, setShowCompletedOptimization ] = useState(false)
   const [ lastCompletedScenario, setLastCompletedScenario ] = useState(null)
+  const [ compareScenarioIndexes, setCompareScenarioIndexes ] = useState([])
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
 
@@ -373,11 +374,12 @@ useEffect(()=> {
     <div className="App">  
       <Header 
         showHeader={showHeader}
-        scenarios={scenarios} 
-        index={scenarioIndex} 
-        scenarioData={scenarioData} 
+        scenarios={scenarios}
+        index={scenarioIndex}
         handleSelection={handleScenarioSelection}
         navigateHome={navigateToScenarioList}
+        compareScenarioIndexes={compareScenarioIndexes}
+          setCompareScenarioIndexes={setCompareScenarioIndexes}
         />
         
       <Routes> 
@@ -434,6 +436,8 @@ useEffect(()=> {
           element={
             <ScenarioCompare
               scenarios={scenarios} 
+              compareScenarioIndexes={compareScenarioIndexes}
+              setCompareScenarioIndexes={setCompareScenarioIndexes}
             />} 
         />
 
