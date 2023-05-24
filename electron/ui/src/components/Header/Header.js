@@ -69,7 +69,7 @@ export default function Header(props) {
               name={"primary"}
             >
                 {Object.entries(scenarios).map( ([key, value] ) => {
-                  return <MenuItem key={key} value={key}>{value.name}</MenuItem>
+                  if (Object.keys(value.results.data).length > 0) return <MenuItem key={key} value={key}>{value.name}</MenuItem>
                 })}
             </Select>
             </FormControl>
@@ -82,7 +82,7 @@ export default function Header(props) {
               name={"reference"}
             >
                 {Object.entries(scenarios).map( ([key, value] ) => {
-                  return <MenuItem key={key} value={key}>{value.name}</MenuItem>
+                  if (Object.keys(value.results.data).length > 0) return <MenuItem key={key} value={key}>{value.name}</MenuItem>
                 })}
             </Select>
             </FormControl>
