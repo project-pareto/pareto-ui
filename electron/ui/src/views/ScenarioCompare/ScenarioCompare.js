@@ -21,6 +21,8 @@ export default function ScenarioCompare(props) {
 //   const [ kpiData, setKpiData ] = useState(null)
   const [ kpiDataPrimary, setKpiDataPrimary ] = useState(null)
   const [ kpiDataReference, setKpiDataReference ] = useState(null)
+  const [ capexBarChartData, setCapexBarChartData ] = useState(null)
+  const [ opexBarChartData, setOpexBarChartData ] = useState(null)
 
   useEffect(()=>{
     //check for indexes
@@ -47,25 +49,64 @@ export default function ScenarioCompare(props) {
         let description = item[1]
         let unit = item[2]
         let value = item[3]
-        tempData[key] = {"description": description, "unit": unit, "value": value}
+        tempData[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[0]].name}
     }
-    console.log(tempData)
+    // console.log(tempData)
     setKpiDataPrimary(tempData)
-    tempData = {}
+    let tempData2 = {}
     for (var index in scenarios[tempIndexes[1]].results.data['v_F_Overview_dict']) {
         let item = scenarios[tempIndexes[1]].results.data['v_F_Overview_dict'][index]
         let key = item[0]
         let description = item[1]
         let unit = item[2]
         let value = item[3]
-        tempData[key] = {"description": description, "unit": unit, "value": value}
+        tempData2[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[1]].name}
     }
-    console.log(tempData)
-    setKpiDataReference(tempData)
-
-    
-
+    // console.log(tempData2)
+    setKpiDataReference(tempData2)
+    unpackBarChartData(tempData,tempData2)
 }, [compareScenarioIndexes]);
+
+const unpackBarChartData = (scenarioData1, scenarioData2) => {
+    // unpack bar chart data
+    let tempCapexData = []
+    let tempOpexData = []
+    let capexKeys = [
+        'v_C_StorageCapEx', 
+        'v_C_TreatmentCapEx', 
+        'v_C_DisposalCapEx', 
+        'v_C_PipelineCapEx',
+    ]
+    let opexKeys = [
+        'v_C_TotalSourced',
+        'v_C_TotalTreatment',
+        'v_C_TotalDisposal',
+        'v_C_TotalPiping',
+        'v_C_TotalTrucking',
+    ]
+
+    for(let each of capexKeys) {
+        let tempX = [scenarioData1[each].name, scenarioData2[each].name]
+        let tempY = [scenarioData1[each].value, scenarioData2[each].value]
+        let tempName = each.replace('v_C_','').replace('CapEx','')
+        tempCapexData.push({x:tempX, y:tempY, name: tempName, type: 'bar'})
+    }
+
+    for(let each of opexKeys) {
+        let tempX = [scenarioData1[each].name, scenarioData2[each].name]
+        let tempY = [scenarioData1[each].value, scenarioData2[each].value]
+        let tempName = each.replace('v_C_','').replace('Total','')
+        tempOpexData.push({x:tempX, y:tempY, name: tempName, type: 'bar'})
+    }
+      
+    console.log('tempCapexData')
+    console.log(tempCapexData)
+
+    setCapexBarChartData(tempCapexData)
+    setOpexBarChartData(tempOpexData)
+    
+    // let layout = {barmode: 'stack'};
+}
 
    const styles = {
     titleDivider: {
@@ -224,7 +265,7 @@ export default function ScenarioCompare(props) {
                 </Box>
             </Grid>
 
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', marginBottom: 0, paddingBottom:0}}>
                     <p style={{marginBottom: 0, paddingBottom:0, fontWeight:"bold"}}>{scenarios[primaryScenarioIndex].name}</p>
                 </Box>
@@ -234,9 +275,61 @@ export default function ScenarioCompare(props) {
                 <Box sx={{display: 'flex', justifyContent: 'center', marginBottom: 0, paddingBottom:0}}>
                     <p style={{marginBottom: 0, paddingBottom:0, fontWeight:"bold"}}>{scenarios[referenceScenarioIndex].name}</p>
                 </Box>
+            </Grid> */}
+
+            <Grid item xs={6}>
+                <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
+                    <Grid container>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                        <p style={styles.chartTitle}>CAPEX</p>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                        <Plot
+                            data={capexBarChartData}
+
+                            layout={{
+                                width: 600,
+                                height: 450,
+                                showlegend: true,
+                                barmode: 'stack'
+                            }}
+                        />
+                        </Box>
+                    </Grid>
+                    </Grid>
+                </Box>
             </Grid>
 
             <Grid item xs={6}>
+                <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
+                    <Grid container>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                        <p style={styles.chartTitle}>OPEX</p>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                        <Plot
+                            data={opexBarChartData}
+
+                            layout={{
+                                width: 600,
+                                height: 450,
+                                showlegend: true,
+                                barmode: 'stack'
+                            }}
+                        />
+                        </Box>
+                    </Grid>
+                    </Grid>
+                </Box>
+            </Grid>
+
+            {/* <Grid item xs={6}>
                 <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
                     <Grid container>
                     <Grid item xs={12}>
@@ -388,7 +481,7 @@ export default function ScenarioCompare(props) {
                 </Box>
             </Grid>
 
-                <Grid item xs={6}>
+            <Grid item xs={6}>
                 <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
                     <Grid container>
                     <Grid item xs={12}>
@@ -438,7 +531,7 @@ export default function ScenarioCompare(props) {
                     </Grid>
                     </Grid>
                 </Box>
-            </Grid>
+            </Grid> */}
 
         </Grid>
         }
