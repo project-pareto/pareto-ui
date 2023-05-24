@@ -8,6 +8,7 @@ import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
+import ComparisonTable from '../../components/ComparisonTable/ComparisonTable';
 import Plot from 'react-plotly.js';
 
 
@@ -150,6 +151,11 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
     icon: {
         backgroundColor: "#5A3E73",
         color:"#CEC7D7"
+    },
+    comparisonTableBox: {
+        paddingTop:2, 
+        boxShadow:3,
+        padding:3
     },
    }
 
@@ -329,210 +335,22 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
                 </Box>
             </Grid>
 
-            {/* <Grid item xs={6}>
-                <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
-                    <Grid container>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <p style={styles.chartTitle}>CAPEX</p>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                        <Plot
-                            data={[
-                            {
-                                type: "pie",
-                                values: [
-                                    kpiDataPrimary.v_C_StorageCapEx.value, 
-                                    kpiDataPrimary.v_C_TreatmentCapEx.value, 
-                                    kpiDataPrimary.v_C_DisposalCapEx.value, 
-                                    kpiDataPrimary.v_C_PipelineCapEx.value],
-                                labels: [
-                                    "Storage", 
-                                    "Treatment", 
-                                    "Disposal", 
-                                    "Pipeline"],
-                                marker: {
-                                        colors: [
-                                            'rgb(255, 127, 19)',
-                                            'rgb(148, 103, 189)',
-                                            'rgb(64, 159, 44)',
-                                            'rgb(214, 39, 40)',
-                                            // 'rgb(30, 119, 180)',
-                                        ]
-                                    },
-                                textinfo: "percent",
-                                // insidetextorientation: "radial"
-                                }
-                            ]}
-
-                            layout={{
-                                width: 450,
-                                height: 450,
-                                showlegend: true
-                            }}
-                        />
-                        </Box>
-                    </Grid>
-                    </Grid>
-                </Box>
-                </Grid>
-
-                <Grid item xs={6}>
-                <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
-                    <Grid container>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <p style={styles.chartTitle}>CAPEX</p>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                        <Plot
-                            data={[
-                            {
-                                type: "pie",
-                                values: [
-                                    kpiDataReference.v_C_StorageCapEx.value, 
-                                    kpiDataReference.v_C_TreatmentCapEx.value, 
-                                    kpiDataReference.v_C_DisposalCapEx.value, 
-                                    kpiDataReference.v_C_PipelineCapEx.value],
-                                labels: [
-                                    "Storage", 
-                                    "Treatment", 
-                                    "Disposal", 
-                                    "Pipeline"],
-                                marker: {
-                                        colors: [
-                                            'rgb(255, 127, 19)',
-                                            'rgb(148, 103, 189)',
-                                            'rgb(64, 159, 44)',
-                                            'rgb(214, 39, 40)',
-                                            // 'rgb(30, 119, 180)',
-                                        ]
-                                    },
-                                textinfo: "percent",
-                                // insidetextorientation: "radial"
-                                }
-                            ]}
-
-                            layout={{
-                                width: 450,
-                                height: 450,
-                                showlegend: true
-                            }}
-                        />
-                        </Box>
-                    </Grid>
-                    </Grid>
-                </Box>
-                </Grid>
-
-                <Grid item xs={6}>
-                <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
-                    <Grid container>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <p style={styles.chartTitle}>OPEX</p>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                        <Plot
-                            data={[
-                            {
-                                type: "pie",
-                                values: [
-                                    kpiDataPrimary.v_C_TotalSourced.value >= 0 ? kpiDataPrimary.v_C_TotalSourced.value : 0, 
-                                    kpiDataPrimary.v_C_TotalTreatment.value >= 0 ? kpiDataPrimary.v_C_TotalTreatment.value : 0, 
-                                    kpiDataPrimary.v_C_TotalDisposal.value >= 0 ? kpiDataPrimary.v_C_TotalDisposal.value : 0, 
-                                    kpiDataPrimary.v_C_TotalPiping.value >= 0 ? kpiDataPrimary.v_C_TotalPiping.value : 0,
-                                    kpiDataPrimary.v_C_TotalTrucking.value >= 0 ? kpiDataPrimary.v_C_TotalTrucking.value : 0],
-                                labels: [
-                                    "Source", 
-                                    "Treatment", 
-                                    "Disposal", 
-                                    "Piping",
-                                    "Trucking"],
-                                marker: {
-                                    colors: [
-                                        'rgb(255, 127, 19)',
-                                        'rgb(148, 103, 189)',
-                                        'rgb(64, 159, 44)',
-                                        'rgb(214, 39, 40)',
-                                        'rgb(30, 119, 180)',
-                                    ]
-                                    },
-                                textinfo: "percent",
-                                // insidetextorientation: "radial"
-                                }
-                            ]}
-
-                            layout={{
-                                width: 450,
-                                height: 450,
-                                showlegend: true
-                            }}
-                        />
-                        </Box>
-                    </Grid>
-                    </Grid>
+            <Grid item xs={12}>
+                <Box sx={{display: 'flex', justifyContent: 'left'}}>
+                    <h2>Results Overview</h2>
                 </Box>
             </Grid>
 
-            <Grid item xs={6}>
-                <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
-                    <Grid container>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <p style={styles.chartTitle}>OPEX</p>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                        <Plot
-                            data={[
-                            {
-                                type: "pie",
-                                values: [
-                                    kpiDataReference.v_C_TotalSourced.value >= 0 ? kpiDataReference.v_C_TotalSourced.value : 0, 
-                                    kpiDataReference.v_C_TotalTreatment.value >= 0 ? kpiDataReference.v_C_TotalTreatment.value : 0, 
-                                    kpiDataReference.v_C_TotalDisposal.value >= 0 ? kpiDataReference.v_C_TotalDisposal.value : 0, 
-                                    kpiDataReference.v_C_TotalPiping.value >= 0 ? kpiDataReference.v_C_TotalPiping.value : 0,
-                                    kpiDataReference.v_C_TotalTrucking.value >= 0 ? kpiDataReference.v_C_TotalTrucking.value : 0],
-                                labels: [
-                                    "Source", 
-                                    "Treatment", 
-                                    "Disposal", 
-                                    "Piping",
-                                    "Trucking"],
-                                marker: {
-                                    colors: [
-                                        'rgb(255, 127, 19)',
-                                        'rgb(148, 103, 189)',
-                                        'rgb(64, 159, 44)',
-                                        'rgb(214, 39, 40)',
-                                        'rgb(30, 119, 180)',
-                                    ]
-                                    },
-                                textinfo: "percent",
-                                // insidetextorientation: "radial"
-                                }
-                            ]}
+            <Grid item xs={12}>
+                <Box style={{backgroundColor:'white'}} sx={styles.comparisonTableBox}>
+                    <ComparisonTable
+                        scenarios={scenarios}
+                        scenarioIndex={primaryScenarioIndex}
+                        secondaryScenarioIndex={referenceScenarioIndex}
 
-                            layout={{
-                                width: 450,
-                                height: 450,
-                                showlegend: true
-                            }}
-                        />
-                        </Box>
-                    </Grid>
-                    </Grid>
+                    />
                 </Box>
-            </Grid> */}
-
+            </Grid>
         </Grid>
         }
     </Box>

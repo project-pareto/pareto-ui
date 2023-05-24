@@ -11,8 +11,8 @@ import CategoryNames from '../../assets/CategoryNames.json'
 
 export default function ComparisonTable(props) {
     let params = useParams(); 
-    const { scenarios, scenarioIndex } = props;
-    const [ indices, setIndices ] = useState([scenarioIndex, scenarioIndex])
+    const { scenarios, scenarioIndex, secondaryScenarioIndex } = props;
+    const [ indices, setIndices ] = useState([scenarioIndex, secondaryScenarioIndex])
     const [ showTable, setShowTable ] = React.useState(true)
     const category = "v_F_Overview_dict"
     const styles ={
@@ -31,37 +31,53 @@ export default function ComparisonTable(props) {
 
 
     useEffect(() => {
-        setIndices([scenarioIndex, scenarioIndex])
-    }, [scenarios, scenarioIndex])
+        setIndices([scenarioIndex, secondaryScenarioIndex])
+    }, [scenarioIndex, secondaryScenarioIndex])
 
-    const handleConfigSelection = (event) => {
-        let value = event.target.value
-        let index = parseInt(event.target.name)
-        let tempIndices = [...indices]
-        tempIndices[index] = value
-        setIndices(tempIndices)
+    
+
+    const getPercentDifference = (value1, value2) => {
+      let result = ((value1 - value2) / value1) * 100
+      if (isNaN(result)) return 0
+      else if(value1 > value2) return "+" + (Math.round(result * 10) / 10)
+      else return Math.round(result * 10) / 10
+    }
+    
+    const getDifferenceStyling = (value1, value2) => {
+      let style = {}
+      if (value1 > value2) style.color = "green"
+      else if (value2 > value1) style.color = "red"
+      return style
     }
 
-    const renderConfigurationSelect = (index) => {
-        return <FormControl >
-            <InputLabel id="select-label"></InputLabel>
-            <Select
-                name={`${index}`}
-                id={`comparison_select_${index}`}
-                value={indices[index]}
-                label="Past Configurations"
-                onChange={handleConfigSelection}
-                variant='standard'
-                sx={{color: "white"}}
-            >
-                {Object.entries(scenarios).map(( [ key, value ], ind) => {
-                    return <MenuItem key={key+value} value={value.id}>
-                                {value.name}
-                            </MenuItem>
-                })}
-            </Select>
-        </FormControl>
-    }
+  // const handleConfigSelection = (event) => {
+  //     let value = event.target.value
+  //     let index = parseInt(event.target.name)
+  //     let tempIndices = [...indices]
+  //     tempIndices[index] = value
+  //     setIndices(tempIndices)
+  //   }
+
+    // const renderConfigurationSelect = (index) => {
+    //     return <FormControl >
+    //         <InputLabel id="select-label"></InputLabel>
+    //         <Select
+    //             name={`${index}`}
+    //             id={`comparison_select_${index}`}
+    //             value={indices[index]}
+    //             label="Past Configurations"
+    //             onChange={handleConfigSelection}
+    //             variant='standard'
+    //             sx={{color: "white"}}
+    //         >
+    //             {Object.entries(scenarios).map(( [ key, value ], ind) => {
+    //                 return <MenuItem key={key+value} value={value.id}>
+    //                             {value.name}
+    //                         </MenuItem>
+    //             })}
+    //         </Select>
+    //     </FormControl>
+    // }
 
 
     const renderOutputTable = () => {
@@ -75,10 +91,12 @@ export default function ComparisonTable(props) {
               <Table style={{border:"1px solid #ddd"}} size='small'>
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key={`headrow`}>
-                    <TableCell key="overview0" style={{backgroundColor:"#6094bc", color:"white", width:"35%", fontSize: 15, paddingTop:"20px"}}>KPI</TableCell> 
-                    <TableCell key="overview1" style={{backgroundColor:"#6094bc", color:"white",  width:"15%", fontSize: 15, paddingTop:"20px"}}>Units</TableCell> 
-                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"25%", paddingTop:"0px"}}>{renderConfigurationSelect(0)}</TableCell> 
-                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"25%", paddingTop:"0px"}}>{renderConfigurationSelect(1)}</TableCell> 
+                    <TableCell key="overview0" style={{backgroundColor:"#6094bc", color:"white", width:"20%"}}>KPI</TableCell> 
+                    <TableCell key="overview1" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}}>Units</TableCell> 
+                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[0]].name}</TableCell> 
+                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[1]].name}</TableCell>
+                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>Percent Difference</TableCell>  
+                    {/* <TableCell key="overview3" style={{backgroundColor:"#6094bc", color:"white",  width:"25%", paddingTop:"0px"}}>{renderConfigurationSelect(1)}</TableCell>  */}
                 </TableRow>
                 </TableHead>
                 <TableBody>
@@ -105,7 +123,19 @@ export default function ComparisonTable(props) {
                     >
                         {scenarios[indices[1]].results.data[category][index+1][3].toLocaleString('en-US', {maximumFractionDigits:0})}
                     </TableCell>
+                    <TableCell 
+                        align="right" 
+                        style={styles.other}
+                    >
+                      <span style={getDifferenceStyling(scenarios[indices[0]].results.data[category][index+1][3], scenarios[indices[1]].results.data[category][index+1][3])}>
+                        {
+                          getPercentDifference(scenarios[indices[0]].results.data[category][index+1][3], scenarios[indices[1]].results.data[category][index+1][3])
+                        }
+                        %
+                      </span>
+                    </TableCell>
                   </TableRow>)
+                  
                 })}
                 </TableBody> 
               
