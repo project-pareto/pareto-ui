@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment, useState} from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -20,11 +20,11 @@ import PopupModal from '../../components/PopupModal/PopupModal'
 const drawerWidth = 240;
 
 export default function Sidebar(props) {
-  const [ openSaveModal, setOpenSaveModal ] = React.useState(false)
-  const [ key, setKey ] =  React.useState(null)
-  const [ openDynamic, setOpenDynamic ] = React.useState(true)
-  const [ openStatic, setOpenStatic ] = React.useState(false)
-  const [ openResultsTables, setOpenResultsTables ] = React.useState(false)
+  const [ openSaveModal, setOpenSaveModal ] = useState(false)
+  const [ key, setKey ] =  useState(null)
+  const [ openDynamic, setOpenDynamic ] = useState(true)
+  const [ openStatic, setOpenStatic ] = useState(false)
+  const [ openResultsTables, setOpenResultsTables ] = useState(false)
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
   const styles = {
@@ -67,14 +67,14 @@ export default function Sidebar(props) {
     let additionalCategories = props.section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
-        <>
+        <Fragment key={"_"+key}>
         <ListItem key={"listitem_"+key} disablePadding>
             <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
             <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_"+key} primary={key} />
             </ListItemButton>
         </ListItem>
         <Divider key={"divider_"+key}></Divider>
-      </>
+      </Fragment>
       ))
     )
   }
@@ -123,7 +123,7 @@ export default function Sidebar(props) {
         <List component="div" disablePadding>
       {Subcategories.Dynamic.map( (value,index) => {
         return(
-            <>
+          <Fragment key={"_"+index}>
             <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <ListItem key={"listitem_"+value} disablePadding>
                 <ListItemButton key={"listitembutton_"+value} selected={props.category===value} onClick={() => handleClick(value)}>
@@ -147,7 +147,7 @@ export default function Sidebar(props) {
             </ListItem>
             </Tooltip>
             <Divider key={"divider_"+value}></Divider>
-          </>
+          </Fragment>
         )
       })}
      </List>
@@ -161,7 +161,7 @@ export default function Sidebar(props) {
         <List component="div" disablePadding>
       {Subcategories.Static.map( (value,index) => {
         return (
-            <>
+          <Fragment key={"_"+index}>
             <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <ListItem style={{fontWeight:'bold'}} key={"listitem_"+value} disablePadding>
                 <ListItemButton key={"listitembutton_"+value} selected={props.category===value} onClick={() => handleClick(value)}>
@@ -185,7 +185,7 @@ export default function Sidebar(props) {
             </ListItem>
             </Tooltip>
             <Divider key={"divider_"+value}></Divider>
-          </>
+          </Fragment>
         )
       })}
      </List>
@@ -197,7 +197,7 @@ export default function Sidebar(props) {
       <Collapse in={openResultsTables} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
       {Object.entries(props.scenario.results.data).map( ([key, value]) => ( 
-        <>
+        <Fragment key={"_"+key}>
         <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : CategoryNames[key] ? CategoryNames[key] : key} placement="right-start">
         <ListItem key={"listitem_"+key} disablePadding>
             <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
@@ -220,7 +220,7 @@ export default function Sidebar(props) {
         </ListItem>
         </Tooltip>
         <Divider key={"divider_"+key}></Divider>
-      </>
+      </Fragment>
       ))}
      </List>
       </Collapse>
