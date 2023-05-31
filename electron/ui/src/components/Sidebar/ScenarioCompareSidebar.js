@@ -12,21 +12,15 @@ import ListItemText from '@mui/material/ListItemText';
 const drawerWidth = 240;
 const categories = [
     {
-        key: "kpis", label: "Key KPIs"
+        key: "output", label: "Results"
     },
     {
-        key: "capexopex", label: "CAPEX and OPEX"
-    },
-    {
-        key: "summary", label: "Summary Table"
-    },
-    {
-        key: "inputdeltas", label: "Input Deltas"
+        key: "input", label: "Inputs"
     },
 ]
 
 export default function Sidebar(props) {
-    const [ category, setCategory ] = useState('kpis')
+    const { category, setCategory, open } = props
 
   const styles = {
     topLevelCategory: {
@@ -64,31 +58,35 @@ export default function Sidebar(props) {
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
-          [`& .MuiBox-root`]: {marginBottom: '60px' },
-        }}
-        PaperProps={{
-            sx: {
-            width: 240,
-            marginTop: '71px',
-            paddingBottom: '71px'
-            }
-        }}
-        open={props.open}
-      >
-        <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
-            <List key="drawer_list" aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
-            {renderCategories()}
-          </List>
-        </Box>
-      </Drawer>
-    </Box>
+    <>
+    {open && 
+      <Box sx={{ display: 'flex' }}>
+        <CssBaseline />
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+            [`& .MuiBox-root`]: {marginBottom: '60px' },
+          }}
+          PaperProps={{
+              sx: {
+              width: 240,
+              marginTop: '71px',
+              paddingBottom: '71px'
+              }
+          }}
+          open={props.open}
+        >
+          <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
+              <List key="drawer_list" aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
+              {renderCategories()}
+            </List>
+          </Box>
+        </Drawer>
+      </Box>
+    }
+    </>
   );
 }

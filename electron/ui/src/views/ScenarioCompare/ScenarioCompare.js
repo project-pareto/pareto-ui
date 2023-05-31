@@ -24,6 +24,8 @@ export default function ScenarioCompare(props) {
   const [ kpiDataReference, setKpiDataReference ] = useState(null)
   const [ capexBarChartData, setCapexBarChartData ] = useState(null)
   const [ opexBarChartData, setOpexBarChartData ] = useState(null)
+  const [ showSidebar, setShowSidebar ] = useState(true)
+  const [ compareCategory, setCompareCategory ] = useState('output')
 
   useEffect(()=>{
     //check for indexes
@@ -157,6 +159,12 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         boxShadow:3,
         padding:3
     },
+    boxView: showSidebar ? {
+        m:3, 
+        paddingLeft: '240px' 
+      } : {
+        m:3
+      },
    }
 
    const getStyle = (key) => {
@@ -181,14 +189,16 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
 
   return (
     <Fragment>
-    {/* <Sidebar
-        open
+    <Sidebar
+        open={showSidebar}
+        category={compareCategory}
+        setCategory={setCompareCategory}
     >
-    </Sidebar> */}
+    </Sidebar>
       
-    <Box sx={{m:3, padding:2 }}>
+    <Box sx={styles.boxView}>
         {kpiDataPrimary && 
-        <Grid container spacing={2} sx={{marginTop:2}}>
+        <Grid container spacing={2}>
 
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'left'}}>
