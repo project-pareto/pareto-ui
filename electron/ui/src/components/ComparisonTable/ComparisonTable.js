@@ -1,19 +1,12 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import DownloadIcon from '@mui/icons-material/Download';
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Typography, Box } from '@mui/material';
-import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import React, { useEffect, useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import CategoryNames from '../../assets/CategoryNames.json'
 
 export default function ComparisonTable(props) {
-    let params = useParams(); 
+    // let params = useParams(); 
     const { scenarios, scenarioIndex, secondaryScenarioIndex } = props;
     const [ indices, setIndices ] = useState([scenarioIndex, secondaryScenarioIndex])
-    const [ showTable, setShowTable ] = React.useState(true)
+    // const [ showTable, setShowTable ] = React.useState(true)
     const category = "v_F_Overview_dict"
     const styles ={
         firstCol: {
@@ -91,11 +84,11 @@ export default function ComparisonTable(props) {
               <Table style={{border:"1px solid #ddd"}} size='small'>
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key={`headrow`}>
-                    <TableCell key="overview0" style={{backgroundColor:"#6094bc", color:"white", width:"20%"}}>KPI</TableCell> 
-                    <TableCell key="overview1" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}}>Units</TableCell> 
-                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[0]].name}</TableCell> 
-                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[1]].name}</TableCell>
-                    <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>Percent Difference</TableCell>  
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white", width:"20%"}}>KPI</TableCell> 
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}}>Units</TableCell> 
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[0]].name}</TableCell> 
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[1]].name}</TableCell>
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>Percent Difference</TableCell>  
                     {/* <TableCell key="overview3" style={{backgroundColor:"#6094bc", color:"white",  width:"25%", paddingTop:"0px"}}>{renderConfigurationSelect(1)}</TableCell>  */}
                 </TableRow>
                 </TableHead>
@@ -151,7 +144,7 @@ export default function ComparisonTable(props) {
   return (
         
         <>
-            {  showTable &&
+            {  
                 renderOutputTable()
             }
         </>
