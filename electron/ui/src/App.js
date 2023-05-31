@@ -373,12 +373,12 @@ useEffect(()=> {
   return (
     <div className="App">  
       <Header 
-        showHeader={showHeader}
-        scenarios={scenarios}
-        index={scenarioIndex}
-        handleSelection={handleScenarioSelection}
-        navigateHome={navigateToScenarioList}
-        compareScenarioIndexes={compareScenarioIndexes}
+          showHeader={showHeader}
+          scenarios={scenarios}
+          index={scenarioIndex}
+          handleSelection={handleScenarioSelection}
+          navigateHome={navigateToScenarioList}
+          compareScenarioIndexes={compareScenarioIndexes}
           setCompareScenarioIndexes={setCompareScenarioIndexes}
         />
         
@@ -387,9 +387,9 @@ useEffect(()=> {
           path="/" 
           element={
             <LandingPage
-            navigateToScenarioList={navigateToScenarioList}
-            handleNewScenario={handleNewScenario} 
-            scenarios={scenarios} 
+              navigateToScenarioList={navigateToScenarioList}
+              handleNewScenario={handleNewScenario} 
+              scenarios={scenarios} 
             />} 
         />
 
@@ -397,15 +397,14 @@ useEffect(()=> {
           path="/scenarios" 
           element={
             <ScenarioList
-            handleNewScenario={handleNewScenario} 
-            handleEditScenarioName={handleEditScenarioName} 
-            handleSelection={handleScenarioSelection}
-            section={section} 
-            scenarios={scenarios} 
-            deleteScenario={handleDeleteScenario}
-            setScenarios={setScenarios}
-            handleSetSection={handleSetSection} 
-            setShowHeader={setShowHeader}
+              handleNewScenario={handleNewScenario} 
+              handleEditScenarioName={handleEditScenarioName} 
+              handleSelection={handleScenarioSelection}
+              scenarios={scenarios} 
+              deleteScenario={handleDeleteScenario}
+              setScenarios={setScenarios}
+              setShowHeader={setShowHeader}
+              setCompareScenarioIndexes={setCompareScenarioIndexes}
             />} 
         />
 

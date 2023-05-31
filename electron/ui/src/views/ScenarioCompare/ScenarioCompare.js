@@ -24,24 +24,33 @@ export default function ScenarioCompare(props) {
   const [ kpiDataReference, setKpiDataReference ] = useState(null)
   const [ capexBarChartData, setCapexBarChartData ] = useState(null)
   const [ opexBarChartData, setOpexBarChartData ] = useState(null)
-  const [ showSidebar, setShowSidebar ] = useState(true)
+  const [ showSidebar, setShowSidebar ] = useState(false)
   const [ compareCategory, setCompareCategory ] = useState('output')
 
   useEffect(()=>{
     //check for indexes
+    console.log('scenarios length')
+    console.log(Object.keys(scenarios).length)
     let tempIndexes = []
     if(compareScenarioIndexes.length === 0) {
         let scenarioIds = Object.keys(scenarios)
-        tempIndexes[0] = scenarioIds[0]
-        tempIndexes[1] = scenarioIds[1]
-        setPrimaryScenarioIndex(scenarioIds[0])
-        setReferenceScenarioIndex(scenarioIds[1])
-        setCompareScenarioIndexes([scenarioIds[0],scenarioIds[1]])
-    } else {
-        tempIndexes[0] = compareScenarioIndexes[0]
-        tempIndexes[1] = compareScenarioIndexes[1]
-        setPrimaryScenarioIndex(compareScenarioIndexes[0])
-        setReferenceScenarioIndex(compareScenarioIndexes[1])
+        tempIndexes[0].push(scenarioIds[0])
+        tempIndexes[1].push(scenarioIds[1])
+        setPrimaryScenarioIndex(tempIndexes[0])
+        setReferenceScenarioIndex(tempIndexes[1])
+        setCompareScenarioIndexes([tempIndexes[0],tempIndexes[1]])
+    } else if(compareScenarioIndexes.length === 1) {
+        let scenarioIds = Object.keys(scenarios)
+        tempIndexes.push(compareScenarioIndexes[0])
+        tempIndexes.push(scenarioIds[0])
+        setCompareScenarioIndexes([tempIndexes[0],tempIndexes[1]])
+        return
+    }
+    else {
+        tempIndexes.push(compareScenarioIndexes[0])
+        tempIndexes.push(compareScenarioIndexes[1])
+        setPrimaryScenarioIndex(tempIndexes[0])
+        setReferenceScenarioIndex(tempIndexes[1])
     }
 
     // organize kpi data
@@ -71,6 +80,7 @@ export default function ScenarioCompare(props) {
 }, [compareScenarioIndexes]);
 
 const unpackBarChartData = (scenarioData1, scenarioData2) => {
+    console.log('unpacking data')
     // unpack bar chart data
     let tempCapexData = []
     let tempOpexData = []
@@ -101,9 +111,6 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         let tempName = each.replace('v_C_','').replace('Total','')
         tempOpexData.push({x:tempX, y:tempY, name: tempName, type: 'bar'})
     }
-      
-    console.log('tempCapexData')
-    console.log(tempCapexData)
 
     setCapexBarChartData(tempCapexData)
     setOpexBarChartData(tempOpexData)

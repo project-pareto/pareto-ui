@@ -3,10 +3,10 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from
 import CategoryNames from '../../assets/CategoryNames.json'
 
 export default function ComparisonTable(props) {
-    // let params = useParams(); 
     const { scenarios, scenarioIndex, secondaryScenarioIndex } = props;
     const [ indices, setIndices ] = useState([scenarioIndex, secondaryScenarioIndex])
-    // const [ showTable, setShowTable ] = React.useState(true)
+    const [ isInput, setIsInput ] = useState(false)
+    const [ inputCategory, setInputCategory ] = useState(null)
     const category = "v_F_Overview_dict"
     const styles ={
         firstCol: {
@@ -42,36 +42,6 @@ export default function ComparisonTable(props) {
       else if (value2 > value1) style.color = "red"
       return style
     }
-
-  // const handleConfigSelection = (event) => {
-  //     let value = event.target.value
-  //     let index = parseInt(event.target.name)
-  //     let tempIndices = [...indices]
-  //     tempIndices[index] = value
-  //     setIndices(tempIndices)
-  //   }
-
-    // const renderConfigurationSelect = (index) => {
-    //     return <FormControl >
-    //         <InputLabel id="select-label"></InputLabel>
-    //         <Select
-    //             name={`${index}`}
-    //             id={`comparison_select_${index}`}
-    //             value={indices[index]}
-    //             label="Past Configurations"
-    //             onChange={handleConfigSelection}
-    //             variant='standard'
-    //             sx={{color: "white"}}
-    //         >
-    //             {Object.entries(scenarios).map(( [ key, value ], ind) => {
-    //                 return <MenuItem key={key+value} value={value.id}>
-    //                             {value.name}
-    //                         </MenuItem>
-    //             })}
-    //         </Select>
-    //     </FormControl>
-    // }
-
 
     const renderOutputTable = () => {
 
