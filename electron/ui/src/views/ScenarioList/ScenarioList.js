@@ -180,25 +180,19 @@ export default function ScenarioList(props) {
                 <TableCell onClick={() => handleSelection(key)} sx={styles.bodyCell} align="center">{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
                 <TableCell sx={styles.bodyCell} align="center">
                     <Tooltip title="Edit Scenario Name" enterDelay={500}>
-                        <span>
-                            <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
-                                <EditIcon fontSize="small"/>
-                            </IconButton>
-                        </span>
+                        <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
+                            <EditIcon fontSize="small"/>
+                        </IconButton>
                     </Tooltip>
                     <Tooltip title="Copy Scenario" enterDelay={500}>
-                        <span>
-                            <IconButton onClick={() => handleCopyScenario(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
-                                <ContentCopyIcon fontSize="small"/>
-                            </IconButton>
-                        </span>
+                        <IconButton onClick={() => handleCopyScenario(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
+                            <ContentCopyIcon fontSize="small"/>
+                        </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete Scenario" enterDelay={500}>
-                        <span>
-                            <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
-                                <DeleteIcon fontSize="small"/>
-                            </IconButton>
-                        </span>
+                        <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
+                            <DeleteIcon fontSize="small"/>
+                        </IconButton>
                     </Tooltip>
                     <Tooltip title="Compare Scenario" enterDelay={500}>
                         <span>
