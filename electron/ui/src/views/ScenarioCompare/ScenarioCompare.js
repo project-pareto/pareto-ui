@@ -1,9 +1,7 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
-import Box from '@mui/material/Box'; 
 import {  } from "react-router-dom";
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
+import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';

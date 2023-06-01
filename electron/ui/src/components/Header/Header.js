@@ -2,11 +2,7 @@ import './Header.css';
 import React from 'react';
 import {useEffect, useState} from 'react';   
 import logo from "../../images/pareto-logo.png";
-import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-
+import { Button, MenuItem, FormControl, Select } from '@mui/material'
  
 
 export default function Header(props) {  

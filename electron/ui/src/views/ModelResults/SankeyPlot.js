@@ -1,10 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import FormControl from '@mui/material/FormControl';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
+import { Box, Grid, FormControl, MenuItem, Select } from '@mui/material'
 import Plot from 'react-plotly.js';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 

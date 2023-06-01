@@ -1,17 +1,7 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableContainer from '@mui/material/TableContainer';
-import FormControl from '@mui/material/FormControl';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Typography from '@mui/material/Typography';
-
+import { Box, FormControl, MenuItem, Select, Typography } from '@mui/material'
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
 
 export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
