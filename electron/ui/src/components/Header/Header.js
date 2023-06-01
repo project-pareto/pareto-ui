@@ -21,7 +21,6 @@ export default function Header(props) {
     useEffect(() => {
       let tempLocationSplit = window.location.href.split('/')
       let tempLocation = tempLocationSplit[tempLocationSplit.length-1]
-      console.log('tempLocation = '+tempLocation)
       setLocation(tempLocation)
     }, [window.location.href])
 
