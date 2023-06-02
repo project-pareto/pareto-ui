@@ -2,9 +2,8 @@ import './Dashboard.css';
 import React from 'react';
 import {useEffect, useState} from 'react';   
 import {  } from "react-router-dom";
-import Grid from '@mui/material/Grid';
+import { Grid, IconButton } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit';
-import IconButton from '@mui/material/IconButton';
 import ProcessToolbar from '../../components/ProcessToolbar/ProcessToolbar'
 import Bottombar from '../../components/Bottombar/Bottombar'; 
 import DataInput from '../DataInput/DataInput'
@@ -185,6 +184,7 @@ export default function Dashboard(props) {
           handleSetSection={props.handleSetSection} 
           appState={props.appState}
           syncScenarioData={props.syncScenarioData}
+          scenarios={props.scenarios}
         />
       }
       </Grid>

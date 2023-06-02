@@ -7,6 +7,7 @@ import TerminationConditions from '../../assets/TerminationConditions.json'
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
+import ComparisonTable from '../../components/ComparisonTable/ComparisonTable';
 
 
 export default function ModelResults(props) {
@@ -185,6 +186,12 @@ const handleRowFilter = (row) => {
         return (
           <Grid container>
             <Grid item xs={11.5}>
+              {/* {props.category === "v_F_Overview_dict" ? 
+              <ComparisonTable
+                scenarios={props.scenarios}
+                scenarioIndex={props.scenario.id}
+              />
+              : */}
               <DataTable 
                 section="output"
                 scenario={props.scenario}
@@ -199,6 +206,8 @@ const handleRowFilter = (row) => {
                 handleEditInput={props.handleEditInput}
                 data={props.scenario.results.data}
               />
+              {/* } */}
+              
             </Grid>
             <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>

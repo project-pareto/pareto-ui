@@ -10,6 +10,7 @@ import '@fontsource/roboto/700.css';
 import Header from './components/Header/Header'; 
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
+import ScenarioCompare from './views/ScenarioCompare/ScenarioCompare';
 import LandingPage from './views/LandingPage/LandingPage';
 import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
 import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
@@ -30,6 +31,7 @@ function App() {
   const [ checkModelResults, setCheckModelResults ] = useState(0)
   const [ showCompletedOptimization, setShowCompletedOptimization ] = useState(false)
   const [ lastCompletedScenario, setLastCompletedScenario ] = useState(null)
+  const [ compareScenarioIndexes, setCompareScenarioIndexes ] = useState([])
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
 
@@ -371,12 +373,13 @@ useEffect(()=> {
   return (
     <div className="App">  
       <Header 
-        showHeader={showHeader}
-        scenarios={scenarios} 
-        index={scenarioIndex} 
-        scenarioData={scenarioData} 
-        handleSelection={handleScenarioSelection}
-        navigateHome={navigateToScenarioList}
+          showHeader={showHeader}
+          scenarios={scenarios}
+          index={scenarioIndex}
+          handleSelection={handleScenarioSelection}
+          navigateHome={navigateToScenarioList}
+          compareScenarioIndexes={compareScenarioIndexes}
+          setCompareScenarioIndexes={setCompareScenarioIndexes}
         />
         
       <Routes> 
@@ -384,9 +387,9 @@ useEffect(()=> {
           path="/" 
           element={
             <LandingPage
-            navigateToScenarioList={navigateToScenarioList}
-            handleNewScenario={handleNewScenario} 
-            scenarios={scenarios} 
+              navigateToScenarioList={navigateToScenarioList}
+              handleNewScenario={handleNewScenario} 
+              scenarios={scenarios} 
             />} 
         />
 
@@ -394,15 +397,14 @@ useEffect(()=> {
           path="/scenarios" 
           element={
             <ScenarioList
-            handleNewScenario={handleNewScenario} 
-            handleEditScenarioName={handleEditScenarioName} 
-            handleSelection={handleScenarioSelection}
-            section={section} 
-            scenarios={scenarios} 
-            deleteScenario={handleDeleteScenario}
-            setScenarios={setScenarios}
-            handleSetSection={handleSetSection} 
-            setShowHeader={setShowHeader}
+              handleNewScenario={handleNewScenario} 
+              handleEditScenarioName={handleEditScenarioName} 
+              handleSelection={handleScenarioSelection}
+              scenarios={scenarios} 
+              deleteScenario={handleDeleteScenario}
+              setScenarios={setScenarios}
+              setShowHeader={setShowHeader}
+              setCompareScenarioIndexes={setCompareScenarioIndexes}
             />} 
         />
 
@@ -410,20 +412,31 @@ useEffect(()=> {
           path="/scenario" 
           element={
             <Dashboard 
-            handleUpdateExcel={handleUpdateExcel}
-            updateScenario={handleScenarioUpdate} 
-            handleEditScenarioName={handleEditScenarioName} 
-            scenario={scenarioData} 
-            section={section} 
-            category={category} 
-            handleSetCategory={handleSetCategory} 
-            handleSetSection={handleSetSection} 
-            backgroundTasks={backgroundTasks}
-            navigateHome={navigateToScenarioList}
-            syncScenarioData={syncScenarioData}
-            addTask={addTask}
-            appState={appState}
-            updateAppState={updateAppState}
+              handleUpdateExcel={handleUpdateExcel}
+              updateScenario={handleScenarioUpdate} 
+              handleEditScenarioName={handleEditScenarioName} 
+              scenario={scenarioData} 
+              section={section} 
+              category={category} 
+              handleSetCategory={handleSetCategory} 
+              handleSetSection={handleSetSection} 
+              backgroundTasks={backgroundTasks}
+              navigateHome={navigateToScenarioList}
+              syncScenarioData={syncScenarioData}
+              addTask={addTask}
+              appState={appState}
+              updateAppState={updateAppState}
+              scenarios={scenarios}
+            />} 
+        />
+
+        <Route
+          path="/compare" 
+          element={
+            <ScenarioCompare
+              scenarios={scenarios} 
+              compareScenarioIndexes={compareScenarioIndexes}
+              setCompareScenarioIndexes={setCompareScenarioIndexes}
             />} 
         />
 
