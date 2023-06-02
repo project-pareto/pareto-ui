@@ -32,6 +32,7 @@ export default function ScenarioList(props) {
     const [ id, setId ] = useState(null)
     let navigate = useNavigate();
     const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
+    const enabledStatusListCompare = ['Optimized', 'Not Optimized']
 
     useEffect(()=> {
         setShowHeader(true)
@@ -196,7 +197,7 @@ export default function ScenarioList(props) {
                     </Tooltip>
                     <Tooltip title="Compare Scenario" enterDelay={500}>
                         <span>
-                            <IconButton onClick={() => handleCompareScenario(key)} disabled={value.results.status==="Draft" ? true : enabledStatusList.includes(value.results.status) ? false : true}>
+                            <IconButton onClick={() => handleCompareScenario(key)} disabled={enabledStatusListCompare.includes(value.results.status) ? false : true}>
                                 <CompareIcon fontSize="small"/>
                             </IconButton>
                         </span>
