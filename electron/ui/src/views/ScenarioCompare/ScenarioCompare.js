@@ -4,6 +4,7 @@ import {  } from "react-router-dom";
 import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
+import ScenarioCompareInput from './ScenarioCompareInput';
 import Subcategories from '../../assets/Subcategories.json'
 
 
@@ -27,6 +28,7 @@ export default function ScenarioCompare(props) {
     
     try {
         for(let key of Subcategories.Static) {
+            temp_deltaDictionary[key] = []
             let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
             let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
             let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
@@ -37,12 +39,13 @@ export default function ScenarioCompare(props) {
                     let primaryValue = primaryValueSet[j]
                     let referenceValue = referenceValueSet[j]
                     if (referenceValue !== primaryValue) {
-                        temp_deltaDictionary[key] = [i,j]
+                        temp_deltaDictionary[key].push(`${i}::${j}`)
                     }
                 }
             }
         }
         for(let key of Subcategories.Dynamic) {
+            temp_deltaDictionary[key] = []
             let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
             let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
             let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
@@ -53,7 +56,7 @@ export default function ScenarioCompare(props) {
                     let primaryValue = primaryValueSet[j]
                     let referenceValue = referenceValueSet[j]
                     if (referenceValue !== primaryValue) {
-                        temp_deltaDictionary[key] = [i,j]
+                        temp_deltaDictionary[key].push(`${i}::${j}`)
                     }
                 }
             }
@@ -192,7 +195,7 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         deltaDictionary={deltaDictionary}
     >
     </Sidebar>
-    {compareCategory==="output" && 
+    {compareCategory==="output" ? 
     <ScenarioCompareOutput
         scenarios={scenarios}
         primaryScenarioIndex={primaryScenarioIndex}
@@ -203,6 +206,14 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         opexBarChartData={opexBarChartData}
         showSidebar={showSidebar}
         compareCategory={compareCategory}
+    />
+    :
+    <ScenarioCompareInput
+        primaryScenario={scenarios[primaryScenarioIndex]}
+        referenceScenario={scenarios[referenceScenarioIndex]}
+        category={compareCategory}
+        showSidebar={showSidebar}
+        deltaDictionary={deltaDictionary}
     />
     }
       

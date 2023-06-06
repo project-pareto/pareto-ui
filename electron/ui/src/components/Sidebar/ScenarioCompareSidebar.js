@@ -36,8 +36,15 @@ export default function Sidebar(props) {
   }
 
   const handleCheckForDifference = (key) => {
-    if(Object.keys(deltaDictionary).includes(key)) return styles.inputDifference
-    else return {backgroundColor: "white"}
+    try {
+      if(Object.keys(deltaDictionary[key]).length > 0) return styles.inputDifference
+      else return {backgroundColor: "white"}
+    }
+    catch(e) {
+      return {backgroundColor: "white"}
+    }
+    
+   
     
   }
 
