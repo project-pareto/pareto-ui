@@ -4,6 +4,7 @@ import {  } from "react-router-dom";
 import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
+import Subcategories from '../../assets/Subcategories.json'
 
 
 
@@ -19,6 +20,52 @@ export default function ScenarioCompare(props) {
   const [ opexBarChartData, setOpexBarChartData ] = useState(null)
   const [ showSidebar, setShowSidebar ] = useState(true)
   const [ compareCategory, setCompareCategory ] = useState('output')
+  const [ deltaDictionary, setDeltaDictionary ] = useState({})
+
+  useEffect(() => {
+    let temp_deltaDictionary = {}
+    
+    try {
+        for(let key of Subcategories.Static) {
+            let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
+            let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
+            let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
+            for (let i = 0; i < tableKeys.length; i++) {
+                let primaryValueSet = primaryValues[tableKeys[i]]
+                let referenceValueSet = referenceValues[tableKeys[i]]
+                for (let j = 0; j < primaryValueSet.length; j++) {
+                    let primaryValue = primaryValueSet[j]
+                    let referenceValue = referenceValueSet[j]
+                    if (referenceValue !== primaryValue) {
+                        temp_deltaDictionary[key] = [i,j]
+                    }
+                }
+            }
+        }
+        for(let key of Subcategories.Dynamic) {
+            let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
+            let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
+            let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
+            for (let i = 0; i < tableKeys.length; i++) {
+                let primaryValueSet = primaryValues[tableKeys[i]]
+                let referenceValueSet = referenceValues[tableKeys[i]]
+                for (let j = 0; j < primaryValueSet.length; j++) {
+                    let primaryValue = primaryValueSet[j]
+                    let referenceValue = referenceValueSet[j]
+                    if (referenceValue !== primaryValue) {
+                        temp_deltaDictionary[key] = [i,j]
+                    }
+                }
+            }
+        }
+        console.log('setting deltadictionary')
+        console.log(temp_deltaDictionary)
+        setDeltaDictionary(temp_deltaDictionary)
+    }
+    catch (e) {
+        setDeltaDictionary({})
+    }        
+  }, [primaryScenarioIndex, referenceScenarioIndex]);
 
   useEffect(()=>{
     //check for indexes
@@ -112,6 +159,7 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
     }
 
     const checkDiff = (key) => {
+        let temp_deltaDictionary = {}
         try {
             let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
             let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
@@ -122,13 +170,15 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
                 for (let j = 0; j < primaryValueSet.length; j++) {
                     let primaryValue = primaryValueSet[j]
                     let referenceValue = referenceValueSet[j]
-                    if (referenceValue !== primaryValue) return true
+                    if (referenceValue !== primaryValue) {
+                        temp_deltaDictionary[key] = [i,j]
+                    }
                 }
             }
-            return false
+            return temp_deltaDictionary
         }
         catch (e) {
-            return false
+            return temp_deltaDictionary
         }        
     }
 
@@ -139,7 +189,7 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         open={showSidebar}
         category={compareCategory}
         setCategory={setCompareCategory}
-        checkDiff={checkDiff}
+        deltaDictionary={deltaDictionary}
     >
     </Sidebar>
     {compareCategory==="output" && 

@@ -11,7 +11,7 @@ import Subcategories from '../../assets/Subcategories.json'
 const drawerWidth = 240;
 
 export default function Sidebar(props) {
-    const { category, setCategory, open, checkDiff } = props
+    const { category, setCategory, open, deltaDictionary } = props
     const [ openDynamic, setOpenDynamic ] = useState(false)
     const [ openStatic, setOpenStatic ] = useState(false)
 
@@ -36,7 +36,7 @@ export default function Sidebar(props) {
   }
 
   const handleCheckForDifference = (key) => {
-    if (checkDiff(key)) return styles.inputDifference
+    if(Object.keys(deltaDictionary).includes(key)) return styles.inputDifference
     else return {backgroundColor: "white"}
     
   }
