@@ -27,23 +27,6 @@ export default function ScenarioCompare(props) {
     let temp_deltaDictionary = {}
     
     try {
-        for(let key of Subcategories.Static) {
-            temp_deltaDictionary[key] = []
-            let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
-            let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
-            let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
-            for (let i = 0; i < tableKeys.length; i++) {
-                let primaryValueSet = primaryValues[tableKeys[i]]
-                let referenceValueSet = referenceValues[tableKeys[i]]
-                for (let j = 0; j < primaryValueSet.length; j++) {
-                    let primaryValue = primaryValueSet[j]
-                    let referenceValue = referenceValueSet[j]
-                    if (referenceValue !== primaryValue) {
-                        temp_deltaDictionary[key].push(`${i}::${j}`)
-                    }
-                }
-            }
-        }
         for(let key of Subcategories.Dynamic) {
             temp_deltaDictionary[key] = []
             let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
@@ -53,27 +36,51 @@ export default function ScenarioCompare(props) {
                 let primaryValueSet = primaryValues[tableKeys[i]]
                 let referenceValueSet = referenceValues[tableKeys[i]]
                 for (let j = 0; j < primaryValueSet.length; j++) {
-                    let primaryValue = primaryValueSet[j]
-                    let referenceValue = referenceValueSet[j]
-                    if (referenceValue !== primaryValue) {
+                    try {
+                        let primaryValue = primaryValues[tableKeys[i]][j]
+                        let referenceValue = referenceValues[tableKeys[i]][j]
+                        if (referenceValue !== primaryValue) {
+                            temp_deltaDictionary[key].push(`${i}::${j}`)
+                        }
+                    } catch (e) {
                         temp_deltaDictionary[key].push(`${i}::${j}`)
                     }
+                    
                 }
             }
         }
-        console.log('setting deltadictionary')
-        console.log(temp_deltaDictionary)
+
+        for(let key of Subcategories.Static) {
+            temp_deltaDictionary[key] = []
+            let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
+            let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
+            let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
+            for (let i = 0; i < tableKeys.length; i++) {
+                let primaryValueSet = primaryValues[tableKeys[i]]
+                let referenceValueSet = referenceValues[tableKeys[i]]
+                for (let j = 0; j < primaryValueSet.length; j++) {
+                    try {
+                        let primaryValue = primaryValues[tableKeys[i]][j]
+                        let referenceValue = referenceValues[tableKeys[i]][j]
+                        if (referenceValue !== primaryValue) {
+                            temp_deltaDictionary[key].push(`${i}::${j}`)
+                        }
+                    } catch (e) {
+                        temp_deltaDictionary[key].push(`${i}::${j}`)
+                    }
+                    
+                }
+            }
+        }
         setDeltaDictionary(temp_deltaDictionary)
     }
     catch (e) {
-        setDeltaDictionary({})
+        setDeltaDictionary(temp_deltaDictionary)
     }        
   }, [primaryScenarioIndex, referenceScenarioIndex]);
 
   useEffect(()=>{
     //check for indexes
-    console.log('scenarios length')
-    console.log(Object.keys(scenarios).length)
     let tempIndexes = []
     if(compareScenarioIndexes.length === 0) {
         let scenarioIds = Object.keys(scenarios)
@@ -160,31 +167,6 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
     
 
     }
-
-    const checkDiff = (key) => {
-        let temp_deltaDictionary = {}
-        try {
-            let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
-            let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
-            let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
-            for (let i = 0; i < tableKeys.length; i++) {
-                let primaryValueSet = primaryValues[tableKeys[i]]
-                let referenceValueSet = referenceValues[tableKeys[i]]
-                for (let j = 0; j < primaryValueSet.length; j++) {
-                    let primaryValue = primaryValueSet[j]
-                    let referenceValue = referenceValueSet[j]
-                    if (referenceValue !== primaryValue) {
-                        temp_deltaDictionary[key] = [i,j]
-                    }
-                }
-            }
-            return temp_deltaDictionary
-        }
-        catch (e) {
-            return temp_deltaDictionary
-        }        
-    }
-
    
   return (
     <Fragment>

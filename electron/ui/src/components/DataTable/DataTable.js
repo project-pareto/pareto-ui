@@ -6,7 +6,7 @@ import CategoryNames from '../../assets/CategoryNames.json'
 
 export default function DataInputTable(props) {  
   useEffect(()=>{
-    console.log('data table use effect triggered')
+    // console.log('data table use effect triggered')
     // console.log(props.data)
     
   }, [props.data]);
@@ -132,7 +132,6 @@ const handleKeyDown = (e) => {
           )
         }
         else if(props.section === "compare") {
-          console.log(props.deltaDictionary[props.category])
           return (
             // <TableCell onKeyDown={handleKeyDown} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
             <TableCell onKeyDown={handleKeyDown} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : props.deltaDictionary[props.category].includes(index+"::"+ind) ? styles.inputDifference : styles.other}>
@@ -283,7 +282,6 @@ const renderOutputTable = () => {
 const renderInputDeltaTable = () => {
 
   try {
-      console.log('rendering input delta table')
       return (
         <TableContainer>
             <h3>
