@@ -60,7 +60,7 @@ export default function Header(props) {
         }
         {location === "compare" &&
           <>
-            <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Primary Scenario</p>
+            <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>
             <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
             <Select
               value={compareScenarioIndexes[0] === null ? "" : compareScenarioIndexes[0]}
@@ -78,7 +78,7 @@ export default function Header(props) {
                 <ChangeCircleOutlinedIcon/>
               </IconButton>
             </Tooltip>
-            <p style={{color:'#565656', fontSize: '20px'}}>Reference Scenario</p>
+            <p style={{color:'#565656', fontSize: '20px'}}>Reference</p>
             <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
             <Select
               value={compareScenarioIndexes[1] === null ? "" : compareScenarioIndexes[1]}
