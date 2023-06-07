@@ -37,14 +37,20 @@ export default function Sidebar(props) {
 
   const handleCheckForDifference = (key) => {
     try {
-      if(Object.keys(deltaDictionary[key]).length > 0) return styles.inputDifference
-      else return {backgroundColor: "white"}
+      if (key === "Static" || key === "Dynamic") {
+        for (let each of Subcategories[key]) {
+          if(Object.keys(deltaDictionary[each]).length > 0) return styles.inputDifference
+        }
+        return {backgroundColor: "white"}
+      }
+      else {
+        if(Object.keys(deltaDictionary[key]).length > 0) return styles.inputDifference
+        else return {backgroundColor: "white"}
+      }
     }
     catch(e) {
       return {backgroundColor: "white"}
     }
-    
-   
     
   }
 
@@ -60,7 +66,7 @@ export default function Sidebar(props) {
           <Divider></Divider>
         </Fragment>
         <ListItem key={"listitem_dynamic"} disablePadding>
-              <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenDynamic(!openDynamic)}>
+              <ListItemButton key={"listitembutton_dynamic"} selected={false} style={handleCheckForDifference("Dynamic")} onClick={() => setOpenDynamic(!openDynamic)}>
               <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_dynamic"} primary={"Dynamic Inputs"} />
               {openDynamic ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
@@ -68,7 +74,7 @@ export default function Sidebar(props) {
           <Divider key={"divider_dynamic"}></Divider>
           {renderDynamicCategories()}
           <ListItem key={"listitem_static"} disablePadding>
-              <ListItemButton key={"listitembutton_static"} selected={false} onClick={() => setOpenStatic(!openStatic)}>
+              <ListItemButton key={"listitembutton_static"} selected={false} style={handleCheckForDifference("Static")} onClick={() => setOpenStatic(!openStatic)}>
               <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_static"} primary={"Static Inputs"} />
               {openStatic ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
