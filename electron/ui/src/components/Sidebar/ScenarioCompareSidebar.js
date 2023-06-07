@@ -132,7 +132,7 @@ export default function Sidebar(props) {
           <Fragment key={"_"+index}>
             <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <ListItem style={{fontWeight:'bold'}} key={"listitem_"+value} disablePadding>
-                <ListItemButton key={"listitembutton_"+value} selected={category===value} onClick={() => handleClick(value)}>
+                <ListItemButton key={"listitembutton_"+value} selected={category===value} style={handleCheckForDifference(value)} onClick={() => handleClick(value)}>
                 <ListItemText 
                   style={styles.subcategory}
                   key={"listitemtext_"+value} 
