@@ -34,7 +34,7 @@ export default function ScenarioCompareOutput(props) {
     kpiBox: {
         paddingTop:2, 
         boxShadow:3,
-        height: "140px"
+        minHeight: "140px"
     },
     pieChartBox: {
         paddingTop:2, 
@@ -108,13 +108,36 @@ export default function ScenarioCompareOutput(props) {
         {kpiDataPrimary && 
         <Grid container spacing={2}>
 
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'left'}}>
                     <h2>Key KPIs</h2>
                 </Box>
+            </Grid> */}
+
+            <Grid item xs={3}>
+            <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
+                <Grid container>
+                <Grid item xs={12}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
+                    <p style={styles.kpiTitle}>Key KPIs</p>
+                    {/* <p style={getStyle("reuse_CompletionsDemandKPI")}>{getValue("reuse_CompletionsDemandKPI")}%</p> */}
+                    </Box>
+                </Grid>
+                <Grid item xs={12}>
+                    <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                    <p style={styles.kpiValue}>Scenario</p>
+                    </Box>
+                </Grid>
+                <Grid item xs={12}>
+                    <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                    <p style={styles.kpiReferenceValue}>vs Reference</p>
+                    </Box>
+                </Grid>
+                </Grid>
+            </Box>
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid item xs={3}>
             <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
                 <Grid container>
                 <Grid item xs={12}>
@@ -137,7 +160,7 @@ export default function ScenarioCompareOutput(props) {
             </Box>
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid item xs={3}>
             <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
                 <Grid container>
                 <Grid item xs={12}>
@@ -160,7 +183,7 @@ export default function ScenarioCompareOutput(props) {
             </Box>
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid item xs={3}>
             <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
                 <Grid container>
                 <Grid item xs={12}>
@@ -182,24 +205,6 @@ export default function ScenarioCompareOutput(props) {
                 </Grid>
             </Box>
             </Grid>
-
-            <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'left'}}>
-                    <h2>CAPEX and OPEX</h2>
-                </Box>
-            </Grid>
-
-            {/* <Grid item xs={6}>
-                <Box sx={{display: 'flex', justifyContent: 'center', marginBottom: 0, paddingBottom:0}}>
-                    <p style={{marginBottom: 0, paddingBottom:0, fontWeight:"bold"}}>{scenarios[primaryScenarioIndex].name}</p>
-                </Box>
-            </Grid>
-
-            <Grid item xs={6}>
-                <Box sx={{display: 'flex', justifyContent: 'center', marginBottom: 0, paddingBottom:0}}>
-                    <p style={{marginBottom: 0, paddingBottom:0, fontWeight:"bold"}}>{scenarios[referenceScenarioIndex].name}</p>
-                </Box>
-            </Grid> */}
 
             <Grid item xs={6}>
                 <Box style={{backgroundColor:'white'}} sx={styles.pieChartBox}>
@@ -253,11 +258,6 @@ export default function ScenarioCompareOutput(props) {
                 </Box>
             </Grid>
 
-            <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'left'}}>
-                    <h2>Results Overview</h2>
-                </Box>
-            </Grid>
 
             <Grid item xs={12}>
                 <Box style={{backgroundColor:'white'}} sx={styles.comparisonTableBox}>
