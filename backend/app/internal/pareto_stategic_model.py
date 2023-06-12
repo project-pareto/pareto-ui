@@ -97,7 +97,7 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
     [model, results_dict] = generate_report(
         strategic_model,
         results_obj=model_results,
-        is_print=[PrintValues.essential],
+        # is_print=[PrintValues.essential],
         output_units=OutputUnits.user_units,
         fname=output_file,
     )

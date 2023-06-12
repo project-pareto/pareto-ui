@@ -32,7 +32,7 @@ export default function ScenarioList(props) {
     const [ id, setId ] = useState(null)
     let navigate = useNavigate();
     const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
-    const enabledStatusListCompare = ['Optimized', 'Not Optimized']
+    const enabledStatusListCompare = ['Optimized']
 
     useEffect(()=> {
         setShowHeader(true)

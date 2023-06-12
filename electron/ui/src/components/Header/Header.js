@@ -2,12 +2,17 @@ import './Header.css';
 import React from 'react';
 import {useEffect, useState} from 'react';   
 import logo from "../../images/pareto-logo.png";
-import { Button, MenuItem, FormControl, Select } from '@mui/material'
+import { Button, MenuItem, FormControl, Select, IconButton, Tooltip } from '@mui/material'
+import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
  
 
 export default function Header(props) {  
   const {showHeader, scenarios, index, handleSelection, navigateHome, compareScenarioIndexes, setCompareScenarioIndexes } = props
   const [ location, setLocation ] = useState("")
+
+    const handleSwitchScenarios = () => {
+      setCompareScenarioIndexes([compareScenarioIndexes[1], compareScenarioIndexes[0]])
+    }
 
     const handleScenarioSelection = (event) => {
       handleSelection(event.target.value)
@@ -55,7 +60,7 @@ export default function Header(props) {
         }
         {location === "compare" &&
           <>
-            <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Primary Scenario</p>
+            <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>
             <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
             <Select
               value={compareScenarioIndexes[0] === null ? "" : compareScenarioIndexes[0]}
@@ -64,11 +69,16 @@ export default function Header(props) {
               name={"primary"}
             >
                 {Object.entries(scenarios).map( ([key, value] ) => {
-                  if (Object.keys(value.results.data).length > 0) return <MenuItem key={key} value={key}>{value.name}</MenuItem>
+                  if (value.results.status === "Optimized") return <MenuItem key={key} value={key}>{value.name}</MenuItem>
                 })}
             </Select>
             </FormControl>
-            <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Reference Scenario</p>
+            <Tooltip title="Switch Scenarios">
+              <IconButton style={{marginRight: '35px', marginLeft: '35px'}} onClick={handleSwitchScenarios}>
+                <ChangeCircleOutlinedIcon/>
+              </IconButton>
+            </Tooltip>
+            <p style={{color:'#565656', fontSize: '20px'}}>Reference</p>
             <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
             <Select
               value={compareScenarioIndexes[1] === null ? "" : compareScenarioIndexes[1]}
@@ -77,7 +87,7 @@ export default function Header(props) {
               name={"reference"}
             >
                 {Object.entries(scenarios).map( ([key, value] ) => {
-                  if (Object.keys(value.results.data).length > 0) return <MenuItem key={key} value={key}>{value.name}</MenuItem>
+                  if (value.results.status === "Optimized") return <MenuItem key={key} value={key}>{value.name}</MenuItem>
                 })}
             </Select>
             </FormControl>

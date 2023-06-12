@@ -6,7 +6,7 @@ import CategoryNames from '../../assets/CategoryNames.json'
 
 export default function DataInputTable(props) {  
   useEffect(()=>{
-    console.log('data table use effect triggered')
+    // console.log('data table use effect triggered')
     // console.log(props.data)
     
   }, [props.data]);
@@ -24,7 +24,12 @@ export default function DataInputTable(props) {
     other: {
       minWidth: 100,
       border:"1px solid #ddd"
-    }
+    },
+    inputDifference: {
+      backgroundColor: "rgb(255,215,0, 0.5)",
+      minWidth: 100,
+      border:"1px solid #ddd"
+    },
   }
 
    const handleChangeValue = (event) => {
@@ -94,34 +99,49 @@ const handleKeyDown = (e) => {
         return 1
       });
 
+      
+
       return (cells.map( (value, index) => {
         /*
           props.columnNodes[props.columnNodesMapping[index]] must be true
           UNLESS it's the first column (index is 0)
         */
        if (index === 0 || props.columnNodes[props.columnNodesMapping[index - 1]] || Object.keys(props.columnNodes).length === 0) {
-        return (
-          <Tooltip key={"tooltip_"+ind+":"+index} title={props.editDict[""+ind+":"+index] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
-          <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
-          {props.editDict[""+ind+":"+index] ? 
-            index === 0 ? value : 
-            <TextField 
-              autoFocus
-              name={""+ind+":"+index} 
-              size="small" label={""} 
-              defaultValue={value} 
-              onChange={handleChangeValue} 
-              onFocus={(event) => event.target.select()}
-            />
-            :
-            props.category === 'PadRates' || props.category === 'FlowbackRates' ?
-            value.toLocaleString('en-US', {maximumFractionDigits:0})
-            :
-            value.toLocaleString('en-US', {maximumFractionDigits:2})
-          }
-          </TableCell>
-          </Tooltip>
-        )
+        if(props.section === "input") {
+          return (
+            <Tooltip key={"tooltip_"+ind+":"+index} title={props.editDict[""+ind+":"+index] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
+            <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
+            {props.editDict[""+ind+":"+index] ? 
+              index === 0 ? value : 
+              <TextField 
+                autoFocus
+                name={""+ind+":"+index} 
+                size="small" label={""} 
+                defaultValue={value} 
+                onChange={handleChangeValue} 
+                onFocus={(event) => event.target.select()}
+              />
+              :
+              props.category === 'PadRates' || props.category === 'FlowbackRates' ?
+              value.toLocaleString('en-US', {maximumFractionDigits:0})
+              :
+              value.toLocaleString('en-US', {maximumFractionDigits:2})
+            }
+            </TableCell>
+            </Tooltip>
+          )
+        }
+        else if(props.section === "compare") {
+          return (
+            // <TableCell onKeyDown={handleKeyDown} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
+            <TableCell onKeyDown={handleKeyDown} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : props.deltaDictionary[props.category].includes(index+"::"+ind) ? styles.inputDifference : styles.other}>
+            {
+              value.toLocaleString('en-US', {maximumFractionDigits:2})
+            }
+            </TableCell>
+          )
+        }
+        
        } else return null
       }))
   }
@@ -183,7 +203,6 @@ const handleKeyDown = (e) => {
 const renderOutputTable = () => {
 
   try {
-      console.log('rendering output table')
       return (
         <TableContainer>
         <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
@@ -260,10 +279,49 @@ const renderOutputTable = () => {
   }
 }
 
+const renderInputDeltaTable = () => {
+
+  try {
+      return (
+        <TableContainer>
+            <h3>
+              {CategoryNames[props.category] ? CategoryNames[props.category] : ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}
+              {props.scenario.data_input.display_units && props.scenario.data_input.display_units[props.category] && ` (${props.scenario.data_input.display_units[props.category]})`}
+            </h3>
+            <TableContainer sx={{overflowX:'auto'}}>
+            <Table style={{border:"1px solid #ddd"}} size='small'>
+              <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
+              <TableRow key="headRow">
+              {Object.entries(props.data[props.category]).map( ([key, value], index) => {
+                keyIndexMapping[index] = index+"::"+key
+                if (index === 0 || props.columnNodes[index+"::"+key] || Object.keys(props.columnNodes).length === 0) {
+                  return (
+                    index === 0 ? 
+                  <TableCell key={key} style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
+                  : 
+                  <TableCell key={key} style={{color:"white"}}>{key}</TableCell>
+                  )
+                } else return null
+              })}
+              </TableRow>
+              </TableHead>
+              <TableBody>
+              {renderInputRows()}
+              </TableBody>
+            </Table>
+            </TableContainer>
+          </TableContainer>
+      )
+  } catch (e) {
+    console.error("unable to render input category: ",e)
+  }
+}
+
   return ( 
     <>
     {props.section === "input" && renderInputTable()}
     {props.section === "output" && renderOutputTable()}
+    {props.section === "compare" && renderInputDeltaTable()}
     </>
   );
 
