@@ -54,7 +54,7 @@ export default function SubHeader(props) {
             <InputLabel sx={styles.inputLabel} id="scenario_label">Scenario</InputLabel>
             <Select
                 labelId="scenario_label" 
-                value={compareScenarioIndexes[0] === null ? "" : compareScenarioIndexes[0]}
+                value={compareScenarioIndexes[0] === undefined ? "" : compareScenarioIndexes[0]}
                 onChange={handleComparisonScenarioSelection}
                 sx={{color:'#0b89b9', fontWeight: "bold"}}
                 name={"primary"}
@@ -71,12 +71,13 @@ export default function SubHeader(props) {
         </Tooltip>
         
         <FormControl sx={styles.form} size="small">
-            <InputLabel sx={styles.inputLabel} id="scenario_label">Reference</InputLabel>
+            <InputLabel sx={styles.inputLabel} id="reference_label">Reference</InputLabel>
             <Select
-              value={compareScenarioIndexes[1] === null ? "" : compareScenarioIndexes[1]}
-              onChange={handleComparisonScenarioSelection}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-              name={"reference"}
+                labelId="reference_label" 
+                value={compareScenarioIndexes[1] === undefined ? "" : compareScenarioIndexes[1]}
+                onChange={handleComparisonScenarioSelection}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+                name={"reference"}
             >
                 {Object.entries(scenarios).map( ([key, value] ) => {
                   if (value.results.status === "Optimized") return <MenuItem key={key} value={key}>{value.name}</MenuItem>

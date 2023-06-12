@@ -378,8 +378,6 @@ useEffect(()=> {
           index={scenarioIndex}
           handleSelection={handleScenarioSelection}
           navigateHome={navigateToScenarioList}
-          compareScenarioIndexes={compareScenarioIndexes}
-          setCompareScenarioIndexes={setCompareScenarioIndexes}
         />
         
       <Routes> 
