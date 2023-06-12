@@ -403,6 +403,7 @@ useEffect(()=> {
               setScenarios={setScenarios}
               setShowHeader={setShowHeader}
               setCompareScenarioIndexes={setCompareScenarioIndexes}
+              setScenarioIndex={setScenarioIndex}
             />} 
         />
 
@@ -435,6 +436,7 @@ useEffect(()=> {
               scenarios={scenarios} 
               compareScenarioIndexes={compareScenarioIndexes}
               setCompareScenarioIndexes={setCompareScenarioIndexes}
+              setScenarioIndex={setScenarioIndex}
             />} 
         />
 

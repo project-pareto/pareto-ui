@@ -13,7 +13,7 @@ import Subcategories from '../../assets/Subcategories.json'
 
 
 export default function ScenarioCompare(props) {
-  const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes} = props
+  const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes, setScenarioIndex} = props
   const [ primaryScenarioIndex, setPrimaryScenarioIndex ] = useState(null)
   const [ referenceScenarioIndex, setReferenceScenarioIndex ] = useState(null)
   const [ kpiDataPrimary, setKpiDataPrimary ] = useState(null)
@@ -88,6 +88,7 @@ export default function ScenarioCompare(props) {
         tempIndexes[0].push(scenarioIds[0])
         tempIndexes[1].push(scenarioIds[1])
         setPrimaryScenarioIndex(tempIndexes[0])
+        setScenarioIndex(tempIndexes[0])
         setReferenceScenarioIndex(tempIndexes[1])
         setCompareScenarioIndexes([tempIndexes[0],tempIndexes[1]])
     } else if(compareScenarioIndexes.length === 1) {
@@ -100,6 +101,7 @@ export default function ScenarioCompare(props) {
     else {
         tempIndexes.push(compareScenarioIndexes[0])
         tempIndexes.push(compareScenarioIndexes[1])
+        setScenarioIndex(tempIndexes[0])
         setPrimaryScenarioIndex(tempIndexes[0])
         setReferenceScenarioIndex(tempIndexes[1])
     }
@@ -131,7 +133,6 @@ export default function ScenarioCompare(props) {
 }, [compareScenarioIndexes]);
 
 const unpackBarChartData = (scenarioData1, scenarioData2) => {
-    console.log('unpacking data')
     // unpack bar chart data
     let tempCapexData = []
     let tempOpexData = []

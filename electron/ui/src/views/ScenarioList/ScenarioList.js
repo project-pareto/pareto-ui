@@ -21,7 +21,8 @@ export default function ScenarioList(props) {
             deleteScenario, 
             setScenarios, 
             setShowHeader, 
-            setCompareScenarioIndexes 
+            setCompareScenarioIndexes,
+            setScenarioIndex
         } = props
     const [ showError, setShowError ] = useState(false)
     const [ errorMessage, setErrorMessage ] = useState("")
@@ -73,6 +74,7 @@ export default function ScenarioList(props) {
 
     const handleCompareScenario = (index) => {
         console.log('comparing scenario with index: '+index)
+        setScenarioIndex(index)
         setCompareScenarioIndexes([index])
         navigate('/compare', {replace: true})
     }
