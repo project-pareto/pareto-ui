@@ -177,8 +177,10 @@ export default function Sidebar(props) {
           PaperProps={{
               sx: {
               width: 240,
-              marginTop: '71px',
-              paddingBottom: '71px'
+              // marginTop: '71px',
+              // paddingBottom: '71px'
+              marginTop: '152px',
+              paddingBottom: '152px'
               }
           }}
           open={open}

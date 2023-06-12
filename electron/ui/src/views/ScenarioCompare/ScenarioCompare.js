@@ -5,6 +5,7 @@ import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
+import SubHeader from './SubHeader';
 import Subcategories from '../../assets/Subcategories.json'
 
 
@@ -177,6 +178,11 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         deltaDictionary={deltaDictionary}
     >
     </Sidebar>
+    <SubHeader 
+        scenarios={scenarios}
+        compareScenarioIndexes={compareScenarioIndexes}
+        setCompareScenarioIndexes={setCompareScenarioIndexes}
+    />
     {compareCategory==="output" ? 
     <ScenarioCompareOutput
         scenarios={scenarios}
