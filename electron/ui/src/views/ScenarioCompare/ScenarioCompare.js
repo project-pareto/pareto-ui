@@ -20,6 +20,8 @@ export default function ScenarioCompare(props) {
   const [ kpiDataReference, setKpiDataReference ] = useState(null)
   const [ capexBarChartData, setCapexBarChartData ] = useState(null)
   const [ opexBarChartData, setOpexBarChartData ] = useState(null)
+  const [ totalCapex, setTotalCapex ] = useState([])
+  const [ totalOpex, setTotalOpex ] = useState([])
   const [ showSidebar, setShowSidebar ] = useState(true)
   const [ compareCategory, setCompareCategory ] = useState('output')
   const [ deltaDictionary, setDeltaDictionary ] = useState({})
@@ -134,6 +136,8 @@ export default function ScenarioCompare(props) {
 
 const unpackBarChartData = (scenarioData1, scenarioData2) => {
     // unpack bar chart data
+    let tempTotalCapex = [0,0]
+    let tempTotalOpex = [0,0]
     let tempCapexData = []
     let tempOpexData = []
     let capexKeys = [
@@ -155,6 +159,8 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         let tempY = [scenarioData1[each].value, scenarioData2[each].value]
         let tempName = each.replace('v_C_','').replace('CapEx','')
         tempCapexData.push({x:tempX, y:tempY, name: tempName, type: 'bar'})
+        tempTotalCapex[0]+=scenarioData1[each].value
+        tempTotalCapex[1]+=scenarioData2[each].value
     }
 
     for(let each of opexKeys) {
@@ -162,12 +168,13 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         let tempY = [scenarioData1[each].value, scenarioData2[each].value]
         let tempName = each.replace('v_C_','').replace('Total','')
         tempOpexData.push({x:tempX, y:tempY, name: tempName, type: 'bar'})
+        tempTotalOpex[0]+=scenarioData1[each].value
+        tempTotalOpex[1]+=scenarioData2[each].value
     }
-
     setCapexBarChartData(tempCapexData)
     setOpexBarChartData(tempOpexData)
-    
-
+    setTotalCapex(tempTotalCapex)
+    setTotalOpex(tempTotalOpex)
     }
    
   return (
@@ -195,6 +202,8 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         opexBarChartData={opexBarChartData}
         showSidebar={showSidebar}
         compareCategory={compareCategory}
+        totalCapex={totalCapex}
+        totalOpex={totalOpex}
     />
     :
     <ScenarioCompareInput

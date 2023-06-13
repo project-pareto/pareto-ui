@@ -1,7 +1,7 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
 import {  } from "react-router-dom";
-import { Box, Grid, IconButton } from '@mui/material'
+import { Box, Grid, IconButton, Typography } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -23,7 +23,9 @@ export default function ScenarioCompareOutput(props) {
         capexBarChartData, 
         opexBarChartData, 
         showSidebar, 
-        compareCategory 
+        compareCategory,
+        totalCapex,
+        totalOpex
     } = props
 
    const styles = {
@@ -80,26 +82,55 @@ export default function ScenarioCompareOutput(props) {
       } : {
         m:3
       },
+      chartTitle: {
+        fontSize: "25px",
+        color: "#989698"
+      }
    }
 
    const getStyle = (key) => {
-    let tempStyle = {...styles.kpiTitle}
-    let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
-    if (diff > 0) tempStyle.color = "green"
-    else if(diff < 0) tempStyle.color = "red"
-    else tempStyle.color = "grey"
-    // tempStyle.fontSize="20px"
-    return tempStyle
+    if (key === "totalCapex") {
+        if (totalCapex[0] > totalCapex[1]) return {color:"green"}
+        else if (totalCapex[0] < totalCapex[1]) return {color:"red"}
+        else if (totalCapex[0] === totalCapex[1]) return {color:"#989698"}
+    } else if (key === "totalOpex") {
+        if (totalOpex[0] > totalOpex[1]) return {color:"green"}
+        else if (totalOpex[0] < totalOpex[1]) return {color:"red"}
+        else if (totalOpex[0] === totalOpex[1]) return {color:"#989698"}
+    }
+    else {
+        let tempStyle = {...styles.kpiTitle}
+        let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
+        if (diff > 0) tempStyle.color = "green"
+        else if(diff < 0) tempStyle.color = "red"
+        else tempStyle.color = "grey"
+        // tempStyle.fontSize="20px"
+        return tempStyle
+    }
+    
    }
 
    const getValue = (key) => {
-    let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
-    let returnGuy
-    if (key === "reuse_CompletionsDemandKPI") returnGuy = Math.round(diff)
-    else returnGuy = diff.toLocaleString('en-US', {maximumFractionDigits:0})
-    returnGuy = ""+returnGuy
-    if (diff > 0) returnGuy = "+" + returnGuy
-    return returnGuy
+    if (key === "totalCapex") {
+        let capexDiff = ""
+        if (totalCapex[0] > totalCapex[1]) capexDiff+="+"
+        capexDiff+=(((totalCapex[0] - totalCapex[1])/totalCapex[0])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
+        return capexDiff
+    } else if (key === "totalOpex") {
+        let opexDiff = ""
+        if (totalOpex[0] > totalOpex[1]) opexDiff+="+"
+        opexDiff+=(((totalOpex[0] - totalOpex[1])/totalOpex[0])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
+        return opexDiff
+    }
+    else {
+        let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
+        let returnGuy
+        if (key === "reuse_CompletionsDemandKPI") returnGuy = Math.round(diff)
+        else returnGuy = diff.toLocaleString('en-US', {maximumFractionDigits:0})
+        returnGuy = ""+returnGuy
+        if (diff > 0) returnGuy = "+" + returnGuy
+        return returnGuy
+    }
    }
 
   return (
@@ -211,7 +242,9 @@ export default function ScenarioCompareOutput(props) {
                     <Grid container>
                     <Grid item xs={12}>
                         <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <p style={styles.chartTitle}>CAPEX</p>
+                        <p style={styles.chartTitle}>
+                            CAPEX <span style={getStyle("totalCapex")}>{getValue("totalCapex")}%</span>
+                        </p>
                         </Box>
                     </Grid>
                     <Grid item xs={12}>
@@ -237,7 +270,9 @@ export default function ScenarioCompareOutput(props) {
                     <Grid container>
                     <Grid item xs={12}>
                         <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <p style={styles.chartTitle}>OPEX</p>
+                        <p style={styles.chartTitle}>
+                            OPEX <span style={getStyle("totalOpex")}>{getValue("totalOpex")}%</span>
+                        </p>
                         </Box>
                     </Grid>
                     <Grid item xs={12}>
