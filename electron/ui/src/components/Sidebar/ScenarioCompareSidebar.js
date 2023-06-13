@@ -45,7 +45,8 @@ export default function Sidebar(props) {
       borderRadius: "5px",
       textAlign: "left",
       marginTop: 1,
-      marginBottom: 1
+      marginBottom: 1,
+      fontWeight: "bold"
     },
     unselected: {
       cursor: "pointer",
