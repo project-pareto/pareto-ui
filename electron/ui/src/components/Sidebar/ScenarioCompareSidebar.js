@@ -97,17 +97,19 @@ export default function Sidebar(props) {
           </div>
           <div style={handleCheckForDifference("Dynamic")}  onClick={() => setOpenDynamic(!openDynamic)}> 
               <p style={styles.topLevelCategory}>
-                
-                <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openDynamic ? <ExpandLess /> : <ExpandMore />}</IconButton>
-                Dynamic Inputs
+                <span style={{display:"flex", justifyContent: "space-between"}}>
+                  Dynamic Inputs
+                  <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openDynamic ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                </span>
               </p>
           </div>
           {renderDynamicCategories()}
           <div style={handleCheckForDifference("Static")}  onClick={() => setOpenStatic(!openStatic)}> 
               <p style={styles.topLevelCategory}>
-                
-                <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openStatic ? <ExpandLess /> : <ExpandMore />}</IconButton>
-                Static Inputs
+                <span style={{display:"flex", justifyContent: "space-between"}}>
+                  Static Inputs
+                  <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openStatic ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                </span>
               </p>
           </div>
           {renderStaticCategories()}
