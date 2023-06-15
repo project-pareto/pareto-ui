@@ -53,9 +53,8 @@ export default function Header(props) {
         <>
         
           <div style={{fontSize:"20px", marginLeft:"20px", color:'#0b89b9', fontWeight: "bold"}}>
-            {/* Projects Home / {scenarios[index].name} / Compare Scenarios */}
-            Projects Home / {scenarios[index].name} / Compare Scenarios
-            
+            {/* Projects  */}
+            Home / {scenarios[index].name} / Compare Scenarios
           </div>
           <Button id='user-name' sx={{color: "#0b89b9"}} onClick={navigateHome}>View Scenario List</Button>
         </>
