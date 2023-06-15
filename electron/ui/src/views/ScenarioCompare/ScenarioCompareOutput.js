@@ -36,7 +36,7 @@ export default function ScenarioCompareOutput(props) {
     kpiBox: {
         paddingTop:2, 
         boxShadow:3,
-        minHeight: "140px"
+        minHeight: "140px",
     },
     pieChartBox: {
         paddingTop:2, 
@@ -51,7 +51,7 @@ export default function ScenarioCompareOutput(props) {
         color:"#989698",
         fontSize: '25px',
         margin: "0",
-        padding: "0"
+        padding: "0",
     },
     kpiValue: {
         color:"black",
@@ -150,18 +150,17 @@ export default function ScenarioCompareOutput(props) {
                 <Grid container>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
-                    <p style={styles.kpiTitle}>Key KPIs</p>
-                    {/* <p style={getStyle("reuse_CompletionsDemandKPI")}>{getValue("reuse_CompletionsDemandKPI")}%</p> */}
+                        <Typography noWrap style={styles.kpiTitle}>Key KPIs</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiValue}>Scenario</p>
+                        <Typography noWrap style={styles.kpiValue}>Scenario</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiReferenceValue}>vs Reference</p>
+                        <Typography noWrap style={styles.kpiReferenceValue}>vs Reference</Typography>
                     </Box>
                 </Grid>
                 </Grid>
@@ -173,18 +172,18 @@ export default function ScenarioCompareOutput(props) {
                 <Grid container>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
-                    <p style={styles.kpiTitle}><IconButton disabled><ChangeCircleIcon sx={{ color: "#947eaa" }}/></IconButton>Recycling Rate &nbsp;&nbsp;</p>
-                    <p style={getStyle("reuse_CompletionsDemandKPI")}>{getValue("reuse_CompletionsDemandKPI")}%</p>
+                        <Typography noWrap style={styles.kpiTitle}><IconButton disabled><ChangeCircleIcon sx={{ color: "#947eaa" }}/></IconButton>Recycling Rate &nbsp;&nbsp;</Typography>
+                        <Typography noWrap style={getStyle("reuse_CompletionsDemandKPI")}>{getValue("reuse_CompletionsDemandKPI")}%</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiValue}>{Math.round(kpiDataPrimary.reuse_CompletionsDemandKPI.value)}%</p>
+                        <Typography noWrap style={styles.kpiValue}>{Math.round(kpiDataPrimary.reuse_CompletionsDemandKPI.value)}%</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiReferenceValue}>vs {Math.round(kpiDataReference.reuse_CompletionsDemandKPI.value)}%</p>
+                        <Typography noWrap style={styles.kpiReferenceValue}>vs {Math.round(kpiDataReference.reuse_CompletionsDemandKPI.value)}%</Typography>
                     </Box>
                 </Grid>
                 </Grid>
@@ -196,18 +195,19 @@ export default function ScenarioCompareOutput(props) {
                 <Grid container>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
-                        <p style={styles.kpiTitle}><IconButton disabled><RemoveCircleOutlineIcon sx={{ color: "#fc2414" }}/></IconButton>Disposal</p>
-                        <p style={getStyle("v_F_TotalDisposed")}>{getValue("v_F_TotalDisposed")}&nbsp;{kpiDataPrimary.v_F_TotalDisposed.unit}</p>
+                        <Typography noWrap style={styles.kpiTitle}><IconButton disabled><RemoveCircleOutlineIcon sx={{ color: "#fc2414" }}/></IconButton>Disposal</Typography>
+                        {/* <p style={styles.kpiTitle}><IconButton disabled><RemoveCircleOutlineIcon sx={{ color: "#fc2414" }}/></IconButton>Disposal</p> */}
+                        <Typography noWrap style={getStyle("v_F_TotalDisposed")}>{getValue("v_F_TotalDisposed")}&nbsp;{kpiDataPrimary.v_F_TotalDisposed.unit}</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiValue}>{kpiDataPrimary.v_F_TotalDisposed.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalDisposed.unit}</p>
+                        <Typography noWrap style={styles.kpiValue}>{kpiDataPrimary.v_F_TotalDisposed.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalDisposed.unit}</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiReferenceValue}>vs {kpiDataReference.v_F_TotalDisposed.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalDisposed.unit}</p>
+                        <Typography noWrap style={styles.kpiReferenceValue}>vs {kpiDataReference.v_F_TotalDisposed.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalDisposed.unit}</Typography>
                     </Box>
                 </Grid>
                 </Grid>
@@ -219,18 +219,18 @@ export default function ScenarioCompareOutput(props) {
                 <Grid container>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
-                        <p style={styles.kpiTitle}><IconButton disabled><WaterIcon sx={{ color:"#59b8d6" }}/></IconButton>Sourced</p>
-                        <p style={getStyle("v_F_TotalSourced")}>{getValue("v_F_TotalSourced")}&nbsp;{kpiDataPrimary.v_F_TotalSourced.unit}</p>
+                        <Typography noWrap style={styles.kpiTitle}><IconButton disabled><WaterIcon sx={{ color:"#59b8d6" }}/></IconButton>Sourced</Typography>
+                        <Typography noWrap style={getStyle("v_F_TotalSourced")}>{getValue("v_F_TotalSourced")}&nbsp;{kpiDataPrimary.v_F_TotalSourced.unit}</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiValue}>{kpiDataPrimary.v_F_TotalSourced.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalSourced.unit}</p>
+                        <Typography noWrap style={styles.kpiValue}>{kpiDataPrimary.v_F_TotalSourced.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalSourced.unit}</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiReferenceValue}>vs {kpiDataReference.v_F_TotalSourced.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalSourced.unit}</p>
+                        <Typography noWrap style={styles.kpiReferenceValue}>vs {kpiDataReference.v_F_TotalSourced.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiDataPrimary.v_F_TotalSourced.unit}</Typography>
                     </Box>
                 </Grid>
                 </Grid>
