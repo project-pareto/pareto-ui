@@ -120,7 +120,7 @@ export default function Sidebar(props) {
       <Collapse in={openDynamic} timeout="auto" unmountOnExit>
       {Subcategories.Dynamic.map( (value,index) => {
         return(
-          <div>
+          <div key={value+""+index}>
             <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             {/* <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)}>  */}
             <div style={handleCheckForDifference(value)} onClick={() => handleClick(value)}>
@@ -153,7 +153,7 @@ export default function Sidebar(props) {
       <Collapse in={openStatic} timeout="auto" unmountOnExit>
       {Subcategories.Static.map( (value,index) => {
         return(
-          <div>
+          <div key={value+""+index}>
             <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <div style={handleCheckForDifference(value)} onClick={() => handleClick(value)}>
                 <p style={styles.subcategory}>
