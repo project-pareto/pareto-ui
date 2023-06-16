@@ -100,5 +100,7 @@
     "reuse_WaterKPI": "Produced Water Recycle Rate",
     "disposal_WaterKPI": "Produced Water Disposal Rate",
     "fresh_CompletionsDemandKPI": "Completions Demand Freshwater Rate",
-    "reuse_CompletionsDemandKPI": "Recycle Rate"
+    "reuse_CompletionsDemandKPI": "Recycle Rate",
+
+    "Solver_Stats_dict": "Solver Stats"
 }
