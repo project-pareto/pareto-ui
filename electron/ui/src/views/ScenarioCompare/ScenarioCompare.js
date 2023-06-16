@@ -5,6 +5,7 @@ import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
+import SubHeader from './SubHeader';
 import Subcategories from '../../assets/Subcategories.json'
 
 
@@ -12,13 +13,15 @@ import Subcategories from '../../assets/Subcategories.json'
 
 
 export default function ScenarioCompare(props) {
-  const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes} = props
+  const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes, setScenarioIndex} = props
   const [ primaryScenarioIndex, setPrimaryScenarioIndex ] = useState(null)
   const [ referenceScenarioIndex, setReferenceScenarioIndex ] = useState(null)
   const [ kpiDataPrimary, setKpiDataPrimary ] = useState(null)
   const [ kpiDataReference, setKpiDataReference ] = useState(null)
   const [ capexBarChartData, setCapexBarChartData ] = useState(null)
   const [ opexBarChartData, setOpexBarChartData ] = useState(null)
+  const [ totalCapex, setTotalCapex ] = useState([])
+  const [ totalOpex, setTotalOpex ] = useState([])
   const [ showSidebar, setShowSidebar ] = useState(true)
   const [ compareCategory, setCompareCategory ] = useState('output')
   const [ deltaDictionary, setDeltaDictionary ] = useState({})
@@ -87,6 +90,7 @@ export default function ScenarioCompare(props) {
         tempIndexes[0].push(scenarioIds[0])
         tempIndexes[1].push(scenarioIds[1])
         setPrimaryScenarioIndex(tempIndexes[0])
+        setScenarioIndex(tempIndexes[0])
         setReferenceScenarioIndex(tempIndexes[1])
         setCompareScenarioIndexes([tempIndexes[0],tempIndexes[1]])
     } else if(compareScenarioIndexes.length === 1) {
@@ -99,6 +103,7 @@ export default function ScenarioCompare(props) {
     else {
         tempIndexes.push(compareScenarioIndexes[0])
         tempIndexes.push(compareScenarioIndexes[1])
+        setScenarioIndex(tempIndexes[0])
         setPrimaryScenarioIndex(tempIndexes[0])
         setReferenceScenarioIndex(tempIndexes[1])
     }
@@ -130,8 +135,9 @@ export default function ScenarioCompare(props) {
 }, [compareScenarioIndexes]);
 
 const unpackBarChartData = (scenarioData1, scenarioData2) => {
-    console.log('unpacking data')
     // unpack bar chart data
+    let tempTotalCapex = [0,0]
+    let tempTotalOpex = [0,0]
     let tempCapexData = []
     let tempOpexData = []
     let capexKeys = [
@@ -153,6 +159,8 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         let tempY = [scenarioData1[each].value, scenarioData2[each].value]
         let tempName = each.replace('v_C_','').replace('CapEx','')
         tempCapexData.push({x:tempX, y:tempY, name: tempName, type: 'bar'})
+        tempTotalCapex[0]+=scenarioData1[each].value
+        tempTotalCapex[1]+=scenarioData2[each].value
     }
 
     for(let each of opexKeys) {
@@ -160,12 +168,13 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         let tempY = [scenarioData1[each].value, scenarioData2[each].value]
         let tempName = each.replace('v_C_','').replace('Total','')
         tempOpexData.push({x:tempX, y:tempY, name: tempName, type: 'bar'})
+        tempTotalOpex[0]+=scenarioData1[each].value
+        tempTotalOpex[1]+=scenarioData2[each].value
     }
-
     setCapexBarChartData(tempCapexData)
     setOpexBarChartData(tempOpexData)
-    
-
+    setTotalCapex(tempTotalCapex)
+    setTotalOpex(tempTotalOpex)
     }
    
   return (
@@ -177,6 +186,11 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         deltaDictionary={deltaDictionary}
     >
     </Sidebar>
+    <SubHeader 
+        scenarios={scenarios}
+        compareScenarioIndexes={compareScenarioIndexes}
+        setCompareScenarioIndexes={setCompareScenarioIndexes}
+    />
     {compareCategory==="output" ? 
     <ScenarioCompareOutput
         scenarios={scenarios}
@@ -188,6 +202,8 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         opexBarChartData={opexBarChartData}
         showSidebar={showSidebar}
         compareCategory={compareCategory}
+        totalCapex={totalCapex}
+        totalOpex={totalOpex}
     />
     :
     <ScenarioCompareInput

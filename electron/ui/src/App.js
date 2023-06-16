@@ -378,8 +378,6 @@ useEffect(()=> {
           index={scenarioIndex}
           handleSelection={handleScenarioSelection}
           navigateHome={navigateToScenarioList}
-          compareScenarioIndexes={compareScenarioIndexes}
-          setCompareScenarioIndexes={setCompareScenarioIndexes}
         />
         
       <Routes> 
@@ -405,6 +403,7 @@ useEffect(()=> {
               setScenarios={setScenarios}
               setShowHeader={setShowHeader}
               setCompareScenarioIndexes={setCompareScenarioIndexes}
+              setScenarioIndex={setScenarioIndex}
             />} 
         />
 
@@ -437,6 +436,7 @@ useEffect(()=> {
               scenarios={scenarios} 
               compareScenarioIndexes={compareScenarioIndexes}
               setCompareScenarioIndexes={setCompareScenarioIndexes}
+              setScenarioIndex={setScenarioIndex}
             />} 
         />
 

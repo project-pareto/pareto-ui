@@ -46,7 +46,6 @@ export default function ComparisonTable(props) {
     const renderOutputTable = () => {
 
         try {
-            console.log('rendering output table')
             return (
               <TableContainer>
               <h3>Results Comparison</h3>

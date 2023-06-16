@@ -7,20 +7,11 @@ import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
  
 
 export default function Header(props) {  
-  const {showHeader, scenarios, index, handleSelection, navigateHome, compareScenarioIndexes, setCompareScenarioIndexes } = props
+  const {showHeader, scenarios, index, handleSelection, navigateHome } = props
   const [ location, setLocation ] = useState("")
-
-    const handleSwitchScenarios = () => {
-      setCompareScenarioIndexes([compareScenarioIndexes[1], compareScenarioIndexes[0]])
-    }
 
     const handleScenarioSelection = (event) => {
       handleSelection(event.target.value)
-    }
-
-    const handleComparisonScenarioSelection = (event) => {
-      if(event.target.name === "primary") setCompareScenarioIndexes([event.target.value, compareScenarioIndexes[1]])
-      else if (event.target.name === "reference") setCompareScenarioIndexes([compareScenarioIndexes[0], event.target.value])
     }
 
     useEffect(() => {
@@ -58,42 +49,16 @@ export default function Header(props) {
             <Button id='user-name' sx={{color: "#0b89b9"}} onClick={navigateHome}>View Scenario List</Button>
           </>
         }
-        {location === "compare" &&
-          <>
-            <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>
-            <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
-            <Select
-              value={compareScenarioIndexes[0] === null ? "" : compareScenarioIndexes[0]}
-              onChange={handleComparisonScenarioSelection}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-              name={"primary"}
-            >
-                {Object.entries(scenarios).map( ([key, value] ) => {
-                  if (value.results.status === "Optimized") return <MenuItem key={key} value={key}>{value.name}</MenuItem>
-                })}
-            </Select>
-            </FormControl>
-            <Tooltip title="Switch Scenarios">
-              <IconButton style={{marginRight: '35px', marginLeft: '35px'}} onClick={handleSwitchScenarios}>
-                <ChangeCircleOutlinedIcon/>
-              </IconButton>
-            </Tooltip>
-            <p style={{color:'#565656', fontSize: '20px'}}>Reference</p>
-            <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
-            <Select
-              value={compareScenarioIndexes[1] === null ? "" : compareScenarioIndexes[1]}
-              onChange={handleComparisonScenarioSelection}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-              name={"reference"}
-            >
-                {Object.entries(scenarios).map( ([key, value] ) => {
-                  if (value.results.status === "Optimized") return <MenuItem key={key} value={key}>{value.name}</MenuItem>
-                })}
-            </Select>
-            </FormControl>
-            
-            <Button id='user-name' sx={{color: "#0b89b9"}} onClick={navigateHome}>View Scenario List</Button>
-          </>
+        {location === "compare" && index &&
+        <>
+        
+          <div style={{fontSize:"20px", marginLeft:"20px", color:'#0b89b9', fontWeight: "bold"}}>
+            {/* Projects  */}
+            Home / {scenarios[index].name} / Compare Scenarios
+          </div>
+          <Button id='user-name' sx={{color: "#0b89b9"}} onClick={navigateHome}>View Scenario List</Button>
+        </>
+          
         }
         </div>
       </div>
