@@ -1,5 +1,5 @@
 import React, {Fragment, useState} from 'react';
-import { Box, Drawer, CssBaseline, Collapse, Divider, Tooltip } from '@mui/material'
+import { Box, Drawer, CssBaseline, Collapse, Divider, Tooltip, IconButton } from '@mui/material'
 import { List, ListItem, ListItemButton, ListItemText } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -12,6 +12,16 @@ import PopupModal from '../../components/PopupModal/PopupModal'
 const drawerWidth = 240;
 
 export default function Sidebar(props) {
+  const {
+    handleSetCategory,
+    scenario,
+    section,
+    category,
+    inputDataEdited,
+    handleUpdateExcel,
+    setInputDataEdited,
+    syncScenarioData,
+  } = props
   const [ openSaveModal, setOpenSaveModal ] = useState(false)
   const [ key, setKey ] =  useState(null)
   const [ openDynamic, setOpenDynamic ] = useState(true)
@@ -23,86 +33,122 @@ export default function Sidebar(props) {
     topLevelCategory: {
       paddingLeft: "0px",
       fontWeight: "500",
-
+      margin: 0,
+      // justifyContent: "space-between"
     },
     subcategory: {
       paddingLeft: "10px",
+      margin: 0,
+    },
+    selected: {
+      cursor: "pointer",
+      color:"#0b89b9",
+      backgroundColor: "#D4EFFF",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1,
+      fontWeight: "bold"
+    },
+    unselected: {
+      cursor: "pointer",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1
     }
   }
 
   const handleSaveModal = () => {
     console.log('saving this thing')
-    props.handleUpdateExcel(props.scenario.id, props.category, props.scenario.data_input.df_parameters[props.category])
+    handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
     handleCloseSaveModal()
-    props.setInputDataEdited(false)
-    props.handleSetCategory(key)
+    setInputDataEdited(false)
+    handleSetCategory(key)
   }
 
   const handleDiscardChanges = () => {
     handleCloseSaveModal()
-    props.setInputDataEdited(false)
-    props.handleSetCategory(key)
-    props.syncScenarioData()
+    setInputDataEdited(false)
+    handleSetCategory(key)
+    syncScenarioData()
   }
 
   const handleClick = (key) => {
     setKey(key)
-    if (props.inputDataEdited) {
+    if (inputDataEdited) {
       handleOpenSaveModal()
     }
     else {
-      props.handleSetCategory(key)
+      handleSetCategory(key)
+    }
+  }
+
+  const getStyle = (key) => {
+    try {
+      if(category === key) return styles.selected
+      else return styles.unselected
+    }
+    catch(e) {
+      return styles.unselected
     }
   }
 
   const renderAdditionalCategories = () => {
-    let additionalCategories = props.section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
+    let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
-        <Fragment key={"_"+key}>
-        <ListItem key={"listitem_"+key} disablePadding>
-            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
-            <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_"+key} primary={key} />
-            </ListItemButton>
-        </ListItem>
-        <Divider key={"divider_"+key}></Divider>
-      </Fragment>
+        <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
+            <p style={styles.topLevelCategory}>{key}</p>
+        </div>
       ))
     )
   }
 
   const renderTopLevelCategories = () => {
-    if (props.section === 0) {
+    if (section === 0) {
       return (
-        <>
-        <ListItem key={"listitem_dynamic"} disablePadding>
-              <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenDynamic(!openDynamic)}>
-              <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_dynamic"} primary={"Dynamic Inputs"} />
-              {openDynamic ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-          </ListItem>
-          <Divider key={"divider_dynamic"}></Divider>
+        <div>
+          <div style={getStyle("Dynamic")}  onClick={() => setOpenDynamic(!openDynamic)}> 
+            <p style={styles.topLevelCategory}>
+              <span style={{display:"flex", justifyContent: "space-between"}}>
+                Dynamic Inputs
+                <IconButton disableRipple size="small" sx={{marginTop: -3, marginBottom: -3}}>{openDynamic ? <ExpandLess /> : <ExpandMore />}</IconButton>
+              </span>
+            </p>
+            
+              
+          </div>
           {renderDynamicCategories()}
-          <ListItem key={"listitem_static"} disablePadding>
-              <ListItemButton key={"listitembutton_static"} selected={false} onClick={() => setOpenStatic(!openStatic)}>
-              <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_static"} primary={"Static Inputs"} />
-              {openStatic ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-          </ListItem>
-          <Divider key={"divider_static"}></Divider>
+          <div style={getStyle("Static")}  onClick={() => setOpenStatic(!openStatic)}> 
+              <p style={styles.topLevelCategory}>
+              <span style={{display:"flex", justifyContent: "space-between"}}>
+                Static Inputs
+                <IconButton disableRipple size="small" sx={{marginTop: -3, marginBottom: -3}}>{openStatic ? <ExpandLess /> : <ExpandMore />}</IconButton>
+              </span>
+              </p>
+          </div>
           {renderStaticCategories()}
-          </>
+        </div>
       ) 
-    }else if (props.section ===2) {
+    }else if (section ===2) {
       return (
         <>
-        <ListItem key={"listitem_dynamic"} disablePadding>
-              <ListItemButton key={"listitembutton_dynamic"} selected={false} onClick={() => setOpenResultsTables(!openResultsTables)}>
-              <ListItemText primaryTypographyProps={styles.topLevelCategory} key={"listitemtext_resultsTables"} primary={"Results Tables"} />
-              {openResultsTables ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-          </ListItem>
-          <Divider key={"divider_resultsTables"}></Divider>
+        <div style={category==="Results Tables" ? styles.selected : styles.unselected} onClick={() => setOpenResultsTables(!openResultsTables)}> 
+            
+          <p style={styles.topLevelCategory}>
+            <span style={{display:"flex", justifyContent: "space-between"}}>
+              Results Tables
+              <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openResultsTables ? <ExpandLess /> : <ExpandMore />}</IconButton>
+            </span>
+          </p>
+        </div>
           {renderResultsTables()}
           </>
       ) 
@@ -112,37 +158,29 @@ export default function Sidebar(props) {
   const renderDynamicCategories = () => {
     return (
       <Collapse in={openDynamic} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
       {Subcategories.Dynamic.map( (value,index) => {
         return(
-          <Fragment key={"_"+index}>
-            <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
-            <ListItem key={"listitem_"+value} disablePadding>
-                <ListItemButton key={"listitembutton_"+value} selected={props.category===value} onClick={() => handleClick(value)}>
-                <ListItemText 
-                  style={styles.subcategory}
-                  key={"listitemtext_"+value} 
-                  primary={CategoryNames[value] ? CategoryNames[value] :
+          <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)} key={value+""+index}> 
+          <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
+            <p style={styles.subcategory}>
+              {CategoryNames[value] ? CategoryNames[value] : 
                     value.replace('_dict','')
-                          .replace('v_F_','')
-                          .replace('v_C_','Cost ')
-                          .replace('v_R_','Credit ')
-                          .replace('v_L_','Water Level ')
-                          .replace('v_S_','Slack ')
-                          .replace('v_D_','Disposal ')
-                          .replace('v_X_','Storage ')
-                          .replace('v_T_','Treatment ')
-                          .replace('vb_y_Flow','Directional Flow')
-                          .replace('vb_y_','New ')} 
-                />
-                </ListItemButton>
-            </ListItem>
-            </Tooltip>
-            <Divider key={"divider_"+value}></Divider>
-          </Fragment>
+                    .replace('v_F_','')
+                    .replace('v_C_','Cost ')
+                    .replace('v_R_','Credit ')
+                    .replace('v_L_','Water Level ')
+                    .replace('v_S_','Slack ')
+                    .replace('v_D_','Disposal ')
+                    .replace('v_X_','Storage ')
+                    .replace('v_T_','Treatment ')
+                    .replace('vb_y_Flow','Directional Flow')
+                    .replace('vb_y_','New ')
+              }
+              </p>
+              </Tooltip>
+          </div>
         )
       })}
-     </List>
       </Collapse>
     )
   }
@@ -150,105 +188,55 @@ export default function Sidebar(props) {
   const renderStaticCategories = () => {
     return (
       <Collapse in={openStatic} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
       {Subcategories.Static.map( (value,index) => {
         return (
-          <Fragment key={"_"+index}>
-            <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
-            <ListItem style={{fontWeight:'bold'}} key={"listitem_"+value} disablePadding>
-                <ListItemButton key={"listitembutton_"+value} selected={props.category===value} onClick={() => handleClick(value)}>
-                <ListItemText 
-                  style={styles.subcategory}
-                  key={"listitemtext_"+value} 
-                  primary={CategoryNames[value] ? CategoryNames[value] :
+          <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)} key={value+""+index}> 
+          <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
+            <p style={styles.subcategory}>
+              {CategoryNames[value] ? CategoryNames[value] : 
                     value.replace('_dict','')
-                          .replace('v_F_','')
-                          .replace('v_C_','Cost ')
-                          .replace('v_R_','Credit ')
-                          .replace('v_L_','Water Level ')
-                          .replace('v_S_','Slack ')
-                          .replace('v_D_','Disposal ')
-                          .replace('v_X_','Storage ')
-                          .replace('v_T_','Treatment ')
-                          .replace('vb_y_Flow','Directional Flow')
-                          .replace('vb_y_','New ')} 
-                />
-                </ListItemButton>
-            </ListItem>
-            </Tooltip>
-            <Divider key={"divider_"+value}></Divider>
-          </Fragment>
+                    .replace('v_F_','')
+                    .replace('v_C_','Cost ')
+                    .replace('v_R_','Credit ')
+                    .replace('v_L_','Water Level ')
+                    .replace('v_S_','Slack ')
+                    .replace('v_D_','Disposal ')
+                    .replace('v_X_','Storage ')
+                    .replace('v_T_','Treatment ')
+                    .replace('vb_y_Flow','Directional Flow')
+                    .replace('vb_y_','New ')
+              }
+              </p>
+              </Tooltip>
+          </div>
         )
       })}
-     </List>
       </Collapse>
     )
   }
   const renderResultsTables = () => {
     return (
       <Collapse in={openResultsTables} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-      {Object.entries(props.scenario.results.data).map( ([key, value]) => ( 
-        <Fragment key={"_"+key}>
-        <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : CategoryNames[key] ? CategoryNames[key] : key} placement="right-start">
-        <ListItem key={"listitem_"+key} disablePadding>
-            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
-            <ListItemText 
-              key={"listitemtext_"+key} 
-              primary={CategoryNames[key] ? CategoryNames[key] :
-                  key.replace('_dict','')
-                      .replace('v_F_','')
-                      .replace('v_C_','Cost ')
-                      .replace('v_R_','Credit ')
-                      .replace('v_L_','Water Level ')
-                      .replace('v_S_','Slack ')
-                      .replace('v_D_','Disposal ')
-                      .replace('v_X_','Storage ')
-                      .replace('v_T_','Treatment ')
-                      .replace('vb_y_Flow','Directional Flow')
-                      .replace('vb_y_','New ')} 
-            />
-            </ListItemButton>
-        </ListItem>
-        </Tooltip>
-        <Divider key={"divider_"+key}></Divider>
-      </Fragment>
-      ))}
-     </List>
+        {Object.entries(scenario.results.data).map( ([key, value]) => ( 
+          <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={key+""+value}> 
+              <p style={styles.subcategory}>
+                {CategoryNames[key] ? CategoryNames[key] :
+                    key.replace('_dict','')
+                        .replace('v_F_','')
+                        .replace('v_C_','Cost ')
+                        .replace('v_R_','Credit ')
+                        .replace('v_L_','Water Level ')
+                        .replace('v_S_','Slack ')
+                        .replace('v_D_','Disposal ')
+                        .replace('v_X_','Storage ')
+                        .replace('v_T_','Treatment ')
+                        .replace('vb_y_Flow','Directional Flow')
+                        .replace('vb_y_','New ')}
+              </p>
+          </div>
+        ))}
       </Collapse>
     )
-  }
-
-  const renderTable = () => {
-    return (
-      Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
-        <>
-        <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : CategoryNames[key] ? CategoryNames[key] : key} placement="right-start">
-        <ListItem key={"listitem_"+key} disablePadding>
-            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
-            <ListItemText 
-              key={"listitemtext_"+key} 
-              primary={CategoryNames[key] ? CategoryNames[key] :
-                  key.replace('_dict','')
-                      .replace('v_F_','')
-                      .replace('v_C_','Cost ')
-                      .replace('v_R_','Credit ')
-                      .replace('v_L_','Water Level ')
-                      .replace('v_S_','Slack ')
-                      .replace('v_D_','Disposal ')
-                      .replace('v_X_','Storage ')
-                      .replace('v_T_','Treatment ')
-                      .replace('vb_y_Flow','Directional Flow')
-                      .replace('vb_y_','New ')} 
-            />
-            </ListItemButton>
-        </ListItem>
-        </Tooltip>
-        <Divider key={"divider_"+key}></Divider>
-      </>
-      ))
-    )
-    
   }
 
   return (
@@ -259,30 +247,25 @@ export default function Sidebar(props) {
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+          [`& .MuiDrawer-paper`]: {backgroundColor:"#F5F5F6",  width: drawerWidth, boxSizing: 'border-box' },
           [`& .MuiBox-root`]: {marginBottom: '60px' },
         }}
         PaperProps={{
             sx: {
             width: 240,
-            marginTop: '152px',
-            paddingBottom: '152px'
+            marginTop: '158px',
+            paddingBottom: '158px'
             }
         }}
-        open={props.open}
+        open={true}
       >
         <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
-            <List key="drawer_list" aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
-            {props.scenario &&
+            {scenario &&
               renderAdditionalCategories()
             }
-            {props.scenario &&
+            {scenario &&
               renderTopLevelCategories()
             }
-            {/* {props.scenario && props.section === 2 &&
-              renderTable()
-            } */}
-          </List>
         </Box>
       </Drawer>
       <PopupModal
