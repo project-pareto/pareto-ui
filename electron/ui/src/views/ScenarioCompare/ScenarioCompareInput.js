@@ -14,8 +14,8 @@ export default function ScenarioCompareInput(props) {
   const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
-  const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
-  const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
+  // const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
+  // const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
 
   const styles = {
     boxView: showSidebar ? {
