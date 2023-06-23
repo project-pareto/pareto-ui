@@ -1,6 +1,5 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
-import {  } from "react-router-dom";
 import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
@@ -83,12 +82,13 @@ export default function ScenarioCompare(props) {
   }, [primaryScenarioIndex, referenceScenarioIndex]);
 
   useEffect(()=>{
+    if(Object.keys(scenarios).length === 0) window.location.href = "/";
     //check for indexes
     let tempIndexes = []
     if(compareScenarioIndexes.length === 0) {
         let scenarioIds = Object.keys(scenarios)
-        tempIndexes[0].push(scenarioIds[0])
-        tempIndexes[1].push(scenarioIds[1])
+        tempIndexes.push(scenarioIds[0])
+        tempIndexes.push(scenarioIds[1])
         setPrimaryScenarioIndex(tempIndexes[0])
         setScenarioIndex(tempIndexes[0])
         setReferenceScenarioIndex(tempIndexes[1])
