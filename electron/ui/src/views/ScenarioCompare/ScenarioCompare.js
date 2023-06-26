@@ -86,6 +86,7 @@ export default function ScenarioCompare(props) {
     //check for indexes
     let tempIndexes = []
     if(compareScenarioIndexes.length === 0) {
+        // in this case maybe it makes sense to just redirect to list page
         let scenarioIds = Object.keys(scenarios)
         tempIndexes.push(scenarioIds[0])
         tempIndexes.push(scenarioIds[1])
@@ -96,7 +97,15 @@ export default function ScenarioCompare(props) {
     } else if(compareScenarioIndexes.length === 1) {
         let scenarioIds = Object.keys(scenarios)
         tempIndexes.push(compareScenarioIndexes[0])
-        tempIndexes.push(scenarioIds[0])
+        for (let scenarioId of scenarioIds) {
+            let status = scenarios[scenarioId].results.status
+            if (status === "Optimized") { 
+                tempIndexes.push(scenarioId)
+                break
+            }
+        }
+        
+        
         setCompareScenarioIndexes([tempIndexes[0],tempIndexes[1]])
         return
     }
