@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Button, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -13,6 +13,47 @@ export default function Sidebar(props) {
     const { category, setCategory, open, deltaDictionary } = props
     const [ openDynamic, setOpenDynamic ] = useState(false)
     const [ openStatic, setOpenStatic ] = useState(false)
+    const [ deltaCategories, setDeltaCategories ] = useState([])
+    const [ checkAgain, setCheckAgain ] = useState(false)
+
+    useEffect(() => {
+      // check if delta dictionary is set yet
+      // if not, need to rerun this stuff 
+      if(Object.keys(deltaDictionary).length < 5) {
+        
+      }
+      // console.log("deltaDictionary")
+      // console.log(deltaDictionary)
+      else {
+        let tempDeltaCategories = []
+        try {
+          let dynamic_delta = false
+          for (let each of Subcategories["Dynamic"]) {
+            if(Object.keys(deltaDictionary[each]).length > 0) {
+              dynamic_delta = true
+              tempDeltaCategories.push(each)
+            }
+          }
+          if (dynamic_delta) tempDeltaCategories.push("Dynamic")
+  
+          let static_delta = false
+          for (let each of Subcategories["Static"]) {
+            if(Object.keys(deltaDictionary[each]).length > 0) {
+              static_delta = true
+              tempDeltaCategories.push(each)
+            }
+          }
+          if (static_delta) tempDeltaCategories.push("Static")
+          setDeltaCategories(tempDeltaCategories)
+        }
+        catch(e) {
+          console.error('error checking delta categories')
+          // console.log(tempDeltaCategories)
+          // setDeltaCategories(tempDeltaCategories)
+        }
+      }
+      
+    }, [deltaDictionary])
 
   const styles = {
     topLevelCategory: {
@@ -67,26 +108,9 @@ export default function Sidebar(props) {
   }
 
   const handleCheckForDifference = (key) => {
-    try {
       if(category === key) return styles.selected
-      else {
-        if (key === "Static" || key === "Dynamic") {
-          for (let each of Subcategories[key]) {
-            if(Object.keys(deltaDictionary[each]).length > 0) return styles.inputDifference
-          }
-          return styles.unselected
-        }
-        else {
-          if(Object.keys(deltaDictionary[key]).length > 0) return styles.inputDifference
-          else return styles.unselected
-        }
-      }
-      
-    }
-    catch(e) {
-      return styles.unselected
-    }
-    
+      else if (deltaCategories.includes(key)) return styles.inputDifference
+      else return styles.unselected
   }
 
   const renderTopLevelCategories = () => {
@@ -95,6 +119,7 @@ export default function Sidebar(props) {
           <div style={category==="output" ? styles.selected : styles.unselected} onClick={() => handleClick("output")}> 
               <p style={styles.topLevelCategory}>Output</p>
           </div>
+          <Tooltip title={deltaCategories.includes("Dynamic") ? "Select to view input deltas" : ""} placement="right-start">
           <div style={handleCheckForDifference("Dynamic")}  onClick={() => setOpenDynamic(!openDynamic)}> 
               <p style={styles.topLevelCategory}>
                 <span style={{display:"flex", justifyContent: "space-between"}}>
@@ -103,7 +128,9 @@ export default function Sidebar(props) {
                 </span>
               </p>
           </div>
+          </Tooltip>
           {renderDynamicCategories()}
+          <Tooltip title={deltaCategories.includes("Static") ? "Select to view input deltas" : ""} placement="right-start">
           <div style={handleCheckForDifference("Static")}  onClick={() => setOpenStatic(!openStatic)}> 
               <p style={styles.topLevelCategory}>
                 <span style={{display:"flex", justifyContent: "space-between"}}>
@@ -112,6 +139,7 @@ export default function Sidebar(props) {
                 </span>
               </p>
           </div>
+          </Tooltip>
           {renderStaticCategories()}
         </div>
       ) 
