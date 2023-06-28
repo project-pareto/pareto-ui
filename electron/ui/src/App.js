@@ -337,7 +337,7 @@ useEffect(()=> {
           tempCategory = appState.category
         }
       } else {
-        console.log('in else')
+        // console.log('in else')
         if(["Initializing", "Solving model", "Generating output", "Optimized", "failure"].includes(scenarios[index].results.status)) {
           tempSection = 2
         } else {

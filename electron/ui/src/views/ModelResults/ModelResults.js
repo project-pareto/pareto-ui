@@ -7,7 +7,6 @@ import TerminationConditions from '../../assets/TerminationConditions.json'
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
-import ComparisonTable from '../../components/ComparisonTable/ComparisonTable';
 
 
 export default function ModelResults(props) {
@@ -70,7 +69,7 @@ export default function ModelResults(props) {
     let tempScenario = {}
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
-    console.log(`termination condition is ${tempScenario.results.terminationCondition}`)
+    // console.log(`termination condition is ${tempScenario.results.terminationCondition}`)
     if (typeof(tempScenario.results.terminationCondition) === 'undefined') {
       console.log('term condition is undefined, rolling forward as good')
       setTerminationCondition('good')
