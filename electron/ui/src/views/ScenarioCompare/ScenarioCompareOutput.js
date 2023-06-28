@@ -155,12 +155,12 @@ export default function ScenarioCompareOutput(props) {
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <Typography noWrap style={styles.kpiValue}>Scenario</Typography>
+                        <Typography noWrap style={styles.kpiValue}>{scenarios[primaryScenarioIndex].name}</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <Typography noWrap style={styles.kpiReferenceValue}>vs Reference</Typography>
+                        <Typography noWrap style={styles.kpiReferenceValue}>vs {scenarios[referenceScenarioIndex].name}</Typography>
                     </Box>
                 </Grid>
                 </Grid>
