@@ -31,7 +31,6 @@ export default function ScenarioCompareInput(props) {
       */
       try {
         if (category !== "Plots" && category !== "Network Diagram" && category !== "Input Summary") {
-          console.log("inside datainput useeffect")
           let tempEditDict = {}
           let tempColumnNodes = {}
           let tempColumnNodesMapping = []

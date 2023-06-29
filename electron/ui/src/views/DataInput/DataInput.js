@@ -35,7 +35,6 @@ export default function DataInput(props) {
     */
     try {
       if (props.category !== "Plots" && props.category !== "Network Diagram" && props.category !== "Input Summary") {
-        console.log("inside datainput useeffect")
         let tempEditDict = {}
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
