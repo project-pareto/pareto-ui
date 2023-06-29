@@ -1,6 +1,7 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import { Box, Grid, LinearProgress } from '@mui/material';
+import { Box, Grid, LinearProgress, Button } from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
 import TerminationConditions from '../../assets/TerminationConditions.json'
@@ -18,6 +19,7 @@ export default function ModelResults(props) {
   const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
+  const [ overrideValues, setOverrideValues ] = useState({})
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const styles ={
@@ -31,6 +33,21 @@ export default function ModelResults(props) {
     kpiDashboardBox: {
       marginLeft: 10, 
       marginRight: 10
+    },
+    filledButton: {
+      // backgroundColor: 'white',
+      // '&:hover': {
+      //     backgroundColor: 'white',
+      //     opacity: 0.9
+      // },
+      // color: "#0884b4",
+      backgroundColor: '#01678f',
+      '&:hover': {
+          backgroundColor: '#01678f',
+          opacity: 0.9
+      },
+      minWidth:"250px",
+      // fontWeight: "bold", 
     }
   }
 
@@ -148,6 +165,19 @@ const handleRowFilter = (row) => {
         setFilteredRowNodes(tempRows)
     }
 }
+
+const handleRerun = () => {
+  console.log('rerun optimization with the following overrides: ')
+  let overviewDict = scenario.results.data.vb_y_overview_dict
+  for(let each of Object.keys(overrideValues)) {
+    //INDEXES ARE 1 HIGHER THAN WHAT I STORE THEM AS
+    //THIS IS BECAUSE I SPLICE THE ARRAY WHEN I POPULATE THE TABLE TO SEPARATE THE TOP ROW OUT
+    //MAYBE THIS SHOULD BE ADDRESSED AT THE SOURCE, BUT IF THERE ARE NO OTHER ISSUES, ADDING ONE HERE FIXES THE ISSUE
+    let rowName = overviewDict[parseInt(each)+1][0]
+    let location = overviewDict[parseInt(each)+1][1]
+    console.log(`${rowName} at location ${location} with value: ${overrideValues[each]}`)
+  }
+}
   
   const renderOutputCategory = () => {
     try {
@@ -204,6 +234,8 @@ const handleRowFilter = (row) => {
                 category={props.category}
                 handleEditInput={props.handleEditInput}
                 data={props.scenario.results.data}
+                overrideValues={overrideValues}
+                setOverrideValues={setOverrideValues}
               />
               {/* } */}
               
@@ -211,7 +243,7 @@ const handleRowFilter = (row) => {
             <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
               {
-                props.category !== "vb_y_overview_dict" &&
+                props.category !== "vb_y_overview_dict" ?
                 <FilterDropdown
                   width="300px"
                   maxHeight="300px"
@@ -226,6 +258,11 @@ const handleRowFilter = (row) => {
                   isAllSelected2={isAllRowsSelected}
                   handleFilter2={handleRowFilter}
                 />
+                :
+                Object.keys(overrideValues).length > 0 &&
+                <Button sx={styles.filledButton} onClick={handleRerun} variant="contained" size="large" endIcon={<ArrowForwardIcon />}> 
+                  Rerun Optimization 
+                </Button>
               }
             
             </Box>

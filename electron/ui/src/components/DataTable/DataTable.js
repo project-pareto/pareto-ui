@@ -15,7 +15,7 @@ export default function DataInputTable(props) {
     // console.log(props.data)
     
   }, [props.data]);
-  const [ overrideValues, setOverrideValues ] = useState({})
+  // const [ props.overrideValues, props.setOverrideValues ] = useState({})
 
   var keyIndexMapping = {}
 
@@ -102,26 +102,26 @@ const handleKeyDown = (e) => {
   }
 
   const handleCheckOverride = (index) => {
-    let tempOverrideValues = {...overrideValues}
+    let tempOverrideValues = {...props.overrideValues}
     if(Object.keys(tempOverrideValues).includes(""+index)) {
       delete tempOverrideValues[index]
     } else {
       tempOverrideValues[index] = ""
     }
     // console.log(tempOverrideValues)
-    setOverrideValues(tempOverrideValues)
+    props.setOverrideValues(tempOverrideValues)
   } 
 
   const handleInputOverrideValue = (event) => {
-    let tempOverrideValues = {...overrideValues}
+    let tempOverrideValues = {...props.overrideValues}
     let idx = event.target.name
     let val = event.target.value
     if(!isNaN(val)) {
       tempOverrideValues[idx] = parseInt(val)
-      setOverrideValues(tempOverrideValues)
+      props.setOverrideValues(tempOverrideValues)
     }
     // tempOverrideValues[idx] = val
-    // setOverrideValues(tempOverrideValues)
+    // props.setOverrideValues(tempOverrideValues)
   }
   
   const renderInputRow = (ind) => {
@@ -324,15 +324,19 @@ const renderOutputTable = () => {
                   align="right"
                   style={styles.other}>
                     {Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0]) ?
-                    
+                    <Tooltip 
+                      title={Object.keys(props.overrideValues).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]]]} table in the data input section.` : ''} 
+                      placement="top" 
+                      enterDelay={500}
+                    >
                     <FormControl sx={{ width: "100%" }} size="small">
                       <InputLabel id="">Value</InputLabel>
                       <Select
-                        disabled={!Object.keys(overrideValues).includes(""+index)}
+                        disabled={!Object.keys(props.overrideValues).includes(""+index)}
                         labelId=""
                         id=""
                         name={`${index}`}
-                        value={overrideValues[index] !== undefined ? overrideValues[index] : ""}
+                        value={props.overrideValues[index] !== undefined ? props.overrideValues[index] : ""}
                         label="Value"
                         onChange={handleInputOverrideValue}
                       >
@@ -346,15 +350,15 @@ const renderOutputTable = () => {
                         ))}
                       </Select>
                     </FormControl>
-
+                    </Tooltip>
                     :
                     <TextField 
                       autoFocus
                       name={`${index}`}
                       size="small" 
                       label="Value"
-                      value={overrideValues[index] !== undefined ? overrideValues[index] : ""}
-                      disabled={!Object.keys(overrideValues).includes(""+index)}
+                      value={props.overrideValues[index] !== undefined ? props.overrideValues[index] : ""}
+                      disabled={!Object.keys(props.overrideValues).includes(""+index)}
                       onChange={handleInputOverrideValue} 
                       onFocus={(event) => event.target.select()}
                     />
