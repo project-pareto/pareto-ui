@@ -81,6 +81,7 @@ export default function Sidebar(props) {
   }
 
   const handleClick = (key) => {
+    console.log(scenario)
     setKey(key)
     if (inputDataEdited) {
       handleOpenSaveModal()

@@ -210,20 +210,24 @@ const handleRowFilter = (row) => {
             </Grid>
             <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
-            <FilterDropdown
-                width="300px"
-                maxHeight="300px"
-                option1="Column"
-                filtered1={filteredColumnNodes}
-                total1={columnNodesMapping}
-                isAllSelected1={isAllColumnsSelected}
-                handleFilter1={handleColumnFilter}
-                option2="Row"
-                filtered2={filteredRowNodes}
-                total2={rowNodesMapping}
-                isAllSelected2={isAllRowsSelected}
-                handleFilter2={handleRowFilter}
-            />
+              {
+                props.category !== "vb_y_overview_dict" &&
+                <FilterDropdown
+                  width="300px"
+                  maxHeight="300px"
+                  option1="Column"
+                  filtered1={filteredColumnNodes}
+                  total1={columnNodesMapping}
+                  isAllSelected1={isAllColumnsSelected}
+                  handleFilter1={handleColumnFilter}
+                  option2="Row"
+                  filtered2={filteredRowNodes}
+                  total2={rowNodesMapping}
+                  isAllSelected2={isAllRowsSelected}
+                  handleFilter2={handleRowFilter}
+                />
+              }
+            
             </Box>
           </Grid>
           </Grid>
