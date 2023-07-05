@@ -29,6 +29,7 @@ export default function ScenarioList(props) {
     const [ openEditName, setOpenEditName ] = useState(false)
     const [ openDeleteModal, setOpenDeleteModal ] = useState(false)
     const [ showFileModal, setShowFileModal ] = useState(false)
+    const [ hasOverrideList, setHasOverrideList ] = useState([])
     const [ name, setName ] = useState('')
     const [ id, setId ] = useState(null)
     let navigate = useNavigate();
@@ -37,7 +38,23 @@ export default function ScenarioList(props) {
 
     useEffect(()=> {
         setShowHeader(true)
+        console.log('setting show header true')
     }, [props]) 
+
+    useEffect(() => {
+        let tempHasOverrideList = []
+        for (let scenarioId of Object.keys(scenarios)) {
+            let scenario = scenarios[scenarioId]
+            if(scenario.results.status==="Optimized") {
+                let hasOverride = false
+                for (let each of Object.keys(scenario.override_values)) {
+                    if (Object.keys(scenario.override_values[each]).length>0) hasOverride = true
+                }
+                if (hasOverride) tempHasOverrideList.push(scenario.id)
+            }
+        }
+        setHasOverrideList(tempHasOverrideList)
+    },[scenarios])
 
     const handleOpenEditName = (name, id) => {
         setName(name)
@@ -119,6 +136,19 @@ export default function ScenarioList(props) {
         })
   }
 
+  const checkForOverride = (scenario) => {
+    //if(scenario.override_values <contains> a value)
+    if(scenario.results.status==="Optimized") {
+        let hasOverride = false
+        for (let each of Object.keys(scenario.override_values)) {
+            if (Object.keys(scenario.override_values[each]).length>0) hasOverride = true
+        }
+        if (hasOverride) return <span style={{color:"red"}}> *</span>
+        else return null
+    }else return null
+
+  }
+
   const styles={
     headerCell: {
         color: "white", 
@@ -176,9 +206,12 @@ export default function ScenarioList(props) {
                 key={key}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } , cursor:"pointer"}}
                 >
-                <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => handleSelection(key)}>
-                    {value.name}
-                </TableCell>
+                <Tooltip title={hasOverrideList.includes(value.id) ? "Scenario has been optimized with manual override" : ""} placement="top" arrow>
+                    <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => handleSelection(key)}>
+                        {value.name}
+                        {hasOverrideList.includes(value.id) && <span style={{color: "red"}}> *</span>}
+                    </TableCell>
+                </Tooltip>
                 <TableCell onClick={() => handleSelection(key)} sx={styles.bodyCell} align="center">{value.date}</TableCell>
                 <TableCell onClick={() => handleSelection(key)} sx={styles.bodyCell} align="center">{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
                 <TableCell sx={styles.bodyCell} align="center">
