@@ -30,14 +30,14 @@ export default function Bottombar(props) {
         }
     }
 
-    // useEffect(() => {
-    //   // check if override values are present
-    //   for (let key of Object.keys(props.scenario.overrideValues)) {
-
-    //   }    
-
-      
-    // },[props.scenario])
+    useEffect(() => {
+      // check if override values are present
+      let showOverrideButton = false
+      for (let key of Object.keys(props.scenario.override_values)) {
+        if(Object.keys(props.scenario.override_values[key]).length>0) showOverrideButton = true
+      }    
+      setHasOverride(showOverrideButton)
+    },[props.scenario.override_values])
 
     useEffect(() => {
         /*
@@ -85,6 +85,12 @@ export default function Bottombar(props) {
         }
       }
 
+      const handleRerunOptimize = () => {
+        console.log('rerun with the following overrides: ')
+        console.log(props.scenario.override_values)
+        // props.handleRunModel
+      }
+
   return ( 
     <Box sx={{ width: 500 }}>
       <CssBaseline />
@@ -101,7 +107,7 @@ export default function Bottombar(props) {
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
                         {props.section === 0 && <Button sx={styles.filled} onClick={() => handleClick(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
                         {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
-                        {(props.section === 2 && hasOverride) && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Re-run Optimization </Button>}
+                        {(props.section === 2 && hasOverride) && <Button onClick={handleRerunOptimize} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Re-run Optimization </Button>}
                     </Box>
                 </Grid>
             </Grid>
