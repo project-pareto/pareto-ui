@@ -98,11 +98,15 @@ const renderOutputTable = () => {
               </>
               
               :
-              data[category][0].map((value, index) => {
+              <>
+              {data[category][0].map((value, index) => {
                 if (Object.keys(columnNodes).length === 0 || columnNodes[columnNodesMapping[index]]){
                   return <TableCell key={`${value}_${index}`} style={{backgroundColor:"#6094bc", color:"white"}}>{value}</TableCell>
                 }
-              })
+              })}
+                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Override</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12.5%"}}>Value</TableCell>
+              </>
               }
               
               </TableRow>
@@ -192,6 +196,25 @@ const renderOutputTable = () => {
                           </TableCell>
                   }
                 })}
+                <TableCell 
+                    align="left"
+                    style={styles.other}>
+                    <Checkbox
+                        checked={getCheckboxValue(index)}
+                        onChange={() => handleCheckOverride(index)}
+                    />
+                </TableCell>
+                <TableCell disabled align="right" style={styles.other}>
+                    <TextField 
+                        name={`${index}`}
+                        size="small" 
+                        label="Value"
+                        value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+                        disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+                        onChange={handleInputOverrideValue} 
+                        onFocus={(event) => event.target.select()}
+                    />
+                    </TableCell>
                 </TableRow>)
                 }
               })}
