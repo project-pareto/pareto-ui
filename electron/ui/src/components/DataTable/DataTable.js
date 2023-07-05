@@ -5,11 +5,6 @@ import OverrideTable from '../OverrideTable/OverrideTable';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 
-const OVERRIDE_PRESET_VALUES = {
-  "Pipeline Construction": "PipelineDiameterValues",
-  "Storage Facility": "StorageCapacityIncrements"
-}
-
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
   "v_F_Piped_dict",
@@ -26,11 +21,16 @@ const OVERRIDE_CATEGORIES = [
 export default function DataTable(props) {  
   const [showOverrideTables, setShowOverrideTables] = useState(false)
   useEffect(()=>{
-    let tempOverrideValues = {...props.overrideValues}
-    for (let each of OVERRIDE_CATEGORIES) {
-      if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {}
+    if(props.scenario.override_values === undefined) {
+      console.log('override values were not defined')
+      let tempOverrideValues = {}
+      for (let each of OVERRIDE_CATEGORIES) {
+        if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {}
+      }
+      const tempScenario = {...props.scenario}
+      tempScenario.override_values = tempOverrideValues
+      props.updateScenario(tempScenario)
     }
-    props.setOverrideValues(tempOverrideValues)
     setShowOverrideTables(true)
     
   }, [props.data]);
@@ -243,6 +243,7 @@ const renderOutputTable = () => {
           columnNodesMapping={props.columnNodesMapping}
           scenario={props.scenario}
           show={showOverrideTables}
+          updateScenario={props.updateScenario}
         /> 
         : 
         <TableContainer sx={{overflowX:'auto'}}>

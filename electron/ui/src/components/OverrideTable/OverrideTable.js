@@ -13,15 +13,14 @@ export default function OverrideTable(props) {
 
     const {
         category, 
-        // scenario.override_values, 
-        setOverrideValues, 
         data, 
         rowNodes, 
         rowNodesMapping, 
         columnNodes, 
         columnNodesMapping, 
         scenario, 
-        show
+        show,
+        updateScenario
     } = props
 
     const styles ={
@@ -53,8 +52,7 @@ export default function OverrideTable(props) {
         }
         const tempScenario = {...scenario}
         tempScenario.override_values = tempOverrideValues
-        props.updateScenario(tempScenario)
-        setOverrideValues(tempOverrideValues)
+        updateScenario(tempScenario)
     } 
 
     const handleInputOverrideValue = (event) => {
@@ -65,8 +63,7 @@ export default function OverrideTable(props) {
             tempOverrideValues[category][idx] = parseInt(val)
             const tempScenario = {...scenario}
             tempScenario.override_values = tempOverrideValues
-            props.updateScenario(tempScenario)
-            setOverrideValues(tempOverrideValues)
+            updateScenario(tempScenario)
         }
     }
 
