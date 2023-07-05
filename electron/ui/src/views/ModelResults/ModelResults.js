@@ -167,16 +167,18 @@ const handleRowFilter = (row) => {
 }
 
 const handleRerun = () => {
-  console.log('rerun optimization with the following overrides: ')
+  // console.log('rerun optimization with the following overrides: ')
   let overviewDict = scenario.results.data.vb_y_overview_dict
-  for(let each of Object.keys(overrideValues)) {
-    //INDEXES ARE 1 HIGHER THAN WHAT I STORE THEM AS
-    //THIS IS BECAUSE I SPLICE THE ARRAY WHEN I POPULATE THE TABLE TO SEPARATE THE TOP ROW OUT
-    //MAYBE THIS SHOULD BE ADDRESSED AT THE SOURCE, BUT IF THERE ARE NO OTHER ISSUES, ADDING ONE HERE FIXES THE ISSUE
-    let rowName = overviewDict[parseInt(each)+1][0]
-    let location = overviewDict[parseInt(each)+1][1]
-    console.log(`${rowName} at location ${location} with value: ${overrideValues[each]}`)
-  }
+  console.log(overrideValues)
+//   for(let each of Object.keys(overrideValues)) {
+//     //INDEXES ARE 1 HIGHER THAN WHAT I STORE THEM AS
+//     //THIS IS BECAUSE I SPLICE THE ARRAY WHEN I POPULATE THE TABLE TO SEPARATE THE TOP ROW OUT
+//     //MAYBE THIS SHOULD BE ADDRESSED AT THE SOURCE, BUT IF THERE ARE NO OTHER ISSUES, ADDING ONE HERE FIXES THE ISSUE
+
+//     let rowName = overviewDict[parseInt(each)+1][0]
+//     let location = overviewDict[parseInt(each)+1][1]
+//     console.log(`${rowName} at location ${location} with value: ${overrideValues[each]}`)
+//   }
 }
   
   const renderOutputCategory = () => {

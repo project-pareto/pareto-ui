@@ -1,6 +1,7 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import OverrideTable from '../OverrideTable/OverrideTable';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 
@@ -9,10 +10,28 @@ const OVERRIDE_PRESET_VALUES = {
   "Storage Facility": "StorageCapacityIncrements"
 }
 
-export default function DataInputTable(props) {  
+const OVERRIDE_CATEGORIES = [
+  "vb_y_overview_dict",
+  "v_F_Piped_dict",
+  "v_F_Sourced_dict",
+  "v_F_Trucked_dict",
+  "v_L_Storage_dict",
+  "v_L_PadStorage_dict",
+  "vb_y_Pipeline_dict",
+  "vb_y_Disposal_dict",
+  "vb_y_Storage_dict",
+  "vb_y_Treatment_dict"
+]
+
+export default function DataTable(props) {  
+  const [showOverrideTables, setShowOverrideTables] = useState(false)
   useEffect(()=>{
-    // console.log('data table use effect triggered')
-    // console.log(props.data)
+    let tempOverrideValues = {...props.overrideValues}
+    for (let each of OVERRIDE_CATEGORIES) {
+      if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {}
+    }
+    props.setOverrideValues(tempOverrideValues)
+    setShowOverrideTables(true)
     
   }, [props.data]);
   // const [ props.overrideValues, props.setOverrideValues ] = useState({})
@@ -99,29 +118,6 @@ const handleKeyDown = (e) => {
 
   const handleEnterOverrideValue = () => {
     console.log('handleEnterOverrideValue')
-  }
-
-  const handleCheckOverride = (index) => {
-    let tempOverrideValues = {...props.overrideValues}
-    if(Object.keys(tempOverrideValues).includes(""+index)) {
-      delete tempOverrideValues[index]
-    } else {
-      tempOverrideValues[index] = ""
-    }
-    // console.log(tempOverrideValues)
-    props.setOverrideValues(tempOverrideValues)
-  } 
-
-  const handleInputOverrideValue = (event) => {
-    let tempOverrideValues = {...props.overrideValues}
-    let idx = event.target.name
-    let val = event.target.value
-    if(!isNaN(val)) {
-      tempOverrideValues[idx] = parseInt(val)
-      props.setOverrideValues(tempOverrideValues)
-    }
-    // tempOverrideValues[idx] = val
-    // props.setOverrideValues(tempOverrideValues)
   }
   
   const renderInputRow = (ind) => {
@@ -239,6 +235,20 @@ const renderOutputTable = () => {
       return (
         <TableContainer>
         <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
+        {OVERRIDE_CATEGORIES.includes(props.category) ? 
+        <OverrideTable
+          category={props.category}
+          overrideValues={props.overrideValues}
+          setOverrideValues={props.setOverrideValues}
+          data={props.data}
+          rowNodes={props.rowNodes}
+          rowNodesMapping={props.rowNodesMapping}
+          columnNodes={props.columnNodes}
+          columnNodesMapping={props.columnNodesMapping}
+          scenario={props.scenario}
+          show={showOverrideTables}
+        /> 
+        : 
         <TableContainer sx={{overflowX:'auto'}}>
         <Table style={{border:"1px solid #ddd"}} size='small'>
           <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
@@ -249,22 +259,6 @@ const renderOutputTable = () => {
             <TableCell key="overview1" style={{backgroundColor:"#6094bc", color:"white"}}>Units</TableCell> 
             <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white"}}>Value</TableCell> 
           </>
-          :
-          props.category === "vb_y_overview_dict" ? 
-          <>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>CAPEX Type</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Location</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Destination</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Technology</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Capacity</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Unit</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Override</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12.5%"}}>Value</TableCell>
-            {/* <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Bound</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Floor</TableCell>
-            <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Ceilling</TableCell> */}
-          </>
-          
           :
           props.data[props.category][0].map((value, index) => {
             if (Object.keys(props.columnNodes).length === 0 || props.columnNodes[props.columnNodesMapping[index]]){
@@ -298,76 +292,6 @@ const renderOutputTable = () => {
             </TableRow>)
           })}
           </TableBody> 
-          : 
-          props.category === "vb_y_overview_dict" ? 
-          <TableBody>
-            {props.data[props.category].slice(1).map((value, index) => {
-              return (<TableRow key={`row_${value}_${index}`}>
-                {[0,1,2,5,3,4].map((cellIdx, i) => (
-                  <TableCell 
-                    align={"left"} 
-                    key={"" + index + i} 
-                    style={i === 0 ? styles.firstCol : styles.other}>
-                      {value[cellIdx].toLocaleString('en-US', {maximumFractionDigits:0})}
-                  </TableCell>
-                  )
-                )}
-                <TableCell 
-                  align="left"
-                  style={styles.other}>
-                    <Checkbox
-                      onChange={() => handleCheckOverride(index)}
-                    />
-                </TableCell>
-                <TableCell 
-                  disabled
-                  align="right"
-                  style={styles.other}>
-                    {Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0]) ?
-                    <Tooltip 
-                      title={Object.keys(props.overrideValues).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]]]} table in the data input section.` : ''} 
-                      placement="top" 
-                      enterDelay={500}
-                    >
-                    <FormControl sx={{ width: "100%" }} size="small">
-                      <InputLabel id="">Value</InputLabel>
-                      <Select
-                        disabled={!Object.keys(props.overrideValues).includes(""+index)}
-                        labelId=""
-                        id=""
-                        name={`${index}`}
-                        value={props.overrideValues[index] !== undefined ? props.overrideValues[index] : ""}
-                        label="Value"
-                        onChange={handleInputOverrideValue}
-                      >
-                        {/* <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem> */}
-                        {props.scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]].VALUE.map((presetValue, i) => (
-                          <MenuItem key={`${presetValue}_${i}`} value={presetValue}>
-                            {presetValue}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    </Tooltip>
-                    :
-                    <TextField 
-                      autoFocus
-                      name={`${index}`}
-                      size="small" 
-                      label="Value"
-                      value={props.overrideValues[index] !== undefined ? props.overrideValues[index] : ""}
-                      disabled={!Object.keys(props.overrideValues).includes(""+index)}
-                      onChange={handleInputOverrideValue} 
-                      onFocus={(event) => event.target.select()}
-                    />
-                    }
-                    
-                </TableCell>
-              </TableRow>)
-            })}
-          </TableBody>
           :
           <TableBody>
           {props.data[props.category].slice(1).map((value, index) => {
@@ -391,6 +315,8 @@ const renderOutputTable = () => {
         
         </Table>
         </TableContainer>
+        }
+        
       </TableContainer>
       )
   } catch (e) {
