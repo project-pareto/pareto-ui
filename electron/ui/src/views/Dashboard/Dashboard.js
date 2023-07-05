@@ -65,15 +65,15 @@ export default function Dashboard(props) {
    }
 
    const handleRunModel = () => {
-    console.log('running model')
+    // console.log('running model')
       runModel({"scenario": scenario})
       .then(r =>  r.json().then(data => ({status: r.status, body: data})))
       .then((response) => {
         let responseCode = response.status
         let data = response.body
         if(responseCode === 200) {
-          console.log('run model successful: ')
-          console.log(data)
+          // console.log('run model successful: ')
+          // console.log(data)
           props.updateScenario(data)
           props.updateAppState({action:'section',section:2},scenario.id)
           props.addTask(scenario.id)

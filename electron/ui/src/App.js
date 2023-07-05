@@ -170,7 +170,7 @@ useEffect(()=> {
   }
 
   const handleCloseFinishedOptimizationDialog = () => {
-    console.log('inside handleCloseFinishedOptimizationDialog')
+    // console.log('inside handleCloseFinishedOptimizationDialog')
     setShowCompletedOptimization(false)
   }
 
@@ -212,9 +212,9 @@ useEffect(()=> {
   }
 
   const handleScenarioUpdate = (updatedScenario) => {
-    console.log('inside handle scenario update')
+    // console.log('inside handle scenario update')
     if (updatedScenario.results.status==='Optimized') {
-      console.log('changing status to not optimized')
+      // console.log('changing status to not optimized')
       updatedScenario.results.status = "Not Optimized"
     }
     const temp = {...scenarios}
@@ -287,8 +287,8 @@ useEffect(()=> {
     updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
     .then(response => response.json())
     .then((data)=>{
-      console.log('return from update excel: ')
-      console.log(data)
+      // console.log('return from update excel: ')
+      // console.log(data)
       if (data.results.status === 'Optimized') {
         data.results.status = "Not Optimized"
         handleScenarioUpdate(data)
