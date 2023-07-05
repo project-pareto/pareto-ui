@@ -32,11 +32,16 @@ export default function Bottombar(props) {
 
     useEffect(() => {
       // check if override values are present
-      let showOverrideButton = false
-      for (let key of Object.keys(props.scenario.override_values)) {
-        if(Object.keys(props.scenario.override_values[key]).length>0) showOverrideButton = true
-      }    
-      setHasOverride(showOverrideButton)
+      try {
+        let showOverrideButton = false
+        for (let key of Object.keys(props.scenario.override_values)) {
+          if(Object.keys(props.scenario.override_values[key]).length>0) showOverrideButton = true
+        }    
+        setHasOverride(showOverrideButton)
+      } catch (e) {
+        
+      }
+
     },[props.scenario.override_values])
 
     useEffect(() => {
