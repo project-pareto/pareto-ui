@@ -14,6 +14,7 @@ export default function Bottombar(props) {
     const [ openSaveModal, setOpenSaveModal ] = useState(false)
     const [ disableOptimize, setDisableOptimize ] = useState(false) 
     const [ key, setKey ] =  useState(null)
+    const [ hasOverride, setHasOverride ] = useState(false)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
     const handleCloseSaveModal = () => setOpenSaveModal(false);
     const styles = {
@@ -28,6 +29,15 @@ export default function Bottombar(props) {
             color: '#595959'
         }
     }
+
+    // useEffect(() => {
+    //   // check if override values are present
+    //   for (let key of Object.keys(props.scenario.overrideValues)) {
+
+    //   }    
+
+      
+    // },[props.scenario])
 
     useEffect(() => {
         /*
@@ -91,6 +101,7 @@ export default function Bottombar(props) {
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
                         {props.section === 0 && <Button sx={styles.filled} onClick={() => handleClick(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
                         {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
+                        {(props.section === 2 && hasOverride) && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Re-run Optimization </Button>}
                     </Box>
                 </Grid>
             </Grid>

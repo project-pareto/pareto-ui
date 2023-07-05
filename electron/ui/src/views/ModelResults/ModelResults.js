@@ -238,6 +238,7 @@ const handleRerun = () => {
                 data={props.scenario.results.data}
                 overrideValues={overrideValues}
                 setOverrideValues={setOverrideValues}
+                updateScenario={props.updateScenario}
               />
               {/* } */}
               

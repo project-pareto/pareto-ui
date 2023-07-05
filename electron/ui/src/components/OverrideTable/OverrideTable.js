@@ -11,7 +11,18 @@ const OVERRIDE_PRESET_VALUES = {
 
 export default function OverrideTable(props) {  
 
-    const {category, overrideValues, setOverrideValues, data, rowNodes, rowNodesMapping, columnNodes, columnNodesMapping, scenario, show} = props
+    const {
+        category, 
+        // scenario.override_values, 
+        setOverrideValues, 
+        data, 
+        rowNodes, 
+        rowNodesMapping, 
+        columnNodes, 
+        columnNodesMapping, 
+        scenario, 
+        show
+    } = props
 
     const styles ={
         firstCol: {
@@ -34,23 +45,35 @@ export default function OverrideTable(props) {
 
 
     const handleCheckOverride = (index) => {
-        let tempOverrideValues = {...overrideValues}
+        let tempOverrideValues = {...scenario.override_values}
         if(Object.keys(tempOverrideValues[category]).includes(""+index)) {
         delete tempOverrideValues[category][index]
         } else {
             tempOverrideValues[category][index] = ""
         }
+        const tempScenario = {...scenario}
+        tempScenario.override_values = tempOverrideValues
+        props.updateScenario(tempScenario)
         setOverrideValues(tempOverrideValues)
     } 
 
     const handleInputOverrideValue = (event) => {
-        let tempOverrideValues = {...overrideValues}
+        let tempOverrideValues = {...scenario.override_values}
         let idx = event.target.name
         let val = event.target.value
         if(!isNaN(val)) {
             tempOverrideValues[category][idx] = parseInt(val)
+            const tempScenario = {...scenario}
+            tempScenario.override_values = tempOverrideValues
+            props.updateScenario(tempScenario)
             setOverrideValues(tempOverrideValues)
         }
+    }
+
+    const getCheckboxValue = (index) => {
+        if(Object.keys(scenario.override_values[category]).includes(""+index)) {
+            return true
+        } else return false
     }
   
 const renderOutputTable = () => {
@@ -104,7 +127,8 @@ const renderOutputTable = () => {
                       align="left"
                       style={styles.other}>
                         <Checkbox
-                          onChange={() => handleCheckOverride(index)}
+                            checked={getCheckboxValue(index)}
+                            onChange={() => handleCheckOverride(index)}
                         />
                     </TableCell>
                     <TableCell 
@@ -113,18 +137,18 @@ const renderOutputTable = () => {
                       style={styles.other}>
                         {Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0]) ?
                         <Tooltip 
-                          title={Object.keys(overrideValues[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]]]} table in the data input section.` : ''} 
+                          title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]]]} table in the data input section.` : ''} 
                           placement="top" 
                           enterDelay={500}
                         >
                         <FormControl sx={{ width: "100%" }} size="small">
                           <InputLabel id="">Value</InputLabel>
                           <Select
-                            disabled={!Object.keys(overrideValues[category]).includes(""+index)}
+                            disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
                             labelId=""
                             id=""
                             name={`${index}`}
-                            value={overrideValues[category][index] !== undefined ? overrideValues[category][index] : ""}
+                            value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
                             label="Value"
                             onChange={handleInputOverrideValue}
                           >
@@ -141,12 +165,12 @@ const renderOutputTable = () => {
                         </Tooltip>
                         :
                         <TextField 
-                          autoFocus
+                        //   autoFocus
                           name={`${index}`}
                           size="small" 
                           label="Value"
-                          value={overrideValues[category][index] !== undefined ? overrideValues[category][index] : ""}
-                          disabled={!Object.keys(overrideValues[category]).includes(""+index)}
+                          value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+                          disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
                           onChange={handleInputOverrideValue} 
                           onFocus={(event) => event.target.select()}
                         />
