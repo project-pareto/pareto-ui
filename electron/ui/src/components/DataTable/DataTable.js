@@ -115,10 +115,6 @@ const handleKeyDown = (e) => {
   } 
   
 }
-
-  const handleEnterOverrideValue = () => {
-    console.log('handleEnterOverrideValue')
-  }
   
   const renderInputRow = (ind) => {
       var cells = []
@@ -147,7 +143,7 @@ const handleKeyDown = (e) => {
                 name={""+ind+":"+index} 
                 size="small" label={""} 
                 defaultValue={value} 
-                onChange={handleEnterOverrideValue} 
+                onChange={handleChangeValue} 
                 onFocus={(event) => event.target.select()}
               />
               :
