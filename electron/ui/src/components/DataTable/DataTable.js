@@ -5,26 +5,13 @@ import OverrideTable from '../OverrideTable/OverrideTable';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 
-const OVERRIDE_CATEGORIES = [
-  "vb_y_overview_dict",
-  "v_F_Piped_dict",
-  "v_F_Sourced_dict",
-  "v_F_Trucked_dict",
-  "v_L_Storage_dict",
-  "v_L_PadStorage_dict",
-  "vb_y_Pipeline_dict",
-  "vb_y_Disposal_dict",
-  "vb_y_Storage_dict",
-  "vb_y_Treatment_dict"
-]
-
 export default function DataTable(props) {  
   const [showOverrideTables, setShowOverrideTables] = useState(false)
   useEffect(()=>{
     if(props.scenario.override_values === undefined) {
       console.log('override values were not defined')
       let tempOverrideValues = {}
-      for (let each of OVERRIDE_CATEGORIES) {
+      for (let each of props.OVERRIDE_CATEGORIES) {
         if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {}
       }
       const tempScenario = {...props.scenario}
@@ -231,7 +218,7 @@ const renderOutputTable = () => {
       return (
         <TableContainer>
         <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
-        {OVERRIDE_CATEGORIES.includes(props.category) ? 
+        {props.OVERRIDE_CATEGORIES.includes(props.category) ? 
         <OverrideTable
           category={props.category}
           overrideValues={props.overrideValues}

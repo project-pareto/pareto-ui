@@ -6,7 +6,10 @@ import CategoryNames from '../../assets/CategoryNames.json'
 
 const OVERRIDE_PRESET_VALUES = {
   "Pipeline Construction": "PipelineDiameterValues",
-  "Storage Facility": "StorageCapacityIncrements"
+  "Storage Facility": "StorageCapacityIncrements",
+  "Disposal Facility": "DisposalCapacityIncrements",
+  "Treatment Facility": "TreatmentCapacityIncrements",
+
 }
 
 export default function OverrideTable(props) {  
@@ -73,6 +76,90 @@ export default function OverrideTable(props) {
         } else return false
     }
   
+    const generateInfrastructureBuildoutOptions = (value, index) => {
+      if (Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0])) {
+        try {
+          let presetValues = []
+          if(value[0] === "Treatment Facility") {
+            let technology = value[5]
+            let technologyNamesKey = "TreatmentCapacities"
+            let indexOfTechnology = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]][technologyNamesKey].indexOf(technology)
+            // let presetValues = []
+            for (let each of Object.keys(scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]])) {
+              let val = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]][each][indexOfTechnology]
+              if(val !== technology) {
+                presetValues.push(val)
+              }
+            }
+          }
+          return (
+            <Tooltip 
+              title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]]]} table in the data input section.` : ''} 
+              placement="top" 
+              enterDelay={500}
+            >
+            <FormControl sx={{ width: "100%" }} size="small">
+              <InputLabel id="">Value</InputLabel>
+              <Select
+                disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+                labelId=""
+                id=""
+                name={`${index}`}
+                value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+                label="Value"
+                onChange={handleInputOverrideValue}
+              >
+                {
+                  value[0] === "Treatment Facility" ? 
+                  presetValues.map((presetValue, i) => (
+                    <MenuItem key={`${presetValue}_${i}`} value={presetValue}>
+                      {presetValue}
+                    </MenuItem>
+                  )) 
+                  : 
+                  scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]].VALUE.map((presetValue, i) => (
+                    <MenuItem key={`${presetValue}_${i}`} value={presetValue}>
+                      {presetValue}
+                    </MenuItem>
+                  ))
+                }
+              </Select>
+            </FormControl>
+            </Tooltip>
+            )
+          
+          
+        } catch (e) {
+          console.error(e)
+          console.log("unable to generate infrastructure buildout options from input table, using generic input")
+          return ( 
+            <TextField 
+              name={`${index}`}
+              size="small" 
+              label="Value"
+              value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+              disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+              onChange={handleInputOverrideValue} 
+              onFocus={(event) => event.target.select()}
+            />
+          )
+        }
+      } else {
+        return ( 
+          <TextField 
+            name={`${index}`}
+            size="small" 
+            label="Value"
+            value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+            disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+            onChange={handleInputOverrideValue} 
+            onFocus={(event) => event.target.select()}
+          />
+        )
+      }
+        
+    }
+
 const renderOutputTable = () => {
 
   try {
@@ -136,47 +223,7 @@ const renderOutputTable = () => {
                       disabled
                       align="right"
                       style={styles.other}>
-                        {Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0]) ?
-                        <Tooltip 
-                          title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]]]} table in the data input section.` : ''} 
-                          placement="top" 
-                          enterDelay={500}
-                        >
-                        <FormControl sx={{ width: "100%" }} size="small">
-                          <InputLabel id="">Value</InputLabel>
-                          <Select
-                            disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
-                            labelId=""
-                            id=""
-                            name={`${index}`}
-                            value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
-                            label="Value"
-                            onChange={handleInputOverrideValue}
-                          >
-                            {/* <MenuItem value="">
-                              <em>None</em>
-                            </MenuItem> */}
-                            {scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]].VALUE.map((presetValue, i) => (
-                              <MenuItem key={`${presetValue}_${i}`} value={presetValue}>
-                                {presetValue}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                        </Tooltip>
-                        :
-                        <TextField 
-                        //   autoFocus
-                          name={`${index}`}
-                          size="small" 
-                          label="Value"
-                          value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
-                          disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
-                          onChange={handleInputOverrideValue} 
-                          onFocus={(event) => event.target.select()}
-                        />
-                        }
-                        
+                        {generateInfrastructureBuildoutOptions(value, index)}
                     </TableCell>
                   </TableRow>)
                 })}
