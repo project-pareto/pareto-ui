@@ -66,7 +66,7 @@ export default function Sidebar(props) {
   }
 
   const handleSaveModal = () => {
-    console.log('saving this thing')
+    // console.log('saving this thing')
     handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
     handleCloseSaveModal()
     setInputDataEdited(false)
@@ -81,7 +81,7 @@ export default function Sidebar(props) {
   }
 
   const handleClick = (key) => {
-    console.log(scenario)
+    // console.log(scenario)
     setKey(key)
     if (inputDataEdited) {
       handleOpenSaveModal()

@@ -67,7 +67,7 @@ export default function Bottombar(props) {
     
 
     const handleSaveModal = () => {
-        console.log('saving this thing')
+        // console.log('saving this thing')
         props.handleUpdateExcel(props.scenario.id, props.category, props.scenario.data_input.df_parameters[props.category])
         handleCloseSaveModal()
         props.setInputDataEdited(false)
