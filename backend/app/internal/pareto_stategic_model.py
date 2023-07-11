@@ -25,8 +25,40 @@ from app.internal.scenario_handler import (
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
 
+## this code will be in PARETO repo eventually
+from pyomo.environ import Var, Binary, units as pyunits
+def fix_vars(model, vars_to_fix, indexes, v_val, upper_bound=None, lower_bound=None, fixvar=True):
+    _log.info('inside fix vars')
+    for var in model.component_objects(Var):
+        if var.name in vars_to_fix:
+            _log.info("\nFixing this variable")
+            _log.info(var)
+            for index in var:
+                if index == indexes:
+                    if fixvar is True:
+                        if var[index].domain is Binary:
+                            var[index].fix(v_val)
+                        else:
+                            v_val = pyunits.convert_value(
+                                                v_val,
+                                                from_units=model.user_units["volume_time"],
+                                                to_units=model.model_units["volume_time"],
+                                            )
+                            var[index].fix(v_val)
+                    else:
+                        #TODO check units
+                        var[index].setlb(lower_bound)
+                        var[index].setub(upper_bound)
+                else:
+                    pass
+            else:
+                pass
+        else:
+            continue
+##
 
-def run_strategic_model(input_file, output_file, id, modelParameters):
+
+def run_strategic_model(input_file, output_file, id, modelParameters, overrideValues={}):
     start_time = datetime.datetime.now()
 
     [set_list, parameter_list] = get_input_lists()
@@ -72,6 +104,22 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
 
     _log.info(f"solving model with options: {options}")
 
+    # check for any override values and fix those variables in the model before running solve
+    _log.info(f"checking for override values: ")
+    # _log.info(overrideValues)
+    for variable in overrideValues:
+        if len(overrideValues[variable]) > 0:
+            for idx in overrideValues[variable]:
+                override_object = overrideValues[variable][idx]
+                _log.info(f"overriding {override_object['variable'].replace('_dict','')} with indexes {override_object['indexes']} and value {override_object['value']}")
+                fix_vars(
+                    model=strategic_model, 
+                    vars_to_fix=[override_object['variable'].replace('_dict','')], 
+                    indexes=tuple(override_object['indexes']), 
+                    v_val=float(override_object['value'])
+                )
+
+
     model_results = solve_model(model=strategic_model, options=options)
     with nostdout():
         feasibility_status = is_feasible(strategic_model)
@@ -107,9 +155,9 @@ def run_strategic_model(input_file, output_file, id, modelParameters):
 
     return results_dict
 
-def handle_run_strategic_model(input_file, output_file, id, modelParameters):
+def handle_run_strategic_model(input_file, output_file, id, modelParameters, overrideValues={}):
     try:
-        results_dict = run_strategic_model(input_file, output_file, id, modelParameters)
+        results_dict = run_strategic_model(input_file, output_file, id, modelParameters, overrideValues)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
         results = scenario["results"]

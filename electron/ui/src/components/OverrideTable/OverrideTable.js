@@ -83,8 +83,6 @@ export default function OverrideTable(props) {
       override_object.indexes=indexes
       override_object.value=""
       // console.log(override_object)
-
-
         let tempOverrideValues = {...scenario.override_values}
         if(Object.keys(tempOverrideValues[category]).includes(""+index)) {
         delete tempOverrideValues[category][index]
@@ -100,6 +98,13 @@ export default function OverrideTable(props) {
         let tempOverrideValues = {...scenario.override_values}
         let idx = event.target.name
         let val = event.target.value
+        /*
+        ***
+          WHEN SETTING VALUE FOR INFRASTRUCTURE BUILDOUT STUFF, WE NEED TO SEND THE NAME, NOT THE VALUE
+          For example, 0 -> C0 and 350000 -> C1
+        ***
+        */
+        
         if(!isNaN(val)) {
             tempOverrideValues[category][idx].value = parseInt(val)
             const tempScenario = {...scenario}
