@@ -82,15 +82,14 @@ export default function OverrideTable(props) {
       }
       override_object.indexes=indexes
       override_object.value=""
-      console.log(override_object)
-
+      // console.log(override_object)
 
 
         let tempOverrideValues = {...scenario.override_values}
         if(Object.keys(tempOverrideValues[category]).includes(""+index)) {
         delete tempOverrideValues[category][index]
         } else {
-            tempOverrideValues[category][index] = ""
+            tempOverrideValues[category][index] = override_object
         }
         const tempScenario = {...scenario}
         tempScenario.override_values = tempOverrideValues
@@ -102,7 +101,7 @@ export default function OverrideTable(props) {
         let idx = event.target.name
         let val = event.target.value
         if(!isNaN(val)) {
-            tempOverrideValues[category][idx] = parseInt(val)
+            tempOverrideValues[category][idx].value = parseInt(val)
             const tempScenario = {...scenario}
             tempScenario.override_values = tempOverrideValues
             updateScenario(tempScenario)
@@ -144,7 +143,7 @@ export default function OverrideTable(props) {
                 labelId=""
                 id=""
                 name={`${index}`}
-                value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+                value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
                 label="Value"
                 onChange={handleInputOverrideValue}
               >
@@ -176,7 +175,7 @@ export default function OverrideTable(props) {
               name={`${index}`}
               size="small" 
               label="Value"
-              value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+              value={scenario.override_values[category][index].value !== undefined ? scenario.override_values[category][index].value : ""}
               disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
               onChange={handleInputOverrideValue} 
               onFocus={(event) => event.target.select()}
@@ -189,7 +188,7 @@ export default function OverrideTable(props) {
             name={`${index}`}
             size="small" 
             label="Value"
-            value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+            value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
             disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
             onChange={handleInputOverrideValue} 
             onFocus={(event) => event.target.select()}
@@ -295,7 +294,7 @@ const renderOutputTable = () => {
                         name={`${index}`}
                         size="small" 
                         label="Value"
-                        value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index] : ""}
+                        value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
                         disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
                         onChange={handleInputOverrideValue} 
                         onFocus={(event) => event.target.select()}
