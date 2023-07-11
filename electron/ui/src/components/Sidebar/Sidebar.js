@@ -1,6 +1,5 @@
-import React, {Fragment, useState} from 'react';
-import { Box, Drawer, CssBaseline, Collapse, Divider, Tooltip, IconButton } from '@mui/material'
-import { List, ListItem, ListItemButton, ListItemText } from '@mui/material'
+import React, {useState} from 'react';
+import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
@@ -81,7 +80,7 @@ export default function Sidebar(props) {
   }
 
   const handleClick = (key) => {
-    // console.log(scenario)
+    // console.log(key)
     setKey(key)
     if (inputDataEdited) {
       handleOpenSaveModal()
