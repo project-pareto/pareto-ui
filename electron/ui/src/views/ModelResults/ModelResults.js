@@ -266,6 +266,17 @@ const handleRowFilter = (row) => {
       console.log('unable to render table for this category: ',e)
     }
   }
+ const checkForOverride = () => {
+    if(scenario.results.status==="Optimized") {
+      let hasOverride = false
+      for (let each of Object.keys(scenario.override_values)) {
+          if (Object.keys(scenario.override_values[each]).length>0) hasOverride = true
+      }
+      if (hasOverride) return <span style={{color:"red"}}>* Scenario has been optimized with manual override.</span>
+      else return null
+  }else return null
+ }
+
 
   const showDisclaimer = () => {
     return (<h3 style={{color: 'red'}}>*{TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.</h3>)
@@ -281,6 +292,7 @@ const handleRowFilter = (row) => {
     {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
       {terminationCondition === "unsure" && showDisclaimer()}
+      {checkForOverride()}
       <Box sx={props.category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
         {renderOutputCategory()}
       </Box>
