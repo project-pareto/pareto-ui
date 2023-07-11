@@ -5,11 +5,22 @@ import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 
 const OVERRIDE_PRESET_VALUES = {
-  "Pipeline Construction": "PipelineDiameterValues",
-  "Storage Facility": "StorageCapacityIncrements",
-  "Disposal Facility": "DisposalCapacityIncrements",
-  "Treatment Facility": "TreatmentCapacityIncrements",
-
+  "Pipeline Construction": {
+    input_table: "PipelineDiameterValues",
+    variable_name: "vb_y_Pipeline_dict"
+  },
+  "Storage Facility": {
+    input_table: "StorageCapacityIncrements",
+    variable_name: "vb_y_Storage_dict"
+  },
+  "Disposal Facility": {
+    input_table: "DisposalCapacityIncrements",
+    variable_name: "vb_y_Disposal_dict"
+  },
+  "Treatment Facility": {
+    input_table: "TreatmentCapacityIncrements",
+    variable_name: "vb_y_Treatment_dict"
+  },
 }
 
 export default function OverrideTable(props) {  
@@ -83,10 +94,10 @@ export default function OverrideTable(props) {
           if(value[0] === "Treatment Facility") {
             let technology = value[5]
             let technologyNamesKey = "TreatmentCapacities"
-            let indexOfTechnology = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]][technologyNamesKey].indexOf(technology)
+            let indexOfTechnology = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table][technologyNamesKey].indexOf(technology)
             // let presetValues = []
-            for (let each of Object.keys(scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]])) {
-              let val = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]][each][indexOfTechnology]
+            for (let each of Object.keys(scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table])) {
+              let val = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table][each][indexOfTechnology]
               if(val !== technology) {
                 presetValues.push(val)
               }
@@ -94,7 +105,7 @@ export default function OverrideTable(props) {
           }
           return (
             <Tooltip 
-              title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]]]} table in the data input section.` : ''} 
+              title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]].input_table]} table in the data input section.` : ''} 
               placement="top" 
               enterDelay={500}
             >
@@ -117,7 +128,7 @@ export default function OverrideTable(props) {
                     </MenuItem>
                   )) 
                   : 
-                  scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]]].VALUE.map((presetValue, i) => (
+                  scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table].VALUE.map((presetValue, i) => (
                     <MenuItem key={`${presetValue}_${i}`} value={presetValue}>
                       {presetValue}
                     </MenuItem>
