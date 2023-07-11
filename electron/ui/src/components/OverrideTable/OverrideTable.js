@@ -23,6 +23,19 @@ const OVERRIDE_PRESET_VALUES = {
   },
 }
 
+const VARIABLE_INDEXES = {
+    "vb_y_overview_dict": [1,2,5],
+    "v_F_Piped_dict": [0,1,2],
+    "v_F_Sourced_dict": [0,1,2],
+    "v_F_Trucked_dict": [0,1,2],
+    "v_L_Storage_dict": [0,1],
+    "v_L_PadStorage_dict": [0,1],
+    "vb_y_Pipeline_dict": [0,1],
+    "vb_y_Disposal_dict": [0,1],
+    "vb_y_Storage_dict": [0,1],
+    "vb_y_Treatment_dict": [0,1],
+}
+
 export default function OverrideTable(props) {  
 
     const {
@@ -57,7 +70,22 @@ export default function OverrideTable(props) {
     }
 
 
-    const handleCheckOverride = (index) => {
+    const handleCheckOverride = (index, value) => {
+      // console.log(value)
+      
+      let variable = category
+      if(category ==="vb_y_overview_dict") variable = OVERRIDE_PRESET_VALUES[value[0]].variable_name
+      let override_object = {variable: variable}
+      let indexes = []
+      for (let i of VARIABLE_INDEXES[category]) {
+        if (!value[i].includes("-")) indexes.push(value[i])
+      }
+      override_object.indexes=indexes
+      override_object.value=""
+      console.log(override_object)
+
+
+
         let tempOverrideValues = {...scenario.override_values}
         if(Object.keys(tempOverrideValues[category]).includes(""+index)) {
         delete tempOverrideValues[category][index]
@@ -227,7 +255,7 @@ const renderOutputTable = () => {
                       style={styles.other}>
                         <Checkbox
                             checked={getCheckboxValue(index)}
-                            onChange={() => handleCheckOverride(index)}
+                            onChange={() => handleCheckOverride(index, value)}
                         />
                     </TableCell>
                     <TableCell 
@@ -259,7 +287,7 @@ const renderOutputTable = () => {
                     style={styles.other}>
                     <Checkbox
                         checked={getCheckboxValue(index)}
-                        onChange={() => handleCheckOverride(index)}
+                        onChange={() => handleCheckOverride(index, value)}
                     />
                 </TableCell>
                 <TableCell disabled align="right" style={styles.other}>
