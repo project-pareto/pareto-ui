@@ -1,7 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import { Box, Grid, LinearProgress, Button } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { Box, Grid, LinearProgress } from '@mui/material';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
 import TerminationConditions from '../../assets/TerminationConditions.json'

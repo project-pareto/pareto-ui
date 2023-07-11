@@ -38,7 +38,7 @@ export default function ScenarioList(props) {
 
     useEffect(()=> {
         setShowHeader(true)
-        console.log('setting show header true')
+        // console.log('setting show header true')
     }, [props]) 
 
     useEffect(() => {
