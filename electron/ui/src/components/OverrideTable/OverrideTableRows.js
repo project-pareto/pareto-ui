@@ -280,6 +280,9 @@ function BinaryVariableRow(props) {
     }
       
   }
+  const handleTechnologySelect = (event) => {
+    console.log('selected '+event.target.value)
+  }
 
 return (
   <>
@@ -290,7 +293,29 @@ return (
               align={"left"} 
               key={"" + index + i} 
               style={i === 0 ? styles.firstCol : styles.other}>
-                {value[cellIdx].toLocaleString('en-US', {maximumFractionDigits:0})
+                {(cellIdx === 5 && overrideChecked && rowName === "Treatment Facility") ?
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">Value</InputLabel>
+                  <Select
+                    // disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+                    labelId=""
+                    id=""
+                    name={`technology::select`}
+                    value={technology}
+                    label="technology"
+                    onChange={handleTechnologySelect}
+                  >
+                    {
+                      Object.keys(presetValues).map((key,idx) => (
+                        <MenuItem key={`${key}_${idx}`} value={key}>
+                          {key}
+                        </MenuItem>
+                      )) 
+                    }
+                  </Select>
+                </FormControl>
+                  :
+                  value[cellIdx].toLocaleString('en-US', {maximumFractionDigits:0})
                 }
             </TableCell>
             )
