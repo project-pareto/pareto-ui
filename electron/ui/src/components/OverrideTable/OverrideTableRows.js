@@ -1,7 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import { TableBody, TableCell, TableRow, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import CategoryNames from '../../assets/CategoryNames.json'
 
 const OVERRIDE_PRESET_VALUES = {
