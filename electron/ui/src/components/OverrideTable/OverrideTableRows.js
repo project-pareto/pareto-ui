@@ -69,7 +69,7 @@ return (
     {category === "vb_y_overview_dict" ? 
     
     <TableBody>
-      {data[category].slice(1).map((value, index) => (
+      {data.map((value, index) => (
         <BinaryVariableRow
           key={`${value}_${index}`}
           category={category}
@@ -85,7 +85,7 @@ return (
     </TableBody>
     :
     <TableBody>
-    {data[category].slice(1).map((value, index) => {
+    {data.map((value, index) => {
       if (Object.keys(rowNodes).length === 0 || rowNodes[rowNodesMapping[index]]) {
       return (<TableRow key={`row_${value}_${index}`}>
       {value.map((cellValue, i)=> {
@@ -157,6 +157,7 @@ function BinaryVariableRow(props) {
       },
   }
   const [ showData, setShowData ] = useState(false)
+  const [ overrideChecked, setOverrideChecked ] = useState(null)
   const [ rowName, setRowName ] = useState("")
   const [ presetValues, setPresetValues ] = useState({})
   const [ technology, setTechnology ] = useState(null)
@@ -197,14 +198,17 @@ function BinaryVariableRow(props) {
       setRowName(value[0])
       setPresetValues(preset_values)
       setShowData(true)
-  }, [props])
+  }, [scenario, value])
 
+  useEffect(() => {
+    /*
+      Logic for creating dictionary with correct values for each infrastructure buildout row 
+    */
+    if(Object.keys(scenario.override_values[category]).includes(""+index)) setOverrideChecked(true)
+    else setOverrideChecked(false)
+    
+  }, [scenario])
 
-  const getCheckboxValue = (index) => {
-      if(Object.keys(scenario.override_values[category]).includes(""+index)) {
-          return true
-      } else return false
-  }
 
   const generateInfrastructureBuildoutValueOptions = (value, index) => {
     if (Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0])) {
@@ -286,7 +290,8 @@ return (
               align={"left"} 
               key={"" + index + i} 
               style={i === 0 ? styles.firstCol : styles.other}>
-                {value[cellIdx].toLocaleString('en-US', {maximumFractionDigits:0})}
+                {value[cellIdx].toLocaleString('en-US', {maximumFractionDigits:0})
+                }
             </TableCell>
             )
           )}
@@ -294,7 +299,7 @@ return (
             align="left"
             style={styles.other}>
               <Checkbox
-                  checked={getCheckboxValue(index)}
+                  checked={overrideChecked}
                   onChange={() => handleCheckOverride(index, value)}
               />
           </TableCell>

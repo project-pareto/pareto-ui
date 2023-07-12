@@ -141,7 +141,7 @@ const renderOutputTable = () => {
               </TableHead>
               <OverrideTableRows
                 category={category}
-                data={data}
+                data={data[category].slice(1)}
                 rowNodes={rowNodes}
                 rowNodesMapping={rowNodesMapping}
                 columnNodes={columnNodes}
