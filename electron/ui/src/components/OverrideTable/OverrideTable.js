@@ -96,16 +96,23 @@ export default function OverrideTable(props) {
 
     const handleInputOverrideValue = (event) => {
         let tempOverrideValues = {...scenario.override_values}
-        let idx = event.target.name
+        let idx = event.target.name.split("::")[0]
+        let inputType = event.target.name.split("::")[1]
         let val = event.target.value
         /*
         ***
           WHEN SETTING VALUE FOR INFRASTRUCTURE BUILDOUT STUFF, WE NEED TO SEND THE NAME, NOT THE VALUE
+          THIS OCCURS WHEN INPUT TYPE IS select
           For example, 0 -> C0 and 350000 -> C1
         ***
         */
-        
-        if(!isNaN(val)) {
+        if(inputType === "select") {
+          tempOverrideValues[category][idx].value = val
+          const tempScenario = {...scenario}
+          tempScenario.override_values = tempOverrideValues
+          updateScenario(tempScenario)
+        }
+        else if(!isNaN(val)) {
             tempOverrideValues[category][idx].value = parseInt(val)
             const tempScenario = {...scenario}
             tempScenario.override_values = tempOverrideValues
@@ -119,9 +126,36 @@ export default function OverrideTable(props) {
         } else return false
     }
   
-    const generateInfrastructureBuildoutOptions = (value, index) => {
+    const generateInfrastructureBuildoutValueOptions = (value, index) => {
       if (Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0])) {
         try {
+
+
+          
+          
+          /*
+            Logic for creating dictionary with correct values for each treatment capacity technology 
+          */
+          let preset_value_table = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table]
+          let preset_values = {}
+          if(value[0] === "Treatment Facility") {
+            let technology = value[5]
+            let technologyNamesKey = "TreatmentCapacities"
+            let technologies = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table][technologyNamesKey]
+            let len = technologies.length
+            for (let i = 0; i < len; i++) {
+              let each = technologies[i]
+              preset_values[each] = {}
+              for (let row of Object.keys(preset_value_table)) {
+                if (row !== technologyNamesKey) {
+                  preset_values[each][row]=preset_value_table[row][i]
+                }
+              }
+            }
+            // console.log(preset_values)
+          }
+
+
           let presetValues = []
           if(value[0] === "Treatment Facility") {
             let technology = value[5]
@@ -135,6 +169,7 @@ export default function OverrideTable(props) {
               }
             }
           }
+          
           return (
             <Tooltip 
               title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]].input_table]} table in the data input section.` : ''} 
@@ -147,16 +182,21 @@ export default function OverrideTable(props) {
                 disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
                 labelId=""
                 id=""
-                name={`${index}`}
+                name={`${index}::select`}
                 value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
                 label="Value"
                 onChange={handleInputOverrideValue}
               >
                 {
                   value[0] === "Treatment Facility" ? 
-                  presetValues.map((presetValue, i) => (
-                    <MenuItem key={`${presetValue}_${i}`} value={presetValue}>
-                      {presetValue}
+                  // presetValues.map((presetValue, i) => (
+                  //   <MenuItem key={`${presetValue}_${i}`} value={presetValue}>
+                  //     {presetValue}
+                  //   </MenuItem>
+                  // )) 
+                  Object.entries(preset_values[value[5]]).map(([key,value]) => (
+                    <MenuItem key={`${key}_${value}`} value={key}>
+                      {value}
                     </MenuItem>
                   )) 
                   : 
@@ -177,7 +217,7 @@ export default function OverrideTable(props) {
           console.log("unable to generate infrastructure buildout options from input table, using generic input")
           return ( 
             <TextField 
-              name={`${index}`}
+              name={`${index}::textfield`}
               size="small" 
               label="Value"
               value={scenario.override_values[category][index].value !== undefined ? scenario.override_values[category][index].value : ""}
@@ -190,7 +230,7 @@ export default function OverrideTable(props) {
       } else {
         return ( 
           <TextField 
-            name={`${index}`}
+            name={`${index}::textfield`}
             size="small" 
             label="Value"
             value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
@@ -266,7 +306,7 @@ const renderOutputTable = () => {
                       disabled
                       align="right"
                       style={styles.other}>
-                        {generateInfrastructureBuildoutOptions(value, index)}
+                        {generateInfrastructureBuildoutValueOptions(value, index)}
                     </TableCell>
                   </TableRow>)
                 })}
@@ -296,7 +336,7 @@ const renderOutputTable = () => {
                 </TableCell>
                 <TableCell disabled align="right" style={styles.other}>
                     <TextField 
-                        name={`${index}`}
+                        name={`${index}::textfield`}
                         size="small" 
                         label="Value"
                         value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
