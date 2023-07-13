@@ -46,11 +46,7 @@ export default function ScenarioList(props) {
         for (let scenarioId of Object.keys(scenarios)) {
             let scenario = scenarios[scenarioId]
             if(scenario.results.status==="Optimized") {
-                let hasOverride = false
-                for (let each of Object.keys(scenario.override_values)) {
-                    if (Object.keys(scenario.override_values[each]).length>0) hasOverride = true
-                }
-                if (hasOverride) tempHasOverrideList.push(scenario.id)
+                if (scenario.optimized_override_values !== undefined) tempHasOverrideList.push(scenario.id)
             }
         }
         setHasOverrideList(tempHasOverrideList)
@@ -134,19 +130,6 @@ export default function ScenarioList(props) {
             setShowError(true)
         }
         })
-  }
-
-  const checkForOverride = (scenario) => {
-    //if(scenario.override_values <contains> a value)
-    if(scenario.results.status==="Optimized") {
-        let hasOverride = false
-        for (let each of Object.keys(scenario.override_values)) {
-            if (Object.keys(scenario.override_values[each]).length>0) hasOverride = true
-        }
-        if (hasOverride) return <span style={{color:"red"}}> *</span>
-        else return null
-    }else return null
-
   }
 
   const styles={

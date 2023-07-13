@@ -135,6 +135,23 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
     scenario = scenario_handler.get_scenario(int(id))
     results = {"data": {}, "status": "Generating output", "terminationCondition": termination_condition}
     scenario["results"] = results
+
+    ## RESET override_values
+    ## ADD them to a different key 
+    scenario['override_values'] = {
+                    "vb_y_overview_dict": {},
+                    "v_F_Piped_dict": {},
+                    "v_F_Sourced_dict": {},
+                    "v_F_Trucked_dict": {},
+                    "v_L_Storage_dict": {},
+                    "v_L_PadStorage_dict": {},
+                    "vb_y_Pipeline_dict": {},
+                    "vb_y_Disposal_dict": {},
+                    "vb_y_Storage_dict": {},
+                    "vb_y_Treatment_dict": {}
+                }
+    scenario['optimized_override_values'] = overrideValues
+
     scenario_handler.update_scenario(scenario)
 
     print("\nConverting to Output Units and Displaying Solution\n" + "-" * 60)
