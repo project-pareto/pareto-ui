@@ -88,8 +88,14 @@ export default function OverrideTable(props) {
         */
         if(inputType === "select") {
           if(category ==="vb_y_overview_dict") {
-            if (tempOverrideValues[category][idx].indexes.length >=3) tempOverrideValues[category][idx].indexes[2] = (val)
-            else tempOverrideValues[category][idx].indexes.push(val)
+            // check for storage faciltiy or disposal facility. they only have 2 total indexes. the others have 3
+            if(tempOverrideValues[category][idx].variable === "vb_y_Storage_dict" || tempOverrideValues[category][idx].variable === "vb_y_Disposal_dict") {
+              if (tempOverrideValues[category][idx].indexes.length >=2) tempOverrideValues[category][idx].indexes[1] = (val)
+              else tempOverrideValues[category][idx].indexes.push(val)
+            } else {
+              if (tempOverrideValues[category][idx].indexes.length >=3) tempOverrideValues[category][idx].indexes[2] = (val)
+              else tempOverrideValues[category][idx].indexes.push(val)
+            }
           } else {
             tempOverrideValues[category][idx].value = val
           }

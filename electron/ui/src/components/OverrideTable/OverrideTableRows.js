@@ -214,8 +214,14 @@ function BinaryVariableRow(props) {
 
   const getValueSelectValue = () => {
     if (scenario.override_values[category][index] !== undefined) {
-      if(scenario.override_values[category][index].indexes.length>=3) return scenario.override_values[category][index].indexes[2]
-      else return ""
+
+      if(scenario.override_values[category][index].variable === "vb_y_Storage_dict" || scenario.override_values[category][index].variable === "vb_y_Disposal_dict") {
+        if(scenario.override_values[category][index].indexes.length>=2) return scenario.override_values[category][index].indexes[1]
+        else return ""
+      } else {
+        if(scenario.override_values[category][index].indexes.length>=3) return scenario.override_values[category][index].indexes[2]
+        else return ""
+      }
     } else return ""
   }
 
