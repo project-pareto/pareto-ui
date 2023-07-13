@@ -22,7 +22,6 @@ const OVERRIDE_PRESET_VALUES = {
   },
 }
 
-
 export default function OverrideTableRows(props) {  
   const {
         category, 
@@ -153,7 +152,7 @@ function BinaryVariableRow(props) {
   }
   const [ displayValue, setDisplayValue ] = useState()
   const [ showData, setShowData ] = useState(false)
-  const [ overrideChecked, setOverrideChecked ] = useState(null)
+  const [ overrideChecked, setOverrideChecked ] = useState(false)
   const [ rowName, setRowName ] = useState("")
   const [ presetValues, setPresetValues ] = useState({})
   const [ technology, setTechnology ] = useState(null)
@@ -169,7 +168,14 @@ function BinaryVariableRow(props) {
     let preset_value_table = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table]
     let preset_values = {}
       if(tempDisplayValue[0] === "Treatment Facility") {
-        let tempTechnology = tempDisplayValue[5]
+        // check for technology in override values. if found, use that. else, use the value from scenario
+        let tempTechnology
+        if (scenario.override_values[category][index] !== undefined) {
+          tempTechnology = scenario.override_values[category][index].indexes[1]
+        } else {
+          tempTechnology = tempDisplayValue[5]
+        }
+         
         let technologyNamesKey = "TreatmentCapacities"
         let technologies = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table][technologyNamesKey]
         let len = technologies.length
@@ -196,12 +202,6 @@ function BinaryVariableRow(props) {
         }
       }
 
-
-      // let tempDisplayValue = [...value]
-      // setDisplayValue(tempDisplayValue)
-      // console.log('value is ')
-      // console.log(value)
-
       setRowName(value[0])
       setPresetValues(preset_values)
       setShowData(true)
@@ -212,6 +212,12 @@ function BinaryVariableRow(props) {
     else if (!Object.keys(scenario.override_values[category]).includes(""+index) && overrideChecked) setOverrideChecked(false)
   }, [scenario])
 
+  const getValueSelectValue = () => {
+    if (scenario.override_values[category][index] !== undefined) {
+      if(scenario.override_values[category][index].indexes.length>=3) return scenario.override_values[category][index].indexes[2]
+      else return ""
+    } else return ""
+  }
 
   const generateInfrastructureBuildoutValueOptions = (value, index) => {
     if (Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0])) {
@@ -229,7 +235,9 @@ function BinaryVariableRow(props) {
               labelId=""
               id=""
               name={`${index}::select`}
-              value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
+              // value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
+              // value={scenario.override_values[category][index].indexes.length>=3 ? scenario.override_values[category][index][2] : ""}
+              value={getValueSelectValue()}
               label="Value"
               onChange={handleInputOverrideValue}
             >

@@ -60,7 +60,8 @@ export default function OverrideTable(props) {
         if (!value[i].includes("-")) indexes.push(value[i])
       }
       override_object.indexes=indexes
-      override_object.value=""
+      if(category ==="vb_y_overview_dict") override_object.value=1
+      else override_object.value=""
       // console.log(override_object)
         let tempOverrideValues = {...scenario.override_values}
         if(Object.keys(tempOverrideValues[category]).includes(""+index)) {
@@ -86,7 +87,12 @@ export default function OverrideTable(props) {
         ***
         */
         if(inputType === "select") {
-          tempOverrideValues[category][idx].value = val
+          if(category ==="vb_y_overview_dict") {
+            if (tempOverrideValues[category][idx].indexes.length >=3) tempOverrideValues[category][idx].indexes[2] = (val)
+            else tempOverrideValues[category][idx].indexes.push(val)
+          } else {
+            tempOverrideValues[category][idx].value = val
+          }
           const tempScenario = {...scenario}
           tempScenario.override_values = tempOverrideValues
           updateScenario(tempScenario)
