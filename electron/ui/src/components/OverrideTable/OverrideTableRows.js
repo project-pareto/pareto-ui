@@ -24,8 +24,7 @@ const OVERRIDE_PRESET_VALUES = {
 
 
 export default function OverrideTableRows(props) {  
-
-    const {
+  const {
         category, 
         data, 
         rowNodes, 
@@ -35,28 +34,26 @@ export default function OverrideTableRows(props) {
         scenario,
         handleCheckOverride,
         handleInputOverrideValue
-    } = props
+  } = props
 
-    const styles ={
-        firstCol: {
-        backgroundColor: "#f4f4f4", 
-        border:"1px solid #ddd",
-        position: 'sticky',
-        left: 0,
+  const styles = {
+      firstCol: {
+      backgroundColor: "#f4f4f4", 
+      border:"1px solid #ddd",
+      position: 'sticky',
+      left: 0,
 
-        },
-        other: {
-        minWidth: 100,
-        border:"1px solid #ddd"
-        },
-        inputDifference: {
-        backgroundColor: "rgb(255,215,0, 0.5)",
-        minWidth: 100,
-        border:"1px solid #ddd"
-        },
-    }
-
-
+      },
+      other: {
+      minWidth: 100,
+      border:"1px solid #ddd"
+      },
+      inputDifference: {
+      backgroundColor: "rgb(255,215,0, 0.5)",
+      minWidth: 100,
+      border:"1px solid #ddd"
+      },
+  }
 
     const getCheckboxValue = (index) => {
         if(Object.keys(scenario.override_values[category]).includes(""+index)) {
@@ -124,9 +121,7 @@ return (
     }
 </>   
 );
-
 }
-
 
 function BinaryVariableRow(props) {  
   const {
@@ -156,6 +151,7 @@ function BinaryVariableRow(props) {
       border:"1px solid #ddd"
       },
   }
+  const [ displayValue, setDisplayValue ] = useState()
   const [ showData, setShowData ] = useState(false)
   const [ overrideChecked, setOverrideChecked ] = useState(null)
   const [ rowName, setRowName ] = useState("")
@@ -166,12 +162,16 @@ function BinaryVariableRow(props) {
     /*
       Logic for creating dictionary with correct values for each infrastructure buildout row 
     */
-    let preset_value_table = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table]
+    let tempDisplayValue = [...value]
+    setDisplayValue(tempDisplayValue)
+
+
+    let preset_value_table = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table]
     let preset_values = {}
-      if(value[0] === "Treatment Facility") {
-        let tempTechnology = value[5]
+      if(tempDisplayValue[0] === "Treatment Facility") {
+        let tempTechnology = tempDisplayValue[5]
         let technologyNamesKey = "TreatmentCapacities"
-        let technologies = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[value[0]].input_table][technologyNamesKey]
+        let technologies = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table][technologyNamesKey]
         let len = technologies.length
         for (let i = 0; i < len; i++) {
           let each = technologies[i]
@@ -195,18 +195,21 @@ function BinaryVariableRow(props) {
           }
         }
       }
+
+
+      // let tempDisplayValue = [...value]
+      // setDisplayValue(tempDisplayValue)
+      // console.log('value is ')
+      // console.log(value)
+
       setRowName(value[0])
       setPresetValues(preset_values)
       setShowData(true)
-  }, [scenario, value])
+  }, [value, overrideChecked])
 
   useEffect(() => {
-    /*
-      Logic for creating dictionary with correct values for each infrastructure buildout row 
-    */
-    if(Object.keys(scenario.override_values[category]).includes(""+index)) setOverrideChecked(true)
-    else setOverrideChecked(false)
-    
+    if(Object.keys(scenario.override_values[category]).includes(""+index) && !overrideChecked) setOverrideChecked(true)
+    else if (!Object.keys(scenario.override_values[category]).includes(""+index) && overrideChecked) setOverrideChecked(false)
   }, [scenario])
 
 
@@ -282,6 +285,11 @@ function BinaryVariableRow(props) {
   }
   const handleTechnologySelect = (event) => {
     console.log('selected '+event.target.value)
+    let tempDisplayValue = [...displayValue]
+    tempDisplayValue[5] = event.target.value
+    setDisplayValue(tempDisplayValue)
+    setTechnology(event.target.value)
+    handleInputOverrideValue(event)
   }
 
 return (
@@ -300,7 +308,7 @@ return (
                     // disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
                     labelId=""
                     id=""
-                    name={`technology::select`}
+                    name={`${index}::technology`}
                     value={technology}
                     label="technology"
                     onChange={handleTechnologySelect}
@@ -315,7 +323,7 @@ return (
                   </Select>
                 </FormControl>
                   :
-                  value[cellIdx].toLocaleString('en-US', {maximumFractionDigits:0})
+                  displayValue[cellIdx].toLocaleString('en-US', {maximumFractionDigits:0})
                 }
             </TableCell>
             )
@@ -325,14 +333,14 @@ return (
             style={styles.other}>
               <Checkbox
                   checked={overrideChecked}
-                  onChange={() => handleCheckOverride(index, value)}
+                  onChange={() => handleCheckOverride(index, displayValue)}
               />
           </TableCell>
           <TableCell 
             disabled
             align="right"
             style={styles.other}>
-              {generateInfrastructureBuildoutValueOptions(value, index)}
+              {generateInfrastructureBuildoutValueOptions(displayValue, index)}
           </TableCell>
         </TableRow>
     }

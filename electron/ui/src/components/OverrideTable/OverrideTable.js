@@ -91,6 +91,12 @@ export default function OverrideTable(props) {
           tempScenario.override_values = tempOverrideValues
           updateScenario(tempScenario)
         }
+        else if(inputType === "technology") {
+          tempOverrideValues[category][idx].indexes[1] = val
+          const tempScenario = {...scenario}
+          tempScenario.override_values = tempOverrideValues
+          updateScenario(tempScenario)
+        }
         else if(!isNaN(val)) {
             if (val === "") tempOverrideValues[category][idx].value = val
             else tempOverrideValues[category][idx].value = parseInt(val)
