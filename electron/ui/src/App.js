@@ -156,6 +156,9 @@ useEffect(()=> {
     */
    if(""+id === ""+scenarioIndex){
     setScenarioData(newScenarios[id])
+    if (section === 2) {
+      handleSetCategory("Dashboard")
+     }
    }
    if (section !== 2) {
     setShowCompletedOptimization(true)
@@ -164,6 +167,7 @@ useEffect(()=> {
 
   const goToModelResults = () => {
     handleSetSection(2)
+    // handleSetCategory("Dashboard")
     setShowCompletedOptimization(false)
     setScenarioData(scenarios[lastCompletedScenario]);
     setScenarioIndex(lastCompletedScenario)
