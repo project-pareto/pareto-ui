@@ -54,7 +54,7 @@ export default function OverrideTable(props) {
       
       let variable = category
       if(category ==="vb_y_overview_dict") variable = OVERRIDE_PRESET_VALUES[value[0]].variable_name
-      let override_object = {variable: variable}
+      let override_object = {variable: variable, isZero: false}
       let indexes = []
       for (let i of VARIABLE_INDEXES[category]) {
         if (!value[i].includes("-")) indexes.push(value[i])
@@ -74,7 +74,7 @@ export default function OverrideTable(props) {
         updateScenario(tempScenario)
     } 
 
-    const handleInputOverrideValue = (event) => {
+    const handleInputOverrideValue = (event, isZero) => {
         let tempOverrideValues = {...scenario.override_values}
         let idx = event.target.name.split("::")[0]
         let inputType = event.target.name.split("::")[1]
@@ -99,6 +99,8 @@ export default function OverrideTable(props) {
           } else {
             tempOverrideValues[category][idx].value = val
           }
+          if(isZero) tempOverrideValues[category][idx].isZero = true
+          else tempOverrideValues[category][idx].isZero = false
           const tempScenario = {...scenario}
           tempScenario.override_values = tempOverrideValues
           updateScenario(tempScenario)

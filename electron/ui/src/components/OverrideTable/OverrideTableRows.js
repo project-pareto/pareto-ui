@@ -225,6 +225,19 @@ function BinaryVariableRow(props) {
     } else return ""
   }
 
+  const handleInput = (event) => {
+    let number_value
+    if (displayValue[0] === "Treatment Facility") {
+      number_value = presetValues[technology][event.target.value]
+    } else {
+      number_value = presetValues[event.target.value]
+    } 
+    // console.log("number_value")
+    // console.log(number_value)
+    if(number_value === 0) handleInputOverrideValue(event, true)
+    else handleInputOverrideValue(event, false)
+  }
+
   const generateInfrastructureBuildoutValueOptions = (value, index) => {
     if (Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0])) {
       try {
@@ -245,7 +258,7 @@ function BinaryVariableRow(props) {
               // value={scenario.override_values[category][index].indexes.length>=3 ? scenario.override_values[category][index][2] : ""}
               value={getValueSelectValue()}
               label="Value"
-              onChange={handleInputOverrideValue}
+              onChange={handleInput}
             >
               {
                 value[0] === "Treatment Facility" ? 

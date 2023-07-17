@@ -200,40 +200,54 @@ OVERRIDE_PRESET_VALUES = {
 }
 
 def handle_run_strategic_model(input_file, output_file, id, modelParameters, overrideValues={}):
+
+    # need to incorporate the override values back into the infrastructure table
     try:
         results_dict = run_strategic_model(input_file, output_file, id, modelParameters, overrideValues)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
         results = scenario["results"]
         results['data'] = results_dict
-
+        # _log.info('optimized_override_values')
+        # _log.info(scenario['optimized_override_values'])
 
         #ONLY DESIGNED FOR INFRASTRUCTURE BUILDOUT
         overrideValues = scenario['optimized_override_values']
+
+        # gotta account for the header row when taking the length
+        new_table_idx = len(results['data']["vb_y_overview_dict"]) - 1
         try:
             for variable in overrideValues:
                 if len(overrideValues[variable]) > 0:
                     for idx in overrideValues[variable]:
-                        override_object = overrideValues[variable][idx]
-                        variable = override_object['variable']
-                        indexes = override_object['indexes']
-                        value = override_object['value']
-
                         # if value is from infrastructure buildout
-                        row_name = OVERRIDE_PRESET_VALUES[variable]['row_name']
-                        unit = OVERRIDE_PRESET_VALUES[variable]['unit']
-                        indexes_idx = 0
-                        new_row = [row_name, '--', '--', '', unit, '--']
-                        for row_idx in OVERRIDE_PRESET_VALUES[variable]['indexes']:
-                            new_row[row_idx] = indexes[indexes_idx]
-                            indexes_idx += 1
-                        new_row[3] = indexes[indexes_idx]
-                        _log.info('new row')
-                        _log.info(new_row)
-                        new_table_idx = len(results['data']["vb_y_overview_dict"])
-                        results['data']["vb_y_overview_dict"].append(tuple(new_row))
+                        if variable == "vb_y_overview_dict":
+                            # _log.info(variable)
+                            override_object = overrideValues[variable][idx]
+                            override_variable = override_object['variable']
+                            indexes = override_object['indexes']
+                            value = override_object['value']
+                            
+                            row_name = OVERRIDE_PRESET_VALUES[override_variable]['row_name']
+                            unit = OVERRIDE_PRESET_VALUES[override_variable]['unit']
+                            indexes_idx = 0
+                            new_row = [row_name, '--', '--', '', unit, '--']
+                            for row_idx in OVERRIDE_PRESET_VALUES[override_variable]['indexes']:
+                                new_row[row_idx] = indexes[indexes_idx]
+                                indexes_idx += 1
+                            new_row[3] = indexes[indexes_idx]
+                            _log.info('new row')
+                            _log.info(new_row)
+                            # if override_object["isZero"]:
+                            #     scenario['override_values'][variable][new_table_idx] = overrideValues[variable][idx]
+                            #     new_table_idx+=1
+                            # else:
+                            #     scenario['override_values'][variable][idx] = overrideValues[variable][idx]
+                            # _log.info('new override values')
+                            # _log.info(scenario['override_values'])
+                            # results['data']["vb_y_overview_dict"].append(tuple(new_row))
 
-                        #else if from another table
+                        # else if from another table
 
         except Exception as e:
             _log.error('unable to add infrastructure rows back in')
