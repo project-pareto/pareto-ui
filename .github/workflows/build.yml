@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "infrastructure-buildout-override"
+      - "run-build"
 
 defaults:
   run:
