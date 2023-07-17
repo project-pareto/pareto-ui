@@ -46,7 +46,14 @@ export default function ScenarioList(props) {
         for (let scenarioId of Object.keys(scenarios)) {
             let scenario = scenarios[scenarioId]
             if(scenario.results.status==="Optimized") {
-                if (scenario.optimized_override_values !== undefined) tempHasOverrideList.push(scenario.id)
+                if (scenario.optimized_override_values !== undefined)  {
+                    for(let key of Object.keys(scenario.optimized_override_values)) {
+                        if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+                            tempHasOverrideList.push(scenario.id)
+                        }
+                    }
+                    
+                }
             }
         }
         setHasOverrideList(tempHasOverrideList)

@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-            name: windows-dist
+            name: windows-pareto-dist
             path: |
               electron/dist/Pareto-UI_Setup.exe
   

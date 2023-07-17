@@ -268,7 +268,14 @@ const handleRowFilter = (row) => {
   }
  const checkForOverride = () => {
     if(scenario.results.status==="Optimized") {
-      if (scenario.optimized_override_values !== undefined) return <span style={{color:"red"}}>* Scenario has been optimized with manual override.</span>
+      if (scenario.optimized_override_values !== undefined)  {
+        for(let key of Object.keys(scenario.optimized_override_values)) {
+          if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+            return <span style={{color:"red"}}>* Scenario has been optimized with manual override.</span>
+          }
+        }
+      return null
+      }
       else return null
   }else return null
  }
