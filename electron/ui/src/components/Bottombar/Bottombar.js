@@ -96,7 +96,7 @@ export default function Bottombar(props) {
       const handleRerunOptimize = () => {
         console.log('rerun with the following overrides: ')
         console.log(props.scenario.override_values)
-        // props.handleRunModel
+        props.handleRunModel()
       }
 
   return ( 
