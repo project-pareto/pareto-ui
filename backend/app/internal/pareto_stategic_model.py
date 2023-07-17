@@ -172,6 +172,33 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
 
     return results_dict
 
+OVERRIDE_PRESET_VALUES = {
+  "vb_y_Pipeline_dict": {
+      "row_name": "Pipeline Construction",
+      "input_table": "PipelineDiameterValues",
+      "indexes": [1, 2],
+      "unit": "in",
+  },
+  "vb_y_Storage_dict": {
+      "row_name": "Storage Facility",
+      "input_table": "StorageCapacityIncrements",
+      "indexes": [1],
+      "unit": "bbl",
+  },
+  "vb_y_Disposal_dict": {
+      "row_name": "Disposal Facility",
+      "input_table": "TreatmentCapacityIncrements",
+      "indexes": [1],
+      "unit": "bbl/d",
+  },
+  "vb_y_Treatment_dict": {
+      "row_name": "Treatment Facility",
+      "input_table": "TreatmentCapacityIncrements",
+      "indexes": [1,5],
+      "unit": "bbl/d",
+  },
+}
+
 def handle_run_strategic_model(input_file, output_file, id, modelParameters, overrideValues={}):
     try:
         results_dict = run_strategic_model(input_file, output_file, id, modelParameters, overrideValues)
@@ -179,6 +206,40 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters, ove
         scenario = scenario_handler.get_scenario(int(id))
         results = scenario["results"]
         results['data'] = results_dict
+
+
+        #ONLY DESIGNED FOR INFRASTRUCTURE BUILDOUT
+        overrideValues = scenario['optimized_override_values']
+        try:
+            for variable in overrideValues:
+                if len(overrideValues[variable]) > 0:
+                    for idx in overrideValues[variable]:
+                        override_object = overrideValues[variable][idx]
+                        variable = override_object['variable']
+                        indexes = override_object['indexes']
+                        value = override_object['value']
+
+                        # if value is from infrastructure buildout
+                        row_name = OVERRIDE_PRESET_VALUES[variable]['row_name']
+                        unit = OVERRIDE_PRESET_VALUES[variable]['unit']
+                        indexes_idx = 0
+                        new_row = [row_name, '--', '--', '', unit, '--']
+                        for row_idx in OVERRIDE_PRESET_VALUES[variable]['indexes']:
+                            new_row[row_idx] = indexes[indexes_idx]
+                            indexes_idx += 1
+                        new_row[3] = indexes[indexes_idx]
+                        _log.info('new row')
+                        _log.info(new_row)
+                        new_table_idx = len(results['data']["vb_y_overview_dict"])
+                        results['data']["vb_y_overview_dict"].append(tuple(new_row))
+
+                        #else if from another table
+
+        except Exception as e:
+            _log.error('unable to add infrastructure rows back in')
+        
+
+
         if results['terminationCondition'] == "infeasible":
             results['status'] = 'Infeasible'
         else:
