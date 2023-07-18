@@ -138,18 +138,18 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
 
     ## RESET override_values
     ## ADD them to a different key 
-    scenario['override_values'] = {
-                    "vb_y_overview_dict": {},
-                    "v_F_Piped_dict": {},
-                    "v_F_Sourced_dict": {},
-                    "v_F_Trucked_dict": {},
-                    "v_L_Storage_dict": {},
-                    "v_L_PadStorage_dict": {},
-                    "vb_y_Pipeline_dict": {},
-                    "vb_y_Disposal_dict": {},
-                    "vb_y_Storage_dict": {},
-                    "vb_y_Treatment_dict": {}
-                }
+    # scenario['override_values'] = {
+    #                 "vb_y_overview_dict": {},
+    #                 "v_F_Piped_dict": {},
+    #                 "v_F_Sourced_dict": {},
+    #                 "v_F_Trucked_dict": {},
+    #                 "v_L_Storage_dict": {},
+    #                 "v_L_PadStorage_dict": {},
+    #                 "vb_y_Pipeline_dict": {},
+    #                 "vb_y_Disposal_dict": {},
+    #                 "vb_y_Storage_dict": {},
+    #                 "vb_y_Treatment_dict": {}
+    #             }
     scenario['optimized_override_values'] = overrideValues
 
     scenario_handler.update_scenario(scenario)
@@ -213,9 +213,6 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters, ove
 
         #ONLY DESIGNED FOR INFRASTRUCTURE BUILDOUT
         overrideValues = scenario['optimized_override_values']
-
-        # gotta account for the header row when taking the length
-        new_table_idx = len(results['data']["vb_y_overview_dict"]) - 1
         try:
             for variable in overrideValues:
                 if len(overrideValues[variable]) > 0:
@@ -224,28 +221,22 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters, ove
                         if variable == "vb_y_overview_dict":
                             # _log.info(variable)
                             override_object = overrideValues[variable][idx]
-                            override_variable = override_object['variable']
-                            indexes = override_object['indexes']
-                            value = override_object['value']
-                            
-                            row_name = OVERRIDE_PRESET_VALUES[override_variable]['row_name']
-                            unit = OVERRIDE_PRESET_VALUES[override_variable]['unit']
-                            indexes_idx = 0
-                            new_row = [row_name, '--', '--', '', unit, '--']
-                            for row_idx in OVERRIDE_PRESET_VALUES[override_variable]['indexes']:
-                                new_row[row_idx] = indexes[indexes_idx]
-                                indexes_idx += 1
-                            new_row[3] = indexes[indexes_idx]
-                            _log.info('new row')
-                            _log.info(new_row)
-                            # if override_object["isZero"]:
-                            #     scenario['override_values'][variable][new_table_idx] = overrideValues[variable][idx]
-                            #     new_table_idx+=1
-                            # else:
-                            #     scenario['override_values'][variable][idx] = overrideValues[variable][idx]
-                            # _log.info('new override values')
-                            # _log.info(scenario['override_values'])
-                            # results['data']["vb_y_overview_dict"].append(tuple(new_row))
+                            if override_object["isZero"]:
+                                override_variable = override_object['variable']
+                                indexes = override_object['indexes']
+                                value = override_object['value']
+                                
+                                row_name = OVERRIDE_PRESET_VALUES[override_variable]['row_name']
+                                unit = OVERRIDE_PRESET_VALUES[override_variable]['unit']
+                                indexes_idx = 0
+                                new_row = [row_name, '--', '--', '', unit, '--']
+                                for row_idx in OVERRIDE_PRESET_VALUES[override_variable]['indexes']:
+                                    new_row[row_idx] = indexes[indexes_idx]
+                                    indexes_idx += 1
+                                new_row[3] = indexes[indexes_idx]
+                                _log.info('new row')
+                                _log.info(new_row)
+                                results['data']["vb_y_overview_dict"].append(tuple(new_row))
 
                         # else if from another table
 

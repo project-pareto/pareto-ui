@@ -156,6 +156,7 @@ function BinaryVariableRow(props) {
   const [ rowName, setRowName ] = useState("")
   const [ presetValues, setPresetValues ] = useState({})
   const [ technology, setTechnology ] = useState(null)
+  const [ uniqueIndex, setUniqueIndex ] = useState('')
 
   useEffect(() => {
     /*
@@ -170,8 +171,8 @@ function BinaryVariableRow(props) {
       if(tempDisplayValue[0] === "Treatment Facility") {
         // check for technology in override values. if found, use that. else, use the value from scenario
         let tempTechnology
-        if (scenario.override_values[category][index] !== undefined) {
-          tempTechnology = scenario.override_values[category][index].indexes[1]
+        if (scenario.override_values[category][uniqueIndex] !== undefined) {
+          tempTechnology = scenario.override_values[category][uniqueIndex].indexes[1]
         } else {
           tempTechnology = tempDisplayValue[5]
         }
@@ -208,18 +209,22 @@ function BinaryVariableRow(props) {
   }, [value, overrideChecked])
 
   useEffect(() => {
-    if(Object.keys(scenario.override_values[category]).includes(""+index) && !overrideChecked) setOverrideChecked(true)
-    else if (!Object.keys(scenario.override_values[category]).includes(""+index) && overrideChecked) setOverrideChecked(false)
+    let newIndex = `${value[0]}:${value[1]}:${value[2]}:${value[5]}`
+    // console.log('new index is: ')
+    // console.log(newIndex)
+    setUniqueIndex(newIndex)
+    if(Object.keys(scenario.override_values[category]).includes(""+newIndex) && !overrideChecked) setOverrideChecked(true)
+    else if (!Object.keys(scenario.override_values[category]).includes(""+newIndex) && overrideChecked) setOverrideChecked(false)
   }, [scenario])
 
   const getValueSelectValue = () => {
-    if (scenario.override_values[category][index] !== undefined) {
+    if (scenario.override_values[category][uniqueIndex] !== undefined) {
 
-      if(scenario.override_values[category][index].variable === "vb_y_Storage_dict" || scenario.override_values[category][index].variable === "vb_y_Disposal_dict") {
-        if(scenario.override_values[category][index].indexes.length>=2) return scenario.override_values[category][index].indexes[1]
+      if(scenario.override_values[category][uniqueIndex].variable === "vb_y_Storage_dict" || scenario.override_values[category][uniqueIndex].variable === "vb_y_Disposal_dict") {
+        if(scenario.override_values[category][uniqueIndex].indexes.length>=2) return scenario.override_values[category][uniqueIndex].indexes[1]
         else return ""
       } else {
-        if(scenario.override_values[category][index].indexes.length>=3) return scenario.override_values[category][index].indexes[2]
+        if(scenario.override_values[category][uniqueIndex].indexes.length>=3) return scenario.override_values[category][uniqueIndex].indexes[2]
         else return ""
       }
     } else return ""
@@ -249,13 +254,22 @@ function BinaryVariableRow(props) {
           >
           <FormControl sx={{ width: "100%" }} size="small">
             <InputLabel id="">Value</InputLabel>
-            <Select
+            {/* <Select
               disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
               labelId=""
               id=""
               name={`${index}::select`}
               // value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
               // value={scenario.override_values[category][index].indexes.length>=3 ? scenario.override_values[category][index][2] : ""}
+              value={getValueSelectValue()}
+              label="Value"
+              onChange={handleInput}
+            > */}
+            <Select
+              disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+              labelId=""
+              id=""
+              name={`${index}::select`}
               value={getValueSelectValue()}
               label="Value"
               onChange={handleInput}
@@ -301,8 +315,8 @@ function BinaryVariableRow(props) {
           name={`${index}::textfield`}
           size="small" 
           label="Value"
-          value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
-          disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+          value={scenario.override_values[category][uniqueIndex] !== undefined ? scenario.override_values[category][uniqueIndex].value : ""}
+          disabled={!Object.keys(scenario.override_values[category]).includes(""+uniqueIndex)}
           onChange={handleInputOverrideValue} 
           onFocus={(event) => event.target.select()}
         />
@@ -335,7 +349,7 @@ return (
                     // disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
                     labelId=""
                     id=""
-                    name={`${index}::technology`}
+                    name={`${uniqueIndex}::technology`}
                     value={technology}
                     label="technology"
                     onChange={handleTechnologySelect}
@@ -360,14 +374,14 @@ return (
             style={styles.other}>
               <Checkbox
                   checked={overrideChecked}
-                  onChange={() => handleCheckOverride(index, displayValue)}
+                  onChange={() => handleCheckOverride(uniqueIndex, displayValue)}
               />
           </TableCell>
           <TableCell 
             disabled
             align="right"
             style={styles.other}>
-              {generateInfrastructureBuildoutValueOptions(displayValue, index)}
+              {generateInfrastructureBuildoutValueOptions(displayValue, uniqueIndex)}
           </TableCell>
         </TableRow>
     }
