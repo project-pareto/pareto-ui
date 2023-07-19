@@ -15,10 +15,10 @@ const OVERRIDE_CATEGORIES = [
   "v_F_Trucked_dict",
   "v_L_Storage_dict",
   "v_L_PadStorage_dict",
-  "vb_y_Pipeline_dict",
-  "vb_y_Disposal_dict",
-  "vb_y_Storage_dict",
-  "vb_y_Treatment_dict"
+  // "vb_y_Pipeline_dict",
+  // "vb_y_Disposal_dict",
+  // "vb_y_Storage_dict",
+  // "vb_y_Treatment_dict"
 ]
 
 export default function ModelResults(props) {
