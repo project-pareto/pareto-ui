@@ -83,37 +83,19 @@ return (
     <TableBody>
     {data.map((value, index) => {
       if (Object.keys(rowNodes).length === 0 || rowNodes[rowNodesMapping[index]]) {
-      return (<TableRow key={`row_${value}_${index}`}>
-      {value.map((cellValue, i)=> {
-        if (Object.keys(columnNodes).length === 0 || columnNodes[columnNodesMapping[i]]) {
-        return <TableCell 
-                align={(i === (value.length - 1)) ? "right" : "left"} 
-                key={"" + index + i} 
-                style={i === 0 ? styles.firstCol : styles.other}>
-                  {cellValue.toLocaleString('en-US', {maximumFractionDigits:0})}
-                </TableCell>
-        }
-      })}
-      <TableCell 
-          align="left"
-          style={styles.other}>
-          <Checkbox
-              checked={getCheckboxValue(index)}
-              onChange={() => handleCheckOverride(index, value)}
-          />
-      </TableCell>
-      <TableCell disabled align="right" style={styles.other}>
-          <TextField 
-              name={`${index}::textfield`}
-              size="small" 
-              label="Value"
-              value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
-              disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
-              onChange={handleInputOverrideValue} 
-              onFocus={(event) => event.target.select()}
-          />
-          </TableCell>
-      </TableRow>)
+      return (
+        <RegularVariableRow
+          key={`${value}_${index}`}
+          category={category}
+          value={value}
+          index={index}
+          scenario={scenario}
+          handleCheckOverride={handleCheckOverride}
+          handleInputOverrideValue={handleInputOverrideValue}
+          columnNodes={columnNodes}
+          columnNodesMapping={columnNodesMapping}
+        />
+      )
       }
     })}
     </TableBody>
@@ -254,17 +236,6 @@ function BinaryVariableRow(props) {
           >
           <FormControl sx={{ width: "100%" }} size="small">
             <InputLabel id="">Value</InputLabel>
-            {/* <Select
-              disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
-              labelId=""
-              id=""
-              name={`${index}::select`}
-              // value={scenario.override_values[category][index] !== undefined ? scenario.override_values[category][index].value : ""}
-              // value={scenario.override_values[category][index].indexes.length>=3 ? scenario.override_values[category][index][2] : ""}
-              value={getValueSelectValue()}
-              label="Value"
-              onChange={handleInput}
-            > */}
             <Select
               disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
               labelId=""
@@ -389,6 +360,101 @@ return (
   )
 }
 
+
+function RegularVariableRow(props) {  
+  const {
+      category, 
+      value,
+      index, 
+      scenario,
+      handleCheckOverride,
+      handleInputOverrideValue,
+      columnNodesMapping,
+      columnNodes
+  } = props
+
+  const styles ={
+      firstCol: {
+      backgroundColor: "#f4f4f4", 
+      border:"1px solid #ddd",
+      position: 'sticky',
+      left: 0,
+
+      },
+      other: {
+      minWidth: 100,
+      border:"1px solid #ddd"
+      },
+      inputDifference: {
+      backgroundColor: "rgb(255,215,0, 0.5)",
+      minWidth: 100,
+      border:"1px solid #ddd"
+      },
+  }
+  // const [ displayValue, setDisplayValue ] = useState()
+  const [ showData, setShowData ] = useState(false)
+  const [ overrideChecked, setOverrideChecked ] = useState(false)
+  const [ rowName, setRowName ] = useState("")
+  const [ uniqueIndex, setUniqueIndex ] = useState('')
+
+  useEffect(() => {
+    let tempDisplayValue = [...value]
+    // setDisplayValue(tempDisplayValue)
+    setRowName(value[0])
+    setShowData(true)
+  }, [value, overrideChecked])
+
+  useEffect(() => {
+    let newIndex = `${value[0]}:${value[1]}:${value[2]}`
+    // console.log('new index is: ')
+    // console.log(newIndex)
+    setUniqueIndex(newIndex)
+    if(Object.keys(scenario.override_values[category]).includes(""+newIndex) && !overrideChecked) setOverrideChecked(true)
+    else if (!Object.keys(scenario.override_values[category]).includes(""+newIndex) && overrideChecked) setOverrideChecked(false)
+  }, [scenario])
+
+  const handleInput = (event) => {
+    handleInputOverrideValue(event, false)
+  }
+
+return (
+  <>
+    {showData && 
+      <TableRow key={`row_${value}_${index}`}>
+        {value.map((cellValue, i)=> {
+          if (Object.keys(columnNodes).length === 0 || columnNodes[columnNodesMapping[i]]) {
+          return <TableCell 
+                  align={(i === (value.length - 1)) ? "right" : "left"} 
+                  key={"" + index + i} 
+                  style={i === 0 ? styles.firstCol : styles.other}>
+                    {cellValue.toLocaleString('en-US', {maximumFractionDigits:0})}
+                  </TableCell>
+          }
+        })}
+        <TableCell 
+            align="left"
+            style={styles.other}>
+            <Checkbox
+                checked={overrideChecked}
+                onChange={() => handleCheckOverride(uniqueIndex, value)}
+            />
+        </TableCell>
+        <TableCell disabled align="right" style={styles.other}>
+            <TextField 
+                name={`${uniqueIndex}::textfield`}
+                size="small" 
+                label="Value"
+                value={scenario.override_values[category][uniqueIndex] !== undefined ? scenario.override_values[category][uniqueIndex].value : ""}
+                disabled={!Object.keys(scenario.override_values[category]).includes(""+uniqueIndex)}
+                onChange={handleInput} 
+                onFocus={(event) => event.target.select()}
+          />
+          </TableCell>
+      </TableRow>
+    }
+  </>
+  )
+}
 
 
 
