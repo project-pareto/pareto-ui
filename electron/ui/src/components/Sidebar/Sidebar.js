@@ -254,7 +254,8 @@ export default function Sidebar(props) {
             sx: {
             width: 240,
             marginTop: '158px',
-            paddingBottom: '158px'
+            paddingBottom: '158px',
+            zIndex:1
             }
         }}
         open={true}
