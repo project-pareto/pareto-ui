@@ -50,13 +50,29 @@ export default function OverrideTable(props) {
 
     const [rows, setRows] = useState([]);
     const [page, setPage] = useState(0);
+    const [visibleRows, setVisibleRows] = useState([])
     const [rowsPerPage, setRowsPerPage] = useState(50);
 
     useEffect(() => {
       let tempRows = data[category].slice(1)
+      let tempVisibleRows = tempRows.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage,
+      )
+      setVisibleRows(tempVisibleRows)
       setRows(tempRows)
 
-    },[data])
+    },[data, scenario, category])
+
+    useEffect(() => {
+      // let tempRows = data[category].slice(1)
+      let tempVisibleRows = rows.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage,
+      )
+      setVisibleRows(tempVisibleRows)
+
+    },[page, rowsPerPage, rows])
     
     const handleChangePage = (event, newPage) => {
       setPage(newPage);
@@ -70,14 +86,14 @@ export default function OverrideTable(props) {
     const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = useMemo(
-      () =>
-        rows.slice(
-          page * rowsPerPage,
-          page * rowsPerPage + rowsPerPage,
-        ),
-      [page, rowsPerPage, rows],
-    );
+    // const visibleRows = useMemo(
+    //   () =>
+    //     rows.slice(
+    //       page * rowsPerPage,
+    //       page * rowsPerPage + rowsPerPage,
+    //     ),
+    //   [page, rowsPerPage, rows],
+    // );
 
 
     const handleCheckOverride = (index, value) => {

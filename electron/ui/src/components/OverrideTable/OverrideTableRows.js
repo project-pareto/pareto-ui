@@ -147,47 +147,53 @@ function BinaryVariableRow(props) {
     let tempDisplayValue = [...value]
     setDisplayValue(tempDisplayValue)
 
-
-    let preset_value_table = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table]
-    let preset_values = {}
-      if(tempDisplayValue[0] === "Treatment Facility") {
-        // check for technology in override values. if found, use that. else, use the value from scenario
-        let tempTechnology
-        if (scenario.override_values[category][uniqueIndex] !== undefined) {
-          tempTechnology = scenario.override_values[category][uniqueIndex].indexes[1]
+    try {
+      let preset_value_table = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table]
+      let preset_values = {}
+        if(tempDisplayValue[0] === "Treatment Facility") {
+          // check for technology in override values. if found, use that. else, use the value from scenario
+          let tempTechnology
+          if (scenario.override_values[category][uniqueIndex] !== undefined) {
+            tempTechnology = scenario.override_values[category][uniqueIndex].indexes[1]
+          } else {
+            tempTechnology = tempDisplayValue[5]
+          }
+           
+          let technologyNamesKey = "TreatmentCapacities"
+          let technologies = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table][technologyNamesKey]
+          let len = technologies.length
+          for (let i = 0; i < len; i++) {
+            let each = technologies[i]
+            preset_values[each] = {}
+            for (let row of Object.keys(preset_value_table)) {
+              if (row !== technologyNamesKey) {
+                preset_values[each][row] = preset_value_table[row][i]
+              }
+            }
+          }
+          setTechnology(tempTechnology)
         } else {
-          tempTechnology = tempDisplayValue[5]
-        }
-         
-        let technologyNamesKey = "TreatmentCapacities"
-        let technologies = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[tempDisplayValue[0]].input_table][technologyNamesKey]
-        let len = technologies.length
-        for (let i = 0; i < len; i++) {
-          let each = technologies[i]
-          preset_values[each] = {}
-          for (let row of Object.keys(preset_value_table)) {
-            if (row !== technologyNamesKey) {
-              preset_values[each][row] = preset_value_table[row][i]
+  
+          // this is janky but not sure how else to standardize reading the data from these different tables
+          for (let key of Object.keys(preset_value_table)) {
+            if(key !== "VALUE") {
+              let leng = preset_value_table[key].length
+              for(let i = 0; i < leng; i++) {
+                preset_values[preset_value_table[key][i]] = preset_value_table.VALUE[i]
+              }
             }
           }
         }
-        setTechnology(tempTechnology)
-      } else {
+        setRowName(value[0])
+        setPresetValues(preset_values)
+        setShowData(true)
+    } catch(e) {
+      console.log('tempDisplayValue is ')
+      console.log(tempDisplayValue)
+      console.log('failed to generated override table rows: ')
+      console.log(e)
+    }
 
-        // this is janky but not sure how else to standardize reading the data from these different tables
-        for (let key of Object.keys(preset_value_table)) {
-          if(key !== "VALUE") {
-            let leng = preset_value_table[key].length
-            for(let i = 0; i < leng; i++) {
-              preset_values[preset_value_table[key][i]] = preset_value_table.VALUE[i]
-            }
-          }
-        }
-      }
-
-      setRowName(value[0])
-      setPresetValues(preset_values)
-      setShowData(true)
   }, [value, overrideChecked])
 
   useEffect(() => {
