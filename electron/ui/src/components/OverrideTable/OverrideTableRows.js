@@ -188,10 +188,10 @@ function BinaryVariableRow(props) {
         setPresetValues(preset_values)
         setShowData(true)
     } catch(e) {
-      console.log('tempDisplayValue is ')
-      console.log(tempDisplayValue)
-      console.log('failed to generated override table rows: ')
-      console.log(e)
+      // console.log('tempDisplayValue is ')
+      // console.log(tempDisplayValue)
+      // console.log('failed to generated override table rows: ')
+      // console.log(e)
     }
 
   }, [value, overrideChecked])
