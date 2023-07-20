@@ -10,7 +10,7 @@ import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
-  // "v_F_Piped_dict",
+  "v_F_Piped_dict",
   "v_F_Sourced_dict",
   "v_F_Trucked_dict",
   "v_L_Storage_dict",

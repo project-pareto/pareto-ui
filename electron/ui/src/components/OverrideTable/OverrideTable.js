@@ -1,5 +1,5 @@
-import React from 'react';
-import { Table, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Table, TableCell, TableHead, TableRow, TableContainer, TablePagination } from '@mui/material';
 import OverrideTableRows from './OverrideTableRows';
 
 const OVERRIDE_PRESET_VALUES = {
@@ -47,6 +47,37 @@ export default function OverrideTable(props) {
         show,
         updateScenario
     } = props
+
+    const [rows, setRows] = useState([]);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(50);
+
+    useEffect(() => {
+      let tempRows = data[category].slice(1)
+      setRows(tempRows)
+
+    },[data])
+    
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+  
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    };
+
+    const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+    const visibleRows = useMemo(
+      () =>
+        rows.slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage,
+        ),
+      [page, rowsPerPage, rows],
+    );
 
 
     const handleCheckOverride = (index, value) => {
@@ -161,7 +192,8 @@ const renderOutputTable = () => {
               </TableHead>
               <OverrideTableRows
                 category={category}
-                data={data[category].slice(1)}
+                // data={data[category].slice(1)}
+                data={visibleRows}
                 rowNodes={rowNodes}
                 rowNodesMapping={rowNodesMapping}
                 columnNodes={columnNodes}
@@ -172,7 +204,18 @@ const renderOutputTable = () => {
               />
             
             </Table>
+            <TablePagination
+              rowsPerPageOptions={[25, 50, 100]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+            
             </TableContainer>
+            
           )
     }
       
