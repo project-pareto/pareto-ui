@@ -23,6 +23,7 @@ export default function Dashboard(props) {
   const [ openEditName, setOpenEditName ] = useState(false)
   // const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
   const [ inputDataEdited, setInputDataEdited ] = useState(false) 
+  const [ disableOptimize, setDisableOptimize ] = useState(false)
   const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
 
   const handleOpenEditName = () => setOpenEditName(true);
@@ -175,6 +176,8 @@ export default function Dashboard(props) {
           updateScenario={props.updateScenario}
           handleRunModel={handleRunModel}
           backgroundTasks={props.backgroundTasks} 
+          disabled={disableOptimize}
+          setDisabled={setDisableOptimize}
         />
       }
       {(scenario && props.section===2) && 
@@ -201,6 +204,8 @@ export default function Dashboard(props) {
       setInputDataEdited={setInputDataEdited}
       syncScenarioData={props.syncScenarioData}
       handleRunModel={handleRunModel}
+      disableOptimize={disableOptimize}
+      setDisableOptimize={setDisableOptimize}
       />
     </>
   );

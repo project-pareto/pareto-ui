@@ -12,7 +12,7 @@ import PopupModal from '../../components/PopupModal/PopupModal';
 
 export default function Bottombar(props) {
     const [ openSaveModal, setOpenSaveModal ] = useState(false)
-    const [ disableOptimize, setDisableOptimize ] = useState(false) 
+    // const [ disableOptimize, setDisableOptimize ] = useState(false) 
     const [ key, setKey ] =  useState(null)
     const [ hasOverride, setHasOverride ] = useState(false)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
@@ -55,9 +55,9 @@ export default function Bottombar(props) {
        try{
         let tasks = props.backgroundTasks
         if ((tasks.length > 0) || (!["Draft", "failure", "Optimized", "Not Optimized", "Infeasible"].includes(props.scenario.results.status))) {
-            setDisableOptimize(true)
+            props.setDisableOptimize(true)
         } else {
-            setDisableOptimize(false)
+            props.setDisableOptimize(false)
         }
        } catch(e){
         console.error("unable to check for background tasks from bottom bar : ",e)
@@ -93,9 +93,10 @@ export default function Bottombar(props) {
         }
       }
 
-      const handleRerunOptimize = () => {
-        console.log('rerun with the following overrides: ')
-        console.log(props.scenario.override_values)
+      const handleRunOptimize = () => {
+        // console.log('rerun with the following overrides: ')
+        // console.log(props.scenario.override_values)
+
         props.handleRunModel()
       }
 
@@ -114,8 +115,8 @@ export default function Bottombar(props) {
                 <Grid item xs={6}>
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
                         {props.section === 0 && <Button sx={styles.filled} onClick={() => handleClick(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
-                        {props.section === 1 && <Button onClick={props.handleRunModel} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
-                        {(props.section === 2 && hasOverride) && <Button onClick={handleRerunOptimize} sx={styles.filled} variant="contained" size="large" disabled={disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Re-run Optimization </Button>}
+                        {props.section === 1 && <Button onClick={handleRunOptimize} sx={styles.filled} variant="contained" size="large" disabled={props.disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
+                        {(props.section === 2 && hasOverride) && <Button onClick={handleRunOptimize} sx={styles.filled} variant="contained" size="large" disabled={props.disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Re-run Optimization </Button>}
                     </Box>
                 </Grid>
             </Grid>
