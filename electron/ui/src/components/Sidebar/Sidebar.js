@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -26,8 +26,25 @@ export default function Sidebar(props) {
   const [ openDynamic, setOpenDynamic ] = useState(true)
   const [ openStatic, setOpenStatic ] = useState(false)
   const [ openResultsTables, setOpenResultsTables ] = useState(false)
+  const [ overrideList, setOverrideList ] = useState([])
+
+  useEffect(() => {
+    let tempOverrideList = []
+    if (scenario.optimized_override_values !== undefined)  {
+        for(let key of Object.keys(scenario.optimized_override_values)) {
+            if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+              tempOverrideList.push(key)
+            }
+        }
+        
+    }
+    if (tempOverrideList.length > 0) tempOverrideList.push("Results Tables")
+    setOverrideList(tempOverrideList)
+},[scenario])
+
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
+
   const styles = {
     topLevelCategory: {
       paddingLeft: "0px",
@@ -61,7 +78,18 @@ export default function Sidebar(props) {
       textAlign: "left",
       marginTop: 1,
       marginBottom: 1
-    }
+    },
+    override: {
+      backgroundColor: "rgb(255,215,0, 0.4)",
+      cursor: "pointer",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1
+    },
   }
 
   const handleSaveModal = () => {
@@ -93,6 +121,7 @@ export default function Sidebar(props) {
   const getStyle = (key) => {
     try {
       if(category === key) return styles.selected
+      else if (overrideList.includes(key)) return styles.override
       else return styles.unselected
     }
     catch(e) {
@@ -160,7 +189,7 @@ export default function Sidebar(props) {
       <Collapse in={openDynamic} timeout="auto" unmountOnExit>
       {Subcategories.Dynamic.map( (value,index) => {
         return(
-          <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)} key={value+""+index}> 
+          <div style={getStyle(value)} onClick={() => handleClick(value)} key={value+""+index}> 
           <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <p style={styles.subcategory}>
               {CategoryNames[value] ? CategoryNames[value] : 
@@ -190,7 +219,7 @@ export default function Sidebar(props) {
       <Collapse in={openStatic} timeout="auto" unmountOnExit>
       {Subcategories.Static.map( (value,index) => {
         return (
-          <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)} key={value+""+index}> 
+          <div style={getStyle(value)} onClick={() => handleClick(value)} key={value+""+index}> 
           <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <p style={styles.subcategory}>
               {CategoryNames[value] ? CategoryNames[value] : 
@@ -218,7 +247,7 @@ export default function Sidebar(props) {
     return (
       <Collapse in={openResultsTables} timeout="auto" unmountOnExit>
         {Object.entries(scenario.results.data).map( ([key, value]) => ( 
-          <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={key+""+value}> 
+          <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
               <p style={styles.subcategory}>
                 {CategoryNames[key] ? CategoryNames[key] :
                     key.replace('_dict','')
