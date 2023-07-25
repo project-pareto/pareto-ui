@@ -36,7 +36,6 @@ export default function Sidebar(props) {
               tempOverrideList.push(key)
             }
         }
-        
     }
     if (tempOverrideList.length > 0) tempOverrideList.push("Results Tables")
     setOverrideList(tempOverrideList)
