@@ -233,7 +233,7 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters, ove
                                 for row_idx in OVERRIDE_PRESET_VALUES[override_variable]['indexes']:
                                     new_row[row_idx] = indexes[indexes_idx]
                                     indexes_idx += 1
-                                new_row[3] = indexes[indexes_idx]
+                                new_row[3] = 0
                                 _log.info('new row')
                                 _log.info(new_row)
                                 results['data']["vb_y_overview_dict"].append(tuple(new_row))
