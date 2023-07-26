@@ -87,10 +87,10 @@ return (
       */}
       {newInfrastructureOverrideRow && 
           <NewBinaryVariableRow
-          category={category}
-          scenario={scenario}
-          handleCheckOverride={handleCheckOverride}
-          handleInputOverrideValue={handleInputOverrideValue}
+            category={category}
+            scenario={scenario}
+            handleCheckOverride={handleCheckOverride}
+            handleInputOverrideValue={handleInputOverrideValue}
         />
       }
 
@@ -158,7 +158,53 @@ function NewBinaryVariableRow(props) {
   const [ overrideChecked, setOverrideChecked ] = useState(true)
   const [ presetValues, setPresetValues ] = useState({})
   const [ complete, setComplete ] = useState(false)
+  const [ nodeConnections, setNodeConnections ] = useState({})
+  const pipelineTables = ['PNA', 'CNA','CCA','NNA', 'NCA','NKA', 'NRA', 'NSA','FCA','RCA','RNA','RSA','SCA','SNA']
+  const pipelineTypes = {'P': 'ProductionPads', 'C': 'CompletionsPads', 'N': "NetworkNodes", 'F': 'FreshwaterSources', 'R': 'TreatmentSites', 'S': 'StorageSites'}
   
+  useEffect(() => {
+
+    //generate location options for pipeline consruction
+    console.log('use effect in place')
+    try {
+      
+        // TODO: generate the pipeline construction options
+        let connections = []
+        let connectionsDictionary = {}
+        let allNodes = new Set()
+        for (let tableName of pipelineTables) {
+          let table = scenario.data_input.df_parameters[tableName]
+          // let rowNames = table['ProductionPads']
+          let rowNames = table[pipelineTypes[tableName.charAt(0)]]
+          
+          for(let colName of Object.keys(table)) {
+            let row = table[colName]
+            let idx = 0
+            for (let element of row) {
+              if (element === 1 || element === "1") {
+                connections.push([rowNames[idx], colName])
+                if (Object.keys(connectionsDictionary).includes(rowNames[idx])) {
+                  connectionsDictionary[rowNames[idx]].push(colName)
+                } else connectionsDictionary[rowNames[idx]] = [colName]
+                allNodes.add(rowNames[idx])
+                allNodes.add(colName)
+              }
+              idx+=1
+            }
+            
+          }
+        }
+        // console.log(connections)
+        console.log(connectionsDictionary)
+        // console.log(allNodes)
+        setNodeConnections(connectionsDictionary)
+      
+    } catch (e) {
+      console.error(e)
+      // console.log("unable to generate infrastructure buildout options from input table, using generic input")
+      return 
+    }
+  },[scenario, category])
 
   const getValueSelectValue = () => {
     if (scenario.override_values[category][uniqueIndex] !== undefined) {
@@ -246,13 +292,18 @@ function NewBinaryVariableRow(props) {
         )
       }
       else if (rowName === "Pipeline Construction") {
-        // TODO: generate the pipeline construction options
-        return
+        return (
+          Object.entries(nodeConnections).map(([k,v]) => (
+            <MenuItem key={`${k}_${v}`} value={k}>
+              {k}
+            </MenuItem>
+          ))
+        )
       }
       
       
     } catch (e) {
-      // console.error(e)
+      console.error(e)
       // console.log("unable to generate infrastructure buildout options from input table, using generic input")
       return 
     }
@@ -260,8 +311,17 @@ function NewBinaryVariableRow(props) {
   }
 
   const generateDestinationOptions = () => {
-
-  }
+    if( location!=="") {
+      return (
+        nodeConnections[location].map((v,i) => (
+          <MenuItem key={`${i}_${v}`} value={v}>
+            {v}
+          </MenuItem>
+        ))
+      )
+    } else return null
+    
+  } 
 
   const generatePresetValues = (rowName) => {
     try {
@@ -303,9 +363,9 @@ function NewBinaryVariableRow(props) {
 
   }
 
-  const generateCapacityOptions = () => {
+  // const generateCapacityOptions = () => {
 
-  }
+  // }
 
 
   const handleSelectRowName = (event) => {
@@ -375,6 +435,7 @@ return (
                     value={rowName}
                     label="CAPEX Type"
                     onChange={handleSelectRowName}
+                    autoFocus
                   >
                     {
                       ["Treatment Facility", "Disposal Facility", "Storage Facility", "Pipeline Construction"].map((key,idx) => (
@@ -399,6 +460,7 @@ return (
                     value={location}
                     label="Origin"
                     onChange={handleSelectLocation}
+                    MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
                   >
                     {
                       generateLocationOptions()
@@ -413,7 +475,7 @@ return (
                   <FormControl sx={{ width: "100%" }} size="small">
                   <InputLabel id="">Destination</InputLabel>
                   <Select
-                    // disabled={location===""}
+                    disabled={location===""}
                     labelId=""
                     id="destination"
                     name={`destination`}
@@ -457,11 +519,6 @@ return (
                 "--"
               }
             </TableCell>
-            {/* <TableCell 
-              align={"left"} 
-              style={styles.other}>
-                  {capacity === "" ? "--" : capacity}
-            </TableCell> */}
             <TableCell 
               align={"left"} 
               style={styles.other}>
@@ -493,33 +550,13 @@ return (
                    }
             </TableCell>
             <TableCell 
-              align="left"
+              align="center"
               style={styles.other}>
                 <Checkbox
                     checked={overrideChecked}
                     // onChange={() => handleCheckOverride(uniqueIndex, displayValue)}
                 />
             </TableCell>
-            {/* <TableCell 
-              align={"left"} 
-              style={styles.other}>
-                  <FormControl sx={{ width: "100%" }} size="small">
-                  <InputLabel id="">Value</InputLabel>
-                  <Select
-                    disabled={rowName==="" || (rowName==="Treatment Facility" && technology==="")}
-                    labelId=""
-                    id="capacity"
-                    name={`capacity`}
-                    value={capacity}
-                    label="Value"
-                    onChange={handleSelectCapacity}
-                  >
-                    {
-                      generateValueOptions()
-                    }
-                  </Select>
-                </FormControl>
-            </TableCell> */}
             <TableCell 
               align={"center"} 
               style={styles.other}>
@@ -775,7 +812,7 @@ return (
             )
           )}
           <TableCell 
-            align="left"
+            align="center"
             style={styles.other}>
               <Checkbox
                   checked={overrideChecked}
@@ -866,7 +903,7 @@ return (
           }
         })}
         <TableCell 
-            align="left"
+            align="center"
             style={styles.other}>
             <Checkbox
                 checked={overrideChecked}

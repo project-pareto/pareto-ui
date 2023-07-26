@@ -182,12 +182,12 @@ const renderOutputTable = () => {
               {category === "vb_y_overview_dict" ? 
               <>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "20%"}}>CAPEX Type</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Location</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Destination</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Technology</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Capacity</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Unit</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Override</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12%"}}>Location</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12%"}}>Destination</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12%"}}>Technology</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12%"}}>Capacity</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12%"}}>Unit</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "7.5%"}}>Override</TableCell>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12.5%"}}>Value</TableCell>
                 {/* <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Bound</TableCell>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Floor</TableCell>
