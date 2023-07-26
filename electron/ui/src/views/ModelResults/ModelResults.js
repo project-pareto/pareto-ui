@@ -178,7 +178,9 @@ const handleRowFilter = (row) => {
 }
 
 const handleNewInfrastructureOverride = () => {
-  console.log('new infrastructure override')
+  // console.log('new infrastructure override')
+  window.scrollTo(0, document.body.scrollHeight);
+  setNewInfrastructureOverrideRow(true);
  }
   
   const renderOutputCategory = () => {
@@ -243,7 +245,7 @@ const handleNewInfrastructureOverride = () => {
               {
                 props.category === "vb_y_overview_dict" ? 
                 
-                <Button style={styles.newOverrideButton} variant="contained" onClick={() => setNewInfrastructureOverrideRow(true)}>
+                <Button style={styles.newOverrideButton} variant="contained" onClick={handleNewInfrastructureOverride}>
                   + Add infrastructure override
                 </Button> 
                 
