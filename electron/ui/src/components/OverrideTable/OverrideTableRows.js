@@ -180,78 +180,74 @@ function NewBinaryVariableRow(props) {
     else handleInputOverrideValue(event, false)
   }
 
-  const generateValueOptions = (value, index) => {
-    if (Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0])) {
+  const generateValueOptions = () => {
+    // if (Object.keys(OVERRIDE_PRESET_VALUES).includes(rowName)) {
       try {
-        return (
-          <Tooltip 
-            title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]].input_table]} table in the data input section.` : ''} 
-            placement="top" 
-            enterDelay={500}
-          >
-          <FormControl sx={{ width: "100%" }} size="small">
-            <InputLabel id="">Value</InputLabel>
-            <Select
-              disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
-              labelId=""
-              id=""
-              name={`${index}::select`}
-              value={getValueSelectValue()}
-              label="Value"
-              onChange={handleInput}
-            >
-              {
-                value[0] === "Treatment Facility" ? 
-                Object.entries(presetValues[technology]).map(([key,value]) => (
-                  <MenuItem key={`${key}_${value}`} value={key}>
-                    {value}
-                  </MenuItem>
-                ))
-                : 
-                Object.entries(presetValues).map(([key,value]) => (
-                  <MenuItem key={`${key}_${value}`} value={key}>
-                    {value}
-                  </MenuItem>
-                )) 
-              }
-            </Select>
-          </FormControl>
-          </Tooltip>
+        if (rowName === "Treatment Facility") {
+          return (
+            Object.entries(presetValues[technology]).map(([key,value]) => (
+              <MenuItem key={`${key}_${value}`} value={key}>
+                {value}
+              </MenuItem>
+            ))
+          ) 
+        }
+        else {
+          return (
+            Object.entries(presetValues).map(([key,value]) => (
+              <MenuItem key={`${key}_${value}`} value={key}>
+                {value}
+              </MenuItem>
+            )) 
           )
+        }
         
         
       } catch (e) {
-        console.error(e)
-        console.log("unable to generate infrastructure buildout options from input table, using generic input")
-        return ( 
-          <TextField 
-            name={`${index}::textfield`}
-            size="small" 
-            label="Value"
-            value={scenario.override_values[category][index].value !== undefined ? scenario.override_values[category][index].value : ""}
-            disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
-            onChange={handleInputOverrideValue} 
-            onFocus={(event) => event.target.select()}
-          />
-        )
+        // console.error(e)
+        // console.log("unable to generate infrastructure buildout options from input table, using generic input")
+        return 
       }
-    } else {
-      return ( 
-        <TextField 
-          name={`${index}::textfield`}
-          size="small" 
-          label="Value"
-          value={scenario.override_values[category][uniqueIndex] !== undefined ? scenario.override_values[category][uniqueIndex].value : ""}
-          disabled={!Object.keys(scenario.override_values[category]).includes(""+uniqueIndex)}
-          onChange={handleInputOverrideValue} 
-          onFocus={(event) => event.target.select()}
-        />
-      )
-    }
+    // }
       
   }
 
   const generateLocationOptions = () => {
+    try {
+      if (rowName === "Treatment Facility") {
+        return (
+          scenario.data_input.df_sets.TreatmentSites.map((v,i) => (
+            <MenuItem key={`${i}_${v}`} value={v}>
+              {v}
+            </MenuItem>
+          ))
+        ) 
+      }
+      else if (rowName === "Disposal Facility") {
+        return (
+          scenario.data_input.df_sets.SWDSites.map((v,i) => (
+            <MenuItem key={`${i}_${v}`} value={v}>
+              {v}
+            </MenuItem>
+          ))
+        )
+      }
+      else if (rowName === "Storage Facility") {
+        return (
+          scenario.data_input.df_sets.StorageSites.map((v,i) => (
+            <MenuItem key={`${i}_${v}`} value={v}>
+              {v}
+            </MenuItem>
+          ))
+        )
+      }
+      
+      
+    } catch (e) {
+      // console.error(e)
+      // console.log("unable to generate infrastructure buildout options from input table, using generic input")
+      return 
+    }
 
   }
 
@@ -259,7 +255,43 @@ function NewBinaryVariableRow(props) {
 
   }
 
-  const generateTechnologyOptions = () => {
+  const generatePresetValues = (rowName) => {
+    try {
+      let preset_value_table = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[rowName].input_table]
+      let preset_values = {}
+        if(rowName === "Treatment Facility") {
+          let technologyNamesKey = "TreatmentCapacities"
+          let technologies = scenario.data_input.df_parameters[OVERRIDE_PRESET_VALUES[rowName].input_table][technologyNamesKey]
+          let len = technologies.length
+          for (let i = 0; i < len; i++) {
+            let each = technologies[i]
+            preset_values[each] = {}
+            for (let row of Object.keys(preset_value_table)) {
+              if (row !== technologyNamesKey) {
+                preset_values[each][row] = preset_value_table[row][i]
+              }
+            }
+          }
+          // setTechnology(tempTechnology)
+        } else {
+  
+          // this is janky but not sure how else to standardize reading the data from these different tables
+          for (let key of Object.keys(preset_value_table)) {
+            if(key !== "VALUE") {
+              let leng = preset_value_table[key].length
+              for(let i = 0; i < leng; i++) {
+                preset_values[preset_value_table[key][i]] = preset_value_table.VALUE[i]
+              }
+            }
+          }
+        }
+        console.log('preset values')
+        console.log(preset_values)
+        setPresetValues(preset_values)
+    } catch(e) {
+      // console.log('failed to generated override table rows: ')
+      // console.log(e)
+    }
 
   }
 
@@ -269,7 +301,13 @@ function NewBinaryVariableRow(props) {
 
 
   const handleSelectRowName = (event) => {
-    setRowName(event.target.value)
+    let row_name = event.target.value
+    setRowName(row_name)
+    setCapacity("")
+    setLocation("")
+    setDestination("")
+    setTechnology("")
+    generatePresetValues(row_name)
   }
 
   const handleSelectLocation = (event) => {
@@ -378,7 +416,11 @@ return (
                     onChange={handleSelectTechnology}
                   >
                     {
-                      generateTechnologyOptions()
+                      Object.keys(presetValues).map((key,idx) => (
+                        <MenuItem key={`${key}_${idx}`} value={key}>
+                          {key}
+                        </MenuItem>
+                      )) 
                     }
                   </Select>
                 </FormControl>
@@ -389,22 +431,7 @@ return (
             <TableCell 
               align={"left"} 
               style={styles.other}>
-                  <FormControl sx={{ width: "100%" }} size="small">
-                  <InputLabel id="">Capacity</InputLabel>
-                  <Select
-                    disabled={rowName==="" || (rowName==="Treatment Facility" && technology==="")}
-                    labelId=""
-                    id="capacity"
-                    name={`capacity`}
-                    value={capacity}
-                    label="Capacity"
-                    onChange={handleSelectCapacity}
-                  >
-                    {
-                      generateCapacityOptions()
-                    }
-                  </Select>
-                </FormControl>
+                  {capacity === "" ? "--" : capacity}
             </TableCell>
             <TableCell 
               align={"left"} 
@@ -439,7 +466,7 @@ return (
                     onChange={handleSelectCapacity}
                   >
                     {
-                      generateCapacityOptions()
+                      generateValueOptions()
                     }
                   </Select>
                 </FormControl>
