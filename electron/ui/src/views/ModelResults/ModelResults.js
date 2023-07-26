@@ -31,6 +31,7 @@ export default function ModelResults(props) {
   const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
+  const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const styles ={
@@ -231,6 +232,8 @@ const handleNewInfrastructureOverride = () => {
                 data={props.scenario.results.data}
                 updateScenario={props.updateScenario}
                 OVERRIDE_CATEGORIES={OVERRIDE_CATEGORIES}
+                newInfrastructureOverrideRow={newInfrastructureOverrideRow}
+                setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
               />
               {/* } */}
               
@@ -240,8 +243,8 @@ const handleNewInfrastructureOverride = () => {
               {
                 props.category === "vb_y_overview_dict" ? 
                 
-                <Button style={styles.newOverrideButton} variant="contained" onClick={handleNewInfrastructureOverride}>
-                  + Add new infrastructure override
+                <Button style={styles.newOverrideButton} variant="contained" onClick={() => setNewInfrastructureOverrideRow(true)}>
+                  + Add infrastructure override
                 </Button> 
                 
                 :

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table, TableCell, TableHead, TableRow, TableContainer, TablePagination } from '@mui/material';
+import { Table, TableCell, TableHead, TableRow, TableContainer, TablePagination, Button } from '@mui/material';
 import OverrideTableRows from './OverrideTableRows';
 
 const OVERRIDE_PRESET_VALUES = {
@@ -45,7 +45,9 @@ export default function OverrideTable(props) {
         columnNodesMapping, 
         scenario, 
         show,
-        updateScenario
+        updateScenario,
+        newInfrastructureOverrideRow,
+        setNewInfrastructureOverrideRow
     } = props
 
     const [rows, setRows] = useState([]);
@@ -179,7 +181,7 @@ const renderOutputTable = () => {
               <TableRow key={`headrow`}>
               {category === "vb_y_overview_dict" ? 
               <>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>CAPEX Type</TableCell>
+                <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "20%"}}>CAPEX Type</TableCell>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Location</TableCell>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Destination</TableCell>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Technology</TableCell>
@@ -217,9 +219,17 @@ const renderOutputTable = () => {
                 scenario={scenario}
                 handleCheckOverride={handleCheckOverride}
                 handleInputOverrideValue={handleInputOverrideValue}
+                newInfrastructureOverrideRow={newInfrastructureOverrideRow}
+                setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
               />
             
             </Table>
+            {category === "vb_y_overview_dict" && 
+              <Button style={{marginTop: "15px", color: "#0884b4", backgroundColor: "white"}} variant="contained" onClick={() => setNewInfrastructureOverrideRow(true)}>
+                + Add infrastructure override
+              </Button> 
+            }
+            
             <TablePagination
               rowsPerPageOptions={[25, 50, 100]}
               component="div"

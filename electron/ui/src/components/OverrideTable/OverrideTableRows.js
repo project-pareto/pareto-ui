@@ -32,7 +32,9 @@ export default function OverrideTableRows(props) {
         columnNodesMapping, 
         scenario,
         handleCheckOverride,
-        handleInputOverrideValue
+        handleInputOverrideValue,
+        newInfrastructureOverrideRow,
+        setNewInfrastructureOverrideRow
   } = props
 
   const styles = {
@@ -76,7 +78,20 @@ return (
           handleInputOverrideValue={handleInputOverrideValue}
         />
       ))}
-        
+      
+      {/* 
+        this is where new rows will go while they're being added
+      */}
+      {newInfrastructureOverrideRow && 
+          <NewBinaryVariableRow
+          category={category}
+          scenario={scenario}
+          handleCheckOverride={handleCheckOverride}
+          handleInputOverrideValue={handleInputOverrideValue}
+        />
+      }
+
+      
       
     </TableBody>
     :
@@ -102,6 +117,335 @@ return (
     }
 </>   
 );
+}
+
+function NewBinaryVariableRow(props) {  
+  const {
+      category,
+      scenario,
+      handleCheckOverride,
+      handleInputOverrideValue
+  } = props
+
+  const styles ={
+      firstCol: {
+      backgroundColor: "#f4f4f4", 
+      border:"1px solid #ddd",
+      position: 'sticky',
+      left: 0,
+
+      },
+      other: {
+      minWidth: 100,
+      border:"1px solid #ddd"
+      },
+      inputDifference: {
+      backgroundColor: "rgb(255,215,0, 0.5)",
+      minWidth: 100,
+      border:"1px solid #ddd"
+      },
+  }
+  const [ value, setValue ] = useState([])
+  const [ rowName, setRowName ] = useState("")
+  const [ location, setLocation ] = useState("")
+  const [ destination, setDestination ] = useState("")
+  const [ technology, setTechnology ] = useState("")
+  const [ capacity, setCapacity ] = useState("")
+  const [ uniqueIndex, setUniqueIndex ] = useState('')
+  const [ overrideChecked, setOverrideChecked ] = useState(true)
+  const [ presetValues, setPresetValues ] = useState({})
+  
+
+  const getValueSelectValue = () => {
+    if (scenario.override_values[category][uniqueIndex] !== undefined) {
+
+      if(scenario.override_values[category][uniqueIndex].variable === "vb_y_Storage_dict" || scenario.override_values[category][uniqueIndex].variable === "vb_y_Disposal_dict") {
+        if(scenario.override_values[category][uniqueIndex].indexes.length>=2) return scenario.override_values[category][uniqueIndex].indexes[1]
+        else return ""
+      } else {
+        if(scenario.override_values[category][uniqueIndex].indexes.length>=3) return scenario.override_values[category][uniqueIndex].indexes[2]
+        else return ""
+      }
+    } else return ""
+  }
+
+  const handleInput = (event) => {
+    let number_value
+    if (value[0] === "Treatment Facility") {
+      number_value = presetValues[technology][event.target.value]
+    } else {
+      number_value = presetValues[event.target.value]
+    } 
+    if(number_value === 0) handleInputOverrideValue(event, true)
+    else handleInputOverrideValue(event, false)
+  }
+
+  const generateValueOptions = (value, index) => {
+    if (Object.keys(OVERRIDE_PRESET_VALUES).includes(value[0])) {
+      try {
+        return (
+          <Tooltip 
+            title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[OVERRIDE_PRESET_VALUES[value[0]].input_table]} table in the data input section.` : ''} 
+            placement="top" 
+            enterDelay={500}
+          >
+          <FormControl sx={{ width: "100%" }} size="small">
+            <InputLabel id="">Value</InputLabel>
+            <Select
+              disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+              labelId=""
+              id=""
+              name={`${index}::select`}
+              value={getValueSelectValue()}
+              label="Value"
+              onChange={handleInput}
+            >
+              {
+                value[0] === "Treatment Facility" ? 
+                Object.entries(presetValues[technology]).map(([key,value]) => (
+                  <MenuItem key={`${key}_${value}`} value={key}>
+                    {value}
+                  </MenuItem>
+                ))
+                : 
+                Object.entries(presetValues).map(([key,value]) => (
+                  <MenuItem key={`${key}_${value}`} value={key}>
+                    {value}
+                  </MenuItem>
+                )) 
+              }
+            </Select>
+          </FormControl>
+          </Tooltip>
+          )
+        
+        
+      } catch (e) {
+        console.error(e)
+        console.log("unable to generate infrastructure buildout options from input table, using generic input")
+        return ( 
+          <TextField 
+            name={`${index}::textfield`}
+            size="small" 
+            label="Value"
+            value={scenario.override_values[category][index].value !== undefined ? scenario.override_values[category][index].value : ""}
+            disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+            onChange={handleInputOverrideValue} 
+            onFocus={(event) => event.target.select()}
+          />
+        )
+      }
+    } else {
+      return ( 
+        <TextField 
+          name={`${index}::textfield`}
+          size="small" 
+          label="Value"
+          value={scenario.override_values[category][uniqueIndex] !== undefined ? scenario.override_values[category][uniqueIndex].value : ""}
+          disabled={!Object.keys(scenario.override_values[category]).includes(""+uniqueIndex)}
+          onChange={handleInputOverrideValue} 
+          onFocus={(event) => event.target.select()}
+        />
+      )
+    }
+      
+  }
+
+  const generateLocationOptions = () => {
+
+  }
+
+  const generateDestinationOptions = () => {
+
+  }
+
+  const generateTechnologyOptions = () => {
+
+  }
+
+  const generateCapacityOptions = () => {
+
+  }
+
+
+  const handleSelectRowName = (event) => {
+    setRowName(event.target.value)
+  }
+
+  const handleSelectLocation = (event) => {
+    setLocation(event.target.value)
+  }
+
+  const handleSelectDestination = (event) => {
+    setDestination(event.target.value)
+  }
+
+  const handleSelectTechnology = (event) => {
+    // console.log('selected '+event.target.value)
+    // let tempValue = [...value]
+    // tempValue[5] = event.target.value
+    // setValue(tempValue)
+    setTechnology(event.target.value)
+    // handleInputOverrideValue(event)
+  }
+
+  const handleSelectCapacity = (event) => {
+    setCapacity(event.target.value)
+  }
+
+
+return (
+      <TableRow>
+            <TableCell 
+              align={"left"} 
+              style={styles.firstCol}>
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">CAPEX Type</InputLabel>
+                  <Select
+                    labelId=""
+                    id="rowname"
+                    name={`rowname`}
+                    value={rowName}
+                    label="CAPEX Type"
+                    onChange={handleSelectRowName}
+                  >
+                    {
+                      ["Treatment Facility", "Disposal Facility", "Storage Facility", "Pipeline Construction"].map((key,idx) => (
+                        <MenuItem key={`${key}_${idx}`} value={key}>
+                          {key}
+                        </MenuItem>
+                      )) 
+                    }
+                  </Select>
+                </FormControl>
+            </TableCell>
+            <TableCell 
+              align={"left"} 
+              style={styles.other}>
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">Origin</InputLabel>
+                  <Select
+                    disabled={rowName===""}
+                    labelId=""
+                    id="location"
+                    name={`location`}
+                    value={location}
+                    label="Origin"
+                    onChange={handleSelectLocation}
+                  >
+                    {
+                      generateLocationOptions()
+                    }
+                  </Select>
+                </FormControl>
+            </TableCell>
+            <TableCell 
+              align={"left"} 
+              style={styles.other}>
+                {rowName === "Pipeline Construction" ? 
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">Destination</InputLabel>
+                  <Select
+                    // disabled={location===""}
+                    labelId=""
+                    id="destination"
+                    name={`destination`}
+                    value={destination}
+                    label="Destination"
+                    onChange={handleSelectDestination}
+                  >
+                    {
+                      generateDestinationOptions()
+                    }
+                  </Select>
+                </FormControl>
+                :
+                "--"
+              }
+            </TableCell>
+            <TableCell 
+              align={"left"} 
+              style={styles.other}>
+                {rowName === "Treatment Facility" ? 
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">Technology</InputLabel>
+                  <Select
+                    labelId=""
+                    id="technology"
+                    name={`technology`}
+                    value={technology}
+                    label="Technology"
+                    onChange={handleSelectTechnology}
+                  >
+                    {
+                      generateTechnologyOptions()
+                    }
+                  </Select>
+                </FormControl>
+                :
+                "--"
+              }
+            </TableCell>
+            <TableCell 
+              align={"left"} 
+              style={styles.other}>
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">Capacity</InputLabel>
+                  <Select
+                    disabled={rowName==="" || (rowName==="Treatment Facility" && technology==="")}
+                    labelId=""
+                    id="capacity"
+                    name={`capacity`}
+                    value={capacity}
+                    label="Capacity"
+                    onChange={handleSelectCapacity}
+                  >
+                    {
+                      generateCapacityOptions()
+                    }
+                  </Select>
+                </FormControl>
+            </TableCell>
+            <TableCell 
+              align={"left"} 
+              style={styles.other}>
+                  {
+                    rowName === "Pipeline Construction" ? "in" : 
+                    rowName === "Storage Facility" ? "bbl" : 
+                    ["Disposal Facility", "Treatment Facility"].includes(rowName) ? "bbl/d" : 
+                    "--"
+                   }
+            </TableCell>
+            <TableCell 
+              align="left"
+              style={styles.other}>
+                <Checkbox
+                    checked={overrideChecked}
+                    // onChange={() => handleCheckOverride(uniqueIndex, displayValue)}
+                />
+            </TableCell>
+            <TableCell 
+              align={"left"} 
+              style={styles.other}>
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">Value</InputLabel>
+                  <Select
+                    disabled={rowName==="" || (rowName==="Treatment Facility" && technology==="")}
+                    labelId=""
+                    id="capacity"
+                    name={`capacity`}
+                    value={capacity}
+                    label="Value"
+                    onChange={handleSelectCapacity}
+                  >
+                    {
+                      generateCapacityOptions()
+                    }
+                  </Select>
+                </FormControl>
+            </TableCell>
+        </TableRow>
+    )
 }
 
 function BinaryVariableRow(props) {  
@@ -188,8 +532,6 @@ function BinaryVariableRow(props) {
         setPresetValues(preset_values)
         setShowData(true)
     } catch(e) {
-      // console.log('tempDisplayValue is ')
-      // console.log(tempDisplayValue)
       // console.log('failed to generated override table rows: ')
       // console.log(e)
     }

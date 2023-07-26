@@ -231,6 +231,8 @@ const renderOutputTable = () => {
           scenario={props.scenario}
           show={showOverrideTables}
           updateScenario={props.updateScenario}
+          newInfrastructureOverrideRow={props.newInfrastructureOverrideRow}
+          setNewInfrastructureOverrideRow={props.setNewInfrastructureOverrideRow}
         /> 
         : 
         <TableContainer sx={{overflowX:'auto'}}>
