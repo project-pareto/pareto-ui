@@ -1,6 +1,9 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { TableBody, TableCell, TableRow, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { TableBody, TableCell, TableRow, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CancelIcon from '@mui/icons-material/Cancel';
 import CategoryNames from '../../assets/CategoryNames.json'
 
 const OVERRIDE_PRESET_VALUES = {
@@ -154,6 +157,7 @@ function NewBinaryVariableRow(props) {
   const [ uniqueIndex, setUniqueIndex ] = useState('')
   const [ overrideChecked, setOverrideChecked ] = useState(true)
   const [ presetValues, setPresetValues ] = useState({})
+  const [ complete, setComplete ] = useState(false)
   
 
   const getValueSelectValue = () => {
@@ -241,6 +245,10 @@ function NewBinaryVariableRow(props) {
           ))
         )
       }
+      else if (rowName === "Pipeline Construction") {
+        // TODO: generate the pipeline construction options
+        return
+      }
       
       
     } catch (e) {
@@ -307,6 +315,7 @@ function NewBinaryVariableRow(props) {
     setLocation("")
     setDestination("")
     setTechnology("")
+    // setComplete(false)
     generatePresetValues(row_name)
   }
 
@@ -329,6 +338,26 @@ function NewBinaryVariableRow(props) {
 
   const handleSelectCapacity = (event) => {
     setCapacity(event.target.value)
+  }
+
+  const checkForCompletion = () => {
+    if (rowName === "") return true
+    else if (rowName === "Treatment Facility") {
+      if (location === "" || technology === "" || capacity === "") return true
+      else return false
+    }
+    else if (rowName === "Disposal Facility") {
+      if (location === "" || capacity === "") return true
+      else return false
+    }
+    else if (rowName === "Storage Facility") {
+      if (location === "" || capacity === "") return true
+      else return false
+    }
+    else if (rowName === "Pipeline Construction") {
+      if (location === "" || capacity === "" || destination === "") return true
+      else return false
+    }
   }
 
 
@@ -428,10 +457,30 @@ return (
                 "--"
               }
             </TableCell>
-            <TableCell 
+            {/* <TableCell 
               align={"left"} 
               style={styles.other}>
                   {capacity === "" ? "--" : capacity}
+            </TableCell> */}
+            <TableCell 
+              align={"left"} 
+              style={styles.other}>
+                  <FormControl sx={{ width: "100%" }} size="small">
+                  <InputLabel id="">Capacity</InputLabel>
+                  <Select
+                    disabled={rowName==="" || (rowName==="Treatment Facility" && technology==="")}
+                    labelId=""
+                    id="capacity"
+                    name={`capacity`}
+                    value={capacity}
+                    label="Capacity"
+                    onChange={handleSelectCapacity}
+                  >
+                    {
+                      generateValueOptions()
+                    }
+                  </Select>
+                </FormControl>
             </TableCell>
             <TableCell 
               align={"left"} 
@@ -451,7 +500,7 @@ return (
                     // onChange={() => handleCheckOverride(uniqueIndex, displayValue)}
                 />
             </TableCell>
-            <TableCell 
+            {/* <TableCell 
               align={"left"} 
               style={styles.other}>
                   <FormControl sx={{ width: "100%" }} size="small">
@@ -470,6 +519,16 @@ return (
                     }
                   </Select>
                 </FormControl>
+            </TableCell> */}
+            <TableCell 
+              align={"center"} 
+              style={styles.other}>
+                  <IconButton color="success" sx={{marginRight:"10px"}} disabled={checkForCompletion()}>
+                    <CheckCircleIcon />
+                  </IconButton>
+                  <IconButton color="error" sx={{marginLeft:"10px"}} disabled={checkForCompletion()}>
+                    <CancelIcon/>
+                  </IconButton>
             </TableCell>
         </TableRow>
     )
