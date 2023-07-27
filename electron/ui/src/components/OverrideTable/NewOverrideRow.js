@@ -199,13 +199,13 @@ export default function NewBinaryVariableRow(props) {
           )
         }
         else if (rowName === "Pipeline Construction") {
-          return (
-            Object.entries(nodeConnections).map(([k,v]) => (
-              <MenuItem key={`${k}_${v}`} value={k}>
-                {k}
-              </MenuItem>
-            ))
-          )
+            return (
+                Object.keys(nodeConnections).sort().map((v,i) => (
+                    <MenuItem key={`${i}_${v}`} value={v}>
+                        {v}
+                    </MenuItem>
+                ))
+            )
         }
         
         
@@ -475,7 +475,7 @@ export default function NewBinaryVariableRow(props) {
                     <IconButton color="success" disabled={checkForCompletion()} onClick={handleAddRow}>
                         <CheckCircleIcon />
                     </IconButton>
-                    <IconButton color="error" disabled={checkForCompletion()} onClick={() => setNewInfrastructureOverrideRow(false)}>
+                    <IconButton color="error" onClick={() => setNewInfrastructureOverrideRow(false)}>
                         <CancelIcon/>
                     </IconButton>
                     </span>
