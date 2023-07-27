@@ -1,38 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Table, TableCell, TableHead, TableRow, TableContainer, TablePagination, Button } from '@mui/material';
+import { INFRASTRUCTURE_CAPEX_MAPPING, VARIABLE_INDEXES }  from '../../assets/InfrastructureCapexMapping.js'
 import OverrideTableRows from './OverrideTableRows';
 
-const OVERRIDE_PRESET_VALUES = {
-  "Pipeline Construction": {
-    input_table: "PipelineDiameterValues",
-    variable_name: "vb_y_Pipeline_dict"
-  },
-  "Storage Facility": {
-    input_table: "StorageCapacityIncrements",
-    variable_name: "vb_y_Storage_dict"
-  },
-  "Disposal Facility": {
-    input_table: "DisposalCapacityIncrements",
-    variable_name: "vb_y_Disposal_dict"
-  },
-  "Treatment Facility": {
-    input_table: "TreatmentCapacityIncrements",
-    variable_name: "vb_y_Treatment_dict"
-  },
-}
-
-const VARIABLE_INDEXES = {
-    "vb_y_overview_dict": [1,2,5],
-    "v_F_Piped_dict": [0,1,2],
-    "v_F_Sourced_dict": [0,1,2],
-    "v_F_Trucked_dict": [0,1,2],
-    "v_L_Storage_dict": [0,1],
-    "v_L_PadStorage_dict": [0,1],
-    "vb_y_Pipeline_dict": [0,1],
-    "vb_y_Disposal_dict": [0,1],
-    "vb_y_Storage_dict": [0,1],
-    "vb_y_Treatment_dict": [0,1],
-}
 
 export default function OverrideTable(props) {  
 
@@ -54,7 +24,7 @@ export default function OverrideTable(props) {
     const [page, setPage] = useState(0);
     const [visibleRows, setVisibleRows] = useState([])
     const [rowsPerPage, setRowsPerPage] = useState(50);
-
+  
     useEffect(() => {
       let tempRows = data[category].slice(1)
       let tempVisibleRows = tempRows.slice(
@@ -102,7 +72,7 @@ export default function OverrideTable(props) {
       // console.log(value)
       
       let variable = category
-      if(category ==="vb_y_overview_dict") variable = OVERRIDE_PRESET_VALUES[value[0]].variable_name
+      if(category ==="vb_y_overview_dict") variable = INFRASTRUCTURE_CAPEX_MAPPING[value[0]].variable_name
       let override_object = {variable: variable, isZero: false}
       let indexes = []
       for (let i of VARIABLE_INDEXES[category]) {
