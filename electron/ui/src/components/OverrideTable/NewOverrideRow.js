@@ -40,10 +40,10 @@ export default function NewBinaryVariableRow(props) {
     const [ destination, setDestination ] = useState("")
     const [ technology, setTechnology ] = useState("")
     const [ capacity, setCapacity ] = useState("")
+    const [ capacityNumberValue, setCapacityNumberValue ] = useState(null)
     const [ uniqueIndex, setUniqueIndex ] = useState('')
     const [ overrideChecked, setOverrideChecked ] = useState(true)
     const [ presetValues, setPresetValues ] = useState({})
-    const [ complete, setComplete ] = useState(false)
     const [ nodeConnections, setNodeConnections ] = useState({})
     const pipelineTables = ['PNA', 'CNA','CCA','NNA', 'NCA','NKA', 'NRA', 'NSA','FCA','RCA','RNA','RSA','SCA','SNA']
     const pipelineTypes = {'P': 'ProductionPads', 'C': 'CompletionsPads', 'N': "NetworkNodes", 'F': 'FreshwaterSources', 'R': 'TreatmentSites', 'S': 'StorageSites'}
@@ -51,7 +51,6 @@ export default function NewBinaryVariableRow(props) {
     useEffect(() => {
   
       //generate location options for pipeline consruction
-      console.log('use effect in place')
       try {
         
           // TODO: generate the pipeline construction options
@@ -81,7 +80,7 @@ export default function NewBinaryVariableRow(props) {
             }
           }
           // console.log(connections)
-          console.log(connectionsDictionary)
+        //   console.log(connectionsDictionary)
           // console.log(allNodes)
           setNodeConnections(connectionsDictionary)
         
@@ -94,8 +93,38 @@ export default function NewBinaryVariableRow(props) {
   
     const handleAddRow = () => {
         // create object to insert into infrastructure buildout table
-        
+        let unit = INFRASTRUCTURE_CAPEX_MAPPING[rowName].unit
+        let newRow = [rowName, location, '--', capacity, unit, '--']
+        if (rowName === "Treatment Facility") {
+            newRow[5] = technology
+        }
+        else if (rowName === "Pipeline Construction") {
+            newRow[2] = destination
+        }
+        console.log(newRow)
+
         // create object to insert into override values
+        let uniqueIndex = `${rowName}:${location}:${destination}:${technology}`
+        let indexes = [location]
+        if (rowName === "Treatment Facility") {
+            indexes.push(technology)
+        }
+        else if (rowName === "Pipeline Construction") {
+            indexes.push(destination) 
+        }
+        indexes.push(capacity)
+        let isZero = false
+        if(capacityNumberValue === 0) isZero = true
+        let variable = INFRASTRUCTURE_CAPEX_MAPPING[rowName].variable_name
+        let new_override_value = {}
+        new_override_value["key"] = uniqueIndex
+        new_override_value["value"] = {
+            indexes: indexes,
+            isZero: isZero,
+            value: 1,
+            variable: variable
+        }
+        console.log(new_override_value)
 
     }
   
@@ -222,8 +251,8 @@ export default function NewBinaryVariableRow(props) {
               }
             }
           }
-          console.log('preset values')
-          console.log(preset_values)
+        //   console.log('preset values')
+        //   console.log(preset_values)
           setPresetValues(preset_values)
       } catch(e) {
         // console.log('failed to generated override table rows: ')
@@ -250,6 +279,7 @@ export default function NewBinaryVariableRow(props) {
   
     const handleSelectLocation = (event) => {
       setLocation(event.target.value)
+      setDestination("")
     }
   
     const handleSelectDestination = (event) => {
@@ -261,7 +291,14 @@ export default function NewBinaryVariableRow(props) {
     }
   
     const handleSelectCapacity = (event) => {
-      setCapacity(event.target.value)
+        let number_value
+        if (rowName === "Treatment Facility") {
+            number_value = presetValues[technology][event.target.value]
+        } else {
+            number_value = presetValues[event.target.value]
+        } 
+        setCapacityNumberValue(number_value)
+        setCapacity(event.target.value)
     }
   
     const checkForCompletion = () => {

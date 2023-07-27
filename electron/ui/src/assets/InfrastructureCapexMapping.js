@@ -1,19 +1,23 @@
 export const INFRASTRUCTURE_CAPEX_MAPPING = {
     "Pipeline Construction": {
       "input_table": "PipelineDiameterValues",
-      "variable_name": "vb_y_Pipeline_dict"
+      "variable_name": "vb_y_Pipeline_dict",
+      "unit" : "in"
     },
     "Storage Facility": {
       "input_table": "StorageCapacityIncrements",
-      "variable_name": "vb_y_Storage_dict"
+      "variable_name": "vb_y_Storage_dict",
+      "unit" : "bbl"
     },
     "Disposal Facility": {
       "input_table": "DisposalCapacityIncrements",
-      "variable_name": "vb_y_Disposal_dict"
+      "variable_name": "vb_y_Disposal_dict",
+      "unit" : "bbl/d"
     },
     "Treatment Facility": {
       "input_table": "TreatmentCapacityIncrements",
-      "variable_name": "vb_y_Treatment_dict"
+      "variable_name": "vb_y_Treatment_dict",
+      "unit" : "bbl/d"
     }
 }
 
