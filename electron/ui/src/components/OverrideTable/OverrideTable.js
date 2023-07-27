@@ -139,6 +139,24 @@ export default function OverrideTable(props) {
         }
     }
 
+    const addNewRow = (newOverride, newRow) => {
+      console.log('override value')
+      console.log(newOverride)
+      console.log('rowvalue')
+      console.log(newRow)
+
+      let tempOverrideValues = {...scenario.override_values}
+      tempOverrideValues.vb_y_overview_dict[newOverride.key] = newOverride.value
+
+      let tempInfrastructureTable = [...scenario.results.data.vb_y_overview_dict]
+      tempInfrastructureTable.push(newRow)
+
+      let tempScenario = {...scenario}
+      tempScenario.override_values = tempOverrideValues
+      tempScenario.results.data.vb_y_overview_dict=tempInfrastructureTable
+      updateScenario(tempScenario)
+    }
+
 
 const renderOutputTable = () => {
 
@@ -191,6 +209,7 @@ const renderOutputTable = () => {
                 handleInputOverrideValue={handleInputOverrideValue}
                 newInfrastructureOverrideRow={newInfrastructureOverrideRow}
                 setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
+                addNewRow={addNewRow}
               />
             
             </Table>

@@ -13,7 +13,9 @@ export default function NewBinaryVariableRow(props) {
         category,
         scenario,
         handleCheckOverride,
-        handleInputOverrideValue
+        handleInputOverrideValue,
+        setNewInfrastructureOverrideRow,
+        addNewRow
     } = props
   
     const styles ={
@@ -92,19 +94,24 @@ export default function NewBinaryVariableRow(props) {
     },[scenario, category])
   
     const handleAddRow = () => {
+        let tempDestination = destination
+        if(tempDestination === "") tempDestination='--'
+        let tempTechnology = technology
+        if(tempTechnology === "") tempTechnology='--'
+
         // create object to insert into infrastructure buildout table
         let unit = INFRASTRUCTURE_CAPEX_MAPPING[rowName].unit
-        let newRow = [rowName, location, '--', capacity, unit, '--']
-        if (rowName === "Treatment Facility") {
-            newRow[5] = technology
-        }
-        else if (rowName === "Pipeline Construction") {
-            newRow[2] = destination
-        }
-        console.log(newRow)
+        let newRow = [rowName, location, tempDestination, capacityNumberValue, unit, tempTechnology]
+        // if (rowName === "Treatment Facility") {
+        //     newRow[5] = technology
+        // }
+        // else if (rowName === "Pipeline Construction") {
+        //     newRow[2] = destination
+        // }
+        // console.log(newRow)
 
         // create object to insert into override values
-        let uniqueIndex = `${rowName}:${location}:${destination}:${technology}`
+        let uniqueIndex = `${rowName}:${location}:${tempDestination}:${tempTechnology}`
         let indexes = [location]
         if (rowName === "Treatment Facility") {
             indexes.push(technology)
@@ -124,7 +131,9 @@ export default function NewBinaryVariableRow(props) {
             value: 1,
             variable: variable
         }
-        console.log(new_override_value)
+        // console.log(new_override_value)
+        addNewRow(new_override_value, newRow)
+        setNewInfrastructureOverrideRow(false)
 
     }
   
@@ -460,13 +469,17 @@ export default function NewBinaryVariableRow(props) {
               </TableCell>
               <TableCell 
                 align={"center"} 
-                style={styles.other}>
-                    <IconButton color="success" sx={{marginRight:"10px"}} disabled={checkForCompletion()} onClick={handleAddRow}>
-                      <CheckCircleIcon />
+                style={styles.other}
+                >
+                    <span style={{overflowX: 'auto', width:'100%'}}>
+                    <IconButton color="success" disabled={checkForCompletion()} onClick={handleAddRow}>
+                        <CheckCircleIcon />
                     </IconButton>
-                    <IconButton color="error" sx={{marginLeft:"10px"}} disabled={checkForCompletion()}>
-                      <CancelIcon/>
+                    <IconButton color="error" disabled={checkForCompletion()} onClick={() => setNewInfrastructureOverrideRow(false)}>
+                        <CancelIcon/>
                     </IconButton>
+                    </span>
+                    
               </TableCell>
           </TableRow>
       )

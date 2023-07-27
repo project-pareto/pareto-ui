@@ -18,6 +18,7 @@ export default function OverrideTableRows(props) {
         handleInputOverrideValue,
         newInfrastructureOverrideRow,
         setNewInfrastructureOverrideRow,
+        addNewRow
   } = props
 
   const styles = {
@@ -71,6 +72,8 @@ return (
             scenario={scenario}
             handleCheckOverride={handleCheckOverride}
             handleInputOverrideValue={handleInputOverrideValue}
+            setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
+            addNewRow={addNewRow}
         />
       }
 
