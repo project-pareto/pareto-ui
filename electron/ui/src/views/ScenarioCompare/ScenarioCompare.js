@@ -4,11 +4,9 @@ import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
+import ScenarioCompareOverrides from './ScenarioCompareOverrides';
 import SubHeader from './SubHeader';
 import Subcategories from '../../assets/Subcategories.json'
-
-
-
 
 
 export default function ScenarioCompare(props) {
@@ -24,6 +22,7 @@ export default function ScenarioCompare(props) {
   const [ showSidebar, setShowSidebar ] = useState(true)
   const [ compareCategory, setCompareCategory ] = useState('output')
   const [ deltaDictionary, setDeltaDictionary ] = useState({})
+  const [ overrides, setOverrides ] = useState([{},{}])
 
   useEffect(() => {
     let temp_deltaDictionary = {}
@@ -78,6 +77,34 @@ export default function ScenarioCompare(props) {
     }
     catch (e) {
         setDeltaDictionary(temp_deltaDictionary)
+    }        
+  }, [primaryScenarioIndex, referenceScenarioIndex]);
+
+  useEffect(() => {
+    let temp_overrides = [{},{}]
+    
+    try {
+        let primaryScenario = {...scenarios[primaryScenarioIndex]}
+        let referenceScenario = {...scenarios[referenceScenarioIndex]}
+        if (primaryScenario.optimized_override_values !== undefined)  {
+            for(let key of Object.keys(primaryScenario.optimized_override_values)) {
+                for(let each of Object.keys(primaryScenario.optimized_override_values[key])) {
+                    temp_overrides[0][each] = primaryScenario.optimized_override_values[key][each]
+                }
+            }
+        }
+        if (referenceScenario.optimized_override_values !== undefined)  {
+            for(let key of Object.keys(referenceScenario.optimized_override_values)) {
+                for(let each of Object.keys(referenceScenario.optimized_override_values[key])) {
+
+                    temp_overrides[1][each] = referenceScenario.optimized_override_values[key][each]
+                } 
+            }
+        }
+        setOverrides(temp_overrides)
+    }
+    catch (e) {
+
     }        
   }, [primaryScenarioIndex, referenceScenarioIndex]);
 
@@ -193,6 +220,7 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         category={compareCategory}
         setCategory={setCompareCategory}
         deltaDictionary={deltaDictionary}
+        overrides={overrides}
     >
     </Sidebar>
     <SubHeader 
@@ -213,6 +241,16 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         compareCategory={compareCategory}
         totalCapex={totalCapex}
         totalOpex={totalOpex}
+    />
+    :
+    compareCategory==="overrides" ? 
+    <ScenarioCompareOverrides
+        primaryScenario={scenarios[primaryScenarioIndex]}
+        referenceScenario={scenarios[referenceScenarioIndex]}
+        category={compareCategory}
+        showSidebar={showSidebar}
+        deltaDictionary={deltaDictionary}
+        overrides={overrides}
     />
     :
     <ScenarioCompareInput

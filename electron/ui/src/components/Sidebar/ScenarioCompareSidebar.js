@@ -10,11 +10,11 @@ import Subcategories from '../../assets/Subcategories.json'
 const drawerWidth = 240;
 
 export default function Sidebar(props) {
-    const { category, setCategory, open, deltaDictionary } = props
+    const { category, setCategory, open, deltaDictionary, overrides } = props
     const [ openDynamic, setOpenDynamic ] = useState(false)
     const [ openStatic, setOpenStatic ] = useState(false)
     const [ deltaCategories, setDeltaCategories ] = useState([])
-    const [ checkAgain, setCheckAgain ] = useState(false)
+    const [ hasOverrides, setHasOverrides ] = useState(false)
 
     useEffect(() => {
       // check if delta dictionary is set yet
@@ -22,8 +22,6 @@ export default function Sidebar(props) {
       if(Object.keys(deltaDictionary).length < 5) {
         
       }
-      // console.log("deltaDictionary")
-      // console.log(deltaDictionary)
       else {
         let tempDeltaCategories = []
         try {
@@ -54,6 +52,14 @@ export default function Sidebar(props) {
       }
       
     }, [deltaDictionary])
+
+    useEffect(()=> {
+      let tempHasOverrides = false
+      for(let each of overrides) {
+        if(Object.keys(each).length > 0) tempHasOverrides = true
+      } 
+      setHasOverrides(tempHasOverrides)
+    },[overrides])
 
   const styles = {
     topLevelCategory: {
@@ -141,6 +147,15 @@ export default function Sidebar(props) {
           </div>
           </Tooltip>
           {renderStaticCategories()}
+          {hasOverrides && 
+            <div style={category==="overrides" ? styles.selected : styles.inputDifference} onClick={() => handleClick("overrides")}> 
+              <p style={styles.topLevelCategory}>
+                <span style={{display:"flex", justifyContent: "space-between"}}>
+                  Manual Overrides
+                </span>
+              </p>
+          </div>
+          }
         </div>
       ) 
   }
