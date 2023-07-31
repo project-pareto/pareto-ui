@@ -53,9 +53,10 @@ export default function ScenarioCompareOverrides(props) {
     }
     setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
     
-  },[])
+  },[primaryScenario, referenceScenario])
 
   const renderInfrastructureTable = (idx) => {
+    console.log('rendering infrastructure with idx '+idx)
     if (overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[0]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[1]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[2]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[3])) {
         return (
             <TableContainer>
@@ -66,12 +67,12 @@ export default function ScenarioCompareOverrides(props) {
                     <Table style={{border:"1px solid #ddd"}} size='small'>
                         <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                             <TableRow>
-                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>Variable</TableCell> 
-                                <TableCell style={{color:"white"}}>Location</TableCell>
-                                <TableCell style={{color:"white"}}>Destination</TableCell>
-                                <TableCell style={{color:"white"}}>Technology</TableCell>
-                                <TableCell style={{color:"white"}}>Capacity</TableCell>
-                                <TableCell style={{color:"white"}}>Unit</TableCell>
+                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"25%"}}>CAPEX Type</TableCell> 
+                                <TableCell style={{color:"white", width:"15%"}}>Location</TableCell>
+                                <TableCell style={{color:"white", width:"15%"}}>Destination</TableCell>
+                                <TableCell style={{color:"white", width:"15%"}}>Technology</TableCell>
+                                <TableCell style={{color:"white", width:"15%"}}>Capacity</TableCell>
+                                <TableCell style={{color:"white", width:"15%"}}>Unit</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
