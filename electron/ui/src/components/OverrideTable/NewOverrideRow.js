@@ -70,11 +70,20 @@ export default function NewBinaryVariableRow(props) {
               for (let element of row) {
                 if (element === 1 || element === "1") {
                   connections.push([rowNames[idx], colName])
+
                   if (Object.keys(connectionsDictionary).includes(rowNames[idx])) {
                     connectionsDictionary[rowNames[idx]].push(colName)
                   } else connectionsDictionary[rowNames[idx]] = [colName]
+
+                  //add connections in both directions (?)
+                  if (Object.keys(connectionsDictionary).includes(colName)) {
+                    connectionsDictionary[colName].push(rowNames[idx])
+                  } else connectionsDictionary[colName] = [rowNames[idx]]
+
                   allNodes.add(rowNames[idx])
                   allNodes.add(colName)
+
+                  
                 }
                 idx+=1
               }
@@ -220,7 +229,7 @@ export default function NewBinaryVariableRow(props) {
     const generateDestinationOptions = () => {
       if( location!=="") {
         return (
-          nodeConnections[location].map((v,i) => (
+          nodeConnections[location].sort().map((v,i) => (
             <MenuItem key={`${i}_${v}`} value={v}>
               {v}
             </MenuItem>
