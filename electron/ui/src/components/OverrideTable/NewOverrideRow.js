@@ -111,13 +111,6 @@ export default function NewBinaryVariableRow(props) {
         // create object to insert into infrastructure buildout table
         let unit = INFRASTRUCTURE_CAPEX_MAPPING[rowName].unit
         let newRow = [rowName, location, tempDestination, capacityNumberValue, unit, tempTechnology]
-        // if (rowName === "Treatment Facility") {
-        //     newRow[5] = technology
-        // }
-        // else if (rowName === "Pipeline Construction") {
-        //     newRow[2] = destination
-        // }
-        // console.log(newRow)
 
         // create object to insert into override values
         let uniqueIndex = `${rowName}:${location}:${tempDestination}:${tempTechnology}`
@@ -138,7 +131,8 @@ export default function NewBinaryVariableRow(props) {
             indexes: indexes,
             isZero: isZero,
             value: 1,
-            variable: variable
+            variable: variable,
+            number_value: capacityNumberValue
         }
         // console.log(new_override_value)
         addNewRow(new_override_value, newRow)

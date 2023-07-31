@@ -55,8 +55,12 @@ export default function ScenarioCompareOverrides(props) {
     
   },[primaryScenario, referenceScenario])
 
+  const formatNumber = (value) => {
+    if (value === undefined) return value
+    else return value.toLocaleString('en-US', {maximumFractionDigits:2})
+  }
+
   const renderInfrastructureTable = (idx) => {
-    console.log('rendering infrastructure with idx '+idx)
     if (overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[0]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[1]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[2]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[3])) {
         return (
             <TableContainer>
@@ -82,7 +86,8 @@ export default function ScenarioCompareOverrides(props) {
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
                                     <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
                                     <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
-                                    <TableCell style={styles.other}>{value.indexes[value.indexes.length-1]}</TableCell>
+                                    {/* <TableCell style={styles.other}>{value.indexes[value.indexes.length-1]}</TableCell> */}
+                                    <TableCell style={styles.other} align="right">{formatNumber(value.number_value)}</TableCell>
                                     <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
                                 </TableRow>
                             ))}

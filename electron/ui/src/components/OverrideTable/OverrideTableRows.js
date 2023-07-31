@@ -226,8 +226,9 @@ function BinaryVariableRow(props) {
     } 
     // console.log("number_value")
     // console.log(number_value)
-    if(number_value === 0) handleInputOverrideValue(event, true)
-    else handleInputOverrideValue(event, false)
+    // if(number_value === 0) handleInputOverrideValue(event, true)
+    // else handleInputOverrideValue(event, false)
+    handleInputOverrideValue(event, number_value)
   }
 
   const generateInfrastructureBuildoutValueOptions = (value, index) => {
@@ -419,7 +420,7 @@ function RegularVariableRow(props) {
   }, [scenario])
 
   const handleInput = (event) => {
-    handleInputOverrideValue(event, false)
+    handleInputOverrideValue(event)
   }
 
 return (

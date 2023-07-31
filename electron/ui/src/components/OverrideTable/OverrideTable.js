@@ -93,7 +93,7 @@ export default function OverrideTable(props) {
         updateScenario(tempScenario)
     } 
 
-    const handleInputOverrideValue = (event, isZero) => {
+    const handleInputOverrideValue = (event, number_value) => {
         let tempOverrideValues = {...scenario.override_values}
         let idx = event.target.name.split("::")[0]
         let inputType = event.target.name.split("::")[1]
@@ -118,8 +118,13 @@ export default function OverrideTable(props) {
           } else {
             tempOverrideValues[category][idx].value = val
           }
-          if(isZero) tempOverrideValues[category][idx].isZero = true
-          else tempOverrideValues[category][idx].isZero = false
+          if (number_value !== undefined) {
+            tempOverrideValues[category][idx].number_value = number_value
+            if (number_value === 0 || number_value === "0") tempOverrideValues[category][idx].isZero = true
+          }
+
+          // if(isZero) tempOverrideValues[category][idx].isZero = true
+          // else tempOverrideValues[category][idx].isZero = false
           const tempScenario = {...scenario}
           tempScenario.override_values = tempOverrideValues
           updateScenario(tempScenario)
