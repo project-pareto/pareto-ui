@@ -5,14 +5,17 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 import Subcategories from '../../assets/Subcategories.json'
+import { OVERRIDE_CATEGORIES }  from '../../assets/InfrastructureCapexMapping'
 
 
 const drawerWidth = 240;
+
 
 export default function Sidebar(props) {
     const { category, setCategory, open, deltaDictionary, overrides } = props
     const [ openDynamic, setOpenDynamic ] = useState(false)
     const [ openStatic, setOpenStatic ] = useState(false)
+    const [ openOverrides, setOpenOverrides ] = useState(false)
     const [ deltaCategories, setDeltaCategories ] = useState([])
     const [ hasOverrides, setHasOverrides ] = useState(false)
 
@@ -148,6 +151,21 @@ export default function Sidebar(props) {
           </Tooltip>
           {renderStaticCategories()}
           {hasOverrides && 
+          <Fragment>
+          <Tooltip title={"Select to view manual overrides"} placement="right-start">
+          <div style={category.includes("overrides") ? styles.selected : styles.inputDifference}  onClick={() => setOpenOverrides(!openOverrides)}> 
+              <p style={styles.topLevelCategory}>
+                <span style={{display:"flex", justifyContent: "space-between"}}>
+                  Manual Overrides
+                  <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openOverrides ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                </span>
+              </p>
+          </div>
+          </Tooltip>
+          {renderOverrideCategories()}
+          </Fragment>
+          }
+          {/* {hasOverrides && 
             <div style={category==="overrides" ? styles.selected : styles.inputDifference} onClick={() => handleClick("overrides")}> 
               <p style={styles.topLevelCategory}>
                 <span style={{display:"flex", justifyContent: "space-between"}}>
@@ -155,9 +173,27 @@ export default function Sidebar(props) {
                 </span>
               </p>
           </div>
-          }
+          } */}
         </div>
       ) 
+  }
+
+  const renderOverrideCategories = () => {
+    return (
+      <Collapse in={openOverrides} timeout="auto" unmountOnExit>
+      {Object.entries(OVERRIDE_CATEGORIES).map( ([key,value]) => (
+          <div key={key}>
+            {/* <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)}>  */}
+            <div style={category.includes(key) ? styles.selected : styles.unselected} onClick={() => handleClick('overrides::'+key)}>
+                <p style={styles.subcategory}>
+                {value.name}
+                </p>
+            </div>
+          </div>
+        )
+      )}
+      </Collapse>
+    )
   }
 
   const renderDynamicCategories = () => {

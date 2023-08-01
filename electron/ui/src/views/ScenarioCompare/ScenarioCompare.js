@@ -243,7 +243,7 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         totalOpex={totalOpex}
     />
     :
-    compareCategory==="overrides" ? 
+    compareCategory.includes("overrides") ? 
     <ScenarioCompareOverrides
         primaryScenario={scenarios[primaryScenarioIndex]}
         referenceScenario={scenarios[referenceScenarioIndex]}

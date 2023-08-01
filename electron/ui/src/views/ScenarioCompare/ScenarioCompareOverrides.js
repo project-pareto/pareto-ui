@@ -51,8 +51,8 @@ export default function ScenarioCompareOverrides(props) {
         let variable = overrides[1][key].variable
         tempReferenceOverridesSet.add(variable)
     }
-    console.log('overrides list: ')
-    console.log([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
+    // console.log('overrides list: ')
+    // console.log([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
     setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
     
   },[primaryScenario, referenceScenario, overrides])
