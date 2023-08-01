@@ -12,12 +12,13 @@ const drawerWidth = 240;
 
 
 export default function Sidebar(props) {
-    const { category, setCategory, open, deltaDictionary, overrides } = props
+    const { category, setCategory, open, deltaDictionary, overrides, compareScenarioIndexes } = props
     const [ openDynamic, setOpenDynamic ] = useState(false)
     const [ openStatic, setOpenStatic ] = useState(false)
     const [ openOverrides, setOpenOverrides ] = useState(false)
     const [ deltaCategories, setDeltaCategories ] = useState([])
     const [ hasOverrides, setHasOverrides ] = useState(false)
+    const [ overridesList, setOverridesList ] = useState([[],[]])
 
     useEffect(() => {
       // check if delta dictionary is set yet
@@ -63,6 +64,33 @@ export default function Sidebar(props) {
       } 
       setHasOverrides(tempHasOverrides)
     },[overrides])
+
+    useEffect(() => {
+      let tempPrimaryOverridesSet = new Set()
+      let tempReferenceOverridesSet = new Set()
+      for (let key of Object.keys(overrides[0])) {
+          let variable = overrides[0][key].variable
+          tempPrimaryOverridesSet.add(variable)
+      }
+      for (let key of Object.keys(overrides[1])) {
+          let variable = overrides[1][key].variable
+          tempReferenceOverridesSet.add(variable)
+      }
+      if (
+        tempPrimaryOverridesSet.has("vb_y_Pipeline_dict") || 
+        tempPrimaryOverridesSet.has("vb_y_Storage_dict") || 
+        tempPrimaryOverridesSet.has("vb_y_Disposal_dict") || 
+        tempPrimaryOverridesSet.has("vb_y_Treatment_dict")
+        ) tempPrimaryOverridesSet.add("vb_y_overview_dict")
+      if (
+        tempReferenceOverridesSet.has("vb_y_Pipeline_dict") || 
+        tempReferenceOverridesSet.has("vb_y_Storage_dict") || 
+        tempReferenceOverridesSet.has("vb_y_Disposal_dict") || 
+        tempReferenceOverridesSet.has("vb_y_Treatment_dict")
+        ) tempReferenceOverridesSet.add("vb_y_overview_dict")
+      setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
+      
+    },[overrides, compareScenarioIndexes])
 
   const styles = {
     topLevelCategory: {
@@ -181,7 +209,9 @@ export default function Sidebar(props) {
   const renderOverrideCategories = () => {
     return (
       <Collapse in={openOverrides} timeout="auto" unmountOnExit>
-      {Object.entries(OVERRIDE_CATEGORIES).map( ([key,value]) => (
+      {Object.entries(OVERRIDE_CATEGORIES).map( ([key,value]) => {
+        if (overridesList[0].includes(key) || overridesList[1].includes(key))
+        return (
           <div key={key}>
             {/* <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)}>  */}
             <div style={category.includes(key) ? styles.selected : styles.unselected} onClick={() => handleClick('overrides::'+key)}>
@@ -191,6 +221,8 @@ export default function Sidebar(props) {
             </div>
           </div>
         )
+          
+      }
       )}
       </Collapse>
     )

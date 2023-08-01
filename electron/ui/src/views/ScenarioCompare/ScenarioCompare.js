@@ -221,6 +221,7 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         setCategory={setCompareCategory}
         deltaDictionary={deltaDictionary}
         overrides={overrides}
+        compareScenarioIndexes={compareScenarioIndexes}
     >
     </Sidebar>
     <SubHeader 

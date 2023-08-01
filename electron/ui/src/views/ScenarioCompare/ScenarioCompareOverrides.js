@@ -51,8 +51,6 @@ export default function ScenarioCompareOverrides(props) {
         let variable = overrides[1][key].variable
         tempReferenceOverridesSet.add(variable)
     }
-    // console.log('overrides list: ')
-    // console.log([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
     setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
     
   },[primaryScenario, referenceScenario, overrides])
@@ -63,78 +61,127 @@ export default function ScenarioCompareOverrides(props) {
   }
 
   const renderPipedTable = (idx) => {
-    if (overridesList[idx].includes("v_F_Piped_dict")) {
         return (
             <TableContainer>
                 <h3>
-                    {idx === 0 ? primaryScenario.name : referenceScenario.name}: Piped
+                    Piped
                 </h3>
                 <TableContainer sx={{overflowX:'auto'}}>
                     <Table style={{border:"1px solid #ddd"}} size='small'>
                         <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                             <TableRow>
-                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"25%"}}>Origin</TableCell> 
-                                <TableCell style={{color:"white", width:"25%"}}>Destination</TableCell>
-                                <TableCell style={{color:"white", width:"25%"}}>Time</TableCell>
-                                <TableCell style={{color:"white", width:"25%"}}>Override Value</TableCell>
+                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"20%"}}>Scenario</TableCell> 
+                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"20%"}}>Origin</TableCell> 
+                                <TableCell style={{color:"white", width:"20%"}}>Destination</TableCell>
+                                <TableCell style={{color:"white", width:"20%"}}>Time</TableCell>
+                                <TableCell style={{color:"white", width:"20%"}} align="right">Override Value</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody>
-                            {Object.entries( idx === 0 ? primaryScenario.override_values.v_F_Piped_dict : referenceScenario.override_values.v_F_Piped_dict).map(([key,value]) => (
-                                <TableRow key = {`${key}_${value}`}>
-                                    <TableCell style={styles.firstCol}>{key.split(":")[0]}</TableCell> 
-                                    <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                    <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                        {Object.keys(primaryScenario.override_values.v_F_Piped_dict).length > 0 && 
+                            <TableBody>
+                                <TableRow>
+                                <TableCell rowSpan={Object.keys(primaryScenario.override_values.v_F_Piped_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                    <b>{primaryScenario.name}</b>
+                                </TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
+                                {Object.entries(primaryScenario.override_values.v_F_Piped_dict).map(([key,value]) => (
+                                    <TableRow key = {`${key}_${value}`}>
+                                        <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
+                                        <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
+                                        <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        }
+                        {Object.keys(referenceScenario.override_values.v_F_Piped_dict).length > 0 && 
+                            <TableBody>
+                                <TableRow>
+                                <TableCell rowSpan={Object.keys(referenceScenario.override_values.v_F_Piped_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                    <b>{referenceScenario.name}</b>
+                                </TableCell>
+                                </TableRow>
+                                {Object.entries(referenceScenario.override_values.v_F_Piped_dict).map(([key,value]) => (
+                                    <TableRow key = {`${key}_${value}`}>
+                                        <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
+                                        <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
+                                        <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        }
                     </Table>
                 </TableContainer>
             </TableContainer>
         )
-    }
-    
   }
 
-  const renderInfrastructureTable = (idx) => {
-    if (overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[0]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[1]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[2]) || overridesList[idx].includes(INFRASTRUCTURE_VARIABLES[3])) {
+  const renderInfrastructureTable = () => {
         return (
             <TableContainer>
                 <h3>
-                    {idx === 0 ? primaryScenario.name : referenceScenario.name}: Infrastructure Buildout
+                    Infrastructure Buildout
                 </h3>
                 <TableContainer sx={{overflowX:'auto'}}>
                     <Table style={{border:"1px solid #ddd"}} size='small'>
                         <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                             <TableRow>
-                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"25%"}}>CAPEX Type</TableCell> 
-                                <TableCell style={{color:"white", width:"15%"}}>Location</TableCell>
-                                <TableCell style={{color:"white", width:"15%"}}>Destination</TableCell>
-                                <TableCell style={{color:"white", width:"15%"}}>Technology</TableCell>
-                                <TableCell style={{color:"white", width:"15%"}}>Capacity</TableCell>
-                                <TableCell style={{color:"white", width:"15%"}}>Unit</TableCell>
+                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"20%"}}>Scenario</TableCell> 
+                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"15%"}}>CAPEX Type</TableCell> 
+                                <TableCell style={{color:"white", width:"13%"}}>Location</TableCell>
+                                <TableCell style={{color:"white", width:"13%"}}>Destination</TableCell>
+                                <TableCell style={{color:"white", width:"13%"}}>Technology</TableCell>
+                                <TableCell style={{color:"white", width:"13%"}} align="right">Capacity</TableCell>
+                                <TableCell style={{color:"white", width:"13%"}}>Unit</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody>
-                            {Object.entries( idx === 0 ? primaryScenario.override_values.vb_y_overview_dict : referenceScenario.override_values.vb_y_overview_dict).map(([key,value]) => (
-                                <TableRow key = {`${key}_${value}`}>
-                                    <TableCell style={styles.firstCol}>{key.split(":")[0]}</TableCell> 
-                                    <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                    <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                    <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
-                                    {/* <TableCell style={styles.other}>{value.indexes[value.indexes.length-1]}</TableCell> */}
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.number_value)}</TableCell>
-                                    <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
+                        {Object.keys(primaryScenario.override_values.vb_y_overview_dict).length > 0 && 
+                            <TableBody>
+                                <TableRow>
+                                <TableCell rowSpan={Object.keys(primaryScenario.override_values.vb_y_overview_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                    <b>{primaryScenario.name}</b>
+                                </TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
+                                {Object.entries(primaryScenario.override_values.vb_y_overview_dict).map(([key,value]) => (
+                                    <TableRow key = {`${key}_${value}`}>
+                                        {/* <TableCell></TableCell> */}
+                                        <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
+                                        <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
+                                        {/* <TableCell style={styles.other}>{value.indexes[value.indexes.length-1]}</TableCell> */}
+                                        <TableCell style={styles.other} align="right">{formatNumber(value.number_value)}</TableCell>
+                                        <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        }
+                        {Object.keys(referenceScenario.override_values.vb_y_overview_dict).length > 0 && 
+                            <TableBody>
+                                <TableRow>
+                                <TableCell rowSpan={Object.keys(referenceScenario.override_values.vb_y_overview_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                    <b>{referenceScenario.name}</b>
+                                </TableCell>
+                                </TableRow>
+                                {Object.entries(referenceScenario.override_values.vb_y_overview_dict).map(([key,value]) => (
+                                    <TableRow key = {`${key}_${value}`}>
+                                        {/* <TableCell></TableCell> */}
+                                        <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
+                                        <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
+                                        {/* <TableCell style={styles.other}>{value.indexes[value.indexes.length-1]}</TableCell> */}
+                                        <TableCell style={styles.other} align="right">{formatNumber(value.number_value)}</TableCell>
+                                        <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        }
                     </Table>
                 </TableContainer>
             </TableContainer>
         )
-    }
-    
   }
 
   const renderOverridesTables = () => {
@@ -142,10 +189,16 @@ export default function ScenarioCompareOverrides(props) {
         return (
             <Box style={{backgroundColor:'white'}} sx={styles.boxView}>
             <Grid container>
-                {renderInfrastructureTable(0)}
+                {category.includes("vb_y_overview_dict") && 
+                    renderInfrastructureTable()
+                }
+                {category.includes("v_F_Piped_dict") && 
+                    renderPipedTable()
+                }
+                {/* {renderInfrastructureTable(0)}
                 {renderInfrastructureTable(1)}
                 {renderPipedTable(0)}
-                {renderPipedTable(1)}
+                {renderPipedTable(1)} */}
             </Grid>
             </Box>
         )
