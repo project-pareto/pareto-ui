@@ -51,13 +51,50 @@ export default function ScenarioCompareOverrides(props) {
         let variable = overrides[1][key].variable
         tempReferenceOverridesSet.add(variable)
     }
+    console.log('overrides list: ')
+    console.log([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
     setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
     
-  },[primaryScenario, referenceScenario])
+  },[primaryScenario, referenceScenario, overrides])
 
   const formatNumber = (value) => {
     if (value === undefined) return value
     else return value.toLocaleString('en-US', {maximumFractionDigits:2})
+  }
+
+  const renderPipedTable = (idx) => {
+    if (overridesList[idx].includes("v_F_Piped_dict")) {
+        return (
+            <TableContainer>
+                <h3>
+                    {idx === 0 ? primaryScenario.name : referenceScenario.name}: Piped
+                </h3>
+                <TableContainer sx={{overflowX:'auto'}}>
+                    <Table style={{border:"1px solid #ddd"}} size='small'>
+                        <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
+                            <TableRow>
+                                <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"25%"}}>Origin</TableCell> 
+                                <TableCell style={{color:"white", width:"25%"}}>Destination</TableCell>
+                                <TableCell style={{color:"white", width:"25%"}}>Time</TableCell>
+                                <TableCell style={{color:"white", width:"25%"}}>Override Value</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {Object.entries( idx === 0 ? primaryScenario.override_values.v_F_Piped_dict : referenceScenario.override_values.v_F_Piped_dict).map(([key,value]) => (
+                                <TableRow key = {`${key}_${value}`}>
+                                    <TableCell style={styles.firstCol}>{key.split(":")[0]}</TableCell> 
+                                    <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
+                                    <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </TableContainer>
+        )
+    }
+    
   }
 
   const renderInfrastructureTable = (idx) => {
@@ -65,7 +102,7 @@ export default function ScenarioCompareOverrides(props) {
         return (
             <TableContainer>
                 <h3>
-                    {idx === 0 ? primaryScenario.name : referenceScenario.name}
+                    {idx === 0 ? primaryScenario.name : referenceScenario.name}: Infrastructure Buildout
                 </h3>
                 <TableContainer sx={{overflowX:'auto'}}>
                     <Table style={{border:"1px solid #ddd"}} size='small'>
@@ -107,6 +144,8 @@ export default function ScenarioCompareOverrides(props) {
             <Grid container>
                 {renderInfrastructureTable(0)}
                 {renderInfrastructureTable(1)}
+                {renderPipedTable(0)}
+                {renderPipedTable(1)}
             </Grid>
             </Box>
         )
