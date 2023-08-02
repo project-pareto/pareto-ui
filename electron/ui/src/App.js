@@ -14,7 +14,8 @@ import ScenarioCompare from './views/ScenarioCompare/ScenarioCompare';
 import LandingPage from './views/LandingPage/LandingPage';
 import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
 import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
-import { deleteScenario } from './services/scenariolist.service'
+import { deleteScenario, copyScenario } from './services/scenariolist.service'
+import { runModel } from './services/homepage.service';
 
 
 function App() {
@@ -95,6 +96,7 @@ useEffect(()=> {
   /*
     make api call to get status of each running task
   */
+//  console.log('checking model results')
   fetchScenarios()
     .then(response => response.json())
     .then((data)=>{
@@ -321,6 +323,7 @@ useEffect(()=> {
   const addTask = (id) => {
     let tempBackgroudTasks = [...backgroundTasks]
     tempBackgroudTasks.push(id)
+    // console.log('adding task!!!')
     setBackgroundTasks(tempBackgroudTasks)
     setCheckModelResults(checkModelResults+1)
   }
@@ -372,6 +375,55 @@ useEffect(()=> {
       setAppState(tempState)
       setCategory(action.category)
     }
+  }
+
+  /*
+    create a copy of current scenario and run an optimization
+  */
+  const copyAndRunOptimization = () => {
+    //copy scenario
+    copyScenario(scenarioIndex)
+    .then(response => response.json())
+    .then((copy_data) => {
+      // update data
+      // console.log('setting scenarios with ')
+      // console.log(copy_data.scenarios)
+      setScenarios(copy_data.scenarios)
+      setScenarioIndex(copy_data.new_id)
+      setScenarioData(copy_data.scenarios[copy_data.new_id])
+
+      // run model on new id
+      runModel({"scenario": copy_data.scenarios[copy_data.new_id]})
+        .then(r =>  r.json().then(data => ({status: r.status, body: data})))
+        .then((response) => {
+          let responseCode = response.status
+          let data = response.body
+          if(responseCode === 200) {
+            // handleScenarioUpdate(data)
+            updateScenario({'updatedScenario': {...data}})
+            .then(response => response.json())
+            .then((updateScenario_data) => {
+              // console.log('returned from update scenario call')
+              updateAppState({action:'section',section:2},copy_data.new_id)
+              addTask(copy_data.new_id)
+              // console.log('updated scenarios on backend')
+            }).catch(e => {
+              console.error('error on scenario update')
+              console.error(e)
+            })
+          }
+          else if(responseCode === 500) {
+            console.error('error code on model run: ',data.detail)
+          }
+        })
+        .catch(e => {
+          console.error('error on model run: ',e)
+        })
+
+      }).catch(e => {
+        console.error('error on scenario copy')
+        console.error(e)
+      })
   }
 
   return (
@@ -430,6 +482,7 @@ useEffect(()=> {
               appState={appState}
               updateAppState={updateAppState}
               scenarios={scenarios}
+              copyAndRunOptimization={copyAndRunOptimization}
             />} 
         />
 

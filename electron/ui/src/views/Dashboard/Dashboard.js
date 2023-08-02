@@ -207,6 +207,7 @@ export default function Dashboard(props) {
       handleRunModel={handleRunModel}
       disableOptimize={disableOptimize}
       setDisableOptimize={setDisableOptimize}
+      copyAndRunOptimization={props.copyAndRunOptimization}
       />
     </>
   );

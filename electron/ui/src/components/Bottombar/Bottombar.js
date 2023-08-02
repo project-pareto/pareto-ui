@@ -102,7 +102,8 @@ export default function Bottombar(props) {
 
       const reoptimizeNewScenario = () => {
         // create function in app.js for this
-        // props.handleRunModel()
+        handleCloseRerunModal()
+        props.copyAndRunOptimization()
       }
 
   return ( 
@@ -150,7 +151,7 @@ export default function Bottombar(props) {
         handleClose={handleCloseRerunModal}
         handleSave={reoptimizeNewScenario}
         handleButtonTwoClick={handleRunOptimize}
-        text="Would you like to create a new scenario for this optimization, or overwrite the current scenario?"
+        text="Would you like to create a new copy of this scenario for this optimization, or overwrite the current scenario?"
         buttonText='+ Create New Scenario'
         buttonColor='primary'
         buttonVariant='contained'

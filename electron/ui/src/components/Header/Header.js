@@ -20,6 +20,11 @@ export default function Header(props) {
       setLocation(tempLocation)
     }, [window.location.href])
 
+    // useEffect(() => {
+    //   console.log('scenarios updated in header : ')
+    //   console.log(scenarios)
+    // }, [scenarios])
+
     return (
       <>
       {showHeader && 
