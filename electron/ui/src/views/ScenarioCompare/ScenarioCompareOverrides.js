@@ -77,7 +77,7 @@ export default function ScenarioCompareOverrides(props) {
                                 <TableCell style={{color:"white", width:"20%"}} align="right">Override Value</TableCell>
                             </TableRow>
                         </TableHead>
-                        {Object.keys(primaryScenario.override_values.v_F_Piped_dict).length > 0 && 
+                        {Object.keys(primaryScenario.override_values.v_F_Piped_dict).length > 0 ? 
                             <TableBody>
                                 <TableRow>
                                 <TableCell rowSpan={Object.keys(primaryScenario.override_values.v_F_Piped_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
@@ -93,8 +93,20 @@ export default function ScenarioCompareOverrides(props) {
                                     </TableRow>
                                 ))}
                             </TableBody>
+                            :
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                        <b>{primaryScenario.name}</b>
+                                    </TableCell>
+                                    <TableCell style={styles.other}>--</TableCell> 
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                </TableRow>
+                            </TableBody>
                         }
-                        {Object.keys(referenceScenario.override_values.v_F_Piped_dict).length > 0 && 
+                        {Object.keys(referenceScenario.override_values.v_F_Piped_dict).length > 0 ? 
                             <TableBody>
                                 <TableRow>
                                 <TableCell rowSpan={Object.keys(referenceScenario.override_values.v_F_Piped_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
@@ -109,6 +121,18 @@ export default function ScenarioCompareOverrides(props) {
                                         <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
                                     </TableRow>
                                 ))}
+                            </TableBody>
+                            :
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                        <b>{referenceScenario.name}</b>
+                                    </TableCell>
+                                    <TableCell style={styles.other}>--</TableCell> 
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                </TableRow>
                             </TableBody>
                         }
                     </Table>
@@ -136,7 +160,7 @@ export default function ScenarioCompareOverrides(props) {
                                 <TableCell style={{color:"white", width:"13%"}}>Unit</TableCell>
                             </TableRow>
                         </TableHead>
-                        {Object.keys(primaryScenario.override_values.vb_y_overview_dict).length > 0 && 
+                        {Object.keys(primaryScenario.override_values.vb_y_overview_dict).length > 0 ? 
                             <TableBody>
                                 <TableRow>
                                 <TableCell rowSpan={Object.keys(primaryScenario.override_values.vb_y_overview_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
@@ -156,8 +180,24 @@ export default function ScenarioCompareOverrides(props) {
                                     </TableRow>
                                 ))}
                             </TableBody>
+                            :
+                            // show empty row if this scenario doesnt have any overrides
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                        <b>{primaryScenario.name}</b>
+                                    </TableCell>
+                                    <TableCell style={styles.other}>--</TableCell> 
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    </TableRow>
+                            </TableBody>
+
                         }
-                        {Object.keys(referenceScenario.override_values.vb_y_overview_dict).length > 0 && 
+                        {Object.keys(referenceScenario.override_values.vb_y_overview_dict).length > 0 ?
                             <TableBody>
                                 <TableRow>
                                 <TableCell rowSpan={Object.keys(referenceScenario.override_values.vb_y_overview_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
@@ -177,6 +217,22 @@ export default function ScenarioCompareOverrides(props) {
                                     </TableRow>
                                 ))}
                             </TableBody>
+                            :
+                            // show empty row if this scenario doesnt have any overrides
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                        <b>{referenceScenario.name}</b>
+                                    </TableCell>
+                                    <TableCell style={styles.other}>--</TableCell> 
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                    <TableCell style={styles.other}>--</TableCell>
+                                </TableRow>
+                            </TableBody>
+
                         }
                     </Table>
                 </TableContainer>
