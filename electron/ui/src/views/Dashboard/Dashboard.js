@@ -142,6 +142,7 @@ export default function Dashboard(props) {
         buttonText='Save'
         buttonColor='primary'
         buttonVariant='contained'
+        width={400}
       />
       <Grid item xs={4}>
       <div>

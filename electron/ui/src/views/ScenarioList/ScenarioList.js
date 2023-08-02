@@ -253,6 +253,7 @@ export default function ScenarioList(props) {
             buttonText='Save'
             buttonColor='primary'
             buttonVariant='contained'
+            width={400}
         />
         <PopupModal
             open={openDeleteModal}
@@ -262,6 +263,7 @@ export default function ScenarioList(props) {
             buttonText='Delete'
             buttonColor='error'
             buttonVariant='contained'
+            width={400}
         />
         {
             showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />

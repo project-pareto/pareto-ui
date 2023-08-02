@@ -12,11 +12,13 @@ import PopupModal from '../../components/PopupModal/PopupModal';
 
 export default function Bottombar(props) {
     const [ openSaveModal, setOpenSaveModal ] = useState(false)
+    const [ openRerunModal, setOpenRerunModal] = useState(false)
     // const [ disableOptimize, setDisableOptimize ] = useState(false) 
     const [ key, setKey ] =  useState(null)
     const [ hasOverride, setHasOverride ] = useState(false)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
     const handleCloseSaveModal = () => setOpenSaveModal(false);
+    const handleCloseRerunModal = () => setOpenRerunModal(false);
     const styles = {
         filled: {
             backgroundColor: '#01678f',
@@ -94,10 +96,13 @@ export default function Bottombar(props) {
       }
 
       const handleRunOptimize = () => {
-        // console.log('rerun with the following overrides: ')
-        // console.log(props.scenario.override_values)
-
+        handleCloseRerunModal()
         props.handleRunModel()
+      }
+
+      const reoptimizeNewScenario = () => {
+        // create function in app.js for this
+        // props.handleRunModel()
       }
 
   return ( 
@@ -116,7 +121,7 @@ export default function Bottombar(props) {
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
                         {props.section === 0 && <Button sx={styles.filled} onClick={() => handleClick(1)} variant="contained" size="large" endIcon={<ArrowForwardIcon /> }> continue to optimization </Button>}
                         {props.section === 1 && <Button onClick={handleRunOptimize} sx={styles.filled} variant="contained" size="large" disabled={props.disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Optimize </Button>}
-                        {(props.section === 2 && hasOverride) && <Button onClick={handleRunOptimize} sx={styles.filled} variant="contained" size="large" disabled={props.disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Re-run Optimization </Button>}
+                        {(props.section === 2 && hasOverride) && <Button onClick={() => setOpenRerunModal(true)} sx={styles.filled} variant="contained" size="large" disabled={props.disableOptimize ? true : false} endIcon={<ArrowForwardIcon /> }> Re-run Optimization </Button>}
                     </Box>
                 </Grid>
             </Grid>
@@ -137,6 +142,22 @@ export default function Bottombar(props) {
         buttonTwoText='Discard'
         buttonTwoColor='error'
         buttonTwoVariant='outlined'
+        width={400}
+      />
+      <PopupModal
+        hasTwoButtons
+        open={openRerunModal}
+        handleClose={handleCloseRerunModal}
+        handleSave={reoptimizeNewScenario}
+        handleButtonTwoClick={handleRunOptimize}
+        text="Would you like to create a new scenario for this optimization, or overwrite the current scenario?"
+        buttonText='+ Create New Scenario'
+        buttonColor='primary'
+        buttonVariant='contained'
+        buttonTwoText='Overwrite Current Scenario'
+        buttonTwoColor='secondary'
+        buttonTwoVariant='outlined'
+        width={775}
       />
     </Box>
   );

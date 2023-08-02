@@ -104,6 +104,7 @@ export default function ProcessToolbar(props) {
         buttonTwoText='Discard'
         buttonTwoColor='error'
         buttonTwoVariant='outlined'
+        width={400}
       />
     </Box>
   );

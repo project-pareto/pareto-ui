@@ -310,6 +310,7 @@ export default function Sidebar(props) {
         buttonTwoText='Discard'
         buttonTwoColor='error'
         buttonTwoVariant='outlined'
+        width={400}
       />
     </Box>
   );
