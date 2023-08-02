@@ -235,8 +235,8 @@ const renderOutputTable = () => {
           setNewInfrastructureOverrideRow={props.setNewInfrastructureOverrideRow}
         /> 
         : 
-        <TableContainer sx={{overflowX:'auto'}}>
-        <Table style={{border:"1px solid #ddd"}} size='small'>
+        <TableContainer sx={{overflowX:'auto', maxHeight: "59vh"}}>
+        <Table style={{border:"1px solid #ddd"}} size='small' stickyHeader>
           <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
           <TableRow key={`headrow`}>
           {props.category === "v_F_Overview_dict" ? 

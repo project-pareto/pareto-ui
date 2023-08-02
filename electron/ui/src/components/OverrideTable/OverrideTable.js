@@ -168,10 +168,10 @@ const renderOutputTable = () => {
   try {
     if (show) {
         return (
-            <TableContainer sx={{overflowX:'auto'}}>
-            <Table style={{border:"1px solid #ddd"}} size='small'>
+            <TableContainer sx={{overflowX:'auto', maxHeight: '59vh'}}>
+            <Table style={{border:"1px solid #ddd"}} size='small' stickyHeader>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
-              <TableRow key={`headrow`}>
+              <TableRow>
               {category === "vb_y_overview_dict" ? 
               <>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "20%"}}>CAPEX Type</TableCell>
