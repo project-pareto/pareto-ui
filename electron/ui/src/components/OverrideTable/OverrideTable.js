@@ -237,7 +237,7 @@ const renderOutputTable = () => {
   try {
     if (show) {
         return (
-            <TableContainer sx={{overflowX:'auto', maxHeight: '59vh'}}>
+            <TableContainer sx={{overflowX:'auto', maxHeight: '73vh'}}>
             <Table style={{border:"1px solid #ddd"}} size='small' stickyHeader>
               <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
               <TableRow>
@@ -309,7 +309,7 @@ const renderOutputTable = () => {
             
             </Table>
             {category === "vb_y_overview_dict" && 
-              <Button style={{marginTop: "15px", color: "#0884b4", backgroundColor: "white"}} variant="contained" onClick={() => setNewInfrastructureOverrideRow(true)}>
+              <Button style={{marginTop: "15px", color: "#0884b4", backgroundColor: "white", marginBottom: '15px'}} variant="contained" onClick={() => setNewInfrastructureOverrideRow(true)}>
                 + Add infrastructure override
               </Button> 
             }
