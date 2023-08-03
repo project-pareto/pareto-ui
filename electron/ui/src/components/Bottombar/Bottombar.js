@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PopupModal from '../../components/PopupModal/PopupModal';
+import AddIcon from '@mui/icons-material/Add';
 
 
 export default function Bottombar(props) {
@@ -152,13 +153,15 @@ export default function Bottombar(props) {
         handleSave={reoptimizeNewScenario}
         handleButtonTwoClick={handleRunOptimize}
         text="Would you like to create a new copy of this scenario for this optimization, or overwrite the current scenario?"
-        buttonText='+ Create New Scenario'
+        buttonText='Create New Scenario'
         buttonColor='primary'
         buttonVariant='contained'
         buttonTwoText='Overwrite Current Scenario'
         buttonTwoColor='secondary'
         buttonTwoVariant='outlined'
-        width={775}
+        width={850}
+        iconOne={<AddIcon/>}
+        iconTwo={<ArrowForwardIcon/>}
       />
     </Box>
   );

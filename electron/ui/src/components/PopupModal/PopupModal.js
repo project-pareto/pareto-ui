@@ -54,11 +54,11 @@ export default function Dashboard(props) {
             <>
             <Grid item xs={1}></Grid>
             <Grid item xs={4.5}>
-                <Button fullWidth onClick={props.handleButtonTwoClick} variant={props.buttonTwoVariant} color={props.buttonTwoColor}>{props.buttonTwoText}</Button>
+                <Button fullWidth onClick={props.handleButtonTwoClick} variant={props.buttonTwoVariant} color={props.buttonTwoColor} endIcon={props.iconTwo && props.iconTwo}>{props.buttonTwoText}</Button>
             </Grid>
             <Grid item xs={1}></Grid>
             <Grid item xs={4.5}>
-                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor}>{props.buttonText}</Button>
+                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
             </Grid>
             <Grid item xs={1}></Grid>
             </> 
@@ -66,7 +66,7 @@ export default function Dashboard(props) {
             <>
             <Grid item xs={3}></Grid>
             <Grid item xs={6}>
-                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor}>{props.buttonText}</Button>
+                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
             </Grid>
             <Grid item xs={3}></Grid>
             </>}
