@@ -32,6 +32,7 @@ export default function OverrideTable(props) {
     const [rowsPerPage, setRowsPerPage] = useState(50);
   
     useEffect(() => {
+      console.log('in first useeffect')
       let tempRows = data[category].slice(1)
       let tempVisibleRows = tempRows.slice(
         page * rowsPerPage,
@@ -41,9 +42,10 @@ export default function OverrideTable(props) {
       setRows(tempRows)
       setPage(0)
 
-    },[data, scenario, category])
+    },[scenario.id, category])
 
     useEffect(() => {
+      console.log('in second useeffect')
       // let tempRows = data[category].slice(1)
       let tempVisibleRows = rows.slice(
         page * rowsPerPage,
