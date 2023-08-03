@@ -45,7 +45,7 @@ jobs:
 
       - name: Install Pareto locally
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout 0.8.0rc0 && pip install --progress-bar off .
 
       - name: Build Backend
         run: npm --prefix electron run build-backend
