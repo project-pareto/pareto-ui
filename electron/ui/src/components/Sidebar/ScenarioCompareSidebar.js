@@ -5,16 +5,20 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 import Subcategories from '../../assets/Subcategories.json'
+import { OVERRIDE_CATEGORIES }  from '../../assets/InfrastructureCapexMapping'
 
 
 const drawerWidth = 240;
 
+
 export default function Sidebar(props) {
-    const { category, setCategory, open, deltaDictionary } = props
+    const { category, setCategory, open, deltaDictionary, overrides, compareScenarioIndexes } = props
     const [ openDynamic, setOpenDynamic ] = useState(false)
     const [ openStatic, setOpenStatic ] = useState(false)
+    const [ openOverrides, setOpenOverrides ] = useState(false)
     const [ deltaCategories, setDeltaCategories ] = useState([])
-    const [ checkAgain, setCheckAgain ] = useState(false)
+    const [ hasOverrides, setHasOverrides ] = useState(false)
+    const [ overridesList, setOverridesList ] = useState([[],[]])
 
     useEffect(() => {
       // check if delta dictionary is set yet
@@ -22,8 +26,6 @@ export default function Sidebar(props) {
       if(Object.keys(deltaDictionary).length < 5) {
         
       }
-      // console.log("deltaDictionary")
-      // console.log(deltaDictionary)
       else {
         let tempDeltaCategories = []
         try {
@@ -54,6 +56,41 @@ export default function Sidebar(props) {
       }
       
     }, [deltaDictionary])
+
+    useEffect(()=> {
+      let tempHasOverrides = false
+      for(let each of overrides) {
+        if(Object.keys(each).length > 0) tempHasOverrides = true
+      } 
+      setHasOverrides(tempHasOverrides)
+    },[overrides])
+
+    useEffect(() => {
+      let tempPrimaryOverridesSet = new Set()
+      let tempReferenceOverridesSet = new Set()
+      for (let key of Object.keys(overrides[0])) {
+          let variable = overrides[0][key].variable
+          tempPrimaryOverridesSet.add(variable)
+      }
+      for (let key of Object.keys(overrides[1])) {
+          let variable = overrides[1][key].variable
+          tempReferenceOverridesSet.add(variable)
+      }
+      if (
+        tempPrimaryOverridesSet.has("vb_y_Pipeline_dict") || 
+        tempPrimaryOverridesSet.has("vb_y_Storage_dict") || 
+        tempPrimaryOverridesSet.has("vb_y_Disposal_dict") || 
+        tempPrimaryOverridesSet.has("vb_y_Treatment_dict")
+        ) tempPrimaryOverridesSet.add("vb_y_overview_dict")
+      if (
+        tempReferenceOverridesSet.has("vb_y_Pipeline_dict") || 
+        tempReferenceOverridesSet.has("vb_y_Storage_dict") || 
+        tempReferenceOverridesSet.has("vb_y_Disposal_dict") || 
+        tempReferenceOverridesSet.has("vb_y_Treatment_dict")
+        ) tempReferenceOverridesSet.add("vb_y_overview_dict")
+      setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
+      
+    },[overrides, compareScenarioIndexes])
 
   const styles = {
     topLevelCategory: {
@@ -141,8 +178,54 @@ export default function Sidebar(props) {
           </div>
           </Tooltip>
           {renderStaticCategories()}
+          {hasOverrides && 
+          <Fragment>
+          <Tooltip title={"Select to view manual overrides"} placement="right-start">
+          <div style={category.includes("overrides") ? styles.selected : styles.inputDifference}  onClick={() => setOpenOverrides(!openOverrides)}> 
+              <p style={styles.topLevelCategory}>
+                <span style={{display:"flex", justifyContent: "space-between"}}>
+                  Manual Overrides
+                  <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openOverrides ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                </span>
+              </p>
+          </div>
+          </Tooltip>
+          {renderOverrideCategories()}
+          </Fragment>
+          }
+          {/* {hasOverrides && 
+            <div style={category==="overrides" ? styles.selected : styles.inputDifference} onClick={() => handleClick("overrides")}> 
+              <p style={styles.topLevelCategory}>
+                <span style={{display:"flex", justifyContent: "space-between"}}>
+                  Manual Overrides
+                </span>
+              </p>
+          </div>
+          } */}
         </div>
       ) 
+  }
+
+  const renderOverrideCategories = () => {
+    return (
+      <Collapse in={openOverrides} timeout="auto" unmountOnExit>
+      {Object.entries(OVERRIDE_CATEGORIES).map( ([key,value]) => {
+        if (overridesList[0].includes(key) || overridesList[1].includes(key))
+        return (
+          <div key={key}>
+            {/* <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)}>  */}
+            <div style={category.includes(key) ? styles.selected : styles.unselected} onClick={() => handleClick('overrides::'+key)}>
+                <p style={styles.subcategory}>
+                {value.name}
+                </p>
+            </div>
+          </div>
+        )
+          
+      }
+      )}
+      </Collapse>
+    )
   }
 
   const renderDynamicCategories = () => {

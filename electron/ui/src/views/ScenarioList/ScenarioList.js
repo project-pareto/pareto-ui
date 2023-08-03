@@ -29,6 +29,7 @@ export default function ScenarioList(props) {
     const [ openEditName, setOpenEditName ] = useState(false)
     const [ openDeleteModal, setOpenDeleteModal ] = useState(false)
     const [ showFileModal, setShowFileModal ] = useState(false)
+    const [ hasOverrideList, setHasOverrideList ] = useState([])
     const [ name, setName ] = useState('')
     const [ id, setId ] = useState(null)
     let navigate = useNavigate();
@@ -37,7 +38,26 @@ export default function ScenarioList(props) {
 
     useEffect(()=> {
         setShowHeader(true)
+        // console.log('setting show header true')
     }, [props]) 
+
+    useEffect(() => {
+        let tempHasOverrideList = []
+        for (let scenarioId of Object.keys(scenarios)) {
+            let scenario = scenarios[scenarioId]
+            if(scenario.results.status==="Optimized") {
+                if (scenario.optimized_override_values !== undefined)  {
+                    for(let key of Object.keys(scenario.optimized_override_values)) {
+                        if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+                            tempHasOverrideList.push(scenario.id)
+                        }
+                    }
+                    
+                }
+            }
+        }
+        setHasOverrideList(tempHasOverrideList)
+    },[scenarios])
 
     const handleOpenEditName = (name, id) => {
         setName(name)
@@ -176,9 +196,12 @@ export default function ScenarioList(props) {
                 key={key}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } , cursor:"pointer"}}
                 >
-                <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => handleSelection(key)}>
-                    {value.name}
-                </TableCell>
+                <Tooltip title={hasOverrideList.includes(value.id) ? "Scenario has been optimized with manual override" : ""} placement="top" arrow>
+                    <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => handleSelection(key)}>
+                        {value.name}
+                        {hasOverrideList.includes(value.id) && <span style={{color: "red"}}> *</span>}
+                    </TableCell>
+                </Tooltip>
                 <TableCell onClick={() => handleSelection(key)} sx={styles.bodyCell} align="center">{value.date}</TableCell>
                 <TableCell onClick={() => handleSelection(key)} sx={styles.bodyCell} align="center">{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
                 <TableCell sx={styles.bodyCell} align="center">
@@ -230,6 +253,7 @@ export default function ScenarioList(props) {
             buttonText='Save'
             buttonColor='primary'
             buttonVariant='contained'
+            width={400}
         />
         <PopupModal
             open={openDeleteModal}
@@ -239,6 +263,7 @@ export default function ScenarioList(props) {
             buttonText='Delete'
             buttonColor='error'
             buttonVariant='contained'
+            width={400}
         />
         {
             showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />

@@ -14,7 +14,7 @@ const mockCategory = null;
 test('test sidebar', () => {
     render( <Sidebar 
             selected={mockSelected} 
-            scenarioData={mockScenario}
+            scenario={mockScenario}
             category={mockCategory}
             handleSetCategory={mockFunction}
             /> )

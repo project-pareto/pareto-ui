@@ -30,7 +30,7 @@ export default function ComparisonTable(props) {
     
 
     const getPercentDifference = (value1, value2) => {
-      let result = ((value1 - value2) / value1) * 100
+      let result = ((value1 - value2) / value2) * 100
       if (isNaN(result)) return 0
       else if(value1 > value2) return "+" + (Math.round(result * 10) / 10)
       else return Math.round(result * 10) / 10

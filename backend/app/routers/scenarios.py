@@ -117,12 +117,20 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
 
         _log.info(f"modelParameters: {modelParameters}")
 
+        
+        try:
+            overrideValues = data['scenario']['override_values']
+        except:
+            _log.error(f'unable to find override values')
+            overrideValues = {}
+
         background_tasks.add_task(
             handle_run_strategic_model, 
             input_file=excel_path,
             output_file=output_path,
             id=data['scenario']['id'],
-            modelParameters=modelParameters
+            modelParameters=modelParameters,
+            overrideValues=overrideValues
         )
         
         # add id to scenario handler task list to keep track of running tasks

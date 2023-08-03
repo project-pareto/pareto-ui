@@ -23,6 +23,7 @@ export default function Dashboard(props) {
   const [ openEditName, setOpenEditName ] = useState(false)
   // const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
   const [ inputDataEdited, setInputDataEdited ] = useState(false) 
+  const [ disableOptimize, setDisableOptimize ] = useState(false)
   const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
 
   const handleOpenEditName = () => setOpenEditName(true);
@@ -65,15 +66,15 @@ export default function Dashboard(props) {
    }
 
    const handleRunModel = () => {
-    console.log('running model')
+    // console.log('running model')
       runModel({"scenario": scenario})
       .then(r =>  r.json().then(data => ({status: r.status, body: data})))
       .then((response) => {
         let responseCode = response.status
         let data = response.body
         if(responseCode === 200) {
-          console.log('run model successful: ')
-          console.log(data)
+          // console.log('run model successful: ')
+          // console.log(data)
           props.updateScenario(data)
           props.updateAppState({action:'section',section:2},scenario.id)
           props.addTask(scenario.id)
@@ -141,6 +142,7 @@ export default function Dashboard(props) {
         buttonText='Save'
         buttonColor='primary'
         buttonVariant='contained'
+        width={400}
       />
       <Grid item xs={4}>
       <div>
@@ -175,6 +177,8 @@ export default function Dashboard(props) {
           updateScenario={props.updateScenario}
           handleRunModel={handleRunModel}
           backgroundTasks={props.backgroundTasks} 
+          disabled={disableOptimize}
+          setDisabled={setDisableOptimize}
         />
       }
       {(scenario && props.section===2) && 
@@ -185,6 +189,7 @@ export default function Dashboard(props) {
           appState={props.appState}
           syncScenarioData={props.syncScenarioData}
           scenarios={props.scenarios}
+          updateScenario={props.updateScenario}
         />
       }
       </Grid>
@@ -200,6 +205,9 @@ export default function Dashboard(props) {
       setInputDataEdited={setInputDataEdited}
       syncScenarioData={props.syncScenarioData}
       handleRunModel={handleRunModel}
+      disableOptimize={disableOptimize}
+      setDisableOptimize={setDisableOptimize}
+      copyAndRunOptimization={props.copyAndRunOptimization}
       />
     </>
   );

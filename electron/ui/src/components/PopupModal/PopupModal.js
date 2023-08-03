@@ -9,7 +9,7 @@ export default function Dashboard(props) {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 400,
+            width: props.width !== undefined ? props.width : 400,
             bgcolor: 'background.paper',
             border: '2px solid #000',
             boxShadow: 24,
@@ -53,12 +53,12 @@ export default function Dashboard(props) {
             {props.hasTwoButtons ? 
             <>
             <Grid item xs={1}></Grid>
-            <Grid item xs={4}>
-                <Button fullWidth onClick={props.handleButtonTwoClick} variant={props.buttonTwoVariant} color={props.buttonTwoColor}>{props.buttonTwoText}</Button>
+            <Grid item xs={4.5}>
+                <Button fullWidth onClick={props.handleButtonTwoClick} variant={props.buttonTwoVariant} color={props.buttonTwoColor} endIcon={props.iconTwo && props.iconTwo}>{props.buttonTwoText}</Button>
             </Grid>
-            <Grid item xs={2}></Grid>
-            <Grid item xs={4}>
-                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor}>{props.buttonText}</Button>
+            <Grid item xs={1}></Grid>
+            <Grid item xs={4.5}>
+                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
             </Grid>
             <Grid item xs={1}></Grid>
             </> 
@@ -66,7 +66,7 @@ export default function Dashboard(props) {
             <>
             <Grid item xs={3}></Grid>
             <Grid item xs={6}>
-                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor}>{props.buttonText}</Button>
+                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
             </Grid>
             <Grid item xs={3}></Grid>
             </>}

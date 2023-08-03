@@ -1,14 +1,26 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import { Box, Grid, LinearProgress } from '@mui/material';
+import { Box, Grid, LinearProgress, Button } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
 import TerminationConditions from '../../assets/TerminationConditions.json'
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
-import ComparisonTable from '../../components/ComparisonTable/ComparisonTable';
 
+const OVERRIDE_CATEGORIES = [
+  "vb_y_overview_dict",
+  "v_F_Piped_dict",
+  "v_F_Sourced_dict",
+  "v_F_Trucked_dict",
+  "v_L_Storage_dict",
+  "v_L_PadStorage_dict",
+  // "vb_y_Pipeline_dict",
+  // "vb_y_Disposal_dict",
+  // "vb_y_Storage_dict",
+  // "vb_y_Treatment_dict"
+]
 
 export default function ModelResults(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
@@ -19,6 +31,7 @@ export default function ModelResults(props) {
   const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
+  const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const styles ={
@@ -32,6 +45,20 @@ export default function ModelResults(props) {
     kpiDashboardBox: {
       marginLeft: 10, 
       marginRight: 10
+    },
+    filledButton: {
+      backgroundColor: '#01678f',
+      '&:hover': {
+          backgroundColor: '#01678f',
+          opacity: 0.9
+      },
+      minWidth:"250px",
+      // fontWeight: "bold", 
+    },
+    newOverrideButton: {
+      minWidth:"350px", 
+      color: "#0884b4", 
+      backgroundColor: "white"
     }
   }
 
@@ -70,7 +97,7 @@ export default function ModelResults(props) {
     let tempScenario = {}
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
-    console.log(`termination condition is ${tempScenario.results.terminationCondition}`)
+    // console.log(`termination condition is ${tempScenario.results.terminationCondition}`)
     if (typeof(tempScenario.results.terminationCondition) === 'undefined') {
       console.log('term condition is undefined, rolling forward as good')
       setTerminationCondition('good')
@@ -149,6 +176,12 @@ const handleRowFilter = (row) => {
         setFilteredRowNodes(tempRows)
     }
 }
+
+const handleNewInfrastructureOverride = () => {
+  // console.log('new infrastructure override')
+  window.scrollTo(0, document.body.scrollHeight);
+  setNewInfrastructureOverrideRow(true);
+ }
   
   const renderOutputCategory = () => {
     try {
@@ -186,12 +219,6 @@ const handleRowFilter = (row) => {
         return (
           <Grid container>
             <Grid item xs={11.5}>
-              {/* {props.category === "v_F_Overview_dict" ? 
-              <ComparisonTable
-                scenarios={props.scenarios}
-                scenarioIndex={props.scenario.id}
-              />
-              : */}
               <DataTable 
                 section="output"
                 scenario={props.scenario}
@@ -205,26 +232,41 @@ const handleRowFilter = (row) => {
                 category={props.category}
                 handleEditInput={props.handleEditInput}
                 data={props.scenario.results.data}
+                updateScenario={props.updateScenario}
+                OVERRIDE_CATEGORIES={OVERRIDE_CATEGORIES}
+                newInfrastructureOverrideRow={newInfrastructureOverrideRow}
+                setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
               />
               {/* } */}
               
             </Grid>
             <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
-            <FilterDropdown
-                width="300px"
-                maxHeight="300px"
-                option1="Column"
-                filtered1={filteredColumnNodes}
-                total1={columnNodesMapping}
-                isAllSelected1={isAllColumnsSelected}
-                handleFilter1={handleColumnFilter}
-                option2="Row"
-                filtered2={filteredRowNodes}
-                total2={rowNodesMapping}
-                isAllSelected2={isAllRowsSelected}
-                handleFilter2={handleRowFilter}
-            />
+              {
+                props.category === "vb_y_overview_dict" ? 
+                
+                <Button style={styles.newOverrideButton} variant="contained" onClick={handleNewInfrastructureOverride}>
+                  + Add infrastructure override
+                </Button> 
+                
+                :
+                
+                <FilterDropdown
+                  width="300px"
+                  maxHeight="300px"
+                  option1="Column"
+                  filtered1={filteredColumnNodes}
+                  total1={columnNodesMapping}
+                  isAllSelected1={isAllColumnsSelected}
+                  handleFilter1={handleColumnFilter}
+                  option2="Row"
+                  filtered2={filteredRowNodes}
+                  total2={rowNodesMapping}
+                  isAllSelected2={isAllRowsSelected}
+                  handleFilter2={handleRowFilter}
+                />
+              }
+            
             </Box>
           </Grid>
           </Grid>
@@ -234,11 +276,57 @@ const handleRowFilter = (row) => {
       console.log('unable to render table for this category: ',e)
     }
   }
+ const checkForOverride = () => {
+    if(scenario.results.status==="Optimized") {
+      if (scenario.optimized_override_values !== undefined)  {
+        for(let key of Object.keys(scenario.optimized_override_values)) {
+          if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+            return <span style={{color:"red"}}>* Scenario has been optimized with manual override.</span>
+          }
+        }
+      return null
+      }
+      else return null
+  }else return null
+ }
 
   const showDisclaimer = () => {
     return (<h3 style={{color: 'red'}}>*{TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.</h3>)
   }
 
+  const resetOverrides = () => {
+    console.log('resetting overrides')
+    let tempScenario = {...scenario}
+    tempScenario.override_values = {
+        "vb_y_overview_dict": {},
+        "v_F_Piped_dict": {},
+        "v_F_Sourced_dict": {},
+        "v_F_Trucked_dict": {},
+        "v_L_Storage_dict": {},
+        "v_L_PadStorage_dict": {},
+        "vb_y_Pipeline_dict": {},
+        "vb_y_Disposal_dict": {},
+        "vb_y_Storage_dict": {},
+        "vb_y_Treatment_dict": {}
+    }
+    tempScenario.results.status="Draft"
+    props.updateScenario(tempScenario)
+    props.handleSetSection(0)
+  }
+
+  const showResetOverrides = () => {
+    if (scenario.optimized_override_values !== undefined)  {
+      for(let key of Object.keys(scenario.optimized_override_values)) {
+          if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+            return <>
+              <p>Please try increasing optimization runtime or resetting manual overrides.</p>
+              <Button onClick={resetOverrides} variant="contained" style={{backgroundColor: "#6094BC"}} ><RefreshIcon/> &nbsp; Reset Manual Overrides </Button>
+            </>
+          }
+      }
+    }
+    return <p>Please try increasing optimization runtime</p>
+  }
 
   return ( 
     <>
@@ -249,6 +337,7 @@ const handleRowFilter = (row) => {
     {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
       {terminationCondition === "unsure" && showDisclaimer()}
+      {checkForOverride()}
       <Box sx={props.category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
         {renderOutputCategory()}
       </Box>
@@ -269,13 +358,13 @@ const handleRowFilter = (row) => {
         <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
           <h2>Unoptimal termination</h2>
           <p>Termination condition: <b>{props.scenario.results.terminationCondition}</b></p>
-          <p>Please try increasing optimization runtime</p>
+          {showResetOverrides()}
         </Box> 
         :
         props.scenario.results.status === "Infeasible" ?
         <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
           <h2>Optimization Infeasible</h2>
-          <p>Please try increasing optimization runtime</p>
+          {showResetOverrides()}
         </Box> 
         :
         <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>

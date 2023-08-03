@@ -9,7 +9,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 
 export default function Optimization(props) {
-  const [ disabled, setDisabled ] = useState(false)
+  // const [ disabled, setDisabled ] = useState(false)
   const [ showAdvancedOptions, setShowAdvancedOptions ] = useState(false) 
   const columnWidths = [5,7]
   const defaultRuntimes = {"cbc": 900, "gurobi": 180}
@@ -83,10 +83,10 @@ export default function Optimization(props) {
       },
   }
 
-   useEffect(()=>{
-    setDisabled(!['Optimized','Draft','failure', 'Not Optimized', 'Infeasible'].includes(props.scenario.results.status))
-    // setScenario(props.scenario)
-   }, [props.scenario]);
+  //  useEffect(()=>{
+  //   props.setDisabled(!['Optimized','Draft','failure', 'Not Optimized', 'Infeasible'].includes(props.scenario.results.status))
+  //   // setScenario(props.scenario)
+  //  }, [props.scenario]);
 
    const handleChange = (event) => {
      const name = event.target.name
@@ -119,6 +119,11 @@ export default function Optimization(props) {
      }
    }
 
+   const handleOptimize = () => {
+    props.setDisabled(true)
+    props.handleRunModel()
+   }
+
   return ( 
     <Grid container spacing={2} style={styles.gridContainer}>
       <Grid item xs={2.5}>
@@ -142,7 +147,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl disabled={disabled}>
+          <FormControl disabled={props.disabled}>
             {/* <RadioGroup
               name="objective"
               aria-labelledby="objectives-select"
@@ -167,7 +172,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
             <Select
               name="solver"
               value={props.scenario.optimization.solver}
@@ -189,7 +194,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
+          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={props.disabled}>
             <OutlinedInput
               name="runtime"  
               id="outlined-adornment-sec"
@@ -204,27 +209,6 @@ export default function Optimization(props) {
           </FormControl>
           </Grid>
 
-          {/* <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Pipeline Cost Calculation
-              <Tooltip title={descriptions.pipelineCost} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-              </p>
-            </Box>
-          </Grid>
-          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
-            <Select
-              name="pipelineCostCalculation"
-              value={props.scenario.optimization.pipelineCostCalculation}
-              onChange={handlePipelineCostChange}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-            >
-              <MenuItem key={0} value={"distance_based"}>Distance Based</MenuItem>
-              <MenuItem key={1} value={"capacity_based"}>Capacity Based</MenuItem>
-            </Select>
-            </FormControl>
-          </Grid> */}
-
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
               <p>Optimality Gap
@@ -233,7 +217,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={disabled}>
+          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" size="small" disabled={props.disabled}>
             <OutlinedInput
               name="optimalityGap"
               id="outlined-adornment-sec"
@@ -256,7 +240,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
             <Select
               name="waterQuality"
               value={props.scenario.optimization.waterQuality}
@@ -280,30 +264,6 @@ export default function Optimization(props) {
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           </Grid>
-          
-          {/* <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-          <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
-              <p>Model Build Units of Measure</p>
-              <Tooltip title={descriptions.units} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            </Collapse>
-          </Grid>
-          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
-            <Select
-              name="build_units"
-              value={props.scenario.optimization.build_units}
-              onChange={handleChange}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-            >
-              <MenuItem key={"user_units"} value={"user_units"}>User Units</MenuItem>
-              <MenuItem key={"scaled_units"} value={"scaled_units"}>Scaled Units</MenuItem>
-            </Select>
-            </FormControl>
-            </Collapse>
-          </Grid> */}
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
@@ -315,7 +275,7 @@ export default function Optimization(props) {
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={disabled}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
             <Select
               name="scale_model"
               value={props.scenario.optimization.scale_model}
@@ -336,7 +296,7 @@ export default function Optimization(props) {
               sx={styles.filled} 
               variant="contained" 
               size="large" 
-              disabled={props.backgroundTasks.length > 0 || disabled} 
+              disabled={props.backgroundTasks.length > 0 || props.disabled} 
               endIcon={<ArrowForwardIcon />}> 
               Optimize 
             </Button>

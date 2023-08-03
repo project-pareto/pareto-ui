@@ -1,15 +1,27 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip, Box } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import OverrideTable from '../OverrideTable/OverrideTable';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
 
-export default function DataInputTable(props) {  
+export default function DataTable(props) {  
+  const [showOverrideTables, setShowOverrideTables] = useState(false)
   useEffect(()=>{
-    // console.log('data table use effect triggered')
-    // console.log(props.data)
+    if(props.scenario.override_values === undefined) {
+      console.log('override values were not defined')
+      let tempOverrideValues = {}
+      for (let each of props.OVERRIDE_CATEGORIES) {
+        if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {}
+      }
+      const tempScenario = {...props.scenario}
+      tempScenario.override_values = tempOverrideValues
+      props.updateScenario(tempScenario)
+    }
+    setShowOverrideTables(true)
     
   }, [props.data]);
+  // const [ props.overrideValues, props.setOverrideValues ] = useState({})
 
   var keyIndexMapping = {}
 
@@ -206,8 +218,25 @@ const renderOutputTable = () => {
       return (
         <TableContainer>
         <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
-        <TableContainer sx={{overflowX:'auto'}}>
-        <Table style={{border:"1px solid #ddd"}} size='small'>
+        {props.OVERRIDE_CATEGORIES.includes(props.category) ? 
+        <OverrideTable
+          category={props.category}
+          overrideValues={props.overrideValues}
+          setOverrideValues={props.setOverrideValues}
+          data={props.data}
+          rowNodes={props.rowNodes}
+          rowNodesMapping={props.rowNodesMapping}
+          columnNodes={props.columnNodes}
+          columnNodesMapping={props.columnNodesMapping}
+          scenario={props.scenario}
+          show={showOverrideTables}
+          updateScenario={props.updateScenario}
+          newInfrastructureOverrideRow={props.newInfrastructureOverrideRow}
+          setNewInfrastructureOverrideRow={props.setNewInfrastructureOverrideRow}
+        /> 
+        : 
+        <TableContainer sx={{overflowX:'auto', maxHeight: "73vh"}}>
+        <Table style={{border:"1px solid #ddd"}} size='small' stickyHeader>
           <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
           <TableRow key={`headrow`}>
           {props.category === "v_F_Overview_dict" ? 
@@ -249,7 +278,7 @@ const renderOutputTable = () => {
             </TableRow>)
           })}
           </TableBody> 
-          : 
+          :
           <TableBody>
           {props.data[props.category].slice(1).map((value, index) => {
             if (Object.keys(props.rowNodes).length === 0 || props.rowNodes[props.rowNodesMapping[index]]) {
@@ -272,6 +301,8 @@ const renderOutputTable = () => {
         
         </Table>
         </TableContainer>
+        }
+        
       </TableContainer>
       )
   } catch (e) {
