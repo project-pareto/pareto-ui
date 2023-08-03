@@ -114,12 +114,12 @@ export default function ScenarioCompareOutput(props) {
     if (key === "totalCapex") {
         let capexDiff = ""
         if (totalCapex[0] > totalCapex[1]) capexDiff+="+"
-        capexDiff+=(((totalCapex[0] - totalCapex[1])/totalCapex[0])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
+        capexDiff+=(((totalCapex[0] - totalCapex[1])/totalCapex[1])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
         return capexDiff
     } else if (key === "totalOpex") {
         let opexDiff = ""
         if (totalOpex[0] > totalOpex[1]) opexDiff+="+"
-        opexDiff+=(((totalOpex[0] - totalOpex[1])/totalOpex[0])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
+        opexDiff+=(((totalOpex[0] - totalOpex[1])/totalOpex[1])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
         return opexDiff
     }
     else {
