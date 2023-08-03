@@ -36,10 +36,10 @@ export default function Bottombar(props) {
       // check if override values are present
       try {
         let tempHasOverride = false
-        if(props.scenario.results.status === "Not Optimized"){
+        // if(props.scenario.results.status === "Not Optimized"){
           for (let key of Object.keys(props.scenario.override_values)) {
             if(Object.keys(props.scenario.override_values[key]).length>0) tempHasOverride = true
-          }    
+          // }    
         }
 
         setHasOverride(tempHasOverride)

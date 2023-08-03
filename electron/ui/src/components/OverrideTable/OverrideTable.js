@@ -97,7 +97,7 @@ export default function OverrideTable(props) {
         }
         const tempScenario = {...scenario}
         tempScenario.override_values = tempOverrideValues
-        updateScenario(tempScenario)
+        updateScenario(tempScenario, true)
     } 
 
     const handleInputOverrideValue = (event, number_value) => {
@@ -134,20 +134,20 @@ export default function OverrideTable(props) {
           // else tempOverrideValues[category][idx].isZero = false
           const tempScenario = {...scenario}
           tempScenario.override_values = tempOverrideValues
-          updateScenario(tempScenario)
+          updateScenario(tempScenario, true)
         }
         else if(inputType === "technology") {
           tempOverrideValues[category][idx].indexes[1] = val
           const tempScenario = {...scenario}
           tempScenario.override_values = tempOverrideValues
-          updateScenario(tempScenario)
+          updateScenario(tempScenario, true)
         }
         else if(!isNaN(val)) {
             if (val === "") tempOverrideValues[category][idx].value = val
             else tempOverrideValues[category][idx].value = parseInt(val)
             const tempScenario = {...scenario}
             tempScenario.override_values = tempOverrideValues
-            updateScenario(tempScenario)
+            updateScenario(tempScenario, true)
         }
     }
 
@@ -166,7 +166,7 @@ export default function OverrideTable(props) {
       let tempScenario = {...scenario}
       tempScenario.override_values = tempOverrideValues
       tempScenario.results.data.vb_y_overview_dict=tempInfrastructureTable
-      updateScenario(tempScenario)
+      updateScenario(tempScenario, true)
     }
 
 

@@ -217,9 +217,9 @@ useEffect(()=> {
     navigate('/scenario', {replace: true})   
   }
 
-  const handleScenarioUpdate = (updatedScenario) => {
+  const handleScenarioUpdate = (updatedScenario, keepOptimized) => {
     // console.log('inside handle scenario update')
-    if (updatedScenario.results.status==='Optimized') {
+    if (updatedScenario.results.status==='Optimized' && !keepOptimized) {
       // console.log('changing status to not optimized')
       updatedScenario.results.status = "Not Optimized"
     }
