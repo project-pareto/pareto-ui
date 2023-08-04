@@ -6,8 +6,8 @@ export const deleteScenario = (data) => {
     });
 }; 
 
-export const copyScenario = (id) => {
-    return fetch('http://localhost:8001/copy/'+id, {
+export const copyScenario = (id, newScenarioName) => {
+    return fetch('http://localhost:8001/copy/'+id+'/'+newScenarioName, {
         method: 'GET', 
         mode: 'cors'
     });

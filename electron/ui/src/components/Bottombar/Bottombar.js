@@ -13,13 +13,20 @@ import AddIcon from '@mui/icons-material/Add';
 
 export default function Bottombar(props) {
     const [ openSaveModal, setOpenSaveModal ] = useState(false)
+
     const [ openRerunModal, setOpenRerunModal] = useState(false)
+    const [ newScenarioName, setNewScenarioName ] = useState('')
+    const [ showModalError, setShowModalError ] = useState(false)
+    const [ modalError, setModalError ] = useState('')
+    
     // const [ disableOptimize, setDisableOptimize ] = useState(false) 
     const [ key, setKey ] =  useState(null)
     const [ hasOverride, setHasOverride ] = useState(false)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
     const handleCloseSaveModal = () => setOpenSaveModal(false);
     const handleCloseRerunModal = () => setOpenRerunModal(false);
+
+
     const styles = {
         filled: {
             backgroundColor: '#01678f',
@@ -67,6 +74,11 @@ export default function Bottombar(props) {
        }
         
     },[props])
+
+    useEffect(() => {
+      setNewScenarioName('')
+      setShowModalError(false)
+    },[props.scenario])
     
 
     const handleSaveModal = () => {
@@ -103,8 +115,22 @@ export default function Bottombar(props) {
 
       const reoptimizeNewScenario = () => {
         // create function in app.js for this
-        handleCloseRerunModal()
-        props.copyAndRunOptimization()
+        if (newScenarioName === '') {
+          // show error
+          setModalError(' *You must provide a name if creating a new scenario*')
+          setShowModalError(true)
+
+        } else {
+          console.log(newScenarioName)
+          setShowModalError(false)
+          handleCloseRerunModal()
+          props.copyAndRunOptimization(newScenarioName)
+        }
+        
+      }
+
+      const handleEditNewScenarioName = (event) => {
+        setNewScenarioName(event.target.value)
       }
 
   return ( 
@@ -147,6 +173,7 @@ export default function Bottombar(props) {
         width={400}
       />
       <PopupModal
+        hasInput
         hasTwoButtons
         open={openRerunModal}
         handleClose={handleCloseRerunModal}
@@ -159,9 +186,14 @@ export default function Bottombar(props) {
         buttonTwoText='Overwrite Current Scenario'
         buttonTwoColor='secondary'
         buttonTwoVariant='outlined'
+        inputText={newScenarioName}
+        textLabel={'New Scenario Name'}
         width={850}
         iconOne={<AddIcon/>}
         iconTwo={<ArrowForwardIcon/>}
+        handleEditText={handleEditNewScenarioName}
+        showError={showModalError}
+        errorText={modalError}
       />
     </Box>
   );

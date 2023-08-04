@@ -380,9 +380,9 @@ useEffect(()=> {
   /*
     create a copy of current scenario and run an optimization
   */
-  const copyAndRunOptimization = () => {
+  const copyAndRunOptimization = (newScenarioName) => {
     //copy scenario
-    copyScenario(scenarioIndex)
+    copyScenario(scenarioIndex, newScenarioName)
     .then(response => response.json())
     .then((copy_data) => {
       // update data

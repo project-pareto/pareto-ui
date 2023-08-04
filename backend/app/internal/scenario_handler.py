@@ -256,7 +256,7 @@ class ScenarioHandler:
         
 
 
-    def copy_scenario(self, id):
+    def copy_scenario(self, id, new_scenario_name):
         _log.info(f"copying scenario with id: {id}")
 
         try:
@@ -267,7 +267,7 @@ class ScenarioHandler:
             # update scenario name, id, and creation date
             current_day = datetime.date.today()
             date = datetime.date.strftime(current_day, "%m/%d/%Y")
-            new_scenario["name"] = new_scenario["name"]+' copy'
+            new_scenario["name"] = new_scenario_name
             new_scenario["id"] = new_scenario_id
             new_scenario["date"] = date
 
