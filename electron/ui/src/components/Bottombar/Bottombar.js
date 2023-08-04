@@ -121,7 +121,7 @@ export default function Bottombar(props) {
           setShowModalError(true)
 
         } else {
-          console.log(newScenarioName)
+          // console.log(newScenarioName)
           setShowModalError(false)
           handleCloseRerunModal()
           props.copyAndRunOptimization(newScenarioName)
