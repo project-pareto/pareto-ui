@@ -13,6 +13,7 @@ const drawerWidth = 240;
 
 export default function Sidebar(props) {
     const { category, setCategory, open, deltaDictionary, overrides, compareScenarioIndexes } = props
+    const [ openOutputs, setOpenOutputs ] = useState(true)
     const [ openDynamic, setOpenDynamic ] = useState(false)
     const [ openStatic, setOpenStatic ] = useState(false)
     const [ openOverrides, setOpenOverrides ] = useState(false)
@@ -153,9 +154,18 @@ export default function Sidebar(props) {
   const renderTopLevelCategories = () => {
       return (
         <div>
-          <div style={category==="output" ? styles.selected : styles.unselected} onClick={() => handleClick("output")}> 
+          {/* <div style={category==="output" ? styles.selected : styles.unselected} onClick={() => handleClick("output")}> 
               <p style={styles.topLevelCategory}>Output</p>
+          </div> */}
+          <div style={category.includes("output") ? styles.selected : styles.unselected}  onClick={() => setOpenOutputs(!openOutputs)}> 
+              <p style={styles.topLevelCategory}>
+                <span style={{display:"flex", justifyContent: "space-between"}}>
+                  Outputs
+                  <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openOutputs ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                </span>
+              </p>
           </div>
+          {renderOutputs()}
           <Tooltip title={deltaCategories.includes("Dynamic") ? "Select to view input deltas" : ""} placement="right-start">
           <div style={handleCheckForDifference("Dynamic")}  onClick={() => setOpenDynamic(!openDynamic)}> 
               <p style={styles.topLevelCategory}>
@@ -204,6 +214,19 @@ export default function Sidebar(props) {
           } */}
         </div>
       ) 
+  }
+
+  const renderOutputs = () => {
+    return (
+      <Collapse in={openOutputs} timeout="auto" unmountOnExit>
+          <div style={category==="output::dashboard" ? styles.selected : styles.unselected} onClick={() => handleClick("output::dashboard")}> 
+            <p style={styles.subcategory}>Dashboard</p>
+          </div>
+          <div style={category==="output::infrastructureBuildout" ? styles.selected : styles.unselected} onClick={() => handleClick("output::infrastructureBuildout")}> 
+            <p style={styles.subcategory}>Infrastructure Buildout</p>
+          </div>
+      </Collapse>
+    )
   }
 
   const renderOverrideCategories = () => {

@@ -20,7 +20,7 @@ export default function ScenarioCompare(props) {
   const [ totalCapex, setTotalCapex ] = useState([])
   const [ totalOpex, setTotalOpex ] = useState([])
   const [ showSidebar, setShowSidebar ] = useState(true)
-  const [ compareCategory, setCompareCategory ] = useState('output')
+  const [ compareCategory, setCompareCategory ] = useState('output::dashboard')
   const [ deltaDictionary, setDeltaDictionary ] = useState({})
   const [ overrides, setOverrides ] = useState([{},{}])
 
@@ -229,7 +229,7 @@ const unpackBarChartData = (scenarioData1, scenarioData2) => {
         compareScenarioIndexes={compareScenarioIndexes}
         setCompareScenarioIndexes={setCompareScenarioIndexes}
     />
-    {compareCategory==="output" ? 
+    {compareCategory.includes("output") ? 
     <ScenarioCompareOutput
         scenarios={scenarios}
         primaryScenarioIndex={primaryScenarioIndex}

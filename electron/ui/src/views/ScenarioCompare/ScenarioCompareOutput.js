@@ -136,7 +136,7 @@ export default function ScenarioCompareOutput(props) {
   return (
       
     <Box sx={styles.boxView}>
-        {kpiDataPrimary && 
+        {compareCategory === "output::dashboard" && kpiDataPrimary ? 
         <Grid container spacing={2}>
 
             {/* <Grid item xs={12}>
@@ -305,6 +305,11 @@ export default function ScenarioCompareOutput(props) {
                 </Box>
             </Grid>
         </Grid>
+        :
+        compareCategory === "output::infrastructureBuildout" &&
+        <span>
+            here goes the table
+        </span>
         }
     </Box>
   );
