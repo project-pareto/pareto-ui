@@ -2,7 +2,7 @@ import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
 import {  } from "react-router-dom";
 import { Box, Grid, IconButton, Typography } from '@mui/material'
-import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
@@ -27,6 +27,8 @@ export default function ScenarioCompareOutput(props) {
         totalCapex,
         totalOpex
     } = props
+
+    const [ hoverRow, setHoverRow] = useState('')
 
    const styles = {
     titleDivider: {
@@ -82,10 +84,23 @@ export default function ScenarioCompareOutput(props) {
       } : {
         m:3
       },
-      chartTitle: {
+    chartTitle: {
         fontSize: "25px",
         color: "#989698"
-      }
+      },
+    firstCol: {
+        backgroundColor: "#f4f4f4", 
+        border:"1px solid #ddd",
+        position: 'sticky',
+        left: 0,
+    },
+    other: {
+        minWidth: 100,
+        border:"1px solid #ddd"
+    },
+    hover: {
+        backgroundColor: "rgb(255,215,0, 0.4)"
+    }
    }
 
    const getStyle = (key) => {
@@ -132,6 +147,122 @@ export default function ScenarioCompareOutput(props) {
         return returnGuy
     }
    }
+   const formatNumber = (value) => {
+    if (value === undefined) return value
+    else return value.toLocaleString('en-US', {maximumFractionDigits:2})
+  }
+
+  const handleHover = (target) => {
+    console.log('hovering on',target)
+    setHoverRow(target)
+  }
+
+   const renderInfrastructureTable = () => {
+    let primaryScenario = scenarios[primaryScenarioIndex]
+    let referenceScenario = scenarios[referenceScenarioIndex]
+    return (
+        <TableContainer>
+            <h3>
+                Infrastructure Buildout
+            </h3>
+            <TableContainer sx={{overflowX:'auto'}}>
+                <Table style={{border:"1px solid #ddd"}} size='small'>
+                    <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
+                        <TableRow>
+                            <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"20%"}}>Scenario</TableCell> 
+                            <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"15%"}}>CAPEX Type</TableCell> 
+                            <TableCell style={{color:"white", width:"13%"}}>Location</TableCell>
+                            <TableCell style={{color:"white", width:"13%"}}>Destination</TableCell>
+                            <TableCell style={{color:"white", width:"13%"}}>Technology</TableCell>
+                            <TableCell style={{color:"white", width:"13%"}} align="right">Capacity</TableCell>
+                            <TableCell style={{color:"white", width:"13%"}}>Unit</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    {Object.keys(primaryScenario.results.data.vb_y_overview_dict).length > 0 ? 
+                        <TableBody>
+                            <TableRow>
+                            <TableCell rowSpan={Object.keys(primaryScenario.results.data.vb_y_overview_dict).length} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <b>{primaryScenario.name}</b>
+                            </TableCell>
+                            </TableRow>
+                            {Object.entries(primaryScenario.results.data.vb_y_overview_dict).slice(1).map(([key,value]) => (
+                                <TableRow    
+                                    key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
+                                    style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
+                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
+                                    // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
+                                >
+                                    {[0,1,2,5,3,4].map((cellIdx, i) => (
+                                        <TableCell style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
+                                            {cellIdx === 3 ? formatNumber(value[cellIdx]) : value[cellIdx]}
+                                        </TableCell>
+                                    )
+                                    )}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                        :
+                        // show empty row if this scenario doesnt have any overrides
+                        <TableBody>
+                            <TableRow>
+                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                    <b>{primaryScenario.name}</b>
+                                </TableCell>
+                                <TableCell style={styles.other}>--</TableCell> 
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                                </TableRow>
+                        </TableBody>
+
+                    }
+                    {Object.keys(referenceScenario.results.data.vb_y_overview_dict).length > 0 ?
+                        <TableBody>
+                            <TableRow>
+                            <TableCell rowSpan={Object.keys(referenceScenario.results.data.vb_y_overview_dict).length} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <b>{referenceScenario.name}</b>
+                            </TableCell>
+                            </TableRow>
+                            {Object.entries(referenceScenario.results.data.vb_y_overview_dict).slice(1).map(([key,value]) => (
+                                <TableRow 
+                                    key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
+                                    style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
+                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
+                                    // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
+                                >
+                                {[0,1,2,5,3,4].map((cellIdx, i) => (
+                                    <TableCell style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
+                                        {cellIdx === 3 ? formatNumber(value[cellIdx]) : value[cellIdx]}
+                                    </TableCell>
+                                )
+                                )}
+                            </TableRow>
+                            ))}
+                        </TableBody>
+                        :
+                        // show empty row if this scenario doesnt have any overrides
+                        <TableBody>
+                            <TableRow>
+                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                    <b>{referenceScenario.name}</b>
+                                </TableCell>
+                                <TableCell style={styles.other}>--</TableCell> 
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                                <TableCell style={styles.other}>--</TableCell>
+                            </TableRow>
+                        </TableBody>
+
+                    }
+                </Table>
+            </TableContainer>
+        </TableContainer>
+    )
+}
 
   return (
       
@@ -307,9 +438,9 @@ export default function ScenarioCompareOutput(props) {
         </Grid>
         :
         compareCategory === "output::infrastructureBuildout" &&
-        <span>
-            here goes the table
-        </span>
+            <Box style={{backgroundColor:'white'}} sx={styles.comparisonTableBox}>
+                {renderInfrastructureTable()}
+            </Box>
         }
     </Box>
   );
