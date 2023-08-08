@@ -29,6 +29,8 @@ export default function ScenarioCompareOutput(props) {
     } = props
 
     const [ hoverRow, setHoverRow] = useState('')
+    const [ hoverTable, setHoverTable ] = useState('')
+    const [ hoverValue, setHoverValue ] = useState('')
 
    const styles = {
     titleDivider: {
@@ -100,6 +102,12 @@ export default function ScenarioCompareOutput(props) {
     },
     hover: {
         backgroundColor: "rgb(255,215,0, 0.4)"
+    },
+    hoverSameValue: {
+        backgroundColor: "#D4EFFF"
+    },
+    hoverDifferentValue: {
+        backgroundColor: "#F79E9E"
     }
    }
 
@@ -152,9 +160,23 @@ export default function ScenarioCompareOutput(props) {
     else return value.toLocaleString('en-US', {maximumFractionDigits:2})
   }
 
-  const handleHover = (target) => {
+  const handleHover = (target, table, value) => {
     console.log('hovering on',target)
     setHoverRow(target)
+    setHoverTable(table)
+    setHoverValue(value)
+  }
+
+  const getHoverStyle = (target, table, value) => {
+    if (target === hoverRow) {
+        if (table === hoverTable) return styles.hover
+        else {
+            if (value === hoverValue) return styles.hoverSameValue
+            else return styles.hoverDifferentValue
+            
+        }
+    } 
+    return null
   }
 
    const renderInfrastructureTable = () => {
@@ -188,8 +210,9 @@ export default function ScenarioCompareOutput(props) {
                             {Object.entries(primaryScenario.results.data.vb_y_overview_dict).slice(1).map(([key,value]) => (
                                 <TableRow    
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
-                                    style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
-                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
+                                    // style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
+                                    style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', value[3])}
+                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', value[3])}
                                     // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
                                 >
                                     {[0,1,2,5,3,4].map((cellIdx, i) => (
@@ -228,8 +251,9 @@ export default function ScenarioCompareOutput(props) {
                             {Object.entries(referenceScenario.results.data.vb_y_overview_dict).slice(1).map(([key,value]) => (
                                 <TableRow 
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
-                                    style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
-                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
+                                    // style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
+                                    style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', value[3])}
+                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', value[3])}
                                     // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
                                 >
                                 {[0,1,2,5,3,4].map((cellIdx, i) => (
