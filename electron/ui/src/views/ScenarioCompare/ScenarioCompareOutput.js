@@ -1,8 +1,8 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
 import {  } from "react-router-dom";
-import { Box, Grid, IconButton, Typography } from '@mui/material'
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
+import { Box, Grid, IconButton, Typography, FormControlLabel, Switch, FormGroup } from '@mui/material'
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer,  } from '@mui/material';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
@@ -31,6 +31,31 @@ export default function ScenarioCompareOutput(props) {
     const [ hoverRow, setHoverRow] = useState('')
     const [ hoverTable, setHoverTable ] = useState('')
     const [ hoverValue, setHoverValue ] = useState('')
+    const [ showBuildoutOverlappingRows, setShowBuildoutOverlappingRows ] = useState(false)
+    const [ buildoutOverlappingRows, setBuildoutOverlappingRows ] = useState([])
+
+    useEffect(() => {
+        let primaryScenario = scenarios[primaryScenarioIndex]
+        let referenceScenario = scenarios[referenceScenarioIndex]
+        if (primaryScenario && referenceScenario) {
+            let primaryScenarioKeys = []
+            for (let value of primaryScenario.results.data.vb_y_overview_dict.slice(1)){
+                let key = `${value[0]}:${value[1]}:${value[2]}:${value[5]}:${value[3]}`
+                primaryScenarioKeys.push(key)
+            }
+            let overlappingRows = []
+            for (let value of referenceScenario.results.data.vb_y_overview_dict.slice(1)){
+                let key = `${value[0]}:${value[1]}:${value[2]}:${value[5]}:${value[3]}`
+                if (primaryScenarioKeys.includes(key)) overlappingRows.push(key)
+            }
+            // console.log('overlappingrows length')
+            // console.log(overlappingRows.length)
+            setBuildoutOverlappingRows(overlappingRows)
+        }
+        
+
+
+    }, [primaryScenarioIndex,referenceScenarioIndex,compareCategory])
 
    const styles = {
     titleDivider: {
@@ -161,7 +186,7 @@ export default function ScenarioCompareOutput(props) {
   }
 
   const handleHover = (target, table, value) => {
-    console.log('hovering on',target)
+    // console.log('hovering on',target)
     setHoverRow(target)
     setHoverTable(table)
     setHoverValue(value)
@@ -184,9 +209,22 @@ export default function ScenarioCompareOutput(props) {
     let referenceScenario = scenarios[referenceScenarioIndex]
     return (
         <TableContainer>
-            <h3>
-                Infrastructure Buildout
-            </h3>
+            <Grid container>
+                <Grid item xs={3}>
+                    <FormGroup>
+                        <FormControlLabel control={<Switch checked={showBuildoutOverlappingRows} onChange={() => setShowBuildoutOverlappingRows(!showBuildoutOverlappingRows)}/>} label="Show Overlaps" />
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={6}>
+                    <h3 style={{marginTop: 0, paddingTop:0}}>
+                        Compare Buildout
+                    </h3>
+                </Grid>
+                <Grid item xs={3}>
+
+                </Grid>
+            </Grid>
+
             <TableContainer sx={{overflowX:'auto'}}>
                 <Table style={{border:"1px solid #ddd"}} size='small'>
                     <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
@@ -208,6 +246,10 @@ export default function ScenarioCompareOutput(props) {
                             </TableCell>
                             </TableRow>
                             {Object.entries(primaryScenario.results.data.vb_y_overview_dict).slice(1).map(([key,value]) => (
+                                (showBuildoutOverlappingRows || !buildoutOverlappingRows.includes(`${value[0]}:${value[1]}:${value[2]}:${value[5]}:${value[3]}`))
+                            
+                                &&
+                                
                                 <TableRow    
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
                                     // style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
@@ -216,7 +258,7 @@ export default function ScenarioCompareOutput(props) {
                                     // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
                                 >
                                     {[0,1,2,5,3,4].map((cellIdx, i) => (
-                                        <TableCell style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
+                                        <TableCell key={`${cellIdx}_${i}`} style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
                                             {cellIdx === 3 ? formatNumber(value[cellIdx]) : value[cellIdx]}
                                         </TableCell>
                                     )
@@ -249,6 +291,9 @@ export default function ScenarioCompareOutput(props) {
                             </TableCell>
                             </TableRow>
                             {Object.entries(referenceScenario.results.data.vb_y_overview_dict).slice(1).map(([key,value]) => (
+                                (showBuildoutOverlappingRows || !buildoutOverlappingRows.includes(`${value[0]}:${value[1]}:${value[2]}:${value[5]}:${value[3]}`))
+                            
+                                &&
                                 <TableRow 
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
                                     // style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
@@ -256,13 +301,13 @@ export default function ScenarioCompareOutput(props) {
                                     onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', value[3])}
                                     // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
                                 >
-                                {[0,1,2,5,3,4].map((cellIdx, i) => (
-                                    <TableCell style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
-                                        {cellIdx === 3 ? formatNumber(value[cellIdx]) : value[cellIdx]}
-                                    </TableCell>
-                                )
-                                )}
-                            </TableRow>
+                                    {[0,1,2,5,3,4].map((cellIdx, i) => (
+                                        <TableCell key={`${cellIdx}_${i}`} style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
+                                            {cellIdx === 3 ? formatNumber(value[cellIdx]) : value[cellIdx]}
+                                        </TableCell>
+                                    )
+                                    )}
+                                </TableRow>
                             ))}
                         </TableBody>
                         :
