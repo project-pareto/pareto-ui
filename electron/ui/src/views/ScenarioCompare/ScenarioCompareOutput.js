@@ -126,7 +126,8 @@ export default function ScenarioCompareOutput(props) {
         border:"1px solid #ddd"
     },
     hover: {
-        backgroundColor: "rgb(255,215,0, 0.4)"
+        // backgroundColor: "rgb(255,215,0, 0.4)"
+        backgroundColor: "#F2F3F5"
     },
     hoverSameValue: {
         backgroundColor: "#D4EFFF"
@@ -212,7 +213,7 @@ export default function ScenarioCompareOutput(props) {
             <Grid container>
                 <Grid item xs={3}>
                     <FormGroup>
-                        <FormControlLabel control={<Switch checked={showBuildoutOverlappingRows} onChange={() => setShowBuildoutOverlappingRows(!showBuildoutOverlappingRows)}/>} label="Show Overlaps" />
+                        <FormControlLabel control={<Switch checked={showBuildoutOverlappingRows} onChange={() => setShowBuildoutOverlappingRows(!showBuildoutOverlappingRows)}/>} label="Show All Rows" />
                     </FormGroup>
                 </Grid>
                 <Grid item xs={6}>
