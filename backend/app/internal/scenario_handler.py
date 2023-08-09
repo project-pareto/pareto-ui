@@ -308,8 +308,11 @@ class ScenarioHandler:
                 output_diagramFileType = 'png'
                 original_output_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/DisposalOverride.png'
                 new_output_diagram_path = f"{self.output_diagrams_path}/{new_scenario_id}.{output_diagramFileType}"
-                shutil.copyfile(original_output_diagram_path, new_output_diagram_path)
-                new_scenario[f'outputDiagramExtension'] = 'png'
+                try:
+                    shutil.copyfile(original_output_diagram_path, new_output_diagram_path)
+                    new_scenario[f'outputDiagramExtension'] = 'png'
+                except Exception as e:
+                    _log.error(f'unable to copy disposal override image over: {e}')
 
 
             # add record in db for new scenario
