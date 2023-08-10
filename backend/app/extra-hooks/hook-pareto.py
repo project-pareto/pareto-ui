@@ -50,6 +50,8 @@ for png_file in pkg_path.glob("**/*"):
             print(f"Import of file '{png_file}' failed: {err}")
             continue
 
-# add disposal override png
+# add disposal override pngs
 datas.append(('internal/assets/DisposalOverride.png', 'app/internal/assets'))
+datas.append(('internal/assets/DisposalOverrideInput.png', 'app/internal/assets'))
+
 print(datas)
