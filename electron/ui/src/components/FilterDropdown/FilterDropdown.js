@@ -119,14 +119,6 @@ export default function FilterDropdown(props) {
                             primary="Select All"
                         />
                         </MenuItem>
-                        {/* {props.total2.map((option, index) => (
-                        <MenuItem key={option} value={option} onClick={()=> props.handleFilter2(option)}>
-                            <ListItemIcon>
-                            <Checkbox checked={props.filtered2.indexOf(option) > -1} />
-                            </ListItemIcon>
-                            <ListItemText primary={option.includes('::') ? option.split("::")[1] : option} />
-                        </MenuItem>
-                        ))} */}
                         {props.rowFilterSet ? 
                         
                         Object.entries(props.rowFilterSet).map(([key,value]) => (

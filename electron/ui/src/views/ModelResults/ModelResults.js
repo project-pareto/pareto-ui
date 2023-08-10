@@ -297,10 +297,8 @@ const handleNewInfrastructureOverride = () => {
                 setScenario={setScenario}
                 columnNodesMapping={columnNodesMapping}
                 columnNodes={columnNodes}
-                // filteredColumnNodes={filteredColumnNodes}
                 rowNodesMapping={rowNodesMapping}
                 rowNodes={rowNodes}
-                // filteredRowNodes={filteredRowNodes}
                 category={props.category}
                 handleEditInput={props.handleEditInput}
                 data={props.scenario.results.data}
@@ -308,6 +306,8 @@ const handleNewInfrastructureOverride = () => {
                 OVERRIDE_CATEGORIES={OVERRIDE_CATEGORIES}
                 newInfrastructureOverrideRow={newInfrastructureOverrideRow}
                 setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
+                rowFilterSet={rowFilterSet}
+                columnFilterSet={columnFilterSet}
               />
               {/* } */}
               

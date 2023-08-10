@@ -224,8 +224,6 @@ const renderOutputTable = () => {
           overrideValues={props.overrideValues}
           setOverrideValues={props.setOverrideValues}
           data={props.data}
-          rowNodes={props.rowNodes}
-          rowNodesMapping={props.rowNodesMapping}
           columnNodes={props.columnNodes}
           columnNodesMapping={props.columnNodesMapping}
           scenario={props.scenario}
@@ -233,6 +231,8 @@ const renderOutputTable = () => {
           updateScenario={props.updateScenario}
           newInfrastructureOverrideRow={props.newInfrastructureOverrideRow}
           setNewInfrastructureOverrideRow={props.setNewInfrastructureOverrideRow}
+          rowFilterSet={props.rowFilterSet}
+          columnFilterSet={props.columnFilterSet}
         /> 
         : 
         <TableContainer sx={{overflowX:'auto', maxHeight: "73vh"}}>

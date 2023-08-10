@@ -9,8 +9,6 @@ export default function OverrideTableRows(props) {
   const {
         category, 
         data, 
-        rowNodes, 
-        rowNodesMapping, 
         columnNodes, 
         columnNodesMapping, 
         scenario,
@@ -83,7 +81,7 @@ return (
     :
     <TableBody>
     {data.map((value, index) => {
-      if (Object.keys(rowNodes).length === 0 || rowNodes[rowNodesMapping[index]]) {
+      // if (Object.keys(rowNodes).length === 0 || rowNodes[rowNodesMapping[index]]) {
       return (
         <RegularVariableRow
           key={`${value}_${index}`}
@@ -97,7 +95,7 @@ return (
           columnNodesMapping={columnNodesMapping}
         />
       )
-      }
+      // }
     })}
     </TableBody>
     }
@@ -404,6 +402,8 @@ function RegularVariableRow(props) {
   const [ uniqueIndex, setUniqueIndex ] = useState('')
 
   useEffect(() => {
+    console.log('inside regular variable row')
+    console.log(value)
     let tempDisplayValue = [...value]
     // setDisplayValue(tempDisplayValue)
     setRowName(value[0])
