@@ -25,12 +25,14 @@ const OVERRIDE_CATEGORIES = [
 export default function ModelResults(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
   const [ terminationCondition, setTerminationCondition ] = useState(null)
-  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) 
-  const [ columnNodes, setColumnNodes ] = useState([])
-  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([])
+  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) // the column mapping; set once and remains the same
+  const [ columnNodes, setColumnNodes ] = useState([]) // dictionary with true false values for each column
+  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([]) // list of active columns
+  const [ columnFilterSet, setColumnFilterSet ] = useState({}) // dictionary containing all unique columns and the amount of each column
   const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
+  const [ rowFilterSet, setRowFilterSet ] = useState({})
   const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
@@ -72,10 +74,21 @@ export default function ModelResults(props) {
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
         let tempRowNodesMapping = []
+
+        let newRowFilterSet = {}
+        let newColFilterSet = {}
         for (let ind in scenario.results.data[props.category][0]) {
+
           let columnNode = `${ind}::${scenario.results.data[props.category][0][ind]}`
           tempColumnNodesMapping.push(columnNode)
           tempColumnNodes[columnNode] = true
+
+          let colKey = scenario.results.data[props.category][0][ind]
+          if (Object.keys(newColFilterSet).includes(colKey)) {
+            newColFilterSet[colKey].amt = newColFilterSet[colKey].amt + 1
+          } else {
+            newColFilterSet[colKey] = {checked: true, amt: 1}
+          }
         }
         let i = 0
         for (let each of scenario.results.data[props.category].slice(1)) {
@@ -83,6 +96,13 @@ export default function ModelResults(props) {
           tempRowNodesMapping.push(rowNode)
           tempRowNodes[rowNode] = true
           i+=1
+
+          let rowKey = each[0]
+          if (Object.keys(newRowFilterSet).includes(rowKey)) {
+            newRowFilterSet[rowKey].amt = newRowFilterSet[rowKey].amt + 1
+          } else {
+            newRowFilterSet[rowKey] = {checked: true, amt: 1}
+          }
         }
         setColumnNodes(tempColumnNodes)
         setRowNodes(tempRowNodes)
@@ -90,6 +110,10 @@ export default function ModelResults(props) {
         setFilteredRowNodes(tempRowNodesMapping)
         setColumnNodesMapping(tempColumnNodesMapping)
         setRowNodesMapping(tempRowNodesMapping) 
+        setRowFilterSet(newRowFilterSet)
+        setColumnFilterSet(newColFilterSet)
+        console.log(newRowFilterSet)
+        console.log(newColFilterSet)
       }
     } catch (e) {
       console.error('unable to set filtering data: ',e)
@@ -118,6 +142,7 @@ export default function ModelResults(props) {
   const handleColumnFilter = (col) => {
     var tempCols
     let tempColumnNodes = {...columnNodes}
+    let tempColumnFilterSet = {...columnFilterSet}
     if (col === 'all') {
       tempCols = filteredColumnNodes.length === columnNodesMapping.length ? [] : columnNodesMapping
       if (filteredColumnNodes.length === columnNodesMapping.length) {
@@ -131,6 +156,21 @@ export default function ModelResults(props) {
       }
       setColumnNodes(tempColumnNodes)
       setFilteredColumnNodes(tempCols);
+
+      let allChecked = true
+      for (let key of Object.keys(tempColumnFilterSet)) {
+        if(!tempColumnFilterSet[key].checked) allChecked = false
+      }
+      if (allChecked) {
+        for (let key of Object.keys(tempColumnFilterSet)) {
+          tempColumnFilterSet[key].checked = false
+        }
+      } else {
+        for (let key of Object.keys(tempColumnFilterSet)) {
+          tempColumnFilterSet[key].checked = true
+        }
+      }
+      setColumnFilterSet(tempColumnFilterSet)
     }
     else {
       tempCols = [...filteredColumnNodes]
@@ -140,41 +180,73 @@ export default function ModelResults(props) {
       } else{
         tempCols.push(col)
       }
+      for (let key of Object.keys(tempColumnNodes)) {
+        if(key.includes(col)) {
+          tempColumnNodes[key] = !tempColumnNodes[key]
+        }
+      }
       tempColumnNodes[col] = !tempColumnNodes[col]
+      tempColumnFilterSet[col].checked = !tempColumnFilterSet[col].checked
+      setColumnFilterSet(tempColumnFilterSet)
       setColumnNodes(tempColumnNodes)
       setFilteredColumnNodes(tempCols)
     }
+    // console.log(tempColumnNodes)
+    // console.log(tempCols)
 }
 
 const handleRowFilter = (row) => {
-    var tempRows
-    let tempRowNodes = {...rowNodes}
-    if (row === 'all') {
-      tempRows = filteredRowNodes.length === rowNodesMapping.length ? [] : rowNodesMapping
-      if (filteredRowNodes.length === rowNodesMapping.length) {
-        for (const key of Object.keys(tempRowNodes)) {
-          tempRowNodes[key] = false
-        }
-      } else {
-        for (const key of Object.keys(tempRowNodes)) {
-          tempRowNodes[key] = true
+  let tempRows
+  let tempRowNodes = {...rowNodes}
+  let tempRowFilterSet = {...rowFilterSet}
+  if (row === 'all') {
+    tempRows = filteredRowNodes.length === rowNodesMapping.length ? [] : rowNodesMapping
+    if (filteredRowNodes.length === rowNodesMapping.length) {
+      for (const key of Object.keys(tempRowNodes)) {
+        tempRowNodes[key] = false
+      }
+    } else {
+      for (const key of Object.keys(tempRowNodes)) {
+        tempRowNodes[key] = true
+      }
+    }
+    setRowNodes(tempRowNodes)
+    setFilteredRowNodes(tempRows);
+
+    let allChecked = true
+    for (let key of Object.keys(tempRowFilterSet)) {
+      if(!tempRowFilterSet[key].checked) allChecked = false
+    }
+    if (allChecked) {
+      for (let key of Object.keys(tempRowFilterSet)) {
+        tempRowFilterSet[key].checked = false
+      }
+    } else {
+      for (let key of Object.keys(tempRowFilterSet)) {
+        tempRowFilterSet[key].checked = true
+      }
+    }
+    setRowFilterSet(tempRowFilterSet)
+  }
+  else {
+    tempRows = [...filteredRowNodes]
+      const index = tempRows.indexOf(row);
+      if (index > -1) {
+        tempRows.splice(index, 1);
+      } else{
+        tempRows.push(row)
+      }
+      for (let key of Object.keys(tempRowNodes)) {
+        if(key.includes(row)) {
+          tempRowNodes[key] = !tempRowNodes[key]
         }
       }
+      tempRowNodes[row] = !tempRowNodes[row]
+      tempRowFilterSet[row].checked = !tempRowFilterSet[row].checked
       setRowNodes(tempRowNodes)
-      setFilteredRowNodes(tempRows);
-    }
-    else {
-      tempRows = [...filteredRowNodes]
-        const index = tempRows.indexOf(row);
-        if (index > -1) {
-          tempRows.splice(index, 1);
-        } else{
-          tempRows.push(row)
-        }
-        tempRowNodes[row] = !tempRowNodes[row]
-        setRowNodes(tempRowNodes)
-        setFilteredRowNodes(tempRows)
-    }
+      setRowFilterSet(tempRowFilterSet)
+      setFilteredRowNodes(tempRows)
+  }
 }
 
 const handleNewInfrastructureOverride = () => {
@@ -225,10 +297,10 @@ const handleNewInfrastructureOverride = () => {
                 setScenario={setScenario}
                 columnNodesMapping={columnNodesMapping}
                 columnNodes={columnNodes}
-                filteredColumnNodes={filteredColumnNodes}
+                // filteredColumnNodes={filteredColumnNodes}
                 rowNodesMapping={rowNodesMapping}
                 rowNodes={rowNodes}
-                filteredRowNodes={filteredRowNodes}
+                // filteredRowNodes={filteredRowNodes}
                 category={props.category}
                 handleEditInput={props.handleEditInput}
                 data={props.scenario.results.data}
@@ -264,6 +336,8 @@ const handleNewInfrastructureOverride = () => {
                   total2={rowNodesMapping}
                   isAllSelected2={isAllRowsSelected}
                   handleFilter2={handleRowFilter}
+                  rowFilterSet={rowFilterSet}
+                  columnFilterSet={columnFilterSet}
                 />
               }
             
