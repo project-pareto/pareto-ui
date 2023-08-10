@@ -323,6 +323,8 @@ const handleNewInfrastructureOverride = () => {
                 
                 :
                 
+                props.category !== "v_F_Overview_dict" && 
+
                 <FilterDropdown
                   width="300px"
                   maxHeight="300px"
