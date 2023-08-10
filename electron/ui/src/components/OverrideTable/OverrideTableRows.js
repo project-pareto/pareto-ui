@@ -402,8 +402,6 @@ function RegularVariableRow(props) {
   const [ uniqueIndex, setUniqueIndex ] = useState('')
 
   useEffect(() => {
-    console.log('inside regular variable row')
-    console.log(value)
     let tempDisplayValue = [...value]
     // setDisplayValue(tempDisplayValue)
     setRowName(value[0])

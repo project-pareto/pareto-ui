@@ -40,10 +40,15 @@ export default function OverrideTable(props) {
       // console.log(rowFilterSet)
       let tempRows
       if (Object.keys(rowFilterSet).length > 0) {
-        tempRows = []
-        for (let row of data[category].slice(1)) {
-          if(rowFilterSet[row[0]].checked) tempRows.push(row)
+        try {
+          tempRows = []
+          for (let row of data[category].slice(1)) {
+            if(rowFilterSet[row[0]].checked) tempRows.push(row)
+          }
+        } catch(e) {
+          tempRows = data[category].slice(1)
         }
+        
       } else {
         tempRows = data[category].slice(1)
       }
