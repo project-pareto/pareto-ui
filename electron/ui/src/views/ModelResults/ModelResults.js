@@ -112,8 +112,6 @@ export default function ModelResults(props) {
         setRowNodesMapping(tempRowNodesMapping) 
         setRowFilterSet(newRowFilterSet)
         setColumnFilterSet(newColFilterSet)
-        console.log(newRowFilterSet)
-        console.log(newColFilterSet)
       }
     } catch (e) {
       console.error('unable to set filtering data: ',e)
@@ -157,6 +155,7 @@ export default function ModelResults(props) {
       setColumnNodes(tempColumnNodes)
       setFilteredColumnNodes(tempCols);
 
+      // handle column filter set
       let allChecked = true
       for (let key of Object.keys(tempColumnFilterSet)) {
         if(!tempColumnFilterSet[key].checked) allChecked = false
@@ -175,16 +174,19 @@ export default function ModelResults(props) {
     else {
       tempCols = [...filteredColumnNodes]
       const index = tempCols.indexOf(col);
-      if (index > -1) { // only splice array when item is found
-        tempCols.splice(index, 1); // 2nd parameter means remove one item only
+      if (index > -1) { 
+        tempCols.splice(index, 1); 
       } else{
         tempCols.push(col)
       }
+
+      // handle column filter set
       for (let key of Object.keys(tempColumnNodes)) {
         if(key.includes(col)) {
           tempColumnNodes[key] = !tempColumnNodes[key]
         }
       }
+
       tempColumnNodes[col] = !tempColumnNodes[col]
       tempColumnFilterSet[col].checked = !tempColumnFilterSet[col].checked
       setColumnFilterSet(tempColumnFilterSet)
