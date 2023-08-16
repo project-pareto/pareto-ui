@@ -3,6 +3,7 @@ describe('scenario testing', () => {
         use sc_count for screenshot names to ensure they are saved in chronological order
         start with 10 because starting with 0 would stop working when it hits 10
     */
+    let strategic_small_case_study_url = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_small_case_study.xlsx"
     let sc_count = 10
     it('test that scenario list loads properly', () => {
         //load webpage
@@ -26,6 +27,12 @@ describe('scenario testing', () => {
         cy.screenshot(`${sc_count}_loaded scenario list`)
         sc_count+=1
     })
+
+    // context('downloadFile', () => {
+    it('download strategic small case study', () => {
+        cy.downloadFile(strategic_small_case_study_url,'cypress/downloads','strategic_small_case_study.xlsx')
+    })
+    // })
 
     it('creates a new scenario by uploading excel sheet', () => {
         //load webpage
@@ -54,7 +61,7 @@ describe('scenario testing', () => {
         cy.screenshot(`${sc_count}_clicked create new scenario`)
         sc_count+=1
         cy.findByRole('textbox').type('cypress test')
-        cy.get('input[type=file]').selectFile('./cypress/downloads/strategic_permian_demo.xlsx', {
+        cy.get('input[type=file]').selectFile('./cypress/downloads/strategic_small_case_study.xlsx', {
             action: 'drag-drop',
             force: true
           })
@@ -166,12 +173,5 @@ describe('scenario testing', () => {
         cy.findByRole('heading', {name: /running optimization/i, timeout: 1200000}).should('not.exist')
         cy.screenshot(`${sc_count}_finished optimizing`)
         sc_count+=1
-
-        //validate results
-//         cy.contains(/recycling rate/i).should('be.visible')
-//         cy.contains(/annual disposal/i).should('be.visible')
-//         cy.contains(/groundwater source/i).should('be.visible')
-//         cy.contains(/capex/i).should('be.visible')
-//         cy.contains(/opex/i).should('be.visible')
     })
 })
