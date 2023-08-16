@@ -155,8 +155,8 @@ async def check_tasks():
     """
     return {'tasks' : scenario_handler.get_background_tasks()}
 
-@router.get("/copy/{scenario_id}")
-async def copy(scenario_id: int):
+@router.get("/copy/{scenario_id}/{new_scenario_name}")
+async def copy(scenario_id: int, new_scenario_name: str):
     """Create a copy of scenario for given scenario id
 
     Args:
@@ -165,7 +165,7 @@ async def copy(scenario_id: int):
     Returns:
         Newly created scenario. 
     """
-    scenarios, new_id = scenario_handler.copy_scenario(scenario_id)
+    scenarios, new_id = scenario_handler.copy_scenario(scenario_id, new_scenario_name)
     return {"scenarios": scenarios, "new_id": new_id}
 
 @router.post("/update_excel")

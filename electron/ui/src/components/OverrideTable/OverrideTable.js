@@ -14,16 +14,16 @@ export default function OverrideTable(props) {
 
     const {
         category, 
-        data, 
-        rowNodes, 
-        rowNodesMapping, 
+        data,
         columnNodes, 
         columnNodesMapping, 
         scenario, 
         show,
         updateScenario,
         newInfrastructureOverrideRow,
-        setNewInfrastructureOverrideRow
+        setNewInfrastructureOverrideRow,
+        rowFilterSet,
+        columnFilterSet
     } = props
 
     const [rows, setRows] = useState([]);
@@ -36,15 +36,27 @@ export default function OverrideTable(props) {
     },[scenario.id, category])
 
     useEffect(() => {
-      let tempRows = data[category].slice(1)
-      // let tempVisibleRows = tempRows.slice(
-      //   page * rowsPerPage,
-      //   page * rowsPerPage + rowsPerPage,
-      // )
-      // setVisibleRows(tempVisibleRows)
+      // console.log('rowfilterset initiated useeffect')
+      // console.log(rowFilterSet)
+      let tempRows
+      if (Object.keys(rowFilterSet).length > 0) {
+        try {
+          tempRows = []
+          for (let row of data[category].slice(1)) {
+            if(rowFilterSet[row[0]].checked) tempRows.push(row)
+          }
+        } catch(e) {
+          tempRows = data[category].slice(1)
+        }
+        
+      } else {
+        tempRows = data[category].slice(1)
+      }
+      // console.log('setting rows to')
+      // console.log(tempRows)
       setRows(tempRows)
 
-    },[scenario, category])
+    },[scenario, rowFilterSet])
 
     useEffect(() => {
       // let tempRows = data[category].slice(1)
@@ -52,6 +64,8 @@ export default function OverrideTable(props) {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       )
+      // console.log('setting visible rows to')
+      // console.log(tempVisibleRows)
       setVisibleRows(tempVisibleRows)
 
     },[page, rowsPerPage, rows])
@@ -67,15 +81,6 @@ export default function OverrideTable(props) {
 
     const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-    // const visibleRows = useMemo(
-    //   () =>
-    //     rows.slice(
-    //       page * rowsPerPage,
-    //       page * rowsPerPage + rowsPerPage,
-    //     ),
-    //   [page, rowsPerPage, rows],
-    // );
 
 
     const handleCheckOverride = (index, value) => {
@@ -215,8 +220,6 @@ const renderOutputTable = () => {
                 category={category}
                 // data={data[category].slice(1)}
                 data={visibleRows}
-                rowNodes={rowNodes}
-                rowNodesMapping={rowNodesMapping}
                 columnNodes={columnNodes}
                 columnNodesMapping={columnNodesMapping}
                 scenario={scenario}

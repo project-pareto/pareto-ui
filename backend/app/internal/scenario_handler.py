@@ -256,7 +256,7 @@ class ScenarioHandler:
         
 
 
-    def copy_scenario(self, id):
+    def copy_scenario(self, id, new_scenario_name):
         _log.info(f"copying scenario with id: {id}")
 
         try:
@@ -267,7 +267,7 @@ class ScenarioHandler:
             # update scenario name, id, and creation date
             current_day = datetime.date.today()
             date = datetime.date.strftime(current_day, "%m/%d/%Y")
-            new_scenario["name"] = new_scenario["name"]+' copy'
+            new_scenario["name"] = new_scenario_name
             new_scenario["id"] = new_scenario_id
             new_scenario["date"] = date
 
@@ -282,25 +282,36 @@ class ScenarioHandler:
             if (os.path.isfile(original_output_path)):
                 shutil.copyfile(original_output_path, new_output_path)
 
-            # create copy of input diagram (if it exists)
-            try:
-                input_diagramFileType = self.scenario_list[id][f'inputDiagramExtension']
-                original_input_diagram_path = f"{self.input_diagrams_path}/{id}.{input_diagramFileType}"
-                new_input_diagram_path = f"{self.input_diagrams_path}/{new_scenario_id}.{input_diagramFileType}"
-                if (os.path.isfile(original_input_diagram_path)):
-                    shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
-            except:
-                _log.info('unable to copy input network diagram')
-
-            # create copy of output diagram (if it exists)
-            try:
-                output_diagramFileType = self.scenario_list[id][f'outputDiagramExtension']
-                original_output_diagram_path = f"{self.output_diagrams_path}/{id}.{output_diagramFileType}"
+            # check for disposal override scenario. if found, insert disposal diagrams in. otherwise, copy input diagram over
+            if new_scenario_name.lower() == 'disposal override':
+                output_diagramFileType = 'png'
+                original_output_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/DisposalOverride.png'
                 new_output_diagram_path = f"{self.output_diagrams_path}/{new_scenario_id}.{output_diagramFileType}"
-                if (os.path.isfile(original_output_diagram_path)):
+
+                input_diagramFileType = 'png'
+                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/DisposalOverrideInput.png'
+                new_input_diagram_path = f"{self.input_diagrams_path}/{new_scenario_id}.{input_diagramFileType}"
+                try:
                     shutil.copyfile(original_output_diagram_path, new_output_diagram_path)
-            except:
-                _log.info('unable to copy input network diagram')
+                    new_scenario[f'outputDiagramExtension'] = 'png'
+                except Exception as e:
+                    _log.error(f'unable to copy disposal override output diagram over: {e}')
+                try:
+                    shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+                    new_scenario[f'inputDiagramExtension'] = 'png'
+                except Exception as e:
+                    _log.error(f'unable to copy disposal override input diagram over: {e}')
+            else:
+                try:
+                    input_diagramFileType = self.scenario_list[id][f'inputDiagramExtension']
+                    original_input_diagram_path = f"{self.input_diagrams_path}/{id}.{input_diagramFileType}"
+                    new_input_diagram_path = f"{self.input_diagrams_path}/{new_scenario_id}.{input_diagramFileType}"
+                    if (os.path.isfile(original_input_diagram_path)):
+                        shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+                except:
+                    _log.info('unable to copy input network diagram')
+            
+
 
             # add record in db for new scenario
             # check if db is in use. if so, wait til its done being used

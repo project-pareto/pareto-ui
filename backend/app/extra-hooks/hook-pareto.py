@@ -49,4 +49,9 @@ for png_file in pkg_path.glob("**/*"):
         except Exception as err:  # assume the import could do bad things
             print(f"Import of file '{png_file}' failed: {err}")
             continue
+
+# add disposal override pngs
+datas.append(('internal/assets/DisposalOverride.png', 'app/internal/assets'))
+datas.append(('internal/assets/DisposalOverrideInput.png', 'app/internal/assets'))
+
 print(datas)

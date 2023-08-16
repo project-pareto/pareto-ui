@@ -1,4 +1,4 @@
-import React from 'react';
+import React , {Fragment} from 'react';
 import { Grid, Button, Modal, TextField } from '@mui/material';
 
 export default function Dashboard(props) {
@@ -48,8 +48,25 @@ export default function Dashboard(props) {
             :
             <Grid container sx={styles.modalStyle} spacing={1}>
             <Grid item xs={12}>
-                <p>{props.text}</p>
+                <p>{props.text}{props.showError && <span style={{color: "red"}}>{props.errorText}</span>}</p>
             </Grid>
+            {props.hasInput &&
+                <Fragment>
+                    <Grid item xs={6}></Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                //  required
+                                sx={{marginBottom: "10px"}}
+                                variant="standard"
+                                id="margin-none"
+                                label={props.textLabel}
+                                value={props.inputText}
+                                onChange={props.handleEditText}
+                                fullWidth
+                            />
+                        </Grid>
+                </Fragment>
+            }
             {props.hasTwoButtons ? 
             <>
             <Grid item xs={1}></Grid>

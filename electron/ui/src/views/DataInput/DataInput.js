@@ -12,12 +12,14 @@ import DataTable from '../../components/DataTable/DataTable';
 export default function DataInput(props) {
   const [ scenario, setScenario] = useState({...props.scenario})
   const [ editDict, setEditDict ] = useState({})
-  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) 
-  const [ columnNodes, setColumnNodes ] = useState([])
-  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([])
+  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) // the column mapping; set once and remains the same
+  const [ columnNodes, setColumnNodes ] = useState([]) // dictionary with true false values for each column
+  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([]) // list of active columns
+  const [ columnFilterSet, setColumnFilterSet ] = useState({}) // dictionary containing all unique columns and the corresponding amount of each column
   const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
+  const [ rowFilterSet, setRowFilterSet ] = useState({})
   const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
   const [ showError, setShowError ] = useState(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
@@ -40,6 +42,28 @@ export default function DataInput(props) {
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
         let tempRowNodesMapping = []
+        let tempColumnFilterSet = {}
+        let tempRowFilterSet =  {}
+
+
+        // determine unique row and column keys for row and column filter sets
+        let grabbedRowList = false
+        for(let colKey of Object.keys(scenario.data_input.df_parameters[props.category])) {
+
+          // first key:value pair contains all the row names
+          if (!grabbedRowList) {
+            let tempRowList = scenario.data_input.df_parameters[props.category][colKey]
+            for (let rowKey of tempRowList) {
+              if(Object.keys(tempRowFilterSet).includes(rowKey)) tempRowFilterSet[rowKey].amt = tempRowFilterSet[rowKey].amt + 1
+              else tempRowFilterSet[rowKey] = {amt: 1, checked: true}
+            }
+            grabbedRowList = true
+          }
+          if(Object.keys(tempColumnFilterSet).includes(colKey)) tempColumnFilterSet[colKey].amt = tempColumnFilterSet[colKey].amt + 1
+          else tempColumnFilterSet[colKey] = {amt: 1, checked: true}
+        }
+        
+        // determing mappings between index/values and rows+columns
         Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
           if (ind === 0) {
             // tempRowNodesMapping = value
@@ -65,6 +89,8 @@ export default function DataInput(props) {
         setFilteredRowNodes(tempRowNodesMapping)
         setColumnNodesMapping(tempColumnNodesMapping)
         setRowNodesMapping(tempRowNodesMapping) 
+        setRowFilterSet(tempRowFilterSet)
+        setColumnFilterSet(tempColumnFilterSet)
       }
     } catch (e) {
       console.error('unable to set edit dictionary: ',e)
@@ -103,6 +129,7 @@ export default function DataInput(props) {
    const handleColumnFilter = (col) => {
     var tempCols
     let tempColumnNodes = {...columnNodes}
+    let tempColumnFilterSet = {...columnFilterSet}
     if (col === 'all') {
       tempCols = filteredColumnNodes.length === columnNodesMapping.length ? [] : columnNodesMapping
       if (filteredColumnNodes.length === columnNodesMapping.length) {
@@ -114,8 +141,26 @@ export default function DataInput(props) {
           tempColumnNodes[key] = true
         }
       }
+
       setColumnNodes(tempColumnNodes)
       setFilteredColumnNodes(tempCols);
+
+      // handle column filter set
+      let allChecked = true
+      for (let key of Object.keys(tempColumnFilterSet)) {
+        if(!tempColumnFilterSet[key].checked) allChecked = false
+      }
+      if (allChecked) {
+        for (let key of Object.keys(tempColumnFilterSet)) {
+          tempColumnFilterSet[key].checked = false
+        }
+      } else {
+        for (let key of Object.keys(tempColumnFilterSet)) {
+          tempColumnFilterSet[key].checked = true
+        }
+      }
+      setColumnFilterSet(tempColumnFilterSet)
+
     }
     else {
       tempCols = [...filteredColumnNodes]
@@ -125,6 +170,16 @@ export default function DataInput(props) {
       } else{
         tempCols.push(col)
       }
+
+      // handle column filter set
+      for (let key of Object.keys(tempColumnNodes)) {
+        if(key.includes(col)) {
+          tempColumnNodes[key] = !tempColumnNodes[key]
+        }
+      }
+      tempColumnFilterSet[col].checked = !tempColumnFilterSet[col].checked
+      setColumnFilterSet(tempColumnFilterSet)
+
       tempColumnNodes[col] = !tempColumnNodes[col]
       setColumnNodes(tempColumnNodes)
       setFilteredColumnNodes(tempCols)
@@ -134,6 +189,7 @@ export default function DataInput(props) {
 const handleRowFilter = (row) => {
     var tempRows
     let tempRowNodes = {...rowNodes}
+    let tempRowFilterSet = {...rowFilterSet}
     if (row === 'all') {
       tempRows = filteredRowNodes.length === rowNodesMapping.length ? [] : rowNodesMapping
       if (filteredRowNodes.length === rowNodesMapping.length) {
@@ -147,6 +203,22 @@ const handleRowFilter = (row) => {
       }
       setRowNodes(tempRowNodes)
       setFilteredRowNodes(tempRows);
+
+      // handle row filter set 
+      let allChecked = true
+      for (let key of Object.keys(tempRowFilterSet)) {
+        if(!tempRowFilterSet[key].checked) allChecked = false
+      }
+      if (allChecked) {
+        for (let key of Object.keys(tempRowFilterSet)) {
+          tempRowFilterSet[key].checked = false
+        }
+      } else {
+        for (let key of Object.keys(tempRowFilterSet)) {
+          tempRowFilterSet[key].checked = true
+        }
+      }
+      setRowFilterSet(tempRowFilterSet)
     }
     else {
       tempRows = [...filteredRowNodes]
@@ -156,6 +228,16 @@ const handleRowFilter = (row) => {
         } else{
           tempRows.push(row)
         }
+
+        // handle row filter set
+        for (let key of Object.keys(tempRowNodes)) {
+          if(key.includes(row)) {
+            tempRowNodes[key] = !tempRowNodes[key]
+          }
+        }
+        tempRowFilterSet[row].checked = !tempRowFilterSet[row].checked
+        setRowFilterSet(tempRowFilterSet)
+
         tempRowNodes[row] = !tempRowNodes[row]
         setRowNodes(tempRowNodes)
         setFilteredRowNodes(tempRows)
@@ -256,6 +338,20 @@ const handleRowFilter = (row) => {
           </Grid>
           <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
+            {/* <FilterDropdown
+                width="300px"
+                maxHeight="300px"
+                option1="Column"
+                filtered1={filteredColumnNodes}
+                total1={columnNodesMapping}
+                isAllSelected1={isAllColumnsSelected}
+                handleFilter1={handleColumnFilter}
+                option2="Row"
+                filtered2={filteredRowNodes}
+                total2={rowNodesMapping}
+                isAllSelected2={isAllRowsSelected}
+                handleFilter2={handleRowFilter}
+            /> */}
             <FilterDropdown
                 width="300px"
                 maxHeight="300px"
@@ -269,7 +365,9 @@ const handleRowFilter = (row) => {
                 total2={rowNodesMapping}
                 isAllSelected2={isAllRowsSelected}
                 handleFilter2={handleRowFilter}
-            />
+                rowFilterSet={rowFilterSet}
+                columnFilterSet={columnFilterSet}
+              />
             </Box>
           </Grid>
         </Grid>
