@@ -28,11 +28,9 @@ describe('scenario testing', () => {
         sc_count+=1
     })
 
-    // context('downloadFile', () => {
     it('download strategic small case study', () => {
         cy.downloadFile(strategic_small_case_study_url,'cypress/downloads','strategic_small_case_study.xlsx')
     })
-    // })
 
     it('creates a new scenario by uploading excel sheet', () => {
         //load webpage
@@ -173,5 +171,12 @@ describe('scenario testing', () => {
         cy.findByRole('heading', {name: /running optimization/i, timeout: 1200000}).should('not.exist')
         cy.screenshot(`${sc_count}_finished optimizing`)
         sc_count+=1
+
+        //validate results
+        cy.contains(/recycling rate/i).should('be.visible')
+        cy.contains(/annual disposal/i).should('be.visible')
+        cy.contains(/groundwater source/i).should('be.visible')
+        cy.contains(/capex/i).should('be.visible')
+        cy.contains(/opex/i).should('be.visible')
     })
 })
