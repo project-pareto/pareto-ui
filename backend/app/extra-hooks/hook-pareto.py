@@ -53,5 +53,6 @@ for png_file in pkg_path.glob("**/*"):
 # add disposal override pngs
 datas.append(('internal/assets/DisposalOverride.png', 'app/internal/assets'))
 datas.append(('internal/assets/DisposalOverrideInput.png', 'app/internal/assets'))
+datas.append(('internal/assets/SRAInput.png', 'app/internal/assets'))
 
 print(datas)

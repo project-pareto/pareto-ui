@@ -141,7 +141,7 @@ class ScenarioHandler:
                 ## move SRA image into input network diagram spot
                 _log.info('scenario has been RENAMED to SRA')
                 input_diagramFileType = 'png'
-                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/DisposalOverrideInput.png'
+                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/SRAInput.png'
                 new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
                 shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
                 updatedScenario[f'inputDiagramExtension'] = 'png'
