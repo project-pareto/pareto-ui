@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "add-name-input-on-rerun"
+      - "new-sra-diagram"
 
 defaults:
   run:
