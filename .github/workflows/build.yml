@@ -62,7 +62,7 @@ jobs:
         with:
             name: windows-pareto-dist
             path: |
-              electron/dist/ParetoUI-08.25.23-win64.exe
+              electron/dist/ParetoUI-08.28.23-win64.exe
   
   # linux-build:
   #   name: Linux Build
