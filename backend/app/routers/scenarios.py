@@ -107,8 +107,8 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
             "pipelineCost": data['scenario']['optimization']['pipelineCostCalculation'],
             "waterQuality": data['scenario']['optimization']['waterQuality']
         }
-        defaultParams = {'solver': None, 'build_units': 'user_units', 'optimalityGap': 5, 'scale_model': True}
-        for param in ['solver', 'build_units', 'optimalityGap', 'scale_model']:
+        defaultParams = {'solver': None, 'build_units': 'user_units', 'optimalityGap': 5, 'scale_model': True, 'hydraulics': 'false'}
+        for param in ['solver', 'build_units', 'optimalityGap', 'scale_model', 'hydraulics']:
             try:
                 modelParameters[param]=data['scenario']['optimization'][param]
             except:

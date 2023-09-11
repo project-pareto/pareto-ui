@@ -214,6 +214,7 @@ class ScenarioHandler:
                     "runtime": 900, 
                     "pipelineCostCalculation": "distance_based", 
                     "waterQuality": "false", 
+                    "hydraulics": "false",
                     "solver": "cbc",
                     "build_units": "scaled_units",
                     "optimalityGap": 0,
