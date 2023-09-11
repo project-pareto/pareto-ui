@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "add-name-input-on-rerun"
+      - "new-sra-diagram"
 
 defaults:
   run:
@@ -62,7 +62,7 @@ jobs:
         with:
             name: windows-pareto-dist
             path: |
-              electron/dist/Pareto-UI_Setup.exe
+              electron/dist/ParetoUI-08.28.23-win64.exe
   
   # linux-build:
   #   name: Linux Build

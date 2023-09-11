@@ -130,6 +130,24 @@ class ScenarioHandler:
     def update_scenario(self, updatedScenario):
         _log.info(f"Updating scenario list")
 
+        try:
+            id_ = updatedScenario["id"]
+            newName = updatedScenario["name"]
+            oldName = self.scenario_list[id_]["name"]
+            # _log.info('trying to replace input diagram for scenarios renamed to SRA')
+            # _log.info(f'new scenario name is: {newName}')
+            # _log.info(f'previous name was {oldName}')
+            if newName.upper() == "SRA" and oldName.upper() != "SRA":
+                ## move SRA image into input network diagram spot
+                _log.info('scenario has been RENAMED to SRA')
+                input_diagramFileType = 'png'
+                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/SRAInput.png'
+                new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
+                shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+                updatedScenario[f'inputDiagramExtension'] = 'png'
+        except:
+            _log.error('unable to check and/or replace input diagram for SRA')
+
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
         while(locked):
