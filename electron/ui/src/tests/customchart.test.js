@@ -31,6 +31,11 @@ test('test model results area chart', () => {
             width={600}
             height={500}
             showlegend={true}
+            labelIndex={1}
+            xindex={2}
+            yindex={3}
+            chartType={'area'}
+            stackgroup={"one"}
       /> )
 
 })
