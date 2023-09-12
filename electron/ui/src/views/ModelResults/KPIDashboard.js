@@ -1,9 +1,10 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, Grid, IconButton, Tooltip } from '@mui/material';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
+import InfoIcon from '@mui/icons-material/Info';
 import Plot from 'react-plotly.js';
 import AreaChart from '../../components/AreaChart/AreaChart'
 
@@ -233,7 +234,7 @@ export default function KPIDashboard(props) {
         </Grid>
         
         <Grid item xs={12}>
-        <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
+        <Box style={{backgroundColor:'white'}} sx={styles.areaChartBox}>
             <Grid container>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
@@ -242,9 +243,14 @@ export default function KPIDashboard(props) {
                     title="Trucked Water Deliveries By Destination"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
                     yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                    labelIndex={1}
+                    xindex={2}
+                    yindex={3}
                     width={600}
                     height={500}
                     showlegend={true}
+                    chartType={'area'}
+                    stackgroup={"one"}
                 />
                 </Box>
             </Grid>
@@ -255,13 +261,64 @@ export default function KPIDashboard(props) {
                     title="Piped Water Deliveries By Destination"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
                     yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                    labelIndex={1}
+                    xindex={2}
+                    yindex={3}
                     width={600}
                     height={500}
                     showlegend={true}
+                    chartType={'area'}
+                    stackgroup={"one"}
                 />
                 </Box>
             </Grid>
             </Grid>
+        </Box>
+        </Grid>
+
+        <Grid item xs={12}>
+        <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
+            <Grid container>
+                
+            <Grid item xs={6}>
+                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                <AreaChart
+                    data={props.waterQualityData} 
+                    title="Water Quality by Node"
+                    xaxis={{titletext: "Planning Horizon (weeks)"}}
+                    yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                    labelIndex={0}
+                    xindex={2}
+                    yindex={3}
+                    width={600}
+                    height={500}
+                    showlegend={true}
+                    chartType={'line'}
+                    stackgroup={false}
+                />
+                </Box>
+            </Grid>
+            <Grid item xs={6}>
+            
+                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                {/* <AreaChart
+                    data={props.hydraulicsData} 
+                    title="Pressure by Node"
+                    xaxis={{titletext: "Planning Horizon (weeks)"}}
+                    yaxis={{titletext: "Pressure (?)"}}
+                    labelIndex={0}
+                    xindex={2}
+                    yindex={3}
+                    width={600}
+                    height={500}
+                    showlegend={true}
+                    chartType={'line'}
+                    stackgroup={false}
+                /> */}
+                </Box>
+            </Grid>
+            </Grid>
+            {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
         </Box>
         </Grid>
 

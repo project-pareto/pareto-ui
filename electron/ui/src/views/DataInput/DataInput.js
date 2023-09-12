@@ -275,6 +275,8 @@ const handleRowFilter = (row) => {
                   width={750}
                   height={500}
                   showlegend={true}
+                  chartType={'area'}
+                  stackgroup={"one"}
                 />
             </Box>
             )

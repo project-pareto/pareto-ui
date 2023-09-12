@@ -1,5 +1,5 @@
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import { useState } from 'react';   
 import { Box, Grid, InputAdornment, Checkbox, FormControlLabel, FormControl, Button } from '@mui/material';
 import { MenuItem, Radio, RadioGroup, Select, IconButton, Tooltip, Collapse, OutlinedInput } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
@@ -41,7 +41,7 @@ export default function Optimization(props) {
                   PARETO's hydraulics module allows the user to determine pumping needs and compute pressures at every node in the network while considering maximum allowable operating pressure (MAOP) constraints. Select how you would like to include it in the model:<br/>
                   -False: This option allows the user to skip the hydraulics computations in the PARETO model.<br/>
                   -Post Process: PARETO first solves for optimal flows and network design. Afterwards, the hydraulics block containing constraints for pressure balances and losses is solved.<br/>
-                  -Co-Optimize: In this method, the hydraulics model block is solved together with the produced water flow and network design. Note: The co-optimize model as currently implemented requires the following MINLP solvers: SCIP and BARON..
+                  -Co-Optimize: In this method, the hydraulics model block is solved together with the produced water flow and network design. Note: The co-optimize model as currently implemented requires the following MINLP solvers: SCIP and BARON.
               </div>,
     solver: <div>
               Select the solver you would like to use. Note: Gurobi requires a license. 
