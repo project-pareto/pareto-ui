@@ -6,7 +6,7 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
 import InfoIcon from '@mui/icons-material/Info';
 import Plot from 'react-plotly.js';
-import AreaChart from '../../components/AreaChart/AreaChart'
+import CustomChart from '../../components/CustomChart/CustomChart'
 
 export default function KPIDashboard(props) {
     const [ kpiData, setKpiData ] = useState(null)
@@ -238,7 +238,7 @@ export default function KPIDashboard(props) {
             <Grid container>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <AreaChart
+                <CustomChart
                     data={props.truckedData} 
                     title="Trucked Water Deliveries By Destination"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
@@ -256,7 +256,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <AreaChart
+                <CustomChart
                     data={props.pipedData} 
                     title="Piped Water Deliveries By Destination"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
@@ -282,7 +282,7 @@ export default function KPIDashboard(props) {
                 
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <AreaChart
+                <CustomChart
                     data={props.waterQualityData} 
                     title="Water Quality by Node"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
@@ -301,7 +301,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={6}>
             
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                {/* <AreaChart
+                {/* <CustomChart
                     data={props.hydraulicsData} 
                     title="Pressure by Node"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
