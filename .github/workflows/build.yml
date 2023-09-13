@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "new-sra-diagram"
+      - "build"
 
 defaults:
   run:
@@ -39,13 +39,13 @@ jobs:
       - name: Get idaes extensions
         run: idaes get-extensions
 
-      # - name: Install Pareto locally
-      #   working-directory: ../
-      #   run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.5.0_release && pip install --progress-bar off .
-
       - name: Install Pareto locally
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout 0.8.0 && pip install --progress-bar off .
+        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+
+      # - name: Install Pareto locally
+      #   working-directory: ../
+      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout 0.8.0 && pip install --progress-bar off .
 
       - name: Build Backend
         run: npm --prefix electron run build-backend
@@ -60,9 +60,9 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-            name: windows-pareto-dist
+            name: windows-pareto-dist.exe
             path: |
-              electron/dist/ParetoUI-08.28.23-win64.exe
+              electron/dist/ParetoUI-09.13.23-win64.exe
   
   # linux-build:
   #   name: Linux Build
