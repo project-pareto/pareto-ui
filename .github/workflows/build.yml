@@ -56,13 +56,16 @@ jobs:
       - name: Build Windows Distribution
         run: npm --prefix electron run electron-build-win
 
+      - name: Display file names
+        run: cd electron && cd dist && ls
+
       - name: Upload artifact for windows build
         uses: actions/upload-artifact@v3
         if: always()
         with:
-            name: windows-pareto-dist.exe
+            name: windows-pareto-dist
             path: |
-              electron/dist/ParetoUI-09.13.23-win64.exe
+              electron/dist/pareto-ui-v09.13.23-win64.paf
   
   # linux-build:
   #   name: Linux Build
