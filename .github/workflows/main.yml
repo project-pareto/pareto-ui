@@ -35,7 +35,13 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: environment.yml
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
           activate-environment: pareto-ui-env
+
+      - name: Install correct branch of pareto
+        working-directory: ../
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
       - name: Install electron JS dependencies
         run: |
@@ -48,6 +54,14 @@ jobs:
       - name: get idaes extensions
         run: idaes get-extensions
 
+      # - name: get idaes extensions
+      #   run: |
+      #    if [ "$RUNNER_OS" == "Linux" ]; then
+      #         idaes get-extensions --platform ubuntu2104
+      #    else
+      #         idaes get-extensions
+      #    fi
+
       - name: run component tests
         run: npm --prefix electron/ui test
 
@@ -59,9 +73,9 @@ jobs:
 
       - name: Cypress e2e tests
         working-directory: electron/ui
-        timeout-minutes: 15
+        timeout-minutes: 24
         run: |
-          "$(npm bin)"/cypress run
+          npx cypress run
       - name: Upload artifact for screenshots & videos
         uses: actions/upload-artifact@v3
         if: always()

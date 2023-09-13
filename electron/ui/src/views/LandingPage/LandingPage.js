@@ -67,7 +67,7 @@ export default function LandingPage(props) {
                 <Grid item xs={10}> 
                     <Box style={{}}>
                         <p>
-                            PARETO can help organizations better manage, better treat, and 
+                            PARETO helps organizations better manage, better treat, and 
                             - where possible - beneficially reuse produced water from oil 
                             and gas operations.
                         </p>

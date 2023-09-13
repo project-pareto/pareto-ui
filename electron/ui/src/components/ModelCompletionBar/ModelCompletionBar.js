@@ -10,7 +10,7 @@ export default function ModelCompletionBar(props) {
     const horizontal = "right"
 
     const handleClose = () => {
-        props.setShowCompletedOptimization(false)
+        props.handleCloseFinishedOptimizationDialog()
     }
 
     return ( 

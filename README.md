@@ -39,7 +39,7 @@ conda env create --file environment-mac.yml && conda activate pareto-ui-env
 Uninstall x86-64 versions of numpy and pandas:
 
 ```sh
-conda uninstall -y numpy pandas
+pip uninstall -y numpy pandas
 ```
 
 #### 1.3
@@ -47,7 +47,7 @@ conda uninstall -y numpy pandas
 Install arm64 versions of numpy and pandas:
 
 ```sh
-conda install -y -c conda-forge/osx-arm64 numpy pandas
+conda install -y -c conda-forge/osx-arm64 numpy pandas=1.5.3
 ```
 
 

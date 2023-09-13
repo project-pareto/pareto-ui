@@ -28,3 +28,25 @@ export const checkTasks = () => {
         mode: 'cors'
     });
 }; 
+
+export const fetchDiagram = (type, id) => {
+    return fetch('http://localhost:8001/get_diagram/'+type+'/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}
+
+export const uploadDiagram = (data, type, id) => {
+    return fetch('http://localhost:8001/upload_diagram/'+type+'/'+id, {
+        method: 'POST', 
+        mode: 'cors',
+        body: data
+    });
+}; 
+
+export const deleteDiagram = (type, id) => {
+    return fetch('http://localhost:8001/delete_diagram/'+type+'/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}

@@ -1,86 +1,270 @@
-import React from 'react';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
-import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import Tooltip from '@mui/material/Tooltip';
+import React, {useState, useEffect} from 'react';
+import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
+import CategoryNames from '../../assets/CategoryNames.json'
+import Subcategories from '../../assets/Subcategories.json'
 import PopupModal from '../../components/PopupModal/PopupModal'
 
 
 const drawerWidth = 240;
 
 export default function Sidebar(props) {
-  const [ openSaveModal, setOpenSaveModal ] = React.useState(false)
-  const [ key, setKey ] =  React.useState(null)
+  const {
+    handleSetCategory,
+    scenario,
+    section,
+    category,
+    inputDataEdited,
+    handleUpdateExcel,
+    setInputDataEdited,
+    syncScenarioData,
+  } = props
+  const [ openSaveModal, setOpenSaveModal ] = useState(false)
+  const [ key, setKey ] =  useState(null)
+  const [ openDynamic, setOpenDynamic ] = useState(true)
+  const [ openStatic, setOpenStatic ] = useState(false)
+  const [ openResultsTables, setOpenResultsTables ] = useState(false)
+  const [ overrideList, setOverrideList ] = useState([])
+
+  useEffect(() => {
+    let tempOverrideList = []
+    if (scenario.optimized_override_values !== undefined)  {
+        for(let key of Object.keys(scenario.optimized_override_values)) {
+            if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+              tempOverrideList.push(key)
+            }
+        }
+    }
+    if (tempOverrideList.length > 0) tempOverrideList.push("Results Tables")
+    setOverrideList(tempOverrideList)
+},[scenario])
+
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
 
+  const styles = {
+    topLevelCategory: {
+      paddingLeft: "0px",
+      fontWeight: "500",
+      margin: 0,
+      // justifyContent: "space-between"
+    },
+    subcategory: {
+      paddingLeft: "10px",
+      margin: 0,
+    },
+    selected: {
+      cursor: "pointer",
+      color:"#0b89b9",
+      backgroundColor: "#D4EFFF",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1,
+      fontWeight: "bold"
+    },
+    unselected: {
+      cursor: "pointer",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1
+    },
+    override: {
+      backgroundColor: "rgb(255,215,0, 0.4)",
+      cursor: "pointer",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1
+    },
+  }
+
   const handleSaveModal = () => {
-    console.log('saving this thing')
-    props.handleUpdateExcel(props.scenario.id, props.category, props.scenario.data_input.df_parameters[props.category])
+    // console.log('saving this thing')
+    handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
     handleCloseSaveModal()
-    props.setInputDataEdited(false)
-    props.handleSetCategory(key)
+    setInputDataEdited(false)
+    handleSetCategory(key)
   }
 
   const handleDiscardChanges = () => {
     handleCloseSaveModal()
-    props.setInputDataEdited(false)
-    props.handleSetCategory(key)
-    props.resetScenarioData()
+    setInputDataEdited(false)
+    handleSetCategory(key)
+    syncScenarioData()
   }
 
   const handleClick = (key) => {
+    // console.log(key)
     setKey(key)
-    if (props.inputDataEdited) {
+    if (inputDataEdited) {
       handleOpenSaveModal()
     }
     else {
-      props.handleSetCategory(key)
+      handleSetCategory(key)
+    }
+  }
+
+  const getStyle = (key) => {
+    try {
+      if(category === key) return styles.selected
+      else if (overrideList.includes(key)) return styles.override
+      else return styles.unselected
+    }
+    catch(e) {
+      return styles.unselected
     }
   }
 
   const renderAdditionalCategories = () => {
-    let additionalCategories = props.section === 0 ? {"Plots": null, "Network Diagram": null} : props.section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
+    let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
-        <>
-        <ListItem key={"listitem_"+key} disablePadding>
-            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
-            <ListItemText key={"listitemtext_"+key} primary={key} />
-            </ListItemButton>
-        </ListItem>
-        <Divider key={"divider_"+key}></Divider>
-      </>
+        <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
+            <p style={styles.topLevelCategory}>{key}</p>
+        </div>
       ))
     )
   }
 
-  const renderTable = () => {
-    return (
-      Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
+  const renderTopLevelCategories = () => {
+    if (section === 0) {
+      return (
+        <div>
+          <div style={getStyle("Dynamic")}  onClick={() => setOpenDynamic(!openDynamic)}> 
+            <p style={styles.topLevelCategory}>
+              <span style={{display:"flex", justifyContent: "space-between"}}>
+                Dynamic Inputs
+                <IconButton disableRipple size="small" sx={{marginTop: -3, marginBottom: -3}}>{openDynamic ? <ExpandLess /> : <ExpandMore />}</IconButton>
+              </span>
+            </p>
+            
+              
+          </div>
+          {renderDynamicCategories()}
+          <div style={getStyle("Static")}  onClick={() => setOpenStatic(!openStatic)}> 
+              <p style={styles.topLevelCategory}>
+              <span style={{display:"flex", justifyContent: "space-between"}}>
+                Static Inputs
+                <IconButton disableRipple size="small" sx={{marginTop: -3, marginBottom: -3}}>{openStatic ? <ExpandLess /> : <ExpandMore />}</IconButton>
+              </span>
+              </p>
+          </div>
+          {renderStaticCategories()}
+        </div>
+      ) 
+    }else if (section ===2) {
+      return (
         <>
-        <Tooltip title={ParetoDictionary[key] ? ParetoDictionary[key] : key} placement="right-start">
-        <ListItem key={"listitem_"+key} disablePadding>
-            <ListItemButton key={"listitembutton_"+key} selected={props.category===key} onClick={() => handleClick(key)}>
-            <ListItemText 
-              key={"listitemtext_"+key} 
-              // primary={key.replace('_dict','').replace(/vb*_[CDFLQRSTXy]_/,'')} 
-              primary={key} 
-            />
-            </ListItemButton>
-        </ListItem>
-        </Tooltip>
-        <Divider key={"divider_"+key}></Divider>
-      </>
-      ))
+        <div style={category==="Results Tables" ? styles.selected : styles.unselected} onClick={() => setOpenResultsTables(!openResultsTables)}> 
+            
+          <p style={styles.topLevelCategory}>
+            <span style={{display:"flex", justifyContent: "space-between"}}>
+              Results Tables
+              <IconButton disableRipple edge={"end"} size="small" sx={{marginTop: -3, marginBottom: -3}}>{openResultsTables ? <ExpandLess /> : <ExpandMore />}</IconButton>
+            </span>
+          </p>
+        </div>
+          {renderResultsTables()}
+          </>
+      ) 
+    }
+  }
+
+  const renderDynamicCategories = () => {
+    return (
+      <Collapse in={openDynamic} timeout="auto" unmountOnExit>
+      {Subcategories.Dynamic.map( (value,index) => {
+        return(
+          <div style={getStyle(value)} onClick={() => handleClick(value)} key={value+""+index}> 
+          <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
+            <p style={styles.subcategory}>
+              {CategoryNames[value] ? CategoryNames[value] : 
+                    value.replace('_dict','')
+                    .replace('v_F_','')
+                    .replace('v_C_','Cost ')
+                    .replace('v_R_','Credit ')
+                    .replace('v_L_','Water Level ')
+                    .replace('v_S_','Slack ')
+                    .replace('v_D_','Disposal ')
+                    .replace('v_X_','Storage ')
+                    .replace('v_T_','Treatment ')
+                    .replace('vb_y_Flow','Directional Flow')
+                    .replace('vb_y_','New ')
+              }
+              </p>
+              </Tooltip>
+          </div>
+        )
+      })}
+      </Collapse>
     )
-    
+  }
+
+  const renderStaticCategories = () => {
+    return (
+      <Collapse in={openStatic} timeout="auto" unmountOnExit>
+      {Subcategories.Static.map( (value,index) => {
+        return (
+          <div style={getStyle(value)} onClick={() => handleClick(value)} key={value+""+index}> 
+          <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
+            <p style={styles.subcategory}>
+              {CategoryNames[value] ? CategoryNames[value] : 
+                    value.replace('_dict','')
+                    .replace('v_F_','')
+                    .replace('v_C_','Cost ')
+                    .replace('v_R_','Credit ')
+                    .replace('v_L_','Water Level ')
+                    .replace('v_S_','Slack ')
+                    .replace('v_D_','Disposal ')
+                    .replace('v_X_','Storage ')
+                    .replace('v_T_','Treatment ')
+                    .replace('vb_y_Flow','Directional Flow')
+                    .replace('vb_y_','New ')
+              }
+              </p>
+              </Tooltip>
+          </div>
+        )
+      })}
+      </Collapse>
+    )
+  }
+  const renderResultsTables = () => {
+    return (
+      <Collapse in={openResultsTables} timeout="auto" unmountOnExit>
+        {Object.entries(scenario.results.data).map( ([key, value]) => ( 
+          <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
+              <p style={styles.subcategory}>
+                {CategoryNames[key] ? CategoryNames[key] :
+                    key.replace('_dict','')
+                        .replace('v_F_','')
+                        .replace('v_C_','Cost ')
+                        .replace('v_R_','Credit ')
+                        .replace('v_L_','Water Level ')
+                        .replace('v_S_','Slack ')
+                        .replace('v_D_','Disposal ')
+                        .replace('v_X_','Storage ')
+                        .replace('v_T_','Treatment ')
+                        .replace('vb_y_Flow','Directional Flow')
+                        .replace('vb_y_','New ')}
+              </p>
+          </div>
+        ))}
+      </Collapse>
+    )
   }
 
   return (
@@ -91,27 +275,26 @@ export default function Sidebar(props) {
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+          [`& .MuiDrawer-paper`]: {backgroundColor:"#F5F5F6",  width: drawerWidth, boxSizing: 'border-box' },
           [`& .MuiBox-root`]: {marginBottom: '60px' },
         }}
         PaperProps={{
             sx: {
             width: 240,
-            marginTop: '152px',
-            paddingBottom: '152px'
+            marginTop: '158px',
+            paddingBottom: '158px',
+            zIndex:1
             }
         }}
-        open={props.open}
+        open={true}
       >
         <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
-            <List key="drawer_list" aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
-            {props.scenario &&
+            {scenario &&
               renderAdditionalCategories()
             }
-            {props.scenario &&
-              renderTable()
+            {scenario &&
+              renderTopLevelCategories()
             }
-          </List>
         </Box>
       </Drawer>
       <PopupModal
@@ -127,6 +310,7 @@ export default function Sidebar(props) {
         buttonTwoText='Discard'
         buttonTwoColor='error'
         buttonTwoVariant='outlined'
+        width={400}
       />
     </Box>
   );

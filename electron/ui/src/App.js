@@ -10,16 +10,19 @@ import '@fontsource/roboto/700.css';
 import Header from './components/Header/Header'; 
 import Dashboard from './views/Dashboard/Dashboard';
 import ScenarioList from './views/ScenarioList/ScenarioList';
+import ScenarioCompare from './views/ScenarioCompare/ScenarioCompare';
 import LandingPage from './views/LandingPage/LandingPage';
 import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
 import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
 import { deleteScenario, copyScenario } from './services/scenariolist.service'
+import { runModel } from './services/homepage.service';
 
 
 function App() {
   
   const [ scenarioData, setScenarioData ] = useState(null);
   const [ scenarios, setScenarios ] = useState({}); 
+  const [ appState, setAppState ] = useState(null)
   const [ section, setSection ] = useState(0)
   const [ category, setCategory ] = useState(null)
   const [ scenarioIndex, setScenarioIndex ] = useState(null)
@@ -29,6 +32,7 @@ function App() {
   const [ checkModelResults, setCheckModelResults ] = useState(0)
   const [ showCompletedOptimization, setShowCompletedOptimization ] = useState(false)
   const [ lastCompletedScenario, setLastCompletedScenario ] = useState(null)
+  const [ compareScenarioIndexes, setCompareScenarioIndexes ] = useState([])
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
 
@@ -57,8 +61,8 @@ function App() {
           for (var key in data.data){
             let scenario = {...data.data[key]}
             tempScenarios[key] = scenario
-            if (!['complete','none','failure'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
-              scenario.results.status = 'none'
+            if (!['Optimized','Draft','failure', 'Not Optimized', 'complete', 'none', 'Infeasible'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
+              scenario.results.status = 'Draft'
               updateScenario({'updatedScenario': {...scenario}})
               .then(response => response.json())
               .then((data) => {
@@ -92,6 +96,7 @@ useEffect(()=> {
   /*
     make api call to get status of each running task
   */
+//  console.log('checking model results')
   fetchScenarios()
     .then(response => response.json())
     .then((data)=>{
@@ -101,22 +106,16 @@ useEffect(()=> {
       for (var i =0; i < backgroundTasks.length; i++) {
         let task = backgroundTasks[i]
         let tempScenario = tempScenarios[task]
-        if(tempScenario.results.status !== scenarios[task].results.status) {
-          updated=true
-          if(tempScenario.results.status === "complete" || tempScenario.results.status === "failure") completed = true
-        }
+        if(tempScenario.results.status !== scenarios[task].results.status) updated=true
+        if(tempScenario.results.status === "Optimized" || tempScenario.results.status === "failure" || tempScenario.results.status === "Infeasible") completed = true
       }
-      if(updated) {
-        // console.log('updated')
-        if(completed) {
-          // console.log('completed')
+      if (completed) {
           /*
             set scenario data, section and scenarios; finish checking
           */
-         setLastCompletedScenario(backgroundTasks[0])
-         handleCompletedOptimization(tempScenarios, backgroundTasks[0])
-        } else {
-          // console.log('not completed')
+            setLastCompletedScenario(backgroundTasks[0])
+            handleCompletedOptimization(tempScenarios, backgroundTasks[0])
+      } else if (updated) {
           /*
             set scenarios and scenario data; keep checking
           */
@@ -128,13 +127,16 @@ useEffect(()=> {
               setTimeout(function() {
                 setCheckModelResults(checkModelResults => checkModelResults+1)
               }, TIME_BETWEEN_CALLS)
+            } else{
+              setCheckModelResults(0)
             }
-        }
       } else {
         if(checkModelResults < 1000) {
           setTimeout(function() {
             setCheckModelResults(checkModelResults => checkModelResults+1)
           }, TIME_BETWEEN_CALLS)
+        }else{
+          setCheckModelResults(0)
         }
       }
     }).catch(e => {
@@ -154,16 +156,28 @@ useEffect(()=> {
     /*
       if not on model results tab, show popup that lets user know that model has finished running
     */
-   if(""+id === ""+scenarioIndex && section === 2){
+   if(""+id === ""+scenarioIndex){
     setScenarioData(newScenarios[id])
-   }else {
+    if (section === 2) {
+      handleSetCategory("Dashboard")
+     }
+   }
+   if (section !== 2) {
     setShowCompletedOptimization(true)
    }
   }
 
   const goToModelResults = () => {
+    handleSetSection(2)
+    // handleSetCategory("Dashboard")
     setShowCompletedOptimization(false)
-    handleScenarioSelection(lastCompletedScenario)
+    setScenarioData(scenarios[lastCompletedScenario]);
+    setScenarioIndex(lastCompletedScenario)
+  }
+
+  const handleCloseFinishedOptimizationDialog = () => {
+    // console.log('inside handleCloseFinishedOptimizationDialog')
+    setShowCompletedOptimization(false)
   }
 
   const navigateToScenarioList = () => {
@@ -188,16 +202,7 @@ useEffect(()=> {
     navigate('/scenario', {replace: true})
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
-    /*
-      if scenario is curretly running or solved, send user to model results tab
-    */
-    if(["Initializing", "Solving model", "Generating output", "complete", "failure"].includes(scenarios[scenario].results.status)) {
-      setCategory("Dashboard")
-      setSection(2)
-    } else {
-      setSection(0);
-      setCategory("Network Diagram")
-    }
+    updateAppState({action: 'select'}, scenario)
 
   };
 
@@ -208,15 +213,19 @@ useEffect(()=> {
     setScenarios(temp)
     setScenarioIndex(data.id)
     setScenarioData(data)
-    setSection(0);
-    setCategory("Network Diagram")
+    updateAppState({action:'new'}, data.id)
     navigate('/scenario', {replace: true})   
   }
 
-  const handleScenarioUpdate = (updatedScenario) => {
+  const handleScenarioUpdate = (updatedScenario, keepOptimized) => {
+    // console.log('inside handle scenario update')
+    if (updatedScenario.results.status==='Optimized' && !keepOptimized) {
+      // console.log('changing status to not optimized')
+      updatedScenario.results.status = "Not Optimized"
+    }
     const temp = {...scenarios}
     temp[scenarioIndex] = {...updatedScenario}
-    console.log('updating scenario: ',updateScenario)
+    console.log('updating scenario: ',updatedScenario)
     setScenarios(temp)
     setScenarioData({...updatedScenario})
     // console.log('new scenario: ')
@@ -235,33 +244,14 @@ useEffect(()=> {
     set process section (input, optimization, results)
   */
   const handleSetSection = (section) => {
-    if(section === 2) {
-      setCategory("Dashboard")
-      fetchScenarios()
-      .then(response => response.json())
-      .then((data)=>{
-        console.log('setscenarios: ',data.data)
-        setScenarios(data.data)
-        setScenarioData(data.data[scenarioIndex])
-      });
-    } else if(section === 0) {
-      setCategory("Network Diagram")
-    } else {
-      setCategory(null)
-      checkTasks()
-      .then(response => response.json())
-      .then((data)=>{
-        setBackgroundTasks(data.tasks)
-      });
-    }
-    setSection(section)
+    updateAppState({action:'section',section:section},scenarioIndex)
  }
 
  /*
   set sidebar category
  */
  const handleSetCategory = (category) => {
-  setCategory(category)
+  updateAppState({action:'category',category:category},scenarioIndex)
  }
 
   const handleEditScenarioName = (newName, id, updateScenarioData) => {
@@ -289,23 +279,12 @@ useEffect(()=> {
     .then(response => response.json())
     .then((data) => {
       setScenarios(data.data)
+      updateAppState({action:'delete'},index)
     }).catch(e => {
       console.error('error on scenario delete')
       console.error(e)
     })
   }
-
-  // const handleCopyScenario = (index) => {
-  //   // console.log('copying scenario: ',index)
-  //   copyScenario(index)
-  //   .then(response => response.json())
-  //   .then((data) => {
-  //     setScenarios(data.data)
-  //   }).catch(e => {
-  //     console.error('error on scenario copy')
-  //     console.error(e)
-  //   })
-  // }
 
   /*
     function for updating an input table for excel sheet
@@ -314,18 +293,22 @@ useEffect(()=> {
     updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
     .then(response => response.json())
     .then((data)=>{
-      // console.log('return from update excel: '+data)
+      // console.log('return from update excel: ')
+      // console.log(data)
+      if (data.results.status === 'Optimized') {
+        data.results.status = "Not Optimized"
+        handleScenarioUpdate(data)
+      }
     })
     .catch(e => {
-      console.error('unable to check for tasks: ',e)
+      console.error('unable to update excel: ',e)
     })
   }
 
   /*
     fetch scenarios and update frontend data
   */
-  const resetScenarioData = () => {
-    // console.log('resetting scenario data, index is '+scenarioIndex)
+  const syncScenarioData = () => {
     fetchScenarios()
       .then(response => response.json())
       .then((data)=>{
@@ -340,19 +323,117 @@ useEffect(()=> {
   const addTask = (id) => {
     let tempBackgroudTasks = [...backgroundTasks]
     tempBackgroudTasks.push(id)
+    // console.log('adding task!!!')
     setBackgroundTasks(tempBackgroudTasks)
     setCheckModelResults(checkModelResults+1)
+  }
+
+  /*
+    update the section or category and cache the values
+  */
+  const updateAppState = (action, index) => {
+    if (action.action === 'select') {
+      let tempSection
+      let tempCategory
+      if (appState) {
+        if (scenarios[index].results.status === "Draft" && appState.section === 2) {
+          tempSection = 0
+          tempCategory = appState.category
+        } else {
+          tempSection = appState.section
+          tempCategory = appState.category
+        }
+      } else {
+        // console.log('in else')
+        if(["Initializing", "Solving model", "Generating output", "Optimized", "failure"].includes(scenarios[index].results.status)) {
+          tempSection = 2
+        } else {
+          tempSection = 0
+        }
+        tempCategory = {0: "Input Summary", 1: null, 2: "Dashboard"}
+        let tempState = {section: tempSection, category: tempCategory}
+        setAppState(tempState)
+      }
+      setSection(tempSection)
+      setCategory(tempCategory[tempSection])
+    } else if (action.action === 'new') {
+      let tempSection = 0
+      let tempCategory = {0: "Input Summary", 1: null, 2: "Dashboard"}
+      let tempState = {section: tempSection, category: tempCategory}
+      setAppState(tempState)
+      setSection(tempSection)
+      setCategory(tempCategory[tempSection])
+    } else if (action.action === 'section') {
+      let tempState = {...appState}
+      tempState.section = action.section
+      setAppState(tempState)
+      setSection(action.section)
+      setCategory(tempState.category[action.section])
+    }else if (action.action === 'category') {
+      let tempState = {...appState}
+      tempState.category[section] = action.category
+      setAppState(tempState)
+      setCategory(action.category)
+    }
+  }
+
+  /*
+    create a copy of current scenario and run an optimization
+  */
+  const copyAndRunOptimization = (newScenarioName) => {
+    //copy scenario
+    copyScenario(scenarioIndex, newScenarioName)
+    .then(response => response.json())
+    .then((copy_data) => {
+      // update data
+      // console.log('setting scenarios with ')
+      // console.log(copy_data.scenarios)
+      setScenarios(copy_data.scenarios)
+      setScenarioIndex(copy_data.new_id)
+      setScenarioData(copy_data.scenarios[copy_data.new_id])
+
+      // run model on new id
+      runModel({"scenario": copy_data.scenarios[copy_data.new_id]})
+        .then(r =>  r.json().then(data => ({status: r.status, body: data})))
+        .then((response) => {
+          let responseCode = response.status
+          let data = response.body
+          if(responseCode === 200) {
+            // handleScenarioUpdate(data)
+            updateScenario({'updatedScenario': {...data}})
+            .then(response => response.json())
+            .then((updateScenario_data) => {
+              // console.log('returned from update scenario call')
+              updateAppState({action:'section',section:2},copy_data.new_id)
+              addTask(copy_data.new_id)
+              // console.log('updated scenarios on backend')
+            }).catch(e => {
+              console.error('error on scenario update')
+              console.error(e)
+            })
+          }
+          else if(responseCode === 500) {
+            console.error('error code on model run: ',data.detail)
+          }
+        })
+        .catch(e => {
+          console.error('error on model run: ',e)
+        })
+
+      }).catch(e => {
+        console.error('error on scenario copy')
+        console.error(e)
+      })
   }
 
   return (
     <div className="App">  
       <Header 
-        showHeader={showHeader}
-        scenarios={scenarios} 
-        index={scenarioIndex} 
-        scenarioData={scenarioData} 
-        handleSelection={handleScenarioSelection}
-        navigateHome={navigateToScenarioList}
+          showHeader={showHeader}
+          scenarios={scenarios}
+          index={scenarioIndex}
+          handleSelection={handleScenarioSelection}
+          navigateHome={navigateToScenarioList}
         />
         
       <Routes> 
@@ -360,9 +441,9 @@ useEffect(()=> {
           path="/" 
           element={
             <LandingPage
-            navigateToScenarioList={navigateToScenarioList}
-            handleNewScenario={handleNewScenario} 
-            scenarios={scenarios} 
+              navigateToScenarioList={navigateToScenarioList}
+              handleNewScenario={handleNewScenario} 
+              scenarios={scenarios} 
             />} 
         />
 
@@ -370,15 +451,15 @@ useEffect(()=> {
           path="/scenarios" 
           element={
             <ScenarioList
-            handleNewScenario={handleNewScenario} 
-            handleEditScenarioName={handleEditScenarioName} 
-            handleSelection={handleScenarioSelection}
-            section={section} 
-            scenarios={scenarios} 
-            deleteScenario={handleDeleteScenario}
-            setScenarios={setScenarios}
-            handleSetSection={handleSetSection} 
-            setShowHeader={setShowHeader}
+              handleNewScenario={handleNewScenario} 
+              handleEditScenarioName={handleEditScenarioName} 
+              handleSelection={handleScenarioSelection}
+              scenarios={scenarios} 
+              deleteScenario={handleDeleteScenario}
+              setScenarios={setScenarios}
+              setShowHeader={setShowHeader}
+              setCompareScenarioIndexes={setCompareScenarioIndexes}
+              setScenarioIndex={setScenarioIndex}
             />} 
         />
 
@@ -386,18 +467,33 @@ useEffect(()=> {
           path="/scenario" 
           element={
             <Dashboard 
-            handleUpdateExcel={handleUpdateExcel}
-            updateScenario={handleScenarioUpdate} 
-            handleEditScenarioName={handleEditScenarioName} 
-            scenario={scenarioData} 
-            section={section} 
-            category={category} 
-            handleSetCategory={handleSetCategory} 
-            handleSetSection={handleSetSection} 
-            backgroundTasks={backgroundTasks}
-            navigateHome={navigateToScenarioList}
-            resetScenarioData={resetScenarioData}
-            addTask={addTask}
+              handleUpdateExcel={handleUpdateExcel}
+              updateScenario={handleScenarioUpdate} 
+              handleEditScenarioName={handleEditScenarioName} 
+              scenario={scenarioData} 
+              section={section} 
+              category={category} 
+              handleSetCategory={handleSetCategory} 
+              handleSetSection={handleSetSection} 
+              backgroundTasks={backgroundTasks}
+              navigateHome={navigateToScenarioList}
+              syncScenarioData={syncScenarioData}
+              addTask={addTask}
+              appState={appState}
+              updateAppState={updateAppState}
+              scenarios={scenarios}
+              copyAndRunOptimization={copyAndRunOptimization}
+            />} 
+        />
+
+        <Route
+          path="/compare" 
+          element={
+            <ScenarioCompare
+              scenarios={scenarios} 
+              compareScenarioIndexes={compareScenarioIndexes}
+              setCompareScenarioIndexes={setCompareScenarioIndexes}
+              setScenarioIndex={setScenarioIndex}
             />} 
         />
 
@@ -408,7 +504,7 @@ useEffect(()=> {
       </Routes> 
       {showCompletedOptimization && 
         <ModelCompletionBar
-          setShowCompletedOptimization={setShowCompletedOptimization}
+          handleCloseFinishedOptimizationDialog={handleCloseFinishedOptimizationDialog}
           goToModelResults={goToModelResults}
         />
       }

@@ -44,7 +44,7 @@ export default function FilterDropdown(props) {
     }
 
     return (
-        <Accordion style={{width:props.width }}sx={{width:props.width}}>
+        <Accordion style={{minWidth:props.width }} sx={{minWidth:props.width, zIndex: 2}}>
                 <AccordionSummary sx={{marginBottom: 0, paddingBottom:0}} style={{justifyContent:"center"}}>
                 <Typography noWrap align="center" sx={{width: '100%',fontWeight: "bold", color: "#0884b4"}}>{props.option1} & {props.option2} Filters</Typography>
                 </AccordionSummary>
@@ -81,15 +81,27 @@ export default function FilterDropdown(props) {
                             primary="Select All"
                         />
                         </MenuItem>
-                        {props.total1.map((option, index) => (
-                        <MenuItem key={option} value={option} onClick={()=> props.handleFilter1(option)}>
-                            <ListItemIcon>
-                            <Checkbox checked={props.filtered1.indexOf(option) > -1} />
-                            </ListItemIcon>
-                            
-                            <ListItemText primary={option.includes('::') ? option.split("::")[1] : option} />
-                        </MenuItem>
-                        ))}
+                        {props.columnFilterSet ? 
+                        
+                        Object.entries(props.columnFilterSet).map(([key,value]) => (
+                            <MenuItem key={key} value={key} onClick={()=> props.handleFilter1(key)}>
+                                <ListItemIcon>
+                                <Checkbox checked={value.checked} />
+                                </ListItemIcon>
+                                <ListItemText primary={key} />
+                            </MenuItem>
+                        )) :
+                        
+                        props.total1.map((option, index) => (
+                            <MenuItem key={option} value={option} onClick={()=> props.handleFilter1(option)}>
+                                <ListItemIcon>
+                                <Checkbox checked={props.filtered1.indexOf(option) > -1} />
+                                </ListItemIcon>
+                                
+                                <ListItemText primary={option.includes('::') ? option.split("::")[1] : option} />
+                            </MenuItem>
+                            ))
+                        }
                     </>
                 }
                     {filterType === props.option2 && 
@@ -107,14 +119,26 @@ export default function FilterDropdown(props) {
                             primary="Select All"
                         />
                         </MenuItem>
-                        {props.total2.map((option, index) => (
-                        <MenuItem key={option} value={option} onClick={()=> props.handleFilter2(option)}>
-                            <ListItemIcon>
-                            <Checkbox checked={props.filtered2.indexOf(option) > -1} />
-                            </ListItemIcon>
-                            <ListItemText primary={option.includes('::') ? option.split("::")[1] : option} />
-                        </MenuItem>
-                        ))}
+                        {props.rowFilterSet ? 
+                        
+                        Object.entries(props.rowFilterSet).map(([key,value]) => (
+                            <MenuItem key={key} value={key} onClick={()=> props.handleFilter2(key)}>
+                                <ListItemIcon>
+                                <Checkbox checked={value.checked} />
+                                </ListItemIcon>
+                                <ListItemText primary={key} />
+                            </MenuItem>
+                        )) :
+                        
+                        props.total2.map((option, index) => (
+                            <MenuItem key={option} value={option} onClick={()=> props.handleFilter2(option)}>
+                                <ListItemIcon>
+                                <Checkbox checked={props.filtered2.indexOf(option) > -1} />
+                                </ListItemIcon>
+                                <ListItemText primary={option.includes('::') ? option.split("::")[1] : option} />
+                            </MenuItem>
+                            ))
+                        }
                     </>
                     }
                     

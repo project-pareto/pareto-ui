@@ -1,19 +1,11 @@
-import React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Paper, Grid, Box, Button, IconButton, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
-import Tooltip from '@mui/material/Tooltip';
+import CompareIcon from '@mui/icons-material/Compare';
 import { uploadExcelSheet } from '../../services/sidebar.service'
 import { copyScenario } from '../../services/scenariolist.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
@@ -21,17 +13,51 @@ import PopupModal from '../../components/PopupModal/PopupModal'
 import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'
 
 export default function ScenarioList(props) {
-    const [ showError, setShowError ] = React.useState(false)
-    const [ errorMessage, setErrorMessage ] = React.useState("")
-    const [ openEditName, setOpenEditName ] = React.useState(false)
-    const [ openDeleteModal, setOpenDeleteModal ] = React.useState(false)
-    const [ showFileModal, setShowFileModal ] = React.useState(false)
-    const [ name, setName ] = React.useState('')
-    const [ id, setId ] = React.useState(null)
+    const { 
+            handleNewScenario, 
+            handleEditScenarioName, 
+            handleSelection, 
+            scenarios, 
+            deleteScenario, 
+            setScenarios, 
+            setShowHeader, 
+            setCompareScenarioIndexes,
+            setScenarioIndex
+        } = props
+    const [ showError, setShowError ] = useState(false)
+    const [ errorMessage, setErrorMessage ] = useState("")
+    const [ openEditName, setOpenEditName ] = useState(false)
+    const [ openDeleteModal, setOpenDeleteModal ] = useState(false)
+    const [ showFileModal, setShowFileModal ] = useState(false)
+    const [ hasOverrideList, setHasOverrideList ] = useState([])
+    const [ name, setName ] = useState('')
+    const [ id, setId ] = useState(null)
+    let navigate = useNavigate();
+    const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
+    const enabledStatusListCompare = ['Optimized']
 
-    React.useEffect(()=> {
-        props.setShowHeader(true)
+    useEffect(()=> {
+        setShowHeader(true)
+        // console.log('setting show header true')
     }, [props]) 
+
+    useEffect(() => {
+        let tempHasOverrideList = []
+        for (let scenarioId of Object.keys(scenarios)) {
+            let scenario = scenarios[scenarioId]
+            if(scenario.results.status==="Optimized") {
+                if (scenario.optimized_override_values !== undefined)  {
+                    for(let key of Object.keys(scenario.optimized_override_values)) {
+                        if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+                            tempHasOverrideList.push(scenario.id)
+                        }
+                    }
+                    
+                }
+            }
+        }
+        setHasOverrideList(tempHasOverrideList)
+    },[scenarios])
 
     const handleOpenEditName = (name, id) => {
         setName(name)
@@ -46,17 +72,17 @@ export default function ScenarioList(props) {
     }
 
     const handleDelete = () => {
-        props.deleteScenario(id)
+        deleteScenario(id)
         setOpenDeleteModal(false)
         setId(null)
     }
 
     const handleCopyScenario = (index) => {
         // console.log('copying scenario: ',index)
-        copyScenario(index)
+        copyScenario(index, scenarios[index].name+' copy')
         .then(response => response.json())
         .then((data) => {
-          props.setScenarios(data.scenarios)
+          setScenarios(data.scenarios)
           setId(data.new_id)
           setOpenEditName(true)
           setName(data.scenarios[data.new_id].name)
@@ -64,14 +90,21 @@ export default function ScenarioList(props) {
           console.error('error on scenario copy')
           console.error(e)
         })
-      }
+    }
+
+    const handleCompareScenario = (index) => {
+        console.log('comparing scenario with index: '+index)
+        setScenarioIndex(index)
+        setCompareScenarioIndexes([index])
+        navigate('/compare', {replace: true})
+    }
 
     const handleEditName = (event) => {
         setName(event.target.value)
        }
     
     const handleSaveName = () => {
-        props.handleEditScenarioName(name, id, false)
+        handleEditScenarioName(name, id, false)
         setOpenEditName(false)
         setId(null)
     }
@@ -80,15 +113,15 @@ export default function ScenarioList(props) {
         console.log('handle file upload')
         console.log('creating scenario with name '+name)
         const formData = new FormData();
-        formData.append('file', file, name);
+        formData.append('file', file, file.name);
 
-        uploadExcelSheet(formData)
+        uploadExcelSheet(formData, name)
         .then(response => {
         if (response.status === 200) {
             response.json()
             .then((data)=>{
                 console.log('fileupload successful: ',data)
-                props.handleNewScenario(data)
+                handleNewScenario(data)
             }).catch((err)=>{
                 console.error("error on file upload: ",err)
                 setErrorMessage(String(err))
@@ -149,40 +182,51 @@ export default function ScenarioList(props) {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead sx={{backgroundColor: "#6094bc", color: "white"}}>
             <TableRow key="headRow">
-                <TableCell sx={styles.headerCell}>Scenario Name</TableCell>
-                <TableCell sx={styles.headerCell}>Date Created</TableCell>
-                <TableCell sx={styles.headerCell}>Status</TableCell>
-                <TableCell sx={styles.headerCell}>Actions</TableCell>
+                <TableCell sx={styles.headerCell} style={{width:"20%"}}>Scenario Name</TableCell>
+                <TableCell sx={styles.headerCell} align="center">Date Created</TableCell>
+                <TableCell sx={styles.headerCell} align="center">Status</TableCell>
+                <TableCell sx={styles.headerCell} align="center">Actions</TableCell>
             </TableRow>
             </TableHead>
             <TableBody>
             
-            {Object.entries(props.scenarios).map( ([key, value] ) => {
+            {Object.entries(scenarios).map( ([key, value] ) => {
                 return( <TableRow
                 hover
                 key={key}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } , cursor:"pointer"}}
                 >
-                <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => props.handleSelection(key)}>
-                    {value.name}
-                </TableCell>
-                <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.date}</TableCell>
-                <TableCell onClick={() => props.handleSelection(key)} sx={styles.bodyCell}>{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
-                <TableCell sx={styles.bodyCell}>
+                <Tooltip title={hasOverrideList.includes(value.id) ? "Scenario has been optimized with manual override" : ""} placement="top" arrow>
+                    <TableCell sx={styles.bodyCell} component="th" scope="row" onClick={() => handleSelection(key)}>
+                        {value.name}
+                        {hasOverrideList.includes(value.id) && <span style={{color: "red"}}> *</span>}
+                    </TableCell>
+                </Tooltip>
+                <TableCell onClick={() => handleSelection(key)} sx={styles.bodyCell} align="center">{value.date}</TableCell>
+                <TableCell onClick={() => handleSelection(key)} sx={styles.bodyCell} align="center">{value.results.status === "complete" ? "Optimized"  : value.results.status === "none" ? "Draft" : value.results.status}</TableCell>
+                <TableCell sx={styles.bodyCell} align="center">
                     <Tooltip title="Edit Scenario Name" enterDelay={500}>
-                        <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleOpenEditName(value.name, key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
                             <EditIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Copy Scenario" enterDelay={500}>
-                        <IconButton onClick={() => handleCopyScenario(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleCopyScenario(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
                             <ContentCopyIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete Scenario" enterDelay={500}>
-                        <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={['complete','none','failure'].includes(value.results.status) ? false : true}>
+                        <IconButton onClick={() => handleOpenDeleteModal(key)} disabled={enabledStatusList.includes(value.results.status) ? false : true}>
                             <DeleteIcon fontSize="small"/>
                         </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Compare Scenario" enterDelay={500}>
+                        <span>
+                            <IconButton onClick={() => handleCompareScenario(key)} disabled={enabledStatusListCompare.includes(value.results.status) ? false : true}>
+                                <CompareIcon fontSize="small"/>
+                            </IconButton>
+                        </span>
+                        
                     </Tooltip>
                 </TableCell>
                 </TableRow>
@@ -209,6 +253,7 @@ export default function ScenarioList(props) {
             buttonText='Save'
             buttonColor='primary'
             buttonVariant='contained'
+            width={400}
         />
         <PopupModal
             open={openDeleteModal}
@@ -218,10 +263,17 @@ export default function ScenarioList(props) {
             buttonText='Delete'
             buttonColor='error'
             buttonVariant='contained'
+            width={400}
         />
         {
             showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
         }
+        <Box sx={{display: 'flex', justifyContent: 'flex-start'}}>
+        <h3 style={{color: '#0083b5'}}>PARETO documentation can be found <a href="https://pareto.readthedocs.io/en/stable/" target="_blank">here</a>.</h3>
+        </Box>
+
+
+
     </Grid>
     </Box>
   );

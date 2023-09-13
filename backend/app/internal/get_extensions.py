@@ -39,9 +39,8 @@ def get_idaes_extensions():
             except Exception as e:
                 print(f'unable to set requests_ca_bundle and ssl_cert_file:\n{e}')
             print(f'trying to download binaries')
-            from idaes.util.download_bin import download_binaries
-            from idaes.config import default_binary_release
-            download_binaries(release=default_binary_release)
+            from app.internal.download_binaries import download_binaries
+            download_binaries(release="3.0.0")
             print(f'extensions have been gotten')
         print('successfully installed idaes extensions')
     except PermissionError as e:

@@ -1,43 +1,50 @@
 import React from 'react';
-import {useState} from 'react';   
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
+import {useState} from 'react';
+import { Grid, Box, IconButton, Divider } from '@mui/material';
 import InputIcon from '@mui/icons-material/Input';
-import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PieChartIcon from '@mui/icons-material/PieChart';
-import Divider from '@mui/material/Divider';
 import PopupModal from '../../components/PopupModal/PopupModal'
 
 
 export default function ProcessToolbar(props) {
+  const { 
+    handleSelection, 
+    selected, 
+    scenario,
+    category,
+    inputDataEdited,
+    handleUpdateExcel,
+    setInputDataEdited,
+    syncScenarioData
+  } = props
   const [ openSaveModal, setOpenSaveModal ] = useState(false)
   const [ key, setKey ] =  useState(null)
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
 
   const handleSaveModal = () => {
-    console.log('saving this thing')
-    props.handleUpdateExcel(props.scenario.id, props.category, props.scenario.data_input.df_parameters[props.category])
+    // console.log('saving this thing')
+    handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
     handleCloseSaveModal()
-    props.setInputDataEdited(false)
-    props.handleSelection(key)
+    setInputDataEdited(false)
+    handleSelection(key)
   }
 
   const handleDiscardChanges = () => {
     handleCloseSaveModal()
-    props.setInputDataEdited(false)
-    props.handleSelection(key)
-    props.resetScenarioData()
+    setInputDataEdited(false)
+    handleSelection(key)
+    syncScenarioData()
   }
 
   const handleClick = (key) => {
     setKey(key)
-    if (props.inputDataEdited) {
+    if (inputDataEdited) {
       handleOpenSaveModal()
     }
     else {
-      props.handleSelection(key)
+      handleSelection(key)
     }
   }
 
@@ -58,25 +65,25 @@ export default function ProcessToolbar(props) {
     },
    }
   return ( 
-    <Box sx={{position: 'sticky', top:'71px', backgroundColor:"white", zIndex:'1'}}>
+    <Box sx={{position: 'sticky', top:'71px', backgroundColor:"white", zIndex:'3'}}>
       <Grid container>
       <Grid item xs={1.8} >
-        <IconButton aria-label="data_input" sx={{marginTop:'5px'}} style={props.selected === 0 ? styles.iconSelected : null} onClick={() => handleClick(0)}>
+        <IconButton aria-label="data_input" sx={{marginTop:'5px'}} style={selected === 0 ? styles.iconSelected : null} onClick={() => handleClick(0)}>
             <InputIcon fontSize="large"></InputIcon>
         </IconButton>
-        <p style={props.selected === 0 ? styles.textSelected : styles.textUnselected}>Data Input</p>
+        <p style={selected === 0 ? styles.textSelected : styles.textUnselected}>Data Input</p>
       </Grid>
       <Grid item xs={1.8}>
-        <IconButton aria-label="optimization" sx={{marginTop:'5px'}} disabled={props.scenario ? false : true} style={props.selected === 1 ? styles.iconSelected : null} onClick={() => handleClick(1)}>
+        <IconButton aria-label="optimization" sx={{marginTop:'5px'}} disabled={scenario ? false : true} style={selected === 1 ? styles.iconSelected : null} onClick={() => handleClick(1)}>
             <SettingsIcon fontSize="large"></SettingsIcon>
         </IconButton>
-        <p style={props.selected === 1 ? styles.textSelected : styles.textUnselected}>Optimization Setup</p>
+        <p style={selected === 1 ? styles.textSelected : styles.textUnselected}>Optimization Setup</p>
       </Grid>
       <Grid item xs={1.8}>
-        <IconButton aria-label="results" sx={{marginTop:'5px'}} disabled={props.scenario ? props.scenario.results.status !== "none" ? false : true : true} style={props.selected === 2 ? styles.iconSelected : null} onClick={() => handleClick(2)}>
+        <IconButton aria-label="results" sx={{marginTop:'5px'}} disabled={scenario ? scenario.results.status !== "Draft" ? false : true : true} style={selected === 2 ? styles.iconSelected : null} onClick={() => handleClick(2)}>
             <PieChartIcon fontSize="large"></PieChartIcon>
         </IconButton>
-        <p style={props.selected === 2 ? styles.textSelected : styles.textUnselected}>Model Results</p>
+        <p style={selected === 2 ? styles.textSelected : styles.textUnselected}>Model Results</p>
       </Grid>
       <Grid item xs={6.6}>
         
@@ -97,6 +104,7 @@ export default function ProcessToolbar(props) {
         buttonTwoText='Discard'
         buttonTwoColor='error'
         buttonTwoVariant='outlined'
+        width={400}
       />
     </Box>
   );

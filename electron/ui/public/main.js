@@ -45,6 +45,7 @@ function saveBounds (bounds) {
 
 
 function createWindow() {
+  
   const bounds = getWindowSettings();
   console.log('bounds:',bounds)
 
@@ -61,7 +62,14 @@ function createWindow() {
   if (isDev) {
     win.webContents.openDevTools()
   } 
-  
+  var handleRedirect = (e, url) => {
+    if(url != win.webContents.getURL()) {
+      e.preventDefault()
+      require('electron').shell.openExternal(url)
+    }
+  }
+  win.webContents.on('will-navigate', handleRedirect)
+  win.webContents.on('new-window', handleRedirect)
   console.log("storing user preferences in: ",app.getPath('userData'));
 
   // save size of window when resized
@@ -218,8 +226,8 @@ app.whenReady().then(() => {
                 else {
                     console.error(`Exceeded maximum trials to connect to ${appName}`)
                     log.info(`Exceeded maximum trials to connect to ${appName}`)
-                    spawnedProcess.kill('SIGINT')
-                    win.close()
+                    // spawnedProcess.kill('SIGINT')
+                    // win.close()
                 }
             });
         };
@@ -246,5 +254,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
-
-
