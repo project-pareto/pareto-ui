@@ -105,7 +105,8 @@
     },
     "win": {
       "target": "portable",
-      "icon": "build/pareto-logo.ico"
+      "icon": "build/pareto-logo.ico",
+      "artifactName": "ParetoUI-09.13.23-win64.exe"
     },
     "linux": {
       "target": "Deb",
