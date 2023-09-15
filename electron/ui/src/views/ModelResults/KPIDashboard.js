@@ -303,7 +303,7 @@ export default function KPIDashboard(props) {
                 </Box>
             }
         
-            {props.hydraulicsData && 
+            {props.hydraulicsData && props.hydraulicsData.length>1 &&
                 <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
                     <Grid container>
                     <Grid item xs={12}>
