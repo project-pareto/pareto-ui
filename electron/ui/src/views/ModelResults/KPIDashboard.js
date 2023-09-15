@@ -277,49 +277,57 @@ export default function KPIDashboard(props) {
         </Grid>
 
         <Grid item xs={12}>
-        <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
-            <Grid container>
-                
-            <Grid item xs={6}>
-                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <CustomChart
-                    data={props.waterQualityData} 
-                    title="Water Quality by Node"
-                    xaxis={{titletext: "Planning Horizon (weeks)"}}
-                    yaxis={{titletext: "Amount of Water (bbl/week)"}}
-                    labelIndex={0}
-                    xindex={2}
-                    yindex={3}
-                    width={600}
-                    height={500}
-                    showlegend={true}
-                    chartType={'line'}
-                    stackgroup={false}
-                />
+            {props.waterQualityData && props.waterQualityData.length>1 &&
+                <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
+                    <Grid container>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                        <CustomChart
+                            data={props.waterQualityData} 
+                            title="Water Quality by Node"
+                            xaxis={{titletext: "Planning Horizon (weeks)"}}
+                            yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                            labelIndex={0}
+                            xindex={2}
+                            yindex={3}
+                            width={1000}
+                            height={500}
+                            showlegend={true}
+                            chartType={'line'}
+                            stackgroup={false}
+                        />
+                        </Box>
+                    </Grid>
+                    </Grid>
+                    {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
                 </Box>
-            </Grid>
-            <Grid item xs={6}>
-            
-                <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                {/* <CustomChart
-                    data={props.hydraulicsData} 
-                    title="Pressure by Node"
-                    xaxis={{titletext: "Planning Horizon (weeks)"}}
-                    yaxis={{titletext: "Pressure (?)"}}
-                    labelIndex={0}
-                    xindex={2}
-                    yindex={3}
-                    width={600}
-                    height={500}
-                    showlegend={true}
-                    chartType={'line'}
-                    stackgroup={false}
-                /> */}
+            }
+        
+            {props.hydraulicsData && 
+                <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
+                    <Grid container>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                        <CustomChart
+                            data={props.hydraulicsData} 
+                            title="Hydraulics Pressure by Node"
+                            xaxis={{titletext: "Planning Horizon (weeks)"}}
+                            yaxis={{titletext: "Pressure (psi)"}}
+                            labelIndex={0}
+                            xindex={1}
+                            yindex={2}
+                            width={1000}
+                            height={500}
+                            showlegend={true}
+                            chartType={'line'}
+                            stackgroup={false}
+                        />
+                        </Box>
+                    </Grid>
+                    </Grid>
+                    {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
                 </Box>
-            </Grid>
-            </Grid>
-            {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
-        </Box>
+            }
         </Grid>
 
     </Grid>
