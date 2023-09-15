@@ -97,6 +97,11 @@
     "v_S_DisposalCapacity_dict":"Slack Disposal Capacity",
     "v_S_TreatmentCapacity_dict":"Slack reatment Capacity",
     "v_S_ReuseCapacity_dict":"Slack Reuse Capacity",
+    "hydraulics.v_PumpHead_dict": "Hydraulics Pump Head",
+    "hydraulics.vb_Y_Pump_dict": "Hydraulics New Pump",
+    "hydraulics.v_ValveHead_dict": "Hydraulics Valve Head",
+    "hydraulics.v_PumpCost_dict": "Hydraulics Pump Cost",
+    "hydraulics.v_Pressure_dict": "Hydraulics Pressure",
 
     "v_Z": "Objective",
     "v_R_TotalStorage": "Credit Total Storage",
