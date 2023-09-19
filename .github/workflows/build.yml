@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "update-workflow-new-cert"
+      - "september-updates"
 
 defaults:
   run:
