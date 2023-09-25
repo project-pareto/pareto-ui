@@ -27,20 +27,42 @@ export default function ComparisonTable(props) {
         setIndices([scenarioIndex, secondaryScenarioIndex])
     }, [scenarioIndex, secondaryScenarioIndex])
 
-    
-
-    const getPercentDifference = (value1, value2) => {
-      let result = ((value1 - value2) / value2) * 100
-      if (isNaN(result)) return 0
-      else if(value1 > value2) return "+" + (Math.round(result * 10) / 10)
-      else return Math.round(result * 10) / 10
+    const getValue = (index) => {
+      try {
+        return scenarios[indices[1]].results.data[category][index+1][3].toLocaleString('en-US', {maximumFractionDigits:0})
+      }catch(e) {
+        return ""
+      }
+      
     }
     
-    const getDifferenceStyling = (value1, value2) => {
-      let style = {}
-      if (value1 > value2) style.color = "green"
-      else if (value2 > value1) style.color = "red"
-      return style
+
+    const getPercentDifference = (index) => {
+      try {
+        let value1 = scenarios[indices[0]].results.data[category][index+1][3] 
+        let value2 = scenarios[indices[1]].results.data[category][index+1][3]
+
+        let result = ((value1 - value2) / value2) * 100
+        if (isNaN(result)) return 0
+        else if(value1 > value2) return "+" + (Math.round(result * 10) / 10)
+        else return Math.round(result * 10) / 10
+      } catch(e) {
+        return ""
+      }
+      
+    }
+    
+    const getDifferenceStyling = (index) => {
+      try {
+        let value1 = scenarios[indices[0]].results.data[category][index+1][3] 
+        let value2 = scenarios[indices[1]].results.data[category][index+1][3]
+        let style = {}
+        if (value1 > value2) style.color = "green"
+        else if (value2 > value1) style.color = "red"
+        return style
+      } catch (e) {
+        return {}
+      }
     }
 
     const renderOutputTable = () => {
@@ -57,8 +79,7 @@ export default function ComparisonTable(props) {
                     <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}}>Units</TableCell> 
                     <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[0]].name}</TableCell> 
                     <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[1]].name}</TableCell>
-                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>Percent Difference</TableCell>  
-                    {/* <TableCell key="overview3" style={{backgroundColor:"#6094bc", color:"white",  width:"25%", paddingTop:"0px"}}>{renderConfigurationSelect(1)}</TableCell>  */}
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>Percent Difference</TableCell> 
                 </TableRow>
                 </TableHead>
                 <TableBody>
@@ -74,6 +95,7 @@ export default function ComparisonTable(props) {
                           cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : 
                           cellValue ? CategoryNames[cellValue] ? CategoryNames[cellValue] :
                           cellValue.replace('v_F_','').replace('v_C_','Cost ').replace(/([A-Z])/g, ' $1').replace('Cap Ex', 'CapEx').trim()
+                          // cellValue
                           : null
                         }
                     </TableCell>
@@ -83,15 +105,15 @@ export default function ComparisonTable(props) {
                         align="right" 
                         style={styles.other}
                     >
-                        {scenarios[indices[1]].results.data[category][index+1][3].toLocaleString('en-US', {maximumFractionDigits:0})}
+                        {getValue(index)}
                     </TableCell>
                     <TableCell 
                         align="right" 
                         style={styles.other}
-                    >
-                      <span style={getDifferenceStyling(scenarios[indices[0]].results.data[category][index+1][3], scenarios[indices[1]].results.data[category][index+1][3])}>
+                    > 
+                    <span style={getDifferenceStyling(index)}>
                         {
-                          getPercentDifference(scenarios[indices[0]].results.data[category][index+1][3], scenarios[indices[1]].results.data[category][index+1][3])
+                          getPercentDifference(index)
                         }
                         %
                       </span>
