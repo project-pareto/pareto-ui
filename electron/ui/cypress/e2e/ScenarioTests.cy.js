@@ -161,6 +161,8 @@ describe('scenario testing', () => {
 
         //run optimization with default settings
         cy.findByRole('button', {name: /continue to optimization/i}).click()
+        cy.screenshot(`${sc_count}_optimization settings`)
+        sc_count+=1
         // cy.findByRole('button', {name: /optimize/i}).click()
         cy.findAllByRole('button', {name: /optimize/i}).eq(0).click()
 
