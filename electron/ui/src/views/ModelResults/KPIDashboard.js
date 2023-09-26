@@ -1,11 +1,12 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, Grid, IconButton, Tooltip } from '@mui/material';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
+import InfoIcon from '@mui/icons-material/Info';
 import Plot from 'react-plotly.js';
-import AreaChart from '../../components/AreaChart/AreaChart'
+import CustomChart from '../../components/CustomChart/CustomChart'
 
 export default function KPIDashboard(props) {
     const [ kpiData, setKpiData ] = useState(null)
@@ -233,36 +234,100 @@ export default function KPIDashboard(props) {
         </Grid>
         
         <Grid item xs={12}>
-        <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
+        <Box style={{backgroundColor:'white'}} sx={styles.areaChartBox}>
             <Grid container>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <AreaChart
+                <CustomChart
                     data={props.truckedData} 
                     title="Trucked Water Deliveries By Destination"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
                     yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                    labelIndex={1}
+                    xindex={2}
+                    yindex={3}
                     width={600}
                     height={500}
                     showlegend={true}
+                    chartType={'area'}
+                    stackgroup={"one"}
                 />
                 </Box>
             </Grid>
             <Grid item xs={6}>
                 <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
-                <AreaChart
+                <CustomChart
                     data={props.pipedData} 
                     title="Piped Water Deliveries By Destination"
                     xaxis={{titletext: "Planning Horizon (weeks)"}}
                     yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                    labelIndex={1}
+                    xindex={2}
+                    yindex={3}
                     width={600}
                     height={500}
                     showlegend={true}
+                    chartType={'area'}
+                    stackgroup={"one"}
                 />
                 </Box>
             </Grid>
             </Grid>
         </Box>
+        </Grid>
+
+        <Grid item xs={12}>
+            {props.waterQualityData && props.waterQualityData.length>1 &&
+                <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
+                    <Grid container>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                        <CustomChart
+                            data={props.waterQualityData} 
+                            title="Water Quality by Node"
+                            xaxis={{titletext: "Planning Horizon (weeks)"}}
+                            yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                            labelIndex={0}
+                            xindex={2}
+                            yindex={3}
+                            width={1000}
+                            height={500}
+                            showlegend={true}
+                            chartType={'line'}
+                            stackgroup={false}
+                        />
+                        </Box>
+                    </Grid>
+                    </Grid>
+                    {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
+                </Box>
+            }
+        
+            {props.hydraulicsData && props.hydraulicsData.length>1 &&
+                <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
+                    <Grid container>
+                    <Grid item xs={12}>
+                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                        <CustomChart
+                            data={props.hydraulicsData} 
+                            title="Hydraulics Pressure by Node"
+                            xaxis={{titletext: "Planning Horizon (weeks)"}}
+                            yaxis={{titletext: "Pressure (psi)"}}
+                            labelIndex={0}
+                            xindex={1}
+                            yindex={2}
+                            width={1000}
+                            height={500}
+                            showlegend={true}
+                            chartType={'line'}
+                            stackgroup={false}
+                        />
+                        </Box>
+                    </Grid>
+                    </Grid>
+                    {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
+                </Box>
+            }
         </Grid>
 
     </Grid>

@@ -2,7 +2,7 @@ import './DataInput.css';
 import React from 'react';
 import {useEffect, useState} from 'react';
 import { Grid, Box, FormControl, MenuItem, Select, Button, Typography } from '@mui/material';
-import AreaChart from '../../components/AreaChart/AreaChart'
+import CustomChart from '../../components/CustomChart/CustomChart'
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import InputSummary from '../../components/InputSummary/InputSummary'
@@ -265,7 +265,7 @@ const handleRowFilter = (row) => {
                     </Select>
                 </FormControl>
             </Box>
-                <AreaChart
+                <CustomChart
                   input
                   category={plotCategoryDictionary[plotCategory]}
                   data={scenario.data_input.df_parameters[plotCategory]} 
@@ -275,6 +275,8 @@ const handleRowFilter = (row) => {
                   width={750}
                   height={500}
                   showlegend={true}
+                  chartType={'area'}
+                  stackgroup={"one"}
                 />
             </Box>
             )
