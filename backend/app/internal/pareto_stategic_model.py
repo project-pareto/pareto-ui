@@ -90,7 +90,7 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
         optimality_gap = int(modelParameters["optimalityGap"])/100
     except:
         optimality_gap = 0
-    _log.info(f'optimality gap is {optimality_gap}')
+    # _log.info(f'optimality gap is {optimality_gap}')
     options = {
         "deactivate_slacks": True,
         "scale_model": modelParameters["scale_model"],
