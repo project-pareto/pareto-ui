@@ -60,6 +60,9 @@ jobs:
       - name: Build Windows Distribution
         run: npm --prefix electron run electron-build-win
 
+      - name: Display file names
+        run: cd electron && cd dist && ls
+
       - name: Sign Windows Distribution
         run: |
           AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-23.09.27-win64.exe
