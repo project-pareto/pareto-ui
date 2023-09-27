@@ -58,7 +58,7 @@ export default function LandingPage(props) {
                 <Grid item xs={5}> </Grid>
                 <Grid item xs={2}> 
                     <Box>
-                        <p style={{paddingTop:0, marginTop: 0, color:"#9c9c9c"}}>v 1.0.0</p>
+                        <p style={{paddingTop:0, marginTop: 0, color:"#9c9c9c"}}>v 23.09.27</p>
                     </Box>
                 </Grid>
                 <Grid item xs={5}> </Grid>
