@@ -9,6 +9,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     solve_model,
     PipelineCost,
     PipelineCapacity,
+    Hydraulics,
     WaterQuality
 )
 from pyomo.opt import TerminationCondition
@@ -76,6 +77,7 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
             "pipeline_capacity": PipelineCapacity.input,
             "node_capacity": True,
             "water_quality": WaterQuality[modelParameters["waterQuality"]],
+            "hydraulics": Hydraulics[modelParameters["hydraulics"]],
             # "build_units": BuildUnits[modelParameters["build_units"]]
         },
     )
@@ -88,7 +90,7 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
         optimality_gap = int(modelParameters["optimalityGap"])/100
     except:
         optimality_gap = 0
-    _log.info(f'optimality gap is {optimality_gap}')
+    # _log.info(f'optimality gap is {optimality_gap}')
     options = {
         "deactivate_slacks": True,
         "scale_model": modelParameters["scale_model"],

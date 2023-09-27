@@ -2,12 +2,12 @@
     "Dynamic": [
         "CompletionsDemand","DisposalOperationalCost","TreatmentOperationalCost","CompletionsPadOutsideSystem",
         "DesalinationTechnologies","DesalinationSites","TruckingTime","PadRates","FlowbackRates","NodeCapacities",
-        "InitialPipelineCapacity","InitialDisposalCapacity","InitialTreatmentCapacity","FreshwaterSourcingAvailability",
+        "InitialPipelineCapacity","InitialPipelineDiameters", "InitialDisposalCapacity","InitialTreatmentCapacity","FreshwaterSourcingAvailability",
         "PadOffloadingCapacity","CompletionsPadStorage","ReuseOperationalCost","PipelineOperationalCost",
         "FreshSourcingCost","TruckingHourlyCost","PipelineDiameterValues","DisposalCapacityIncrements",
         "InitialStorageCapacity","StorageCapacityIncrements","TreatmentCapacityIncrements","TreatmentEfficiency",
         "DisposalExpansionCost","StorageExpansionCost","TreatmentExpansionCost","PipelineCapexDistanceBased",
-        "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","Hydraulics",
+        "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","WellPressure", "Hydraulics","Elevation",
         "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity", "RemovalEfficiency"
     ],
     "Static": [

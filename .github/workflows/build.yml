@@ -19,9 +19,9 @@ jobs:
 
     runs-on: windows-latest
 
-    env:
-      CSC_LINK: ${{ secrets.CSC_LINK }}
-      CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+    # env:
+    #   CSC_LINK: ${{ secrets.CSC_LINK }}
+    #   CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +29,10 @@ jobs:
         with:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
+      
+      - name: Install Azure Signtool
+        run: |
+          dotnet tool install --global AzureSignTool
 
       - name: Install Electron JS dependencies
         run: |
@@ -56,8 +60,9 @@ jobs:
       - name: Build Windows Distribution
         run: npm --prefix electron run electron-build-win
 
-      - name: Display file names
-        run: cd electron && cd dist && ls
+      - name: Sign Windows Distribution
+        run: |
+          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-09.19.23-win64.exe
 
       - name: Upload artifact for windows build
         uses: actions/upload-artifact@v3
@@ -65,15 +70,15 @@ jobs:
         with:
             name: windows-pareto-dist
             path: |
-              electron/dist/ParetoUI-09.13.23-win64.exe
-  
-  # linux-build:
-  #   name: Linux Build
+              electron/dist/ParetoUI-09.19.23-win64.exe
+  # windows-build:
+  #   name: Windows Build
 
-  #   runs-on: ubuntu-latest
+  #   runs-on: windows-latest
 
-  #   env: 
-  #     CI: false
+  #   env:
+  #     CSC_LINK: ${{ secrets.CSC_LINK }}
+  #     CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
 
   #   steps:
   #     - uses: actions/checkout@v3
@@ -88,33 +93,30 @@ jobs:
   #     - name: Install frontend JS dependencies
   #       run: |
   #         npm --prefix electron/ui clean-install
-  #     - name: Install GNU FORTRAN, GOMP, Blas, and Lapack libraries
-  #       run: |
-  #         sudo apt-get install -y libgfortran5 libgomp1 liblapack3 libblas3
   #     - name: Get idaes extensions
   #       run: idaes get-extensions
 
+  #     # - name: Install Pareto locally
+  #     #   working-directory: ../
+  #     #   run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.5.0_release && pip install --progress-bar off .
+
   #     - name: Install Pareto locally
   #       working-directory: ../
-  #       run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+  #       run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout 0.8.0 && pip install --progress-bar off .
 
   #     - name: Build Backend
   #       run: npm --prefix electron run build-backend
 
   #     - name: Build Frontend
-  #       run: npm --prefix electron run build-frontend
+  #       run: npm --prefix electron run build-frontend-win
 
-  #     # for some reason, ico file breaks linux build. going without icon for now
-  #     - name: Remove ico file
-  #       run: rm electron/build/pareto-logo.ico
+  #     - name: Build Windows Distribution
+  #       run: npm --prefix electron run electron-build-win
 
-  #     - name: Build Linux Distribution
-  #       run: npm --prefix electron run electron-build-lin
-
-  #     - name: Upload artifact for linux build
+  #     - name: Upload artifact for windows build
   #       uses: actions/upload-artifact@v3
   #       if: always()
   #       with:
-  #           name: linux-dist
+  #           name: windows-pareto-dist
   #           path: |
-  #             electron/dist/pareto-ui_0.1.0_amd64.deb
+  #             electron/dist/ParetoUI-09.19.23-win64.exe

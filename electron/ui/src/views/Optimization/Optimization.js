@@ -1,5 +1,5 @@
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import { useState } from 'react';   
 import { Box, Grid, InputAdornment, Checkbox, FormControlLabel, FormControl, Button } from '@mui/material';
 import { MenuItem, Radio, RadioGroup, Select, IconButton, Tooltip, Collapse, OutlinedInput } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
@@ -37,6 +37,12 @@ export default function Optimization(props) {
                       -Post Process: Calculates the water quality after optimization. The model cannot impose quality restrictions.<br/>
                       -Discrete: Utilize a discrete model to incorporate water quality into decisions. This model can impose quality restrictions. For example, a maximum TDS allowed at a treatment facility.
                   </div>,
+    hydraulics: <div>
+                  PARETO's hydraulics module allows the user to determine pumping needs and compute pressures at every node in the network while considering maximum allowable operating pressure (MAOP) constraints. Select how you would like to include it in the model:<br/>
+                  -False: This option allows the user to skip the hydraulics computations in the PARETO model.<br/>
+                  -Post Process: PARETO first solves for optimal flows and network design. Afterwards, the hydraulics block containing constraints for pressure balances and losses is solved.<br/>
+                  -Co-Optimize: In this method, the hydraulics model block is solved together with the produced water flow and network design. Note: The co-optimize model as currently implemented requires the following MINLP solvers: SCIP and BARON.
+              </div>,
     solver: <div>
               Select the solver you would like to use. Note: Gurobi requires a license. 
               If you do not have a Gurobi licence, select "CBC", an open source solver.
@@ -181,7 +187,6 @@ export default function Optimization(props) {
             >
               <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
               <MenuItem key={1} value={"gurobi_direct"}>Gurobi (Commercial)</MenuItem>
-              {/* <MenuItem key={2} value={"gurobi_direct"}>Gurobi Direct (Commercial)</MenuItem> */}
             </Select>
             </FormControl>
           </Grid>
@@ -250,6 +255,28 @@ export default function Optimization(props) {
               <MenuItem key={0} value={"false"}>False</MenuItem>
               <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
               <MenuItem key={2} value={"discrete"}>Discrete</MenuItem>
+            </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={columnWidths[0]} style={styles.gridItems}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+              <p>Hydraulics
+              <Tooltip title={descriptions.hydraulics} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+              </p>
+            </Box>
+          </Grid>
+          <Grid item xs={columnWidths[1]} style={styles.gridItems}>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
+            <Select
+              name="hydraulics"
+              value={props.scenario.optimization.hydraulics}
+              onChange={handleChange}
+              sx={{color:'#0b89b9', fontWeight: "bold"}}
+            >
+              <MenuItem key={0} value={"false"}>False</MenuItem>
+              <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
+              <MenuItem key={2} value={"co_optimize"}>Co-Optimize</MenuItem>
             </Select>
             </FormControl>
           </Grid>

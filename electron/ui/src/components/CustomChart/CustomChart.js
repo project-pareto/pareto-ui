@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import Plot from 'react-plotly.js';
 
 
-export default function KPIDashboard(props) {
+export default function AreaChart(props) {
     const [ areaChartData, setAreaChartData ] = useState(null)
 
     useEffect(()=>{
@@ -48,9 +48,14 @@ export default function KPIDashboard(props) {
             // organize area chart data
             for (var index = 1; index < props.data.length; index++) {
                 let item = props.data[index]
-                let key = item[1]
-                let x = item[2]
-                let y = item[3]
+                let key = item[props.labelIndex]
+                // if(key.length > 4) {
+                //     key=key.substring(0,4)
+                //     console.log(key)
+                // }
+                key = key.replace('PostTreatmentTreatedWaterNode',"PTTWN").replace("PostTreatmentResidualNode","PTRN").replace('intermediate','I')
+                let x = item[props.xindex]
+                let y = item[props.yindex]
                 if (key in tempData){
                     tempData[key].x.push(parseInt(x.substring(1)))
                     tempData[key].y.push(y)
@@ -63,10 +68,11 @@ export default function KPIDashboard(props) {
             //     tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
             // })
 
-            let keys = Object.keys(tempData).sort().reverse()
+            // let keys = Object.keys(tempData).sort().reverse()
+            let keys = Object.keys(tempData).sort()
             keys.map((key, ind) => {
                 let value = tempData[key]
-                tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
+                tempAreaChartData.push({x: value.x, y: value.y, stackgroup: props.stackgroup, name: key})
                 return 1
             })
             setAreaChartData(tempAreaChartData)
