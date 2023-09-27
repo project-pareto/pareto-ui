@@ -51,6 +51,10 @@ jobs:
         working-directory: ../
         run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout 0.9.0rc0 && pip install --progress-bar off .
 
+      - name: Install numpy 1.24.3
+        run: |
+          pip uninstall -y numpy && pip install numpy==1.24.3
+
       - name: Build Backend
         run: npm --prefix electron run build-backend
 

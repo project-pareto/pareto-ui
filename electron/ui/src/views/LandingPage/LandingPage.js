@@ -55,13 +55,13 @@ export default function LandingPage(props) {
                 </Grid>
                 <Grid item xs={2}> </Grid>
 
-                <Grid item xs={5}> </Grid>
-                <Grid item xs={2}> 
+                <Grid item xs={3}> </Grid>
+                <Grid item xs={6}> 
                     <Box>
                         <p style={{paddingTop:0, marginTop: 0, color:"#9c9c9c"}}>v23.09.27 (PARETO v0.9.0)</p>
                     </Box>
                 </Grid>
-                <Grid item xs={5}> </Grid>
+                <Grid item xs={3}> </Grid>
 
                 <Grid item xs={1}> </Grid>
                 <Grid item xs={10}> 
