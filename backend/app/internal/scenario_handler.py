@@ -523,6 +523,7 @@ class ScenarioHandler:
         # for column in scenario["data_input"]["df_parameters"][table_key]:
 
         # update excel sheet
+        _log.info(f'updating table: {updatedTable}')
         for column in updatedTable:
             y = 3
             for cellValue in updatedTable[column]:
@@ -531,15 +532,16 @@ class ScenarioHandler:
                 if cellValue == "":
                     newValue = None
                 else:
-                    try:
-                        newValue = int(cellValue)
-                    except ValueError:
-                        try:
-                            newValue = float(cellValue)
-                        except: 
-                            newValue = cellValue
+                    newValue = cellValue
+                    # try:
+                    #     newValue = int(cellValue)
+                    # except ValueError:
+                    #     try:
+                    #         newValue = float(cellValue)
+                    #     except: 
+                    #         newValue = cellValue
                 if originalValue != newValue:
-                    print('updating value')
+                    # print('updating value')
                     ws[cellLocation] = newValue
                 y+=1
             x+=1
