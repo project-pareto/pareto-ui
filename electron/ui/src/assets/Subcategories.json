@@ -8,9 +8,11 @@
         "InitialStorageCapacity","StorageCapacityIncrements","TreatmentCapacityIncrements","TreatmentEfficiency",
         "DisposalExpansionCost","StorageExpansionCost","TreatmentExpansionCost","PipelineCapexDistanceBased",
         "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","WellPressure", "Hydraulics","Elevation",
-        "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity", "RemovalEfficiency"
+        "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity", "RemovalEfficiency",
+        "ReuseCapacity", "ReuseMinimum", "BeneficialReuseCredit"
     ],
     "Static": [
-        "PNA","CNA","CCA","NNA","NCA","NKA","NRA","NSA","FCA","RCA","RNA","RSA","SCA","SNA","PCT","PKT","FCT","CST","CCT","CKT"
+        "PNA","CNA","CCA","NNA","NCA","NKA","NRA","NSA","FCA","RCA","RNA","RSA","SCA","SNA",
+        "PCT","PKT","FCT","CST","CCT","CKT","NOA","SOA","ROA","RST","ROT","SOT"
     ]
 }
