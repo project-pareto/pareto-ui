@@ -108,7 +108,7 @@
     "v_Z": "Objective",
     "v_R_TotalStorage": "Credit Total Storage",
     "v_R_BeneficialReuse_dict": "Credit Beneficial Reuse",
-    "vb_y_BeneficialReuse_dict": "New Beneficial Reuse",
+    "vb_y_BeneficialReuse_dict": "Beneficial Reuse Usage",
     "reuse_WaterKPI": "Produced Water Recycle Rate",
     "disposal_WaterKPI": "Produced Water Disposal Rate",
     "fresh_CompletionsDemandKPI": "Completions Demand Freshwater Rate",
