@@ -7,9 +7,20 @@ import WaterIcon from '@mui/icons-material/Water';
 import InfoIcon from '@mui/icons-material/Info';
 import Plot from 'react-plotly.js';
 import CustomChart from '../../components/CustomChart/CustomChart'
+import FilterDropdown from '../../components/FilterDropdown/WaterQualityFilterDropdown';
 
 export default function KPIDashboard(props) {
     const [ kpiData, setKpiData ] = useState(null)
+    const [ filteredNodes, setFilteredNodes ] = useState({})
+    const [ totalNodes, setTotalNodes ] = useState([])
+    const [ isAllNodesSelected, setIsAllNodesSelected ] = useState(true)
+    const [ filterSet, setFilteredSet ] = useState([])
+
+    useEffect(()=>{
+        // set data for water quality drop down filters
+        
+        
+    }, [props]);
 
     useEffect(()=>{
         let tempData = {}
@@ -70,6 +81,10 @@ export default function KPIDashboard(props) {
             margin: "0",
             padding: "0"
           }
+      }
+
+      const handleNodesFilter = () => {
+        console.log('handle nodes filters')
       }
 
   return ( 
@@ -280,8 +295,10 @@ export default function KPIDashboard(props) {
             {props.waterQualityData && props.waterQualityData.length>1 &&
                 <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
                     <Grid container>
-                    <Grid item xs={12}>
-                        <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
+                    <Grid item xs={1}></Grid>
+                    <Grid item xs={10}>
+                        {/* <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}> */}
+                        <Box display="flex" justifyContent="center" sx={{overflow: "scroll"}}>
                         <CustomChart
                             data={props.waterQualityData} 
                             title="Water Quality by Node"
@@ -290,7 +307,7 @@ export default function KPIDashboard(props) {
                             labelIndex={0}
                             xindex={2}
                             yindex={3}
-                            width={1000}
+                            width={900}
                             height={500}
                             showlegend={true}
                             chartType={'line'}
@@ -298,7 +315,22 @@ export default function KPIDashboard(props) {
                         />
                         </Box>
                     </Grid>
+                    <Grid item xs={1}>
+                        <Box display="flex" justifyContent="flex-end" sx={{marginRight:"10px"}}>
+                            <FilterDropdown
+                                width="220px"
+                                maxHeight="300px"
+                                filtered={filteredNodes}
+                                total={totalNodes}
+                                isAllSelected={isAllNodesSelected}
+                                handleFilter={handleNodesFilter}
+                                filterSet={filterSet}
+                            />
+                        </Box>
                     </Grid>
+                    
+                    </Grid>
+                    
                     {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
                 </Box>
             }
@@ -306,7 +338,8 @@ export default function KPIDashboard(props) {
             {props.hydraulicsData && props.hydraulicsData.length>1 &&
                 <Box style={{backgroundColor:'white', marginBottom:"20px"}} sx={styles.areaChartBox}>
                     <Grid container>
-                    <Grid item xs={12}>
+                    <Grid item xs={1}></Grid>
+                    <Grid item xs={10}>
                         <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}>
                         <CustomChart
                             data={props.hydraulicsData} 
@@ -316,7 +349,7 @@ export default function KPIDashboard(props) {
                             labelIndex={0}
                             xindex={1}
                             yindex={2}
-                            width={1000}
+                            width={900}
                             height={500}
                             showlegend={true}
                             chartType={'line'}
@@ -324,6 +357,7 @@ export default function KPIDashboard(props) {
                         />
                         </Box>
                     </Grid>
+                    <Grid item xs={1}></Grid>
                     </Grid>
                     {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
                 </Box>
