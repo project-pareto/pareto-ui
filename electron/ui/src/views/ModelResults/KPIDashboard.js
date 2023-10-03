@@ -12,15 +12,38 @@ import FilterDropdown from '../../components/FilterDropdown/WaterQualityFilterDr
 export default function KPIDashboard(props) {
     const [ kpiData, setKpiData ] = useState(null)
     const [ filteredNodes, setFilteredNodes ] = useState({})
-    const [ totalNodes, setTotalNodes ] = useState([])
-    const [ isAllNodesSelected, setIsAllNodesSelected ] = useState(true)
-    const [ filterSet, setFilteredSet ] = useState([])
+    const [ totalSet, setTotalSet ] = useState([])
+    const [ filterSet, setFilterSet ] = useState([])
+    const [ waterQualityData, setWaterQualityData ] = useState([])
+    const isAllNodesSelected = totalSet.length > 0 && totalSet.length === filterSet.length;
 
     useEffect(()=>{
         // set data for water quality drop down filters
+        let tempWaterQualityData = [props.waterQualityData[0]]
+        for (var index = 1; index < props.waterQualityData.length; index++) {
+            let item = props.waterQualityData[index]
+            let nodeType = item[1]
+            if (filterSet.includes(nodeType)) tempWaterQualityData.push(item)
+        }
+        setWaterQualityData(tempWaterQualityData)
+    }, [filterSet]);
+
+    useEffect(()=>{
+        let tempNodes = new Set()
+        let tempRowFilteredNodes = {}
         
-        
-    }, [props]);
+        for (var index = 1; index < props.waterQualityData.length; index++) {
+            let item = props.waterQualityData[index]
+            let nodeType = item[1]
+            tempNodes.add(nodeType)
+            tempRowFilteredNodes[nodeType] = true
+        }
+        tempNodes = Array.from(tempNodes)
+        setTotalSet(tempNodes)
+        setFilterSet(tempNodes)
+        setFilteredNodes(tempRowFilteredNodes)
+
+    }, [props.waterQualityData]);
 
     useEffect(()=>{
         let tempData = {}
@@ -83,8 +106,36 @@ export default function KPIDashboard(props) {
           }
       }
 
-      const handleNodesFilter = () => {
-        console.log('handle nodes filters')
+      const handleNodesFilter = (key) => {
+        let tempFilteredNodes = {...filteredNodes}
+        let tempFilterSet = [...filterSet]
+        if(key === "all") {
+            if(isAllNodesSelected) {
+                tempFilterSet = []
+                for (let key of Object.keys(tempFilteredNodes)) {
+                    tempFilteredNodes[key] = false
+                }
+            } else {
+                tempFilterSet = [...totalSet]
+                for (let key of Object.keys(tempFilteredNodes)) {
+                    tempFilteredNodes[key] = true
+                }
+            }
+        } else {
+            if(tempFilteredNodes[key]) {
+                const index = tempFilterSet.indexOf(key);
+                if (index > -1) { // only splice array when item is found
+                    tempFilterSet.splice(index, 1); // 2nd parameter means remove one item only
+                }
+            } else {
+                tempFilterSet.push(key)
+            }
+            tempFilteredNodes[key] = !tempFilteredNodes[key]
+        }
+        
+        setFilteredNodes(tempFilteredNodes)
+        setFilterSet(tempFilterSet)
+
       }
 
   return ( 
@@ -299,20 +350,22 @@ export default function KPIDashboard(props) {
                     <Grid item xs={10}>
                         {/* <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}> */}
                         <Box display="flex" justifyContent="center" sx={{overflow: "scroll"}}>
-                        <CustomChart
-                            data={props.waterQualityData} 
-                            title="Water Quality by Node"
-                            xaxis={{titletext: "Planning Horizon (weeks)"}}
-                            yaxis={{titletext: "Amount of Water (bbl/week)"}}
-                            labelIndex={0}
-                            xindex={2}
-                            yindex={3}
-                            width={900}
-                            height={500}
-                            showlegend={true}
-                            chartType={'line'}
-                            stackgroup={false}
-                        />
+                            <CustomChart
+                                data={waterQualityData} 
+                                title="Water Quality by Node"
+                                xaxis={{titletext: "Planning Horizon (weeks)"}}
+                                yaxis={{titletext: "Amount of Water (bbl/week)"}}
+                                labelIndex={0}
+                                xindex={2}
+                                yindex={3}
+                                width={900}
+                                height={500}
+                                showlegend={true}
+                                chartType={'line'}
+                                stackgroup={false}
+                                waterQuality
+                                filterSet={filterSet}
+                            />
                         </Box>
                     </Grid>
                     <Grid item xs={1}>
@@ -321,7 +374,7 @@ export default function KPIDashboard(props) {
                                 width="220px"
                                 maxHeight="300px"
                                 filtered={filteredNodes}
-                                total={totalNodes}
+                                total={totalSet}
                                 isAllSelected={isAllNodesSelected}
                                 handleFilter={handleNodesFilter}
                                 filterSet={filterSet}

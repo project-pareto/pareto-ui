@@ -46,10 +46,10 @@ export default function FilterDropdown(props) {
                         />
                         </MenuItem>
                         {
-                        Object.entries(props.filterSet).map(([key,value]) => (
+                        Object.entries(props.filtered).map(([key,value]) => (
                             <MenuItem key={key} value={key} onClick={()=> props.handleFilter(key)}>
                                 <ListItemIcon>
-                                <Checkbox checked={value.checked} />
+                                <Checkbox checked={value} />
                                 </ListItemIcon>
                                 <ListItemText primary={key} />
                             </MenuItem>

@@ -278,7 +278,7 @@ const handleNewInfrastructureOverride = () => {
                   pipedData={props.scenario.results.data['v_F_Piped_dict']}
                   waterQualityData={props.scenario.results.data["quality.v_Q_dict"]}
                   hydraulicsData={props.scenario.results.data["hydraulics.v_Pressure_dict"]}
-                  
+
                 />
       }
       /*
