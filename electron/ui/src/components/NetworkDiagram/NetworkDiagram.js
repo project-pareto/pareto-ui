@@ -149,7 +149,7 @@ export default function NetworkDiagram(props) {
             <IconButton onClick={() => handleDelete()}><CloseIcon/></IconButton>
             </Grid>
             <Grid item xs ={11.5}>
-            <img alt="network diagram" style={{height:"500px"}} src={`file://${diagramImage}`}></img>
+            <img alt="network diagram" style={{width: "100%"}} src={`file://${diagramImage}`}></img>
             </Grid>
         </Grid>
         
