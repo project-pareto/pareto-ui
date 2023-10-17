@@ -33,9 +33,7 @@ export default function AreaChart(props) {
                 return 1
             })
             let tempAreaChartData = []
-            // Object.entries(tempData).map(([key, value] ) => {
-            //     tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
-            // })
+
             let keys = Object.keys(tempData).sort().reverse()
             keys.map((key, ind) => {
                 let value = tempData[key]
@@ -46,35 +44,31 @@ export default function AreaChart(props) {
         } else {
             let tempData = {}
             // organize area chart data
+            // console.log('setting chart data for '+props.title+': ')
+            // console.log(props.data)
             for (var index = 1; index < props.data.length; index++) {
                 let item = props.data[index]
                 let key = item[props.labelIndex]
-                // if(key.length > 4) {
-                //     key=key.substring(0,4)
-                //     console.log(key)
-                // }
                 key = key.replace('PostTreatmentTreatedWaterNode',"PTTWN").replace("PostTreatmentResidualNode","PTRN").replace('intermediate','I')
                 let x = item[props.xindex]
+                x = parseInt(x.substring(1))
                 let y = item[props.yindex]
                 if (key in tempData){
-                    tempData[key].x.push(parseInt(x.substring(1)))
+                    tempData[key].x.push(x)
                     tempData[key].y.push(y)
                 }else {
                     tempData[key] = {x: [x], y: [y]}
                 }
             }
             let tempAreaChartData = []
-            // Object.entries(tempData).map(([key, value] ) => {
-            //     tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
-            // })
 
-            // let keys = Object.keys(tempData).sort().reverse()
             let keys = Object.keys(tempData).sort()
             keys.map((key, ind) => {
                 let value = tempData[key]
-                tempAreaChartData.push({x: value.x, y: value.y, stackgroup: props.stackgroup, name: key})
+                tempAreaChartData.push({x: value.x, y: value.y, stackgroup: props.stackgroup, name: key, mode: "lines"})
                 return 1
             })
+            // console.log(tempAreaChartData)
             setAreaChartData(tempAreaChartData)
         }
 
@@ -85,7 +79,6 @@ export default function AreaChart(props) {
             /* 
                 x values are T values
                 y values are bbl/week
-                where does K value go? needs to be a label of some sort
             */
             data={areaChartData}
             layout={{

@@ -55,4 +55,12 @@ datas.append(('internal/assets/DisposalOverride.png', 'app/internal/assets'))
 datas.append(('internal/assets/DisposalOverrideInput.png', 'app/internal/assets'))
 datas.append(('internal/assets/SRAInput.png', 'app/internal/assets'))
 
+# add workshop pngs
+datas.append(('internal/assets/workshop_baseline_input.png', 'app/internal/assets'))
+datas.append(('internal/assets/workshop_baseline_output.png', 'app/internal/assets'))
+datas.append(('internal/assets/workshop_SRA_input.png', 'app/internal/assets'))
+datas.append(('internal/assets/workshop_SRA_output.png', 'app/internal/assets'))
+datas.append(('internal/assets/workshop_beneficial_reuse_input.png', 'app/internal/assets'))
+datas.append(('internal/assets/workshop_beneficial_reuse_output.png', 'app/internal/assets'))
+
 print(datas)

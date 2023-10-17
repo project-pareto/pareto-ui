@@ -145,6 +145,24 @@ class ScenarioHandler:
                 new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
                 shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
                 updatedScenario[f'inputDiagramExtension'] = 'png'
+            if newName.upper() == "WORKSHOP BASELINE" and oldName.upper() != "WORKSHOP BASELINE":
+                input_diagramFileType = 'png'
+                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_baseline_input.png'
+                new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
+                shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+                updatedScenario[f'inputDiagramExtension'] = 'png'
+            if newName.upper() == "WORKSHOP SRA" and oldName.upper() != "WORKSHOP SRA":
+                input_diagramFileType = 'png'
+                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_SRA_input.png'
+                new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
+                shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+                updatedScenario[f'inputDiagramExtension'] = 'png'
+            if newName.upper() == "WORKSHOP BENEFICIAL REUSE" and oldName.upper() != "WORKSHOP BENEFICIAL REUSE":
+                input_diagramFileType = 'png'
+                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_input.png'
+                new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
+                shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+                updatedScenario[f'inputDiagramExtension'] = 'png'
         except:
             _log.error('unable to check and/or replace input diagram for SRA')
 
@@ -264,7 +282,14 @@ class ScenarioHandler:
             diagramIdentifier = scenario['name']
             scenario_diagram_path = f"{self.output_diagrams_path}/{id}.{extension}"
         try:
-            diagram_path = files('pareto').parent.joinpath(f"docs/img/{diagramIdentifier}.{extension}")
+            if scenario['name'].upper() == "WORKSHOP BASELINE":
+                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_baseline_{diagramType}.png'
+            elif scenario['name'].upper() == "WORKSHOP SRA":
+                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_sra_{diagramType}.png'
+            elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE":
+                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_{diagramType}.png'
+            else: 
+                diagram_path = files('pareto').parent.joinpath(f"docs/img/{diagramIdentifier}.{extension}")
             _log.info(f'diagram_path is : {diagram_path}')
             shutil.copyfile(diagram_path, scenario_diagram_path)
             scenario[f"{diagramType}DiagramExtension"] = extension
@@ -272,7 +297,6 @@ class ScenarioHandler:
         except Exception as e:
             _log.info(f'unable to find diagram_path: {e}')
             return scenario
-        
 
 
     def copy_scenario(self, id, new_scenario_name):
@@ -523,6 +547,7 @@ class ScenarioHandler:
         # for column in scenario["data_input"]["df_parameters"][table_key]:
 
         # update excel sheet
+        _log.info(f'updating table: {updatedTable}')
         for column in updatedTable:
             y = 3
             for cellValue in updatedTable[column]:
@@ -531,15 +556,16 @@ class ScenarioHandler:
                 if cellValue == "":
                     newValue = None
                 else:
-                    try:
-                        newValue = int(cellValue)
-                    except ValueError:
-                        try:
-                            newValue = float(cellValue)
-                        except: 
-                            newValue = cellValue
+                    newValue = cellValue
+                    # try:
+                    #     newValue = int(cellValue)
+                    # except ValueError:
+                    #     try:
+                    #         newValue = float(cellValue)
+                    #     except: 
+                    #         newValue = cellValue
                 if originalValue != newValue:
-                    print('updating value')
+                    # print('updating value')
                     ws[cellLocation] = newValue
                 y+=1
             x+=1
