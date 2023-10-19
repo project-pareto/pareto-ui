@@ -694,5 +694,10 @@ def get_input_lists():
         "StorageInitialWaterQuality",
         "PadStorageInitialWaterQuality",
         "DisposalOperatingCapacity",
+        "TreatmentExpansionLeadTime",
+        "DisposalExpansionLeadTime",
+        "StorageExpansionLeadTime",
+        "PipelineExpansionLeadTime_Dist",
+        "PipelineExpansionLeadTime_Capac",
     ]
     return [set_list, parameter_list]
