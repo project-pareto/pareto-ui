@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import { FileUploader } from "react-drag-drop-files";
 import { fetchDiagram, uploadDiagram, deleteDiagram } from '../../services/app.service';
+import NetworkMap from '../NetworkMap/NetworkMap';
 
 export default function NetworkDiagram(props) {
     const [ file, setFile ] = useState(null)
@@ -155,7 +156,8 @@ export default function NetworkDiagram(props) {
         
         : 
         <>
-        {UploadBox()}
+        <NetworkMap></NetworkMap>
+        {/* {UploadBox()} */}
         {/* <Button>Upload Diagram</Button> */}
         </>
         
