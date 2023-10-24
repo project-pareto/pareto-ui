@@ -1,10 +1,20 @@
 from zipfile import ZipFile
 import pprint
 import xml.sax, xml.sax.handler
+import shutil
 import math
+from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 # pandas: geoparse
 def ParseKMZ(filename = "Demo_network_correct.kmz"):
+    global NODE_NAMES
+    NODE_NAMES = set()
+
+    def calculate_distance(coord1, coord2):
+        # print(f'calculating distance from {coord1} to {coord2}')
+        distance = math.sqrt(((float(coord1[0]) - float(coord2[0]))**2) + ((float(coord1[1]) - float(coord2[1]))**2))
+        return distance
 
     ## check if kmz or kml
     if filename[-3:] == 'kmz':
@@ -47,6 +57,9 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
             elif name == "name" and self.inPlacemark:
                 self.inName = False # on end title tag           
                 self.name_tag = self.buffer.strip()
+                while self.name_tag in NODE_NAMES:
+                    self.name_tag = f'{self.name_tag}_'
+                NODE_NAMES.add(self.name_tag)
                 self.mapping[self.name_tag] = {}
             elif self.inPlacemark:
                 if name in self.mapping[self.name_tag]:
@@ -71,6 +84,8 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
     network_nodes = {}
     disposal_sites = {}
     treatment_sites = {}
+    storage_sites = {}
+    freshwater_sources = {}
     other_nodes = {}
     arcs = {}
 
@@ -84,8 +99,6 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
             if len(each) > 0:
                 coordinates_list.append(each.split(','))
         result_object[key]["coordinates"] = coordinates_list
-
-        # print(coordinates_list)
 
         if len(coordinates_list) > 1:
             result_object[key]["node_type"] = "path"
@@ -105,17 +118,17 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
                 disposal_sites[key] = result_object[key]
             elif key[0].upper() == 'R':
                 treatment_sites[key] = result_object[key]
+            elif key[0].upper() == 'S' and len(key) < 4:
+                storage_sites[key] = result_object[key]
+            elif key[0].upper() == 'F':
+                freshwater_sources[key] = result_object[key]
             else:
                 other_nodes[key] = result_object[key]
             all_nodes[key] = result_object[key]
 
-    def calculate_distance(coord1, coord2):
-        # print(f'calculating distance from {coord1} to {coord2}')
-        distance = math.sqrt(((float(coord1[0]) - float(coord2[0]))**2) + ((float(coord1[1]) - float(coord2[1]))**2))
-        return distance
-
     connections = {
-        "all_connections": [],
+        "all_connections_list": [],
+        "all_connections": {},
         "P": {
             "C": [],
             "N": [],
@@ -187,7 +200,19 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
                 # origin_node_data = all_nodes[origin_node]
                 # destination_node_data = all_nodes[closest_node]
 
-                connections["all_connections"].append(connection)
+                connections["all_connections_list"].append(connection)
+
+                ## ASSUME connections are bidirectional
+                if origin_node in connections["all_connections"]:
+                    connections["all_connections"][origin_node].append(closest_node)
+                else:
+                    connections["all_connections"][origin_node] = [closest_node]
+                if closest_node in connections["all_connections"]:
+                    connections["all_connections"][closest_node].append(origin_node)
+                else:
+                    connections["all_connections"][closest_node] = [origin_node]
+
+
                 try:
                     connections[origin_node[0]][closest_node[0]].append(connection)
                 except:
@@ -199,11 +224,13 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
         arc['node_list'] = node_list
 
     data['all_nodes'] = all_nodes
-    data['production_pads'] = production_pads
-    data['completion_pads'] = completion_pads
-    data['network_nodes'] = network_nodes
-    data['disposal_sites'] = disposal_sites
-    data['treatment_sites'] = treatment_sites
+    data['ProductionPads'] = production_pads
+    data['CompletionsPads'] = completion_pads
+    data['NetworkNodes'] = network_nodes
+    data['SWDSites'] = disposal_sites
+    data['TreatmentSites'] = treatment_sites
+    data['StorageSites'] = storage_sites
+    data['FreshwaterSources'] = freshwater_sources
     data['other_nodes'] = other_nodes
     data['arcs'] = arcs
     data['connections'] = connections
@@ -212,28 +239,94 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
     return data 
 
 
+def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
+    input_path = "pareto_input_template.xlsx"
+    excel_path = f'{output_file_name}.xlsx'
+    print(f'writing data to excel at {excel_path}')
 
-data = ParseKMZ(filename="Demo_network_correct.kmz")
-pp = pprint.PrettyPrinter(indent=1)
-pp.pprint(data['production_pads'])
+    ## step 1: copy pareto_input_template to new file for writing
+    shutil.copyfile(input_path, excel_path)
+
+    ## step 2: open excel workbook
+    wb = load_workbook(excel_path, data_only=True)
+
+    ## step 3: add nodes
+    node_keys = [
+        'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
+        'StorageSites', 'TreatmentSites', 'NetworkNodes'
+    ]
+
+    column = 1
+    for node_key in node_keys:
+        row = 2
+        ws = wb[node_key]
+        for node in data[node_key]:
+            print(f'{node_key}: adding {node}')
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row+=1
+
+    ## step 4: add arcs
+    piped_arcs = {
+        "PNA": ["ProductionPads", "NetworkNodes"],
+        "CNA": ["CompletionsPads", "NetworkNodes"],
+        "CCA": ["CompletionsPads", "CompletionsPads"],
+        "NNA": ["NetworkNodes", "NetworkNodes"],
+        "NCA": ["NetworkNodes", "CompletionsPads"],
+        "NKA": ["NetworkNodes", "SWDSites"],
+        "NRA": ["NetworkNodes", "TreatmentSites"],
+        "NSA": ["NetworkNodes", "StorageSites"],
+        # "NOA": ["NetworkNodes", "BeneficialReuse?"],
+        "SNA": ["StorageSites", "NetworkNodes"],
+        # "SOA": ["StorageSites", "BeneficialReuse"],
+        "FCA": ["FreshwaterSources", "CompletionsPads"],
+        "RCA": ["TreatmentSites", "CompletionsPads"],
+        "RSA": ["TreatmentSites", "StorageSites"],
+        "SCA": ["StorageSites", "CompletionsPads"],
+        "RNA": ["TreatmentSites", "NetworkNodes"],
+        # "ROA": ["TreatmentSites", "BeneficialReuse"],
+    }
+    piped_arc = "PNA" ## will be a loop
+    for piped_arc in piped_arcs:
+        ws = wb[piped_arc]
+        piped_arc_node1 = piped_arcs[piped_arc][0]
+        piped_arc_node2 = piped_arcs[piped_arc][1]
+        column = 1
+        row = 3
+        row_nodes = []
+        print(f'{piped_arc}: adding {piped_arc_node1}')
+        for node in data[piped_arc_node1]:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row_nodes.append(node)
+            row+=1
+        column = 2
+        row = 2
+        print(f'{piped_arc}: adding {piped_arc_node2}')
+        for node in data[piped_arc_node2]:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            # print('checking for connections')
+            ind = 3
+            for row_node in row_nodes:
+                if row_node in data["connections"]["all_connections"]:
+                    if node in data["connections"]["all_connections"][row_node]:
+                        # print(f'adding connection for {row_node}:{node}')
+                        cellLocation = f'{get_column_letter(column)}{ind}'
+                        # print(f'adding to cell location: {cellLocation}')
+                        ws[cellLocation] = 1
+
+                ind+=1
+            column+=1
 
 
+    ## step 5: Save and close
+    wb.save(excel_path)
+    wb.close()
 
-# def build_table(mapping):
-#     sep = ','
-#     output = 'Name' + sep + 'Coordinates\n'
-#     points = ''
-#     lines = ''
-#     shapes = ''
-#     for key in mapping:
-#         coord_str = mapping[key]['coordinates'] + sep
-#         if 'LookAt' in mapping[key]: #points
-#             points += key + sep + coord_str + "\n"
-#         elif 'LineString' in mapping[key]: #lines
-#             lines += key + sep + coord_str + "\n"
-#         else: #shapes
-#             shapes += key + sep + coord_str + "\n"
-#     output += points + lines + shapes
-#     return output
 
-# outstr = build_table(handler.mapping)
+# data = ParseKMZ(filename="Demo_network_correct.kmz")
+# print('got data')
+# pp = pprint.PrettyPrinter(indent=1)
+# pp.pprint(data['connections']['all_connections'])
+# WriteKMZDataToExcel(data)
