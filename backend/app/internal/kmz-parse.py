@@ -350,6 +350,17 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
         "WellPressure": ["ProductionPads", "CompletionsPads"],
     }
 
+    column = 1
+    for forecast_tab_key in forecast_tabs:
+        ws = wb[forecast_tab_key]
+        row = 3
+        for node_key in forecast_tabs[forecast_tab_key]:
+            print(f'{forecast_tab_key}: adding {node_key}')
+            for node in data[node_key]:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                row+=1
+
     ## step 7: add initial capacities
 
     ## step 8: 
@@ -361,6 +372,6 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
 
 data = ParseKMZ(filename="Demo_network_correct.kmz")
 # print('got data')
-# pp = pprint.PrettyPrinter(indent=1)
-# pp.pprint(data['arcs'])
+pp = pprint.PrettyPrinter(indent=1)
+pp.pprint(data['arcs'])
 WriteKMZDataToExcel(data)
