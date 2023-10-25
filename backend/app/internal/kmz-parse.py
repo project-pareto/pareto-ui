@@ -366,12 +366,62 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
                 row+=1
 
     ## step 7: add initial capacities
-    initial_capacity_tabs = {
+    initial_pipeline_tabs = {
         "InitialPipelineCapacity": [
             ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
             ],
+        "InitialPipelineDiameters": [
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
+            ],
     }
+
+    
+    for initial_pipeline_tab in initial_pipeline_tabs:
+        ws = wb[initial_pipeline_tab]
+
+        # write row indexes
+        column = 1
+        row = 3
+        node_keys = initial_pipeline_tabs[initial_pipeline_tab][0]
+        for node_key in node_keys:
+            print(f'{initial_pipeline_tab}: adding {node_key}')
+            for node in data[node_key]:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                row+=1
+        
+        # write column indexes
+        node_keys = initial_pipeline_tabs[initial_pipeline_tab][1]
+        column = 2
+        row = 2
+        for node_key in node_keys:
+            print(f'{initial_pipeline_tab}: adding {node_key}')
+            for node in data[node_key]:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                column+=1
+
+    initial_capacity_tabs = {
+        "InitialDisposalCapacity": "SWDSites",
+        "InitialStorageCapacity": "StorageSites",
+        "CompletionsPadStorage": "CompletionsPads",
+        "PadOffloadingCapacity": "CompletionsPads",
+        "NodeCapacities": "NetworkNodes",
+        "PadOffloadingCapacity": "CompletionsPads",
+    }
+    column = 1
+    for initial_capacity_tab in initial_capacity_tabs:
+        ws = wb[initial_capacity_tab]
+        node_key = initial_capacity_tabs[initial_capacity_tab]
+        row = 3
+        print(f'{initial_capacity_tab}: adding {node_key}')
+        for node in data[node_key]:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row+=1
+    
 
     ## step 8: 
 
