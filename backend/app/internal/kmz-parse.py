@@ -86,6 +86,7 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
     treatment_sites = {}
     storage_sites = {}
     freshwater_sources = {}
+    reuse_options = {}
     other_nodes = {}
     arcs = {}
 
@@ -122,6 +123,8 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
                 storage_sites[key] = result_object[key]
             elif key[0].upper() == 'F':
                 freshwater_sources[key] = result_object[key]
+            elif key[0].upper() == 'O' and len(key) < 4:
+                reuse_options[key] = result_object[key]
             else:
                 other_nodes[key] = result_object[key]
             all_nodes[key] = result_object[key]
@@ -231,6 +234,7 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
     data['TreatmentSites'] = treatment_sites
     data['StorageSites'] = storage_sites
     data['FreshwaterSources'] = freshwater_sources
+    data['ReuseOptions'] = reuse_options
     data['other_nodes'] = other_nodes
     data['arcs'] = arcs
     data['connections'] = connections
@@ -251,9 +255,9 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
     wb = load_workbook(excel_path, data_only=True)
 
     ## step 3: add nodes
-    node_keys = [ # would this would also include beneficial reuse?
+    node_keys = [
         'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
-        'StorageSites', 'TreatmentSites', 'NetworkNodes'
+        'StorageSites', 'TreatmentSites', 'NetworkNodes', "ReuseOptions"
     ]
 
     column = 1
@@ -321,9 +325,9 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
 
 
     ## step 5: add elevations:
-    elevation_nodes = [ # this would also include beneficial reuse
+    elevation_nodes = [
         'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
-        'StorageSites', 'TreatmentSites', 'NetworkNodes'
+        'StorageSites', 'TreatmentSites', 'ReuseOptions', 'NetworkNodes'
     ]
 
     column = 1
@@ -362,6 +366,12 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
                 row+=1
 
     ## step 7: add initial capacities
+    initial_capacity_tabs = {
+        "InitialPipelineCapacity": [
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
+            ],
+    }
 
     ## step 8: 
 
