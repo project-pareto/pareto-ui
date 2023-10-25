@@ -251,7 +251,7 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
     wb = load_workbook(excel_path, data_only=True)
 
     ## step 3: add nodes
-    node_keys = [
+    node_keys = [ # would this would also include beneficial reuse?
         'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
         'StorageSites', 'TreatmentSites', 'NetworkNodes'
     ]
@@ -320,13 +320,47 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
             column+=1
 
 
-    ## step 5: Save and close
+    ## step 5: add elevations:
+    elevation_nodes = [ # this would also include beneficial reuse
+        'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
+        'StorageSites', 'TreatmentSites', 'NetworkNodes'
+    ]
+
+    column = 1
+    row = 2
+    ws = wb["Elevation"]
+    for node_key in elevation_nodes:
+        for node in data[node_key]:
+            print(f'{node_key}: adding {node} elevation')
+            nodeCellLocation = f'{get_column_letter(column)}{row}'
+            valueCellLocation = f'{get_column_letter(column+1)}{row}'
+            ws[nodeCellLocation] = node
+            try:
+                ws[valueCellLocation] = float(data[node_key][node]['altitude'])
+            except:
+                print('unable to convert elevation to float. adding it as is')
+                ws[valueCellLocation] = data[node_key][node]['altitude']
+            row+=1
+
+    ## step 6: add forecasts (with empty values)
+    forecast_tabs = {
+        "CompletionsDemand": ["CompletionsPads"],
+        "PadRates": ["ProductionPads"],
+        "FlowbackRates": ["CompletionsPads"],
+        "WellPressure": ["ProductionPads", "CompletionsPads"],
+    }
+
+    ## step 7: add initial capacities
+
+    ## step 8: 
+
+    ## final step: Save and close
     wb.save(excel_path)
     wb.close()
 
 
-# data = ParseKMZ(filename="Demo_network_correct.kmz")
+data = ParseKMZ(filename="Demo_network_correct.kmz")
 # print('got data')
 # pp = pprint.PrettyPrinter(indent=1)
-# pp.pprint(data['connections']['all_connections'])
-# WriteKMZDataToExcel(data)
+# pp.pprint(data['arcs'])
+WriteKMZDataToExcel(data)
