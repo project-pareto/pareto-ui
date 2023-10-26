@@ -374,11 +374,19 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
         "InitialPipelineCapacity": [
             ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
-            ],
+        ],
         "InitialPipelineDiameters": [
             ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
-            ],
+        ],
+        "PipelineOperationalCost": [
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
+        ],
+        "PipelineExpansionDistance": [
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
+        ],
     }
     
     for initial_pipeline_tab in initial_pipeline_tabs:
@@ -412,7 +420,6 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
         "CompletionsPadStorage": "CompletionsPads",
         "PadOffloadingCapacity": "CompletionsPads",
         "NodeCapacities": "NetworkNodes",
-        "PadOffloadingCapacity": "CompletionsPads",
     }
     column = 1
     for initial_capacity_tab in initial_capacity_tabs:
