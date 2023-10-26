@@ -11,6 +11,7 @@ from app.internal.pareto_stategic_model import run_strategic_model, handle_run_s
 from app.internal.scenario_handler import (
     scenario_handler,
 )
+from app.internal.KMZParser import ParseKMZ, WriteDataToExcel
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ async def update(request: Request):
 
 @router.post("/upload/{scenario_name}")
 async def upload(scenario_name: str, file: UploadFile = File(...)):
-    """Upload an excel sheet and create corresponding scenario.
+    """Upload an excel sheet or KMZ map file and create corresponding scenario.
 
     Args:
         file: excel sheet to be uploaded
@@ -56,17 +57,35 @@ async def upload(scenario_name: str, file: UploadFile = File(...)):
         New scenario data
     """
     new_id = scenario_handler.get_next_id()
-    output_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,new_id)
-    try:
-    # get file contents
-        async with aiofiles.open(output_path, 'wb') as out_file:
-            content = await file.read()  # async read
-            await out_file.write(content) 
-        return scenario_handler.upload_excelsheet(output_path=output_path, scenarioName=scenario_name, filename=file.filename)
+    # check if file is excel or KMZ
+    if file.filename.split('.')[-1].lower() == 'kmz':
+        kmz_path = f"{scenario_handler.excelsheets_path}/{new_id}.kmz"
+        excel_path = f"{scenario_handler.excelsheets_path}/{new_id}"
+        try: # get file contents
+            async with aiofiles.open(kmz_path, 'wb') as out_file:
+                content = await file.read()  # async read
+                await out_file.write(content) 
+            kmz_data = ParseKMZ(kmz_path)
+            _log.info(f'got kmz_data')
+            template_location = f'{os.path.dirname(os.path.abspath(__file__))}/../internal/assets/pareto_input_template.xlsx'
+            WriteDataToExcel(kmz_data, excel_path, template_location)
+            _log.info('finished writing data to excel')
+            return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename)
+        except Exception as e:
+            _log.error(f"error on file upload: {str(e)}")
+            raise HTTPException(400, detail=f"File upload failed: {e}")
+        
+    elif file.filename.split('.')[-1].lower() == 'xlsx':
+        output_path = f"{scenario_handler.excelsheets_path}/{new_id}.xlsx"
+        try: # get file contents
+            async with aiofiles.open(output_path, 'wb') as out_file:
+                content = await file.read()  # async read
+                await out_file.write(content) 
+            return scenario_handler.upload_excelsheet(output_path=output_path, scenarioName=scenario_name, filename=file.filename)
 
-    except Exception as e:
-        _log.error(f"error on file upload: {str(e)}")
-        raise HTTPException(400, detail=f"File upload failed: {e}")
+        except Exception as e:
+            _log.error(f"error on file upload: {str(e)}")
+            raise HTTPException(400, detail=f"File upload failed: {e}")
 
 @router.post("/delete_scenario")
 async def delete_scenario(request: Request):

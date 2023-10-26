@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 # pandas: geoparse
-def ParseKMZ(filename = "Demo_network_correct.kmz"):
+def ParseKMZ(filename):
     global NODE_NAMES
     NODE_NAMES = set()
 
@@ -130,43 +130,7 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
             all_nodes[key] = result_object[key]
 
     connections = {
-        "all_connections_list": [],
         "all_connections": {},
-        "P": {
-            "C": [],
-            "N": [],
-            "K": [],
-        }, 
-        "C": {
-            "C": [],
-            "N": [],
-            "K": [],
-            "S": [],
-        }, 
-        "N": {
-            "C": [],
-            "N": [],
-            "K": [],
-            "S": [],
-            "R": [],
-            "O": [],
-            "P": [],
-        },
-        "S": {
-            "C": [],
-            "N": [],
-            "O": [],
-        }, 
-        "R": {
-            "C": [],
-            "N": [],
-            "O": [],
-            "S": [],
-            "R": [],
-        }, 
-        "F": {
-            "C": [],
-        }
     }
 
     ## possible connection types:
@@ -203,7 +167,7 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
                 # origin_node_data = all_nodes[origin_node]
                 # destination_node_data = all_nodes[closest_node]
 
-                connections["all_connections_list"].append(connection)
+                # connections["all_connections_list"].append(connection)
 
                 ## ASSUME connections are bidirectional
                 if origin_node in connections["all_connections"]:
@@ -214,12 +178,10 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
                     connections["all_connections"][closest_node].append(origin_node)
                 else:
                     connections["all_connections"][closest_node] = [origin_node]
-
-
-                try:
-                    connections[origin_node[0]][closest_node[0]].append(connection)
-                except:
-                    print(f'unable to add connection: {connection}')
+                # try:
+                #     connections[origin_node[0]][closest_node[0]].append(connection)
+                # except:
+                #     print(f'unable to add connection: {connection}')
 
 
 
@@ -243,13 +205,13 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
     return data 
 
 
-def WriteDataToExcel(data, output_file_name="kmz_scenario"):
-    input_path = "pareto_input_template.xlsx"
+def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = "pareto_input_template.xlsx"):
+    # input_path = "./assets/pareto_input_template.xlsx"
     excel_path = f'{output_file_name}.xlsx'
     print(f'writing data to excel at {excel_path}')
 
     ## step 1: copy pareto_input_template to new file for writing
-    shutil.copyfile(input_path, excel_path)
+    shutil.copyfile(template_location, excel_path)
 
     ## step 2: open excel workbook
     wb = load_workbook(excel_path, data_only=True)
