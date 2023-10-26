@@ -243,7 +243,7 @@ def ParseKMZ(filename = "Demo_network_correct.kmz"):
     return data 
 
 
-def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
+def WriteDataToExcel(data, output_file_name="kmz_scenario"):
     input_path = "pareto_input_template.xlsx"
     excel_path = f'{output_file_name}.xlsx'
     print(f'writing data to excel at {excel_path}')
@@ -472,15 +472,15 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
                 row+=1
 
 
-    ## step 8: 
+    ## step 8: add tabs that rely on TreatmentTechnologies, Capacities, Diameters
 
     ## final step: Save and close
     wb.save(excel_path)
     wb.close()
 
 
-data = ParseKMZ(filename="Demo_network_correct.kmz")
-# print('got data')
-pp = pprint.PrettyPrinter(indent=1)
-pp.pprint(data['arcs'])
-WriteKMZDataToExcel(data)
+# data = ParseKMZ(filename="Demo_network_correct.kmz")
+# # print('got data')
+# pp = pprint.PrettyPrinter(indent=1)
+# pp.pprint(data['arcs'])
+# WriteDataToExcel(data)
