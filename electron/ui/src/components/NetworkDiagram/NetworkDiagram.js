@@ -156,9 +156,8 @@ export default function NetworkDiagram(props) {
         
         : 
         <>
-        <NetworkMap></NetworkMap>
-        {/* {UploadBox()} */}
-        {/* <Button>Upload Diagram</Button> */}
+        {/* <NetworkMap></NetworkMap> */}
+        {UploadBox()}
         </>
         
         }
