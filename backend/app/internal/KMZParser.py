@@ -432,6 +432,10 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
             ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
+        "TruckingTime": [
+            ["ProductionPads", "CompletionsPads"], 
+            ["SWDSites"],
+        ],
     }
     
     for initial_pipeline_tab in initial_pipeline_tabs:
