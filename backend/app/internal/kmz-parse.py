@@ -369,7 +369,7 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
                 ws[cellLocation] = node
                 row+=1
 
-    ## step 7: add initial pipelines, capacities
+    ## step 7: add initial pipelines, capacities, ...
     initial_pipeline_tabs = {
         "InitialPipelineCapacity": [
             ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
@@ -425,23 +425,45 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
             ws[cellLocation] = node
             row+=1
 
-    single_value_cost_tabs = {
+    single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
         "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
         "FreshSourcingCost": ["FreshwaterSources"],
         "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "FreshwaterSources"],
+        "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
+        "BeneficialReuseCredit": ["ReuseOptions"],
+        "CompletionsPadOutsideSystem": ["CompletionsPads"],
+
     }
 
     column = 1
-    for single_value_cost_tab in single_value_cost_tabs:
-        ws = wb[single_value_cost_tab]
+    for single_value_tab in single_value_tabs:
+        ws = wb[single_value_tab]
         row = 3
-        for node_key in single_value_cost_tabs[single_value_cost_tab]:
-            print(f'{single_value_cost_tab}: adding {node_key}')
+        for node_key in single_value_tabs[single_value_tab]:
+            print(f'{single_value_tab}: adding {node_key}')
             for node in data[node_key]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
                 row+=1
+
+    water_quality_tabs = { ## AUTOFILL all these to ~150,000.00?
+        "PadWaterQuality": ["ProductionPads", "CompletionsPads"],
+        "StorageInitialWaterQuality": ["StorageSites"],
+        "PadStorageInitialWaterQuality": ["CompletionsPads"],
+    }
+
+    column = 1
+    for water_quality_tab in water_quality_tabs:
+        ws = wb[water_quality_tab]
+        row = 3
+        for node_key in water_quality_tabs[water_quality_tab]:
+            print(f'{water_quality_tab}: adding {node_key}')
+            for node in data[node_key]:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                row+=1
+
 
     ## step 8: 
 
