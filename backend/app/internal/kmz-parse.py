@@ -352,6 +352,10 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
         "PadRates": ["ProductionPads"],
         "FlowbackRates": ["CompletionsPads"],
         "WellPressure": ["ProductionPads", "CompletionsPads"],
+        "ReuseMinimum": ["ReuseOptions"],
+        "ReuseCapacity": ["ReuseOptions"],
+        "FreshwaterSourcingAvailability": ["FreshwaterSources"],
+        "DisposalOperatingCapacity": ["SWDSites"], ## AUTOFILL with ones?
     }
 
     column = 1
@@ -365,7 +369,7 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
                 ws[cellLocation] = node
                 row+=1
 
-    ## step 7: add initial capacities
+    ## step 7: add initial pipelines, capacities
     initial_pipeline_tabs = {
         "InitialPipelineCapacity": [
             ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
@@ -376,7 +380,6 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
             ],
     }
-
     
     for initial_pipeline_tab in initial_pipeline_tabs:
         ws = wb[initial_pipeline_tab]
@@ -421,7 +424,24 @@ def WriteKMZDataToExcel(data, output_file_name="kmz_scenario"):
             cellLocation = f'{get_column_letter(column)}{row}'
             ws[cellLocation] = node
             row+=1
-    
+
+    single_value_cost_tabs = {
+        "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
+        "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
+        "FreshSourcingCost": ["FreshwaterSources"],
+        "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "FreshwaterSources"],
+    }
+
+    column = 1
+    for single_value_cost_tab in single_value_cost_tabs:
+        ws = wb[single_value_cost_tab]
+        row = 3
+        for node_key in single_value_cost_tabs[single_value_cost_tab]:
+            print(f'{single_value_cost_tab}: adding {node_key}')
+            for node in data[node_key]:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                row+=1
 
     ## step 8: 
 
