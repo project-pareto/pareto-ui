@@ -522,6 +522,23 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
 
 
     ## step 8: add tabs that rely on TreatmentTechnologies, Capacities, Diameters
+    expansion_tabs = {
+        "DisposalExpansionCost": "SWDSites",
+        "StorageExpansionCost": "StorageSites",
+        # "TreatmentExpansionCost": "TreatmentSites", # this one will be tricky
+        "DisposalExpansionLeadTime": "SWDSites",
+        "StorageExpansionLeadTime": "StorageSites",
+    }
+    column = 1
+    for expansion_tab in expansion_tabs:
+        ws = wb[expansion_tab]
+        node_key = expansion_tabs[expansion_tab]
+        row = 3
+        print(f'{expansion_tab}: adding {node_key}')
+        for node in data[node_key]:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row+=1
 
     ## final step: Save and close
     wb.save(excel_path)
