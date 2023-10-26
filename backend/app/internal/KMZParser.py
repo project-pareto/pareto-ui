@@ -84,9 +84,61 @@ def ParseKMZ(filename):
     network_nodes = {}
     disposal_sites = {}
     treatment_sites = {}
-    storage_sites = {}
-    freshwater_sources = {}
-    reuse_options = {}
+    # storage_sites = {}
+    # freshwater_sources = {}
+    # reuse_options = {}
+    storage_sites = { ## add fake storage site as fill in data
+         'S01': 
+         {
+             'LookAt': '',
+            'Point': '',
+            'altitude': '0',
+            'altitudeMode': 'relativeToGround',
+            'coordinates': ['-122.0857031353512', '37.42169546752972', '0'],
+            'description': 'Located in Mountain View, California',
+            'heading': '51.91673446364886',
+            'latitude': '37.42169546752972',
+            'longitude': '-122.0857031353512',
+            'node_type': 'point',
+            'range': '232.1878066927673',
+            'styleUrl': '#sn_noicon',
+            'tilt': '50.75900171660835',
+        },
+    }
+    freshwater_sources = { ## add fake freshwater source as fill in data
+        'F01': {
+            'LookAt': '',
+            'Point': '',
+            'altitude': '0',
+            'altitudeMode': 'relativeToGround',
+            'coordinates': ['-43.20953574843956', '-22.95040715767599', '0'],
+            'description': 'Located in Rio, Brazil',
+            'heading': '-134.4620862063529',
+            'latitude': '-22.950407157676',
+            'longitude': '-43.20953574843956',
+            'node_type': 'point',
+            'range': '518.7551361289096',
+            'styleUrl': '#sn_noicon',
+            'tilt': '58.47824597790541',
+        },
+    }
+    reuse_options = { ## add fake beneficial reuse option as fill in data
+        'O01': {
+            'LookAt': '',
+            'Point': '',
+            'altitude': '0',
+            'altitudeMode': 'relativeToGround',
+            'coordinates': ['138.7818265722904', '35.34063009043844', '0'],
+            'description': 'Located near Tokyo, Japan',
+            'heading': '-62.46343745766319',
+            'latitude': '35.34063009043844',
+            'longitude': '138.7818265722904',
+            'node_type': 'point',
+            'range': '7131.323646428426',
+            'styleUrl': '#sn_noicon',
+            'tilt': '67.6064862659656',
+        },
+    }
     other_nodes = {}
     arcs = {}
 
@@ -242,18 +294,18 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
         "NKA": ["NetworkNodes", "SWDSites"],
         "NRA": ["NetworkNodes", "TreatmentSites"],
         "NSA": ["NetworkNodes", "StorageSites"],
-        # "NOA": ["NetworkNodes", "BeneficialReuse?"],
+        "NOA": ["NetworkNodes", "ReuseOptions"],
         "SNA": ["StorageSites", "NetworkNodes"],
-        # "SOA": ["StorageSites", "BeneficialReuse"],
+        "SOA": ["StorageSites", "ReuseOptions"],
         "FCA": ["FreshwaterSources", "CompletionsPads"],
         "RCA": ["TreatmentSites", "CompletionsPads"],
         "RSA": ["TreatmentSites", "StorageSites"],
         "SCA": ["StorageSites", "CompletionsPads"],
         "RNA": ["TreatmentSites", "NetworkNodes"],
-        # "ROA": ["TreatmentSites", "BeneficialReuse"],
+        "ROA": ["TreatmentSites", "ReuseOptions"],
     }
-    piped_arc = "PNA" ## will be a loop
-    for piped_arc in piped_arcs:
+
+    for piped_arc in piped_arcs: ## assume all connections on map are for pipes
         ws = wb[piped_arc]
         piped_arc_node1 = piped_arcs[piped_arc][0]
         piped_arc_node2 = piped_arcs[piped_arc][1]
@@ -285,6 +337,37 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
                 ind+=1
             column+=1
 
+    trucked_arcs = {
+        "PCT": ["ProductionPads", "CompletionsPads"],
+        "FCT": ["FreshwaterSources", "CompletionsPads"],
+        "PKT": ["ProductionPads", "SWDSites"],
+        "CKT": ["CompletionsPads", "SWDSites"],
+        "CCT": ["CompletionsPads", "CompletionsPads"],
+        "CST": ["CompletionsPads", "StorageSites"],
+        "RST": ["TreatmentSites", "StorageSites"],
+        "ROT": ["TreatmentSites", "ReuseOptions"],
+        "SOT": ["StorageSites", "ReuseOptions"],
+    }
+
+    for trucked_arc in trucked_arcs:
+        ws = wb[trucked_arc]
+        trucked_arc_node1 = trucked_arcs[trucked_arc][0]
+        trucked_arc_node2 = trucked_arcs[trucked_arc][1]
+        column = 1
+        row = 3
+        print(f'{trucked_arc}: adding {trucked_arc_node1}')
+        for node in data[trucked_arc_node1]:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row+=1
+        column = 2
+        row = 2
+        print(f'{trucked_arc}: adding {trucked_arc_node2}')
+        for node in data[trucked_arc_node2]:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            ind = 3
+            column+=1
 
     ## step 5: add elevations:
     elevation_nodes = [
