@@ -64,5 +64,8 @@
   "homepage": "./",
   "devDependencies": {
     "cypress-downloadfile": "^1.2.3"
+  },
+  "jest": {
+    "transformIgnorePatterns": []
   }
 }
