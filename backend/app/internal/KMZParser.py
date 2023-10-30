@@ -87,24 +87,7 @@ def ParseKMZ(filename):
     # storage_sites = {}
     # freshwater_sources = {}
     # reuse_options = {}
-    storage_sites = { ## add fake storage site as fill in data
-         'S01': 
-         {
-             'LookAt': '',
-            'Point': '',
-            'altitude': '0',
-            'altitudeMode': 'relativeToGround',
-            'coordinates': ['-122.0857031353512', '37.42169546752972', '0'],
-            'description': 'Located in Mountain View, California',
-            'heading': '51.91673446364886',
-            'latitude': '37.42169546752972',
-            'longitude': '-122.0857031353512',
-            'node_type': 'point',
-            'range': '232.1878066927673',
-            'styleUrl': '#sn_noicon',
-            'tilt': '50.75900171660835',
-        },
-    }
+    storage_sites = {}
     freshwater_sources = { ## add fake freshwater source as fill in data
         'F01': {
             'LookAt': '',
@@ -141,6 +124,9 @@ def ParseKMZ(filename):
     }
     other_nodes = {}
     arcs = {}
+    connections = {
+        "all_connections": {},
+    }
 
     for key in result_object:
         # data[key] = {}
@@ -171,6 +157,10 @@ def ParseKMZ(filename):
                 disposal_sites[key] = result_object[key]
             elif key[0].upper() == 'R':
                 treatment_sites[key] = result_object[key]
+                storage_site_key = key.replace('R','S').replace('r','S')
+                storage_sites[storage_site_key] = result_object[key]
+                connections["all_connections"][key] = [storage_site_key]
+                connections["all_connections"][storage_site_key] = [key]
             elif key[0].upper() == 'S' and len(key) < 4:
                 storage_sites[key] = result_object[key]
             elif key[0].upper() == 'F':
@@ -180,10 +170,6 @@ def ParseKMZ(filename):
             else:
                 other_nodes[key] = result_object[key]
             all_nodes[key] = result_object[key]
-
-    connections = {
-        "all_connections": {},
-    }
 
     ## possible connection types:
     # P - N, C, K
