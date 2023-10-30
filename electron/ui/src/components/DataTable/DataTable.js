@@ -4,9 +4,14 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextF
 import OverrideTable from '../OverrideTable/OverrideTable';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
+import PopupModal from '../../components/PopupModal/PopupModal'
 
 export default function DataTable(props) {  
   const [showOverrideTables, setShowOverrideTables] = useState(false)
+  const [ rowValue, setRowValue ] = useState(0)
+  const [ doubleClickIndex, setDoubleClickIndex ] = useState(null)
+  const [ showRowValueInput, setShowRowValueInput ] = useState(false)
+
   useEffect(()=>{
     if(props.scenario.override_values === undefined) {
       console.log('override values were not defined')
@@ -66,16 +71,10 @@ const handleDoubleClick = (ind, index) => {
     index: column number, starting at 0
   */
   if (['Optimized','Draft','failure', 'Not Optimized'].includes(props.scenario.results.status)) {
-    if(index === 0) //when double clicking column index, set all numerical values in that row to 0
+    if(index === 0) //when double clicking column index, allow user to input value to apply to that entire row
     { 
-      let tempScenario = {...props.scenario}
-      Object.entries(props.scenario.data_input.df_parameters[props.category]).map(([key, value], i) => {
-        if (i > 0 && value[ind] !== "" && !isNaN(value[ind])) {
-          value[ind] = 0
-        }
-      })
-      props.handleEditInput(true)
-      props.setScenario(tempScenario)
+      setShowRowValueInput(true)
+      setDoubleClickIndex(ind)
     }else {
       if(!props.editDict[""+ind+":"+index]) {
         let tempEditDict = {...props.editDict}
@@ -89,6 +88,27 @@ const handleDoubleClick = (ind, index) => {
   else {
     props.setShowError(true)
   }
+ }
+
+ const handleEditRowValue = (event) => {
+  if (isNaN(event.target.value)) {
+    setRowValue(event.target.value)
+  }else {
+    setRowValue(Number(event.target.value))
+  }
+ }
+
+ const handleUpdateRowValues = () => {
+  let tempScenario = {...props.scenario}
+  Object.entries(props.scenario.data_input.df_parameters[props.category]).map(([key, value], i) => {
+    if (i > 0 && value[doubleClickIndex] !== "" && !isNaN(value[doubleClickIndex])) {
+      value[doubleClickIndex] = rowValue
+    }
+  })
+  props.handleEditInput(true)
+  props.setScenario(tempScenario)
+  setShowRowValueInput(false)
+  setRowValue(0)
  }
 
 const handleKeyDown = (e) => {
@@ -353,6 +373,19 @@ const renderInputDeltaTable = () => {
     {props.section === "input" && renderInputTable()}
     {props.section === "output" && renderOutputTable()}
     {props.section === "compare" && renderInputDeltaTable()}
+    <PopupModal
+        input
+        open={showRowValueInput}
+        handleClose={() => setShowRowValueInput(false)}
+        text={rowValue}
+        textLabel='Update all values in this row'
+        handleEditText={handleEditRowValue}
+        handleSave={handleUpdateRowValues}
+        buttonText='Update'
+        buttonColor='primary'
+        buttonVariant='contained'
+        width={400}
+      />
     </>
   );
 
