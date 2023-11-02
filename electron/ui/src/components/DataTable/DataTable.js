@@ -101,7 +101,7 @@ const handleDoubleClick = (ind, index) => {
  const handleUpdateRowValues = () => {
   let tempScenario = {...props.scenario}
   Object.entries(props.scenario.data_input.df_parameters[props.category]).map(([key, value], i) => {
-    if (i > 0 && value[doubleClickIndex] !== "" && !isNaN(value[doubleClickIndex])) {
+    if (i > 0 && !isNaN(value[doubleClickIndex])) {
       value[doubleClickIndex] = rowValue
     }
   })
