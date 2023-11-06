@@ -16,7 +16,7 @@ export default function Dashboard(props) {
     const [ showWarning, setShowWarning ] = useState(false)
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
-    const fileTypes = ["xlsx", "kmz"];
+    const fileTypes = ["xlsx", "kmz", "kml"];
     // const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.6_rel/pareto/case_studies/strategic_small_case_study.xlsx"
     const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_permian_demo.xlsx"
 

@@ -21,7 +21,6 @@ def ParseKMZ(filename):
         kmz = ZipFile(filename, 'r')
         kml = kmz.open('doc.kml', 'r')
     elif filename[-3:] == 'kml':
-        print('file type is kml')
         kml = open(filename, 'r')
     else:
         print('filetype is not kmz or kml')
@@ -72,7 +71,8 @@ def ParseKMZ(filename):
     handler = PlacemarkHandler()
     parser.setContentHandler(handler)
     parser.parse(kml)
-    kmz.close()
+    if filename[-3:] == 'kmz':
+        kmz.close()
 
     # this is the object that contains all the data for each point on the map
     result_object = handler.mapping

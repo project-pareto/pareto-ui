@@ -57,9 +57,10 @@ async def upload(scenario_name: str, file: UploadFile = File(...)):
         New scenario data
     """
     new_id = scenario_handler.get_next_id()
+    file_extension = file.filename.split('.')[-1].lower()
     # check if file is excel or KMZ
-    if file.filename.split('.')[-1].lower() == 'kmz':
-        kmz_path = f"{scenario_handler.excelsheets_path}/{new_id}.kmz"
+    if file_extension == 'kmz' or file_extension == 'kml':
+        kmz_path = f"{scenario_handler.excelsheets_path}/{new_id}.{file_extension}"
         excel_path = f"{scenario_handler.excelsheets_path}/{new_id}"
         try: # get file contents
             async with aiofiles.open(kmz_path, 'wb') as out_file:
@@ -70,12 +71,12 @@ async def upload(scenario_name: str, file: UploadFile = File(...)):
             template_location = f'{os.path.dirname(os.path.abspath(__file__))}/../internal/assets/pareto_input_template.xlsx'
             WriteDataToExcel(kmz_data, excel_path, template_location)
             _log.info('finished writing data to excel')
-            return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename)
+            return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, kmz_data=kmz_data)
         except Exception as e:
             _log.error(f"error on file upload: {str(e)}")
             raise HTTPException(400, detail=f"File upload failed: {e}")
         
-    elif file.filename.split('.')[-1].lower() == 'xlsx':
+    elif file_extension == 'xlsx':
         output_path = f"{scenario_handler.excelsheets_path}/{new_id}.xlsx"
         try: # get file contents
             async with aiofiles.open(output_path, 'wb') as out_file:

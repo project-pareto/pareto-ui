@@ -184,7 +184,7 @@ class ScenarioHandler:
 
         return updatedScenario
     
-    def upload_excelsheet(self, output_path, scenarioName, filename):
+    def upload_excelsheet(self, output_path, scenarioName, filename, kmz_data=None):
         _log.info(f"Uploading excel sheet: {scenarioName}")
 
         [set_list, parameter_list] = get_input_lists()
@@ -225,7 +225,7 @@ class ScenarioHandler:
             "name": scenarioName, 
             "id": self.next_id, 
             "date": date,
-            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units}, 
+            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units, "map_data": kmz_data}, 
             "optimization": 
                 {
                     "objective":"cost", 
