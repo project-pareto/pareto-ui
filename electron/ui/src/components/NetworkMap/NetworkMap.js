@@ -5,7 +5,7 @@ import { useMap } from 'react-leaflet/hooks'
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
 // import MapLegend from './maplegend';
 import { blueIcon, redIcon, violetIcon, blackIcon, greenIcon, greyIcon, yellowIcon, orangeIcon, goldIcon } from '../../assets/custom-icons';
-import { kmz_data } from '../../assets/kmz_output';
+// import { kmz_data } from '../../assets/kmz_output';
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 
@@ -28,6 +28,7 @@ import { Tooltip } from 'react-leaflet/Tooltip'
 const icons = [blueIcon, redIcon, violetIcon, blackIcon, greenIcon, greyIcon, yellowIcon, orangeIcon, goldIcon]
 
 export default function NetworkMap(props) {
+    const { points, lines } = props;
     const [ googleMapType, setGoogleMapType ] = useState('y')
     const [ lineData, setLineData ] = useState([])
     const [ nodeData, setNodeData ] = useState([])
@@ -77,31 +78,36 @@ export default function NetworkMap(props) {
         
         let amt = 0
         let totalCoords = [0, 0]
-        for (let key of Object.keys(kmz_data)) {
-            let kmz_object = kmz_data[key]
-            if(kmz_object.node_type === "point") {
-                let tempDataObject = {name: key}
-                let coords = kmz_object.coordinates[0]
-                let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
-                tempDataObject.coordinates = coordinates
-                tempNodeData.push(tempDataObject)
+        for (let key of Object.keys(points)) {
+            let node_object = points[key]
+            let tempDataObject = {name: key}
+            let coords = node_object.coordinates
+            let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
+            tempDataObject.coordinates = coordinates
+            tempNodeData.push(tempDataObject)
 
-                amt+=1
-                totalCoords[0] += parseFloat(coords[0])
-                totalCoords[1] += parseFloat(coords[1])
-            }else {
-                //add it to templinedatas
-                let tempLineObject = {name: key, data: [], color: "#A03232"}
-                for (let each of kmz_object.coordinates) {
-                    let coordinates = [parseFloat(each[1]), parseFloat(each[0])]
-                    tempLineObject.data.push(coordinates)
-                }
-                tempLineDatas.push(tempLineObject)
-            }
+            amt+=1
+            // console.log('adding to coordinates: ')
+            // console.log(coordinates)
+            totalCoords[0] += parseFloat(coords[0])
+            totalCoords[1] += parseFloat(coords[1])
         }
+        for (let key of Object.keys(lines)) {
+            let tempLineObject = {name: key, data: [], color: "#A03232"}
+            let line_object = lines[key]
+            let tempDataObject = {name: key}
+            let coords = line_object.coordinates[0]
+            let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
+            for (let each of line_object.coordinates) {
+                let coordinates = [parseFloat(each[1]), parseFloat(each[0])]
+                tempLineObject.data.push(coordinates)
+            }
+            tempLineDatas.push(tempLineObject)
+        }
+
         let tempMapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
         console.log(tempMapCenter)
-        console.log(tempLineDatas)
+        // console.log(tempLineDatas)
         setLineData(tempLineDatas)
         setNodeData(tempNodeData)
         setMapCenter(tempMapCenter)
@@ -169,12 +175,7 @@ export default function NetworkMap(props) {
                                     position={[
                                         value.coordinates[1],
                                         value.coordinates[0]
-                                    ]}
-                                    eventHandlers={{
-                                        click: (e) => {
-                                            props.show_photos(value.name)
-                                        },
-                                        }}                            
+                                    ]}                        
                                     icon={icons[0]}
                                 >
                                     <Tooltip>{value.name}</Tooltip>

@@ -7,10 +7,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import { FileUploader } from "react-drag-drop-files";
 import { fetchDiagram, uploadDiagram, deleteDiagram } from '../../services/app.service';
-// import NetworkMap from '../NetworkMap/NetworkMap';
+import NetworkMap from '../NetworkMap/NetworkMap';
 
 export default function NetworkDiagram(props) {
     const [ file, setFile ] = useState(null)
+    const [ hasMap, setHasMap ] = useState(false)
     const fileTypes = ["png","jpg","jpeg"];
     const [ diagramImage, setDiagramImage ] = useState(null)
     const [ showWarning, setShowWarning ] = useState(false)
@@ -24,7 +25,14 @@ export default function NetworkDiagram(props) {
         }
       }
     useEffect(()=>{
-        fetchNetworkDiagram()
+        if (props.scenario.data_input.map_data) {
+            console.log('we got ourselves a map')
+            setHasMap(true)
+            
+        } else {
+            fetchNetworkDiagram()
+        }
+        
     }, [props.scenario]);
 
     const fileTypeError = () => {
@@ -155,6 +163,12 @@ export default function NetworkDiagram(props) {
         </Grid>
         
         : 
+        hasMap ? 
+        <NetworkMap 
+            points={props.scenario.data_input.map_data.all_nodes} 
+            lines={props.scenario.data_input.map_data.arcs}
+        />
+        :
         <>
         {/* <NetworkMap></NetworkMap> */}
         {UploadBox()}
