@@ -20,6 +20,7 @@ def ParseKMZ(filename):
     if filename[-3:] == 'kmz':
         kmz = ZipFile(filename, 'r')
         kml = kmz.open('doc.kml', 'r')
+        kmz.close()
     elif filename[-3:] == 'kml':
         kml = open(filename, 'r')
     else:
@@ -71,8 +72,7 @@ def ParseKMZ(filename):
     handler = PlacemarkHandler()
     parser.setContentHandler(handler)
     parser.parse(kml)
-    if filename[-3:] == 'kmz':
-        kmz.close()
+        
 
     # this is the object that contains all the data for each point on the map
     result_object = handler.mapping
@@ -340,7 +340,7 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     ]
 
     column = 1
-    row = 2
+    row = 3
     ws = wb["Elevation"]
     for node_key in elevation_nodes:
         for node in data[node_key]:
