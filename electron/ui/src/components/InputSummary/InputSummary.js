@@ -1,6 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import { Box, FormControl, MenuItem, Select, Typography } from '@mui/material'
+import { Box, FormControl, MenuItem, Select, Typography, Grid, Button } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
 
 export default function InputSummary(props) {
@@ -26,6 +26,24 @@ export default function InputSummary(props) {
             left: 0,
       
           },
+        inputFileTextBox: {
+            display: 'flex', 
+            justifyContent: 'flex-start', 
+            textAlign: 'left'
+        },
+        downloadInput: {
+            color: "#0083b5",
+            cursor: "pointer",
+            fontWeight: "bold",
+            paddingBottom: 20
+        },
+        uploadInput: {
+            color: "#0083b5",
+            borderColor: "#0083b5",
+            '&:hover': {
+                borderColor: "#0083b5",
+            },
+        }
     }
 
     useEffect(()=>{
@@ -185,27 +203,59 @@ export default function InputSummary(props) {
     }
     
   return ( 
-    <TableContainer>
-        <Box display="flex" justifyContent="center" sx={{marginBottom:"20px"}}>
-            <FormControl sx={{ width: "30ch" }} size="small">
-                <Select
-                value={tableType}
-                onChange={(handleTableTypeChange)}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-                >
-                <MenuItem key={0} value={"Input Summary"}>Input Summary</MenuItem>
-                <MenuItem key={1} value={"Summary By Time"}>Summary By Time</MenuItem>
-                </Select>
-            </FormControl>
-        </Box>
-        <TableContainer sx={{overflowX:'auto'}}>
-            {tableType === "Input Summary" ? 
-            renderInputSummaryTable()
-            : 
-            renderSummaryTimeTable()
-            }
+    <>
+    {props.scenario.results.status === 'Incomplete' ? 
+        <Grid container sx={{m: 5}}>
+            <Grid item xs={5}>
+                <Box sx={styles.inputFileTextBox}>
+                    <h2>PARETO Input File</h2>
+                </Box>
+                <Box sx={styles.inputFileTextBox}>
+                    <p>
+                        A PARETO input file has been generated based on the schematic file uploaded. 
+                        Fill out this input file and upload it here to begin your optimization
+                    </p>
+                </Box>
+                <Box sx={styles.inputFileTextBox}>
+                    <p style={styles.downloadInput}>
+                        Download PARETO input file
+                    </p>
+                </Box>
+                <Box sx={styles.inputFileTextBox}>
+                    <Button variant="outlined" sx={styles.uploadInput}>Upload PARETO input file</Button>
+                </Box>
+                
+            </Grid>
+            <Grid item xs={5}>
+
+            </Grid>
+
+        </Grid>
+        : 
+        <TableContainer>
+            <Box display="flex" justifyContent="center" sx={{marginBottom:"20px"}}>
+                <FormControl sx={{ width: "30ch" }} size="small">
+                    <Select
+                    value={tableType}
+                    onChange={(handleTableTypeChange)}
+                    sx={{color:'#0b89b9', fontWeight: "bold"}}
+                    >
+                    <MenuItem key={0} value={"Input Summary"}>Input Summary</MenuItem>
+                    <MenuItem key={1} value={"Summary By Time"}>Summary By Time</MenuItem>
+                    </Select>
+                </FormControl>
+            </Box>
+            <TableContainer sx={{overflowX:'auto'}}>
+                {tableType === "Input Summary" ? 
+                renderInputSummaryTable()
+                : 
+                renderSummaryTimeTable()
+                }
+            </TableContainer>
         </TableContainer>
-    </TableContainer>
+    }
+    </>
+    
   );
 
 }
