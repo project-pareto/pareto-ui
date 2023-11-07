@@ -221,6 +221,10 @@ class ScenarioHandler:
         # create scenario object
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
+        if kmz_data is not None:
+            status = "Incomplete"
+        else:
+            status = "Draft"
         return_object = {
             "name": scenarioName, 
             "id": self.next_id, 
@@ -238,7 +242,7 @@ class ScenarioHandler:
                     "optimalityGap": 0,
                     "scale_model": True
                 }, 
-            "results": {"status": "Draft", "data": {}},
+            "results": {"status": status, "data": {}},
             "override_values": 
                 {
                     "vb_y_overview_dict": {},

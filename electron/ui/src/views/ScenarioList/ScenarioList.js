@@ -33,7 +33,7 @@ export default function ScenarioList(props) {
     const [ name, setName ] = useState('')
     const [ id, setId ] = useState(null)
     let navigate = useNavigate();
-    const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
+    const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible', 'Incomplete']
     const enabledStatusListCompare = ['Optimized']
 
     useEffect(()=> {
