@@ -56,9 +56,14 @@ export default function DataTable(props) {
     let ind = parseInt(inds[0])
     let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
     let tempScenario = {...props.scenario}
+    console.log('setting value to : ')
+    console.log(event.target.value)
     if (isNaN(event.target.value)) {
       tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
-    }else {
+    }else if(event.target.value === "") {
+      tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    }
+    else {
       tempScenario.data_input.df_parameters[props.category][colName][ind] = Number(event.target.value)
     }
     props.setScenario(tempScenario)
