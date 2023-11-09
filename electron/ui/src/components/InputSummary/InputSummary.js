@@ -2,10 +2,12 @@ import React from 'react';
 import {useEffect, useState} from 'react';   
 import { Box, FormControl, MenuItem, Select, Typography, Grid, Button } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
+import { fetchExcelTemplate } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
 
 export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
+    const [ excelTemplatePath, setExcelTemplatePath ] = useState("")
     const [ sumValues, setSumValues ] = useState([
         {statistic: 'Total Completions Demand', value: 0, units: 'bbl'},
         {statistic: 'Total Produced Water', value: 0, units: 'bbl'},
@@ -32,11 +34,15 @@ export default function InputSummary(props) {
             justifyContent: 'flex-start', 
             textAlign: 'left'
         },
-        downloadInput: {
-            color: "#0083b5",
-            cursor: "pointer",
+        downloadInputP: {
+            // color: "#0083b5",
+            // cursor: "pointer",
             fontWeight: "bold",
             paddingBottom: 20
+        },
+        downloadInputA: {
+            color: "#0083b5",
+            textDecoration: "none",
         },
         uploadInput: {
             color: "#0083b5",
@@ -56,6 +62,23 @@ export default function InputSummary(props) {
     }
 
     useEffect(()=>{
+
+        if (props.scenario.results.status === 'Incomplete') { //fetch location of excel template
+
+            fetchExcelTemplate(props.scenario.id).then(response => {
+            if (response.status === 200) {
+                response.json().then((data)=>{
+                    setExcelTemplatePath(data.path)
+                }).catch((err)=>{
+                    console.error("error fetching excel template path: ",err)
+                })
+            }
+            else {
+                console.error("error fetching excel template path: ",response.statusText)
+            }
+            })
+        }
+        else {
         /* 
             calculate total completions demand, total produced water, 
             total disposal capacity, and total treatment capacity; 
@@ -63,91 +86,92 @@ export default function InputSummary(props) {
             calculate totals for each time segment as well
         */
 
-        let disposalCapacity = 0
-        for (let each in props.initialDisposalCapacity) {
-            for (let value of props.initialDisposalCapacity[each]) {
-                if (!isNaN(value)) {
-                    disposalCapacity+=Number(value)
+            let disposalCapacity = 0
+            for (let each in props.initialDisposalCapacity) {
+                for (let value of props.initialDisposalCapacity[each]) {
+                    if (!isNaN(value)) {
+                        disposalCapacity+=Number(value)
+                    }
                 }
             }
-        }
 
-        let treatmentCapacity = 0
-        for (let each in props.initialTreatmentCapacity) {
-            for (let value of props.initialTreatmentCapacity[each]) {
-                if (!isNaN(value)) {
-                    treatmentCapacity+=Number(value)
+            let treatmentCapacity = 0
+            for (let each in props.initialTreatmentCapacity) {
+                for (let value of props.initialTreatmentCapacity[each]) {
+                    if (!isNaN(value)) {
+                        treatmentCapacity+=Number(value)
+                    }
                 }
             }
-        }
-        
-        let totCompletionsDemand = 0
-        let completionsDemandByTime = []
-        let disposalCapacityByTime = []
-        let treatmentCapacityByTime = []      
-        /*
-            start weeks at -1 because the first record is the index, so after incrementing the index we are at 0
-        */  
-        let totWeeks = -1
-        for (let each in props.completionsDemand) {
-            let nextTime = 0
-            for (let value of props.completionsDemand[each]) {
-                if (!isNaN(value)) {
-                    totCompletionsDemand+=Number(value)
-                    nextTime += Number(value)
+            
+            let totCompletionsDemand = 0
+            let completionsDemandByTime = []
+            let disposalCapacityByTime = []
+            let treatmentCapacityByTime = []      
+            /*
+                start weeks at -1 because the first record is the index, so after incrementing the index we are at 0
+            */  
+            let totWeeks = -1
+            for (let each in props.completionsDemand) {
+                let nextTime = 0
+                for (let value of props.completionsDemand[each]) {
+                    if (!isNaN(value)) {
+                        totCompletionsDemand+=Number(value)
+                        nextTime += Number(value)
+                    }
                 }
+                completionsDemandByTime.push(nextTime)
+                disposalCapacityByTime.push(disposalCapacity)
+                treatmentCapacityByTime.push(treatmentCapacity)
+                totWeeks += 1
             }
-            completionsDemandByTime.push(nextTime)
-            disposalCapacityByTime.push(disposalCapacity)
-            treatmentCapacityByTime.push(treatmentCapacity)
-            totWeeks += 1
-        }
 
-        let totProducedWater = 0
-        let padRatesByTime = []
-        for (let each in props.padRates) {
-            let nextTime = 0
-            for (let value of props.padRates[each]) {
-                if (!isNaN(value)) {
-                    totProducedWater+=Number(value)
-                    nextTime += Number(value)
+            let totProducedWater = 0
+            let padRatesByTime = []
+            for (let each in props.padRates) {
+                let nextTime = 0
+                for (let value of props.padRates[each]) {
+                    if (!isNaN(value)) {
+                        totProducedWater+=Number(value)
+                        nextTime += Number(value)
+                    }
                 }
+                padRatesByTime.push(nextTime)
             }
-            padRatesByTime.push(nextTime)
-        }
 
-        let flowbackRatesByTime = []
-        for (let each in props.flowbackRates) {
-            let nextTime = 0
-            for (let value of props.flowbackRates[each]) {
-                if (!isNaN(value)) {
-                    totProducedWater+=Number(value)
-                    nextTime += Number(value)
+            let flowbackRatesByTime = []
+            for (let each in props.flowbackRates) {
+                let nextTime = 0
+                for (let value of props.flowbackRates[each]) {
+                    if (!isNaN(value)) {
+                        totProducedWater+=Number(value)
+                        nextTime += Number(value)
+                    }
                 }
+                flowbackRatesByTime.push(nextTime)
             }
-            flowbackRatesByTime.push(nextTime)
-        }
 
-        let producedWaterByTime = []
-        for (let i = 0; i < padRatesByTime.length; i++) {
-            producedWaterByTime.push(padRatesByTime[i] + flowbackRatesByTime[i])
-        }
+            let producedWaterByTime = []
+            for (let i = 0; i < padRatesByTime.length; i++) {
+                producedWaterByTime.push(padRatesByTime[i] + flowbackRatesByTime[i])
+            }
 
-        let tempSumValues = [
-            {statistic: 'Total Completions Demand', value: totCompletionsDemand, units: 'bbl'},
-            {statistic: 'Total Produced Water', value: totProducedWater, units: 'bbl'},
-            {statistic: 'Total Starting Disposal Capacity', value: (disposalCapacity * totWeeks), units: 'bbl'},
-            {statistic: 'Total Starting Treatment Capacity', value: (treatmentCapacity * totWeeks), units: 'bbl'},
-        ]
-        setSumValues(tempSumValues)
+            let tempSumValues = [
+                {statistic: 'Total Completions Demand', value: totCompletionsDemand, units: 'bbl'},
+                {statistic: 'Total Produced Water', value: totProducedWater, units: 'bbl'},
+                {statistic: 'Total Starting Disposal Capacity', value: (disposalCapacity * totWeeks), units: 'bbl'},
+                {statistic: 'Total Starting Treatment Capacity', value: (treatmentCapacity * totWeeks), units: 'bbl'},
+            ]
+            setSumValues(tempSumValues)
 
-        let tempTimeSumValues = {
-            'Completions Demand': completionsDemandByTime,
-            'Produced Water': producedWaterByTime,
-            'Initial Disposal Capacity': disposalCapacityByTime,
-            'Initial Treatment Capacity': treatmentCapacityByTime,
+            let tempTimeSumValues = {
+                'Completions Demand': completionsDemandByTime,
+                'Produced Water': producedWaterByTime,
+                'Initial Disposal Capacity': disposalCapacityByTime,
+                'Initial Treatment Capacity': treatmentCapacityByTime,
+            }
+            setTimeSumValues(tempTimeSumValues)
         }
-        setTimeSumValues(tempTimeSumValues)
       }, [props]);
 
 
@@ -226,9 +250,13 @@ export default function InputSummary(props) {
                     </p>
                 </Box>
                 <Box sx={styles.inputFileTextBox}>
-                    <p style={styles.downloadInput}>
+                    {/* <p style={styles.downloadInput}>
                         Download PARETO input file
+                    </p> */}
+                    <p style={styles.downloadInputP}>
+                        <a data-cy="excel-download"  style={styles.downloadInputA} href={excelTemplatePath} download>Download PARETO input file</a>
                     </p>
+                    
                 </Box>
                 <Box sx={styles.inputFileTextBox}>
                     <Button variant="outlined" sx={styles.uploadInput}>Upload PARETO input file</Button>

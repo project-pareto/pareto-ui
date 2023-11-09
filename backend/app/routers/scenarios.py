@@ -216,6 +216,7 @@ async def get_diagram(diagram_type: str, id: int):
 
     Args:
         id: scenario id
+        diagram_type: input or output
 
     Returns:
         Network diagram
@@ -223,6 +224,19 @@ async def get_diagram(diagram_type: str, id: int):
     data = scenario_handler.get_diagram(diagram_type, id)
     return {"data":data}
     # return StreamingResponse(io.BytesIO(data), media_type=f"image/{diagramFileType}")
+
+@router.get("/get_template_path/{id}")
+async def get_template_path(id: int):
+    """Fetch excel template
+
+    Args:
+        id: scenario id
+
+    Returns:
+        Path to excel template
+    """
+    path = scenario_handler.get_excelsheet_path(id)
+    return {"path": path}
 
 @router.post("/upload_diagram/{diagram_type}/{id}")
 async def upload_diagram(diagram_type: str, id: int, file: UploadFile = File(...)):

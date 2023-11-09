@@ -50,3 +50,10 @@ export const deleteDiagram = (type, id) => {
         mode: 'cors'
     });
 }
+
+export const fetchExcelTemplate = (id) => {
+    return fetch('http://localhost:8001/get_template_path/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}
