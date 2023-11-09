@@ -168,8 +168,23 @@ export default function NetworkMap(props) {
             
             <Box>
                 {showMap && 
-                    <MapContainer center={mapCenter} zoom={mapZoom} scrollWheelZoom={true} maxBounds={mapBounds} minZoom={5}>
-                        <CustomMapHandler/>
+                    <MapContainer 
+                        center={mapCenter} 
+                        zoom={mapZoom} 
+                        maxBounds={mapBounds} 
+                        minZoom={5}
+                        scrollWheelZoom={props.interactive}
+                        doubleClickZoom={props.interactive}
+                        closePopupOnClick={props.interactive}
+                        dragging={props.interactive}
+                        zoomSnap={props.interactive}
+                        zoomDelta={props.interactive}
+                        zoomControl={props.interactive}
+                        // trackResize={props.interactive}
+                        touchZoom={props.interactive}
+                        
+                    >
+                    <CustomMapHandler/>
                     <TileLayer
                         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         url={`https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`}
