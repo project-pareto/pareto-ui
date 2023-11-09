@@ -167,6 +167,10 @@ export default function NetworkDiagram(props) {
         <NetworkMap 
             points={props.scenario.data_input.map_data.all_nodes} 
             lines={props.scenario.data_input.map_data.arcs}
+            showMapTypeToggle
+            interactive
+            width={100}
+            height={85}
         />
         :
         <>

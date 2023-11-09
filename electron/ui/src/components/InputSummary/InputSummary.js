@@ -2,6 +2,7 @@ import React from 'react';
 import {useEffect, useState} from 'react';   
 import { Box, FormControl, MenuItem, Select, Typography, Grid, Button } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
+import NetworkMap from '../NetworkMap/NetworkMap';
 
 export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
@@ -226,8 +227,18 @@ export default function InputSummary(props) {
                 </Box>
                 
             </Grid>
-            <Grid item xs={5}>
-
+            <Grid item xs={1}></Grid>
+            <Grid item xs={6}>
+                <Box>
+                <NetworkMap 
+                    points={props.scenario.data_input.map_data.all_nodes} 
+                    lines={props.scenario.data_input.map_data.arcs}
+                    showMapTypeToggle={false}
+                    interactive={false}
+                    width={100}  //%
+                    height={50} //vh
+                />
+                </Box>
             </Grid>
 
         </Grid>

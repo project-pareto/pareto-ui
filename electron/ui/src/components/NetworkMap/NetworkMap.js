@@ -63,6 +63,15 @@ export default function NetworkMap(props) {
             // boxShadow:'0px 5px 10px 0px rgba(0, 0, 0, 0.5)'
         }
     }
+
+    const css = `
+        .leaflet-container {
+            width: ${props.width}%;
+            height: ${props.height}vh;
+            z-index: 0;
+        }
+    `
+
     // NOTEWORTHY: MY COORDINATES ARE REVERSED FROM HOW LEAFLET WANTS THEM
     useEffect(() => {
         //line color: #A03232
@@ -135,11 +144,15 @@ export default function NetworkMap(props) {
 
     return (
         <Box sx={{ px: 4, pb: 5, pt: 3 }}>
+            <style>{css}</style>
             <Grid container>
                 <Grid item xs={6}>
-                <Box sx={{ p:1 }}>
-                    <MapTypeToggle updateMapType={setGoogleMapType} style={styles.mapTypeToggle}/>
-                </Box>
+                {props.showMapTypeToggle &&
+                    <Box sx={{ p:1 }}>
+                        <MapTypeToggle updateMapType={setGoogleMapType} style={styles.mapTypeToggle}/>
+                    </Box>
+                }
+                
                 </Grid>
                 <Grid item xs={4}></Grid>
                 <Grid item xs={2}>
@@ -209,7 +222,7 @@ function MapTypeToggle(props) {
     };
 
     return (
-        <Box sx={{  }} style={style}>
+        <Box style={style}>
         <Tabs
             onChange={handleChange}
             value={value}
