@@ -44,7 +44,15 @@ export default function InputSummary(props) {
             '&:hover': {
                 borderColor: "#0083b5",
             },
-        }
+        },
+        viewFullMapText: {
+            color: "#0083b5",
+            cursor: "pointer",
+            fontWeight: "bold",
+            paddingTop: 0,
+            marginTop: 0,
+            // paddingBottom: 20
+        },
     }
 
     useEffect(()=>{
@@ -206,7 +214,7 @@ export default function InputSummary(props) {
   return ( 
     <>
     {props.scenario.results.status === 'Incomplete' ? 
-        <Grid container sx={{m: 5}}>
+        <Grid container sx={{px: 5}}>
             <Grid item xs={5}>
                 <Box sx={styles.inputFileTextBox}>
                     <h2>PARETO Input File</h2>
@@ -238,6 +246,9 @@ export default function InputSummary(props) {
                     width={100}  //%
                     height={50} //vh
                 />
+                    <p style={styles.viewFullMapText} onClick={() => props.handleSetCategory('Network Diagram')}>
+                        View Full Network Map
+                    </p>
                 </Box>
             </Grid>
 
