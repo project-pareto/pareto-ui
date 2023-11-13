@@ -504,6 +504,97 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
             ws[cellLocation] = node
             row+=1
 
+    ## CODE TO GET TREATMENT TECHNOLOGIES. WE ARE DEFAULTING TO CB, CB-EV, MVC, and MD; so hard code those with corresponding values for now
+
+    # treatment_technologies = []
+    # ws = wb["TreatmentTechnologies"]
+    # column = 1
+    # row = 2
+    # cellLocation = f'{get_column_letter(column)}{row}'
+    # technology = ws[cellLocation].value
+    # while technology is not None and technology != "" and row < 100: # just wanna make sure this doesnt get caught in an infinite loop
+    #     print(f'adding technology: {technology}')
+    #     treatment_technologies.append(technology)
+    #     row += 1
+    #     cellLocation = f'{get_column_letter(column)}{row}'
+    #     technology = ws[cellLocation].value
+
+    # print(f'treatment technologies is {treatment_technologies}')
+    treatment_technologies = {
+        "CB": {"TreatmentOperationalCost": 0.2, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0},
+        "CB-EV": {"TreatmentOperationalCost": 0.3, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0},
+        "MVC": {"TreatmentOperationalCost": 0.5, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99},
+        "MD": {"TreatmentOperationalCost": 1.0, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99},
+    }
+
+    ## GET TREATMENT CAPACITIES
+    treatment_capacities = {
+        "J0": {"TreatmentExpansionLeadTime": 0},
+        "J1": {"TreatmentExpansionLeadTime": 68},
+        "J2": {"TreatmentExpansionLeadTime": 70},
+        "J3": {"TreatmentExpansionLeadTime": 72},
+    }
+
+
+    tabs = {
+        "InitialTreatmentCapacity": "TreatmentSites"
+    }
+    column = 1
+    for tab in tabs:
+        ws = wb[tab]
+        node_key = tabs[tab]
+        row = 3
+        print(f'{tab}: adding {node_key}')
+        for node in data[node_key]:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row+=1
+    
+    tabs = {
+        "TreatmentOperationalCost": "TreatmentSites",
+        "TreatmentEfficiency": "TreatmentSites",
+        "RemovalEfficiency": "TreatmentSites",
+    }
+    column = 2
+    for tab in tabs:
+        ws = wb[tab]
+        node_key = tabs[tab]
+        row = 3
+        for technology in treatment_technologies:
+            value = treatment_technologies[technology][tab]
+            print(f'{tab}: adding {technology}')
+            for node in data[node_key]:
+                treatmentCellLocation = f'{get_column_letter(column-1)}{row}'
+                technologyCellLocation = f'{get_column_letter(column)}{row}'
+                valueCellLocation = f'{get_column_letter(column+1)}{row}'
+                ws[treatmentCellLocation] = node
+                ws[technologyCellLocation] = technology
+                ws[valueCellLocation] = value
+                row+=1
+
+    tabs = {
+        "TreatmentExpansionLeadTime": "TreatmentSites"
+    }
+    column = 1
+    for tab in tabs:
+        ws = wb[tab]
+        node_key = tabs[tab]
+        row = 3
+        for technology in treatment_technologies:
+            print(f'{tab}: adding {technology}')
+            for node in data[node_key]:
+                treatmentCellLocation = f'{get_column_letter(column)}{row}'
+                technologyCellLocation = f'{get_column_letter(column+1)}{row}'
+                ws[treatmentCellLocation] = node
+                ws[technologyCellLocation] = technology
+                i = 2
+                for treatmentCapacity in treatment_capacities:
+                    value = treatment_capacities[treatmentCapacity][tab]
+                    cellLocation = f'{get_column_letter(column+i)}{row}'
+                    ws[cellLocation] = value
+                    i+=1
+                row+=1
+
     ## final step: Save and close
     wb.save(excel_path)
     wb.close()
