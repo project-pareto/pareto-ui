@@ -563,12 +563,11 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
         "StorageCapacityIncrements": {"node": "StorageSites", "default": "StorageCapacities"},
         "PipelineDiameterValues": {"node": "StorageSites", "default": "PipelineDiameters"},
         "PipelineCapacityIncrements": {"node": "StorageSites", "default": "PipelineDiameters"},
+        "DesalinationTechnologies": {"default": "TreatmentTechnologies"},
     }
 
     for capacity_increments_tab in capacity_increments_tabs:
         ws = wb[capacity_increments_tab]
-        node_key = capacity_increments_tabs[capacity_increments_tab]["node"]
-
         default_values = defaults[capacity_increments_tabs[capacity_increments_tab]["default"]]
         row = 3
         try:
