@@ -229,25 +229,34 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     }
 
     pipeline_diameters = {
-        "D0": {"PipelineCapacityIncrements": 0, "PipelineDiameterValues": 0},
-        "D4": {"PipelineCapacityIncrements": 14286, "PipelineDiameterValues": 4},
-        "D6": {"PipelineCapacityIncrements": 35714, "PipelineDiameterValues": 6},
-        "D8": {"PipelineCapacityIncrements": 42857, "PipelineDiameterValues": 8},
-        "D12": {"PipelineCapacityIncrements": 50000, "PipelineDiameterValues": 12},
+        "D0": {"PipelineCapacityIncrements": 0, "PipelineDiameterValues": 0, "PipelineExpansionLeadTime_Capac": 0},
+        "D4": {"PipelineCapacityIncrements": 14286, "PipelineDiameterValues": 4, "PipelineExpansionLeadTime_Capac": 1},
+        "D6": {"PipelineCapacityIncrements": 35714, "PipelineDiameterValues": 6, "PipelineExpansionLeadTime_Capac": 2},
+        "D8": {"PipelineCapacityIncrements": 42857, "PipelineDiameterValues": 8, "PipelineExpansionLeadTime_Capac": None},
+        "D12": {"PipelineCapacityIncrements": 50000, "PipelineDiameterValues": 12, "PipelineExpansionLeadTime_Capac": None},
     }
 
     storage_capacities = {
-        "C0": {"StorageCapacityIncrements": 0},
-        "C1": {"StorageCapacityIncrements": 50000},
-        "C2": {"StorageCapacityIncrements": 100000},
-        "C3": {"StorageCapacityIncrements": 350000},
+        "C0": {"StorageCapacityIncrements": 0, "StorageExpansionLeadTime": 0},
+        "C1": {"StorageCapacityIncrements": 50000, "StorageExpansionLeadTime": 88},
+        "C2": {"StorageCapacityIncrements": 100000, "StorageExpansionLeadTime": 89},
+        "C3": {"StorageCapacityIncrements": 350000, "StorageExpansionLeadTime": 90},
     }
 
     injection_capacities = {
-        "I0": {"DisposalCapacityIncrements": 0},
-        "I1": {"DisposalCapacityIncrements": 7143},
-        "I2": {"DisposalCapacityIncrements": 14286},
-        "I3": {"DisposalCapacityIncrements": 50000},
+        "I0": {"DisposalCapacityIncrements": 0, "DisposalExpansionLeadTime": 0},
+        "I1": {"DisposalCapacityIncrements": 7143, "DisposalExpansionLeadTime": 45},
+        "I2": {"DisposalCapacityIncrements": 14286, "DisposalExpansionLeadTime": None},
+        "I3": {"DisposalCapacityIncrements": 50000, "DisposalExpansionLeadTime": None},
+    }
+
+    defaults = {
+        "TreatmentTechnologies": treatment_technologies,
+        "TreatmentCapacities": treatment_capacities,
+        "PipelineDiameters": pipeline_diameters,
+        "StorageCapacities": storage_capacities,
+        "InjectionCapacities": injection_capacities,
+        
     }
 
 
@@ -526,20 +535,26 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
 
     ## step 8: add tabs that rely on TreatmentTechnologies, Capacities, Diameters
     expansion_tabs = {
-        "DisposalExpansionCost": "SWDSites",
-        "StorageExpansionCost": "StorageSites",
+        "DisposalExpansionCost": {"node": "SWDSites", "default": "InjectionCapacities"},
+        "StorageExpansionCost": {"node": "StorageSites", "default": "StorageCapacities"},
         # "TreatmentExpansionCost": "TreatmentSites", # this one will be tricky
-        "DisposalExpansionLeadTime": "SWDSites",
-        "StorageExpansionLeadTime": "StorageSites",
+        "DisposalExpansionLeadTime": {"node": "SWDSites", "default": "InjectionCapacities"},
+        "StorageExpansionLeadTime": {"node": "StorageSites", "default": "StorageCapacities"},
     }
-    column = 1
+
     for expansion_tab in expansion_tabs:
         ws = wb[expansion_tab]
-        node_key = expansion_tabs[expansion_tab]
+        node_key = expansion_tabs[expansion_tab]["node"]
+        # add column headers
+        column = 2
+        for header in defaults[expansion_tabs[expansion_tab]["default"]]:
+            columnHeaderCellLocation = f'{get_column_letter(column)}{2}'
+            ws[columnHeaderCellLocation] = header
+            column+=1
         row = 3
         print(f'{expansion_tab}: adding {node_key}')
         for node in data[node_key]:
-            cellLocation = f'{get_column_letter(column)}{row}'
+            cellLocation = f'{get_column_letter(1)}{row}'
             ws[cellLocation] = node
             row+=1
 
