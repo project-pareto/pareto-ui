@@ -215,10 +215,10 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
 
     # some defaults:
     treatment_technologies = {
-        "CB": {"TreatmentOperationalCost": 0.2, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0},
-        "CB-EV": {"TreatmentOperationalCost": 0.3, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0},
-        "MVC": {"TreatmentOperationalCost": 0.5, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1},
-        "MD": {"TreatmentOperationalCost": 1.0, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1},
+        "CB": {"TreatmentOperationalCost": 0.2, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0, "TreatmentExpansionCost": 75},
+        "CB-EV": {"TreatmentOperationalCost": 0.3, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0, "TreatmentExpansionCost": 100},
+        "MVC": {"TreatmentOperationalCost": 0.5, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 1000},
+        "MD": {"TreatmentOperationalCost": 1.0, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 500},
     }
 
     treatment_capacities = {
@@ -537,7 +537,6 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     expansion_tabs = {
         "DisposalExpansionCost": {"node": "SWDSites", "default": "InjectionCapacities"},
         "StorageExpansionCost": {"node": "StorageSites", "default": "StorageCapacities"},
-        # "TreatmentExpansionCost": "TreatmentSites", # this one will be tricky
         "DisposalExpansionLeadTime": {"node": "SWDSites", "default": "InjectionCapacities"},
         "StorageExpansionLeadTime": {"node": "StorageSites", "default": "StorageCapacities"},
     }
@@ -559,10 +558,10 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
             row+=1
     
     capacity_increments_tabs = {
-        "DisposalCapacityIncrements": {"node": "SWDSites", "default": "InjectionCapacities"},
-        "StorageCapacityIncrements": {"node": "StorageSites", "default": "StorageCapacities"},
-        "PipelineDiameterValues": {"node": "StorageSites", "default": "PipelineDiameters"},
-        "PipelineCapacityIncrements": {"node": "StorageSites", "default": "PipelineDiameters"},
+        "DisposalCapacityIncrements": {"default": "InjectionCapacities"},
+        "StorageCapacityIncrements": {"default": "StorageCapacities"},
+        "PipelineDiameterValues": {"default": "PipelineDiameters"},
+        "PipelineCapacityIncrements": {"default": "PipelineDiameters"},
         "DesalinationTechnologies": {"default": "TreatmentTechnologies"},
     }
 
@@ -689,6 +688,37 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
                     value = treatment_capacities[treatmentCapacity][tab]
                     cellLocation = f'{get_column_letter(i)}{row}'
                     ws[cellLocation] = value
+                    i+=1
+                row+=1
+
+    tabs = {
+        "TreatmentExpansionCost": {"node": "TreatmentSites", "default": "TreatmentTechnologies"}
+    }
+    
+    for tab in tabs:
+        ws = wb[tab]
+        node_key = tabs[tab]["node"]
+        row = 3
+        column = 3
+        # add column headers
+        for cap in treatment_capacities:
+            columnHeaderCellLocation = f'{get_column_letter(column)}{2}'
+            ws[columnHeaderCellLocation] = cap
+            column+=1
+        
+        for default in defaults[tabs[tab]["default"]]:
+            default_values = defaults[tabs[tab]["default"]][default]
+            print(f'{tab}: adding {default}')
+            for node in data[node_key]:
+                treatmentCellLocation = f'{get_column_letter(1)}{row}'
+                technologyCellLocation = f'{get_column_letter(2)}{row}'
+                ws[treatmentCellLocation] = node
+                ws[technologyCellLocation] = default
+                i = 3
+                value = default_values[tab]
+                for treatmentCapacity in treatment_capacities:
+                    valueCellLocation = f'{get_column_letter(i)}{row}'
+                    ws[valueCellLocation] = value
                     i+=1
                 row+=1
         
