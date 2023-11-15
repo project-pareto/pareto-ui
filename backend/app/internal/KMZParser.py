@@ -561,14 +561,20 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     tabs = {
         "InitialTreatmentCapacity": "TreatmentSites"
     }
-    column = 1
+    
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]
+        # add column header
+        column = 2
+        for tech in treatment_technologies:
+            columnHeaderCellLocation = f'{get_column_letter(column)}{2}'
+            ws[columnHeaderCellLocation] = tech
+            column+=1
         row = 3
         print(f'{tab}: adding {node_key}')
         for node in data[node_key]:
-            cellLocation = f'{get_column_letter(column)}{row}'
+            cellLocation = f'{get_column_letter(1)}{row}'
             ws[cellLocation] = node
             row+=1
     
@@ -622,6 +628,8 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
                     ws[cellLocation] = value
                     i+=1
                 row+=1
+        
+
 
 
     ## final step: Save and close
