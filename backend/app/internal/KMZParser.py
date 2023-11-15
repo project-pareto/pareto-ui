@@ -561,7 +561,7 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     capacity_increments_tabs = {
         "DisposalCapacityIncrements": {"node": "SWDSites", "default": "InjectionCapacities"},
         "StorageCapacityIncrements": {"node": "StorageSites", "default": "StorageCapacities"},
-        # "TreatmentCapacityIncrements": {"node": "SWDSites", "default": "TreatmentCapacities"},
+        "PipelineDiameterValues": {"node": "StorageSites", "default": "PipelineDiameters"},
         "PipelineCapacityIncrements": {"node": "StorageSites", "default": "PipelineDiameters"},
     }
 
