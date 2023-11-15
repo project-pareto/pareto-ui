@@ -9,7 +9,8 @@
         "DisposalExpansionCost","StorageExpansionCost","TreatmentExpansionCost","PipelineCapexDistanceBased",
         "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","WellPressure", "Hydraulics","Elevation",
         "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity", "RemovalEfficiency",
-        "ReuseCapacity", "ReuseMinimum", "BeneficialReuseCredit"
+        "ReuseCapacity", "ReuseMinimum", "BeneficialReuseCredit", "TreatmentExpansionLeadTime", "DisposalExpansionLeadTime", "StorageExpansionLeadTime",
+        "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac"
     ],
     "Static": [
         "PNA","CNA","CCA","NNA","NCA","NKA","NRA","NSA","FCA","RCA","RNA","RSA","SCA","SNA",
