@@ -212,6 +212,45 @@ def ParseKMZ(filename):
 
 
 def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = "pareto_input_template.xlsx"):
+
+    # some defaults:
+    treatment_technologies = {
+        "CB": {"TreatmentOperationalCost": 0.2, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0},
+        "CB-EV": {"TreatmentOperationalCost": 0.3, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0},
+        "MVC": {"TreatmentOperationalCost": 0.5, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1},
+        "MD": {"TreatmentOperationalCost": 1.0, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1},
+    }
+
+    treatment_capacities = {
+        "J0": {"TreatmentExpansionLeadTime": 0, "TreatmentCapacityIncrements": 0},
+        "J1": {"TreatmentExpansionLeadTime": 68, "TreatmentCapacityIncrements": 10000},
+        "J2": {"TreatmentExpansionLeadTime": 70, "TreatmentCapacityIncrements": 20000},
+        "J3": {"TreatmentExpansionLeadTime": 72, "TreatmentCapacityIncrements": 50000},
+    }
+
+    pipeline_diameters = {
+        "D0": {"PipelineCapacityIncrements": 0, "PipelineDiameterValues": 0},
+        "D4": {"PipelineCapacityIncrements": 14286, "PipelineDiameterValues": 4},
+        "D6": {"PipelineCapacityIncrements": 35714, "PipelineDiameterValues": 6},
+        "D8": {"PipelineCapacityIncrements": 42857, "PipelineDiameterValues": 8},
+        "D12": {"PipelineCapacityIncrements": 50000, "PipelineDiameterValues": 12},
+    }
+
+    storage_capacities = {
+        "C0": {"StorageCapacityIncrements": 0},
+        "C1": {"StorageCapacityIncrements": 50000},
+        "C2": {"StorageCapacityIncrements": 100000},
+        "C3": {"StorageCapacityIncrements": 350000},
+    }
+
+    injection_capacities = {
+        "I0": {"DisposalCapacityIncrements": 0},
+        "I1": {"DisposalCapacityIncrements": 7143},
+        "I2": {"DisposalCapacityIncrements": 14286},
+        "I3": {"DisposalCapacityIncrements": 50000},
+    }
+
+
     # input_path = "./assets/pareto_input_template.xlsx"
     excel_path = f'{output_file_name}.xlsx'
     print(f'writing data to excel at {excel_path}')
@@ -519,23 +558,6 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     #     cellLocation = f'{get_column_letter(column)}{row}'
     #     technology = ws[cellLocation].value
 
-    # print(f'treatment technologies is {treatment_technologies}')
-    treatment_technologies = {
-        "CB": {"TreatmentOperationalCost": 0.2, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0},
-        "CB-EV": {"TreatmentOperationalCost": 0.3, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0},
-        "MVC": {"TreatmentOperationalCost": 0.5, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99},
-        "MD": {"TreatmentOperationalCost": 1.0, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99},
-    }
-
-    ## GET TREATMENT CAPACITIES
-    treatment_capacities = {
-        "J0": {"TreatmentExpansionLeadTime": 0},
-        "J1": {"TreatmentExpansionLeadTime": 68},
-        "J2": {"TreatmentExpansionLeadTime": 70},
-        "J3": {"TreatmentExpansionLeadTime": 72},
-    }
-
-
     tabs = {
         "InitialTreatmentCapacity": "TreatmentSites"
     }
@@ -575,25 +597,32 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     tabs = {
         "TreatmentExpansionLeadTime": "TreatmentSites"
     }
-    column = 1
+    
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]
         row = 3
+        column = 3
+        # add column header
+        for cap in treatment_capacities:
+            columnHeaderCellLocation = f'{get_column_letter(column)}{2}'
+            ws[columnHeaderCellLocation] = cap
+            column+=1
         for technology in treatment_technologies:
             print(f'{tab}: adding {technology}')
             for node in data[node_key]:
-                treatmentCellLocation = f'{get_column_letter(column)}{row}'
-                technologyCellLocation = f'{get_column_letter(column+1)}{row}'
+                treatmentCellLocation = f'{get_column_letter(1)}{row}'
+                technologyCellLocation = f'{get_column_letter(2)}{row}'
                 ws[treatmentCellLocation] = node
                 ws[technologyCellLocation] = technology
-                i = 2
+                i = 3
                 for treatmentCapacity in treatment_capacities:
                     value = treatment_capacities[treatmentCapacity][tab]
-                    cellLocation = f'{get_column_letter(column+i)}{row}'
+                    cellLocation = f'{get_column_letter(i)}{row}'
                     ws[cellLocation] = value
                     i+=1
                 row+=1
+
 
     ## final step: Save and close
     wb.save(excel_path)
