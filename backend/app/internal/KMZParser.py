@@ -557,6 +557,32 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
             cellLocation = f'{get_column_letter(1)}{row}'
             ws[cellLocation] = node
             row+=1
+    
+    capacity_increments_tabs = {
+        "DisposalCapacityIncrements": {"node": "SWDSites", "default": "InjectionCapacities"},
+        "StorageCapacityIncrements": {"node": "StorageSites", "default": "StorageCapacities"},
+        # "TreatmentCapacityIncrements": {"node": "SWDSites", "default": "TreatmentCapacities"},
+        "PipelineCapacityIncrements": {"node": "StorageSites", "default": "PipelineDiameters"},
+    }
+
+    for capacity_increments_tab in capacity_increments_tabs:
+        ws = wb[capacity_increments_tab]
+        node_key = capacity_increments_tabs[capacity_increments_tab]["node"]
+
+        default_values = defaults[capacity_increments_tabs[capacity_increments_tab]["default"]]
+        row = 3
+        try:
+            for each in default_values:
+                print(f'{capacity_increments_tab}: adding {each}')
+                keyCellLocation = f'{get_column_letter(1)}{row}'
+                valueCellLocation = f'{get_column_letter(2)}{row}'
+                ws[keyCellLocation] = each
+                ws[valueCellLocation] = default_values[each][capacity_increments_tab]
+                row+=1
+        except Exception as e:
+            print(f'unable to add {capacity_increments_tab}: {e}')
+        
+        
 
     ## CODE TO GET TREATMENT TECHNOLOGIES. WE ARE DEFAULTING TO CB, CB-EV, MVC, and MD; so hard code those with corresponding values for now
 
