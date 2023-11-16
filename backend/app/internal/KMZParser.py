@@ -723,12 +723,20 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
 
 
     tabs = {
-        "PipelineCapexCapacityBased": {"node": "connections"},
-        "PipelineExpansionLeadTime_Capac": {"node": "connections"},
+        "PipelineCapexCapacityBased": {"node": "connections", "default": "PipelineDiameters"},
+        "PipelineExpansionLeadTime_Capac": {"node": "connections", "default": "PipelineDiameters"},
     }
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]["node"]
+        row = 2
+        column = 3
+        default_values = defaults[tabs[tab]["default"]]
+        # add column headers
+        for each in default_values:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = each
+            column+=1
         row = 3
         for location in data[node_key]['all_connections']:
             for destination in data[node_key]['all_connections'][location]:
@@ -738,9 +746,6 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
                 ws[locationCellLocation] = location
                 ws[destinationCellLocation] = destination
                 row+=1
-        
-
-
 
     ## final step: Save and close
     wb.save(excel_path)
