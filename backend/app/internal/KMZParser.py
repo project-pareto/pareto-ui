@@ -256,7 +256,6 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
         "PipelineDiameters": pipeline_diameters,
         "StorageCapacities": storage_capacities,
         "InjectionCapacities": injection_capacities,
-        
     }
 
 
@@ -720,6 +719,24 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
                     valueCellLocation = f'{get_column_letter(i)}{row}'
                     ws[valueCellLocation] = value
                     i+=1
+                row+=1
+
+
+    tabs = {
+        "PipelineCapexCapacityBased": {"node": "connections"},
+        "PipelineExpansionLeadTime_Capac": {"node": "connections"},
+    }
+    for tab in tabs:
+        ws = wb[tab]
+        node_key = tabs[tab]["node"]
+        row = 3
+        for location in data[node_key]['all_connections']:
+            for destination in data[node_key]['all_connections'][location]:
+                print(f'{tab}: adding {location}:{destination} arc')
+                locationCellLocation = f'{get_column_letter(1)}{row}'
+                destinationCellLocation = f'{get_column_letter(2)}{row}'
+                ws[locationCellLocation] = location
+                ws[destinationCellLocation] = destination
                 row+=1
         
 

@@ -120,6 +120,6 @@
     "DisposalExpansionLeadTime": "Disposal Expansion", 
     "StorageExpansionLeadTime": "Storage Expansion",
     "PipelineExpansionLeadTime_Dist": "Pipeline Expansion Distance Based", 
-    "PipelineExpansionLeadTime_Capac": "Treatment Expansion Capacity Based",
+    "PipelineExpansionLeadTime_Capac": "Pipeline Expansion Capacity Based",
     "Solver_Stats_dict": "Solver Stats"
 }
