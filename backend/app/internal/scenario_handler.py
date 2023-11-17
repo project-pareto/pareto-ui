@@ -166,6 +166,11 @@ class ScenarioHandler:
                 new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
                 shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
                 updatedScenario[f'inputDiagramExtension'] = 'png'
+                output_diagramFileType = 'png'
+                original_output_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_override_output.png'
+                new_output_diagram_path = f"{self.output_diagrams_path}/{id_}.{output_diagramFileType}"
+                shutil.copyfile(original_output_diagram_path, new_output_diagram_path)
+                updatedScenario[f'outputDiagramExtension'] = 'png'
         except:
             _log.error('unable to check and/or replace input diagram based on scenario name')
 
