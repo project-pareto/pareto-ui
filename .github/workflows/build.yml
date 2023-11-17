@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "update-value-multiple-cells"
+      - "multiple-cell-input-bug"
 
 defaults:
   run:
