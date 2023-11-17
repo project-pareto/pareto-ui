@@ -166,11 +166,6 @@ class ScenarioHandler:
                 new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
                 shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
                 updatedScenario[f'inputDiagramExtension'] = 'png'
-                output_diagramFileType = 'png'
-                original_output_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_override_output.png'
-                new_output_diagram_path = f"{self.output_diagrams_path}/{id_}.{output_diagramFileType}"
-                shutil.copyfile(original_output_diagram_path, new_output_diagram_path)
-                updatedScenario[f'outputDiagramExtension'] = 'png'
         except:
             _log.error('unable to check and/or replace input diagram based on scenario name')
 
@@ -298,6 +293,11 @@ class ScenarioHandler:
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE OVERRIDE":
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_override_{diagramType}.png'
+                ## do input for Workshop beneficial reuse override
+                input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_override_input.png'
+                input_scenario_diagram_path = f"{self.input_diagrams_path}/{id}.{extension}"
+                shutil.copyfile(input_diagram_path, input_scenario_diagram_path)
+                scenario[f"inputDiagramExtension"] = extension
             else: 
                 diagram_path = files('pareto').parent.joinpath(f"docs/img/{diagramIdentifier}.{extension}")
             _log.info(f'diagram_path is : {diagram_path}')
