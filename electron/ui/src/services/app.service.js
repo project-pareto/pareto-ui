@@ -57,3 +57,11 @@ export const fetchExcelTemplate = (id) => {
         mode: 'cors'
     });
 }
+
+export const replaceExcelSheet = (data, id) => {
+    return fetch('http://localhost:8001/replace/'+id, {
+        method: 'POST', 
+        mode: 'cors',
+        body: data
+    });
+}; 

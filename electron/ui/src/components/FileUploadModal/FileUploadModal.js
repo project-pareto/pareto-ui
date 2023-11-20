@@ -11,7 +11,7 @@ import { FileUploader } from "react-drag-drop-files";
 
 
 
-export default function Dashboard(props) {
+export default function FileUploadModal(props) {
     const [ scenarioName, setScenarioName ] = useState("")
     const [ showWarning, setShowWarning ] = useState(false)
     const [ warningMessage, setWarningMessage ] = useState("")

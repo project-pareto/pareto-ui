@@ -274,6 +274,65 @@ class ScenarioHandler:
         
         return return_object
     
+    def replace_excelsheet(self, output_path, id):
+        _log.info(f"replacing excel sheet for id: {id}")
+        _log.info(f"id type is {type(id)}")
+
+        [set_list, parameter_list] = get_input_lists()
+
+        # read in data from uploaded excel sheet
+        [df_sets, df_parameters, frontend_parameters] = get_data(output_path, set_list, parameter_list)
+        
+        try:
+            display_units = get_display_units(parameter_list, df_parameters["Units"])
+        except Exception as e:
+            _log.error(f'unable to get units: {e}')
+            display_units = {}
+
+        del frontend_parameters['Units']
+
+        # convert tuple keys into dictionary values - necessary for javascript interpretation
+        for key in df_parameters:
+            original_value = df_parameters[key]
+            new_value=[]
+            for k, v in original_value.items():
+                try:
+                    if math.isnan(v):
+                        new_value.append({'key':k, 'value': ''})
+                    else:
+                        new_value.append({'key':k, 'value': v})
+                except:
+                    new_value.append({'key':k, 'value': v})
+            df_parameters[key] = new_value
+
+        # convert pandas series into lists
+        for key in df_sets:
+            df_sets[key] = df_sets[key].tolist()
+
+        scenario = self.get_scenario(id)
+        scenario["results"]["status"] = "Draft"
+        scenario["data_input"]["df_sets"] = df_sets
+        scenario["data_input"]["df_parameters"] = frontend_parameters
+        scenario["data_input"]["display_units"] = display_units
+
+        # check if db is in use. if so, wait til its done being used
+        locked = self.LOCKED
+        while(locked):
+            time.sleep(0.5)
+            locked = self.LOCKED
+        self.LOCKED = True
+        query = tinydb.Query()
+        self._db.upsert(
+            {"scenario": scenario, 'id_': scenario['id'], 'version': self.VERSION},
+            ((query.id_ == scenario['id']) & (query.version == self.VERSION)),
+        )
+        # self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
+        self.LOCKED = False
+    
+        self.retrieve_scenarios()
+        
+        return scenario
+    
     def check_for_diagram(self, id, filename = None):
         scenario = self.get_scenario(id)
         extension = "png"

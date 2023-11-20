@@ -87,6 +87,28 @@ async def upload(scenario_name: str, file: UploadFile = File(...)):
         except Exception as e:
             _log.error(f"error on file upload: {str(e)}")
             raise HTTPException(400, detail=f"File upload failed: {e}")
+        
+@router.post("/replace/{scenario_id}")
+async def replace_excel(scenario_id: int, file: UploadFile = File(...)):
+    """Upload an excel sheet or KMZ map file and create corresponding scenario.
+
+    Args:
+        file: excel sheet to be uploaded
+
+    Returns:
+        New scenario data
+    """
+        
+    output_path = f"{scenario_handler.excelsheets_path}/{scenario_id}.xlsx"
+    try: # get file contents
+        async with aiofiles.open(output_path, 'wb') as out_file:
+            content = await file.read()  # async read
+            await out_file.write(content) 
+        return scenario_handler.replace_excelsheet(output_path=output_path, id=scenario_id)
+
+    except Exception as e:
+        _log.error(f"error on file upload: {str(e)}")
+        raise HTTPException(400, detail=f"File upload failed: {e}")
 
 @router.post("/delete_scenario")
 async def delete_scenario(request: Request):

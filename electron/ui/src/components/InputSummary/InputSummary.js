@@ -2,12 +2,15 @@ import React from 'react';
 import {useEffect, useState} from 'react';   
 import { Box, FormControl, MenuItem, Select, Typography, Grid, Button } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
-import { fetchExcelTemplate } from '../../services/app.service';
+import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
+import { FileUploader } from "react-drag-drop-files";
 
 export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
     const [ excelTemplatePath, setExcelTemplatePath ] = useState("")
+    const [ updatedExcelFile, setUpdatedExcelFile ] = useState(null)
+    const fileTypes = ["xlsx"];
     const [ sumValues, setSumValues ] = useState([
         {statistic: 'Total Completions Demand', value: 0, units: 'bbl'},
         {statistic: 'Total Produced Water', value: 0, units: 'bbl'},
@@ -177,7 +180,65 @@ export default function InputSummary(props) {
 
     const handleTableTypeChange = (event) => {
         setTableType(event.target.value)
-       }
+    }
+
+    const handleReplaceExcel = (file) => {
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+        replaceExcelSheet(formData, props.scenario.id)
+        .then(response => {
+        if (response.status === 200) {
+            response.json()
+            .then((data)=>{
+                console.log('fileupload successful: ',data)
+
+                // updateScenario(data)
+            }).catch((err)=>{
+                console.error("error on file upload: ",err)
+                // setErrorMessage(String(err))
+                // setShowError(true)
+            })
+        }
+        /*
+            in the case of bad file type
+        */
+        else if (response.status === 400) {
+            console.error("error on file upload: ",response.statusText)
+            // setErrorMessage(response.statusText)
+            // setShowError(true)
+        }
+        })
+    }
+
+    const fileUploaderContainer = () => {
+        return (
+            <>
+                <Box sx={styles.inputFileTextBox}>
+                    <Button variant="outlined" sx={styles.uploadInput}>Upload PARETO input file</Button>
+                </Box>
+                <Box sx={{display: 'flex'}}>
+                    <p style={{marginBottom:0, paddingTop:0}}>{updatedExcelFile === null ? "" : updatedExcelFile.name}</p>
+                </Box>
+            </>
+        )
+    }
+
+    function DragDrop() {
+        const handleChange = (file) => {
+            console.log('setting file: '+file.name)
+            setUpdatedExcelFile(file);
+            handleReplaceExcel(file)
+        };
+        return (
+          <FileUploader 
+            handleChange={handleChange} 
+            name="file" 
+            types={fileTypes}
+            children={fileUploaderContainer()}
+            // onTypeError={fileTypeError}
+          />
+        );
+      }
 
     const renderInputSummaryTable = () => {
         return (
@@ -258,10 +319,10 @@ export default function InputSummary(props) {
                     </p>
                     
                 </Box>
-                <Box sx={styles.inputFileTextBox}>
+                {/* <Box sx={styles.inputFileTextBox}>
                     <Button variant="outlined" sx={styles.uploadInput}>Upload PARETO input file</Button>
-                </Box>
-                
+                </Box> */}
+                {DragDrop()}
             </Grid>
             <Grid item xs={1}></Grid>
             <Grid item xs={6}>
