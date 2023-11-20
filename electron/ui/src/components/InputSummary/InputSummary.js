@@ -5,12 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from
 import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
 import { FileUploader } from "react-drag-drop-files";
+import ErrorBar from '../ErrorBar/ErrorBar'
 
 export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
-    const [ excelTemplatePath, setExcelTemplatePath ] = useState("")
-    const [ excelTemplate, setExcelTemplate ] = useState(null)
     const [ updatedExcelFile, setUpdatedExcelFile ] = useState(null)
+    const [ showError, setShowError ] = useState(false)
+    const [ errorMessage, setErrorMessage ] = useState("")
     const fileTypes = ["xlsx"];
     const [ sumValues, setSumValues ] = useState([
         {statistic: 'Total Completions Demand', value: 0, units: 'bbl'},
@@ -194,20 +195,35 @@ export default function InputSummary(props) {
                 props.updateScenario(data)
             }).catch((err)=>{
                 console.error("error on file upload: ",err)
-                // setErrorMessage(String(err))
-                // setShowError(true)
+                setErrorMessage(String(err))
+                setShowError(true)
             })
         }
         /*
             in the case of bad file type
         */
         else if (response.status === 400) {
-            console.error("error on file upload: ",response.statusText)
-            // setErrorMessage(response.statusText)
-            // setShowError(true)
+            response.json()
+            .then((data)=>{
+                console.error("error on file upload: ",data.detail)
+                setErrorMessage(data.detail)
+                setShowError(true)
+            }).catch((err)=>{
+                console.error("error on file upload: ",err)
+                setErrorMessage(response.statusText)
+                setShowError(true)
+            })
         }
         })
     }
+
+    const fileTypeError = () => {
+        setErrorMessage("Please choose a valid excel file")
+        setShowError(true)
+        setTimeout(function() {
+            setShowError(false)
+          }, 5000)
+   }
 
     const fileUploaderContainer = () => {
         return (
@@ -234,7 +250,7 @@ export default function InputSummary(props) {
             name="file" 
             types={fileTypes}
             children={fileUploaderContainer()}
-            // onTypeError={fileTypeError}
+            onTypeError={fileTypeError}
           />
         );
       }
@@ -336,7 +352,9 @@ export default function InputSummary(props) {
                     </p>
                 </Box>
             </Grid>
-
+            {
+                showError && <ErrorBar duration={30000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
+            }
         </Grid>
         : 
         <TableContainer>
