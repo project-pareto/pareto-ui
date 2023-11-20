@@ -276,7 +276,6 @@ class ScenarioHandler:
     
     def replace_excelsheet(self, output_path, id):
         _log.info(f"replacing excel sheet for id: {id}")
-        _log.info(f"id type is {type(id)}")
 
         [set_list, parameter_list] = get_input_lists()
 

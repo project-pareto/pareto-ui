@@ -5,8 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from
 import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
 import { FileUploader } from "react-drag-drop-files";
+import { useNavigate } from "react-router-dom";
 
 export default function InputSummary(props) {
+    let navigate = useNavigate();
     const [ tableType, setTableType ] = useState("Input Summary")
     const [ excelTemplatePath, setExcelTemplatePath ] = useState("")
     const [ updatedExcelFile, setUpdatedExcelFile ] = useState(null)
@@ -175,7 +177,7 @@ export default function InputSummary(props) {
             }
             setTimeSumValues(tempTimeSumValues)
         }
-      }, [props]);
+      }, [props, props.scenario]);
 
 
     const handleTableTypeChange = (event) => {
@@ -191,8 +193,7 @@ export default function InputSummary(props) {
             response.json()
             .then((data)=>{
                 console.log('fileupload successful: ',data)
-
-                // updateScenario(data)
+                props.updateScenario(data)
             }).catch((err)=>{
                 console.error("error on file upload: ",err)
                 // setErrorMessage(String(err))
