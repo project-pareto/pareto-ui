@@ -247,8 +247,8 @@ async def get_diagram(diagram_type: str, id: int):
     return {"data":data}
     # return StreamingResponse(io.BytesIO(data), media_type=f"image/{diagramFileType}")
 
-@router.get("/get_template_path/{id}")
-async def get_template_path(id: int):
+@router.get("/get_template/{id}")
+async def get_template(id: int):
     """Fetch excel template
 
     Args:
@@ -258,7 +258,7 @@ async def get_template_path(id: int):
         Path to excel template
     """
     path = scenario_handler.get_excelsheet_path(id)
-    return {"path": path}
+    return FileResponse(path)
 
 @router.post("/upload_diagram/{diagram_type}/{id}")
 async def upload_diagram(diagram_type: str, id: int, file: UploadFile = File(...)):

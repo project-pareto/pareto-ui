@@ -5,12 +5,11 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from
 import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
 import { FileUploader } from "react-drag-drop-files";
-import { useNavigate } from "react-router-dom";
 
 export default function InputSummary(props) {
-    let navigate = useNavigate();
     const [ tableType, setTableType ] = useState("Input Summary")
     const [ excelTemplatePath, setExcelTemplatePath ] = useState("")
+    const [ excelTemplate, setExcelTemplate ] = useState(null)
     const [ updatedExcelFile, setUpdatedExcelFile ] = useState(null)
     const fileTypes = ["xlsx"];
     const [ sumValues, setSumValues ] = useState([
@@ -39,15 +38,11 @@ export default function InputSummary(props) {
             justifyContent: 'flex-start', 
             textAlign: 'left'
         },
-        downloadInputP: {
-            // color: "#0083b5",
-            // cursor: "pointer",
+        downloadInput: {
+            color: "#0083b5",
+            cursor: "pointer",
             fontWeight: "bold",
             paddingBottom: 20
-        },
-        downloadInputA: {
-            color: "#0083b5",
-            textDecoration: "none",
         },
         uploadInput: {
             color: "#0083b5",
@@ -68,22 +63,7 @@ export default function InputSummary(props) {
 
     useEffect(()=>{
 
-        if (props.scenario.results.status === 'Incomplete') { //fetch location of excel template
-
-            fetchExcelTemplate(props.scenario.id).then(response => {
-            if (response.status === 200) {
-                response.json().then((data)=>{
-                    setExcelTemplatePath(data.path)
-                }).catch((err)=>{
-                    console.error("error fetching excel template path: ",err)
-                })
-            }
-            else {
-                console.error("error fetching excel template path: ",response.statusText)
-            }
-            })
-        }
-        else {
+        if (props.scenario.results.status !== 'Incomplete') { //fetch location of excel template{
         /* 
             calculate total completions demand, total produced water, 
             total disposal capacity, and total treatment capacity; 
@@ -179,9 +159,27 @@ export default function InputSummary(props) {
         }
       }, [props, props.scenario]);
 
-
     const handleTableTypeChange = (event) => {
         setTableType(event.target.value)
+    }
+
+    const handleDownloadExcel = () => {
+        fetchExcelTemplate(props.scenario.id).then(response => {
+        if (response.status === 200) {
+                response.blob().then((data)=>{
+                let excelURL = window.URL.createObjectURL(data);
+                let tempLink = document.createElement('a');
+                tempLink.href = excelURL;
+                tempLink.setAttribute('download', props.scenario.name+'.xlsx');
+                tempLink.click();
+            }).catch((err)=>{
+                console.error("error fetching excel template path: ",err)
+            })
+        }
+        else {
+            console.error("error fetching excel template path: ",response.statusText)
+        }
+        })
     }
 
     const handleReplaceExcel = (file) => {
@@ -312,11 +310,8 @@ export default function InputSummary(props) {
                     </p>
                 </Box>
                 <Box sx={styles.inputFileTextBox}>
-                    {/* <p style={styles.downloadInput}>
+                    <p style={styles.downloadInput} onClick={handleDownloadExcel}>
                         Download PARETO input file
-                    </p> */}
-                    <p style={styles.downloadInputP}>
-                        <a data-cy="excel-download"  style={styles.downloadInputA} href={excelTemplatePath} download>Download PARETO input file</a>
                     </p>
                     
                 </Box>

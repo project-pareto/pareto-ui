@@ -52,7 +52,7 @@ export const deleteDiagram = (type, id) => {
 }
 
 export const fetchExcelTemplate = (id) => {
-    return fetch('http://localhost:8001/get_template_path/'+id, {
+    return fetch('http://localhost:8001/get_template/'+id, {
         method: 'GET', 
         mode: 'cors'
     });
