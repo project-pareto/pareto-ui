@@ -75,7 +75,7 @@ const handleDoubleClick = (ind, index) => {
     ind: row number, starting at 0, excluding header row
     index: column number, starting at 0
   */
-  if (['Optimized','Draft','failure', 'Not Optimized'].includes(props.scenario.results.status)) {
+  if (['Optimized','Draft','failure', 'Not Optimized', 'Incomplete'].includes(props.scenario.results.status)) {
     if(index === 0) //when double clicking column index, allow user to input value to apply to that entire row
     { 
       setShowRowValueInput(true)
