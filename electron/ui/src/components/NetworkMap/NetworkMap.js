@@ -4,8 +4,9 @@ import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
 import { useMap } from 'react-leaflet/hooks'
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
 // import MapLegend from './maplegend';
-import { blueIcon, redIcon, violetIcon, blackIcon, greenIcon, greyIcon, yellowIcon, orangeIcon, goldIcon } from '../../assets/custom-icons';
+import { blueIcon, disposalIcon, treatmentIcon, completionPadIcon, productionPadIcon, networkNodeIcon, storageSiteIcon, reuseOptionIcon } from '../../assets/custom-icons';
 // import { kmz_data } from '../../assets/kmz_output';
+import CustomIcon from '../CustomIcon/CustomIcon';
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 
@@ -21,11 +22,17 @@ import { Tooltip } from 'react-leaflet/Tooltip'
 // TILELAYER OPTIONS: https://leaflet-extras.github.io/leaflet-providers/preview/
 // https://openmaptiles.org/styles/
 
+const icons = {
+    TreatmentSite: treatmentIcon,
+    StorageSite: storageSiteIcon,
+    DisposalSite: disposalIcon,
+    CompletionPad: completionPadIcon,
+    ProductionPad: productionPadIcon,
+    NetworkNode: networkNodeIcon,
+    ReuseOption: reuseOptionIcon,
+}
+const iconUrl = "http://maps.google.com/mapfiles/kml/"
 
-
-  
-
-const icons = [blueIcon, redIcon, violetIcon, blackIcon, greenIcon, greyIcon, yellowIcon, orangeIcon, goldIcon]
 
 export default function NetworkMap(props) {
     const { points, lines } = props;
@@ -89,9 +96,24 @@ export default function NetworkMap(props) {
         let totalCoords = [0, 0]
         for (let key of Object.keys(points)) {
             let node_object = points[key]
-            let tempDataObject = {name: key}
+            let styleUrl = node_object.styleUrl.replace('#','').replace('msn_','')
+            let tempDataObject = {name: key, styleUrl: styleUrl}
             let coords = node_object.coordinates
             let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
+            let nodeType
+            if (key.toUpperCase().includes('R')) nodeType = 'TreatmentSite'
+            else if (key.toUpperCase().includes('PP')) nodeType = 'ProductionPad'
+            else if (key.toUpperCase().includes('CP')) nodeType = 'CompletionPad'
+            else if (key.toUpperCase().includes('K')) nodeType = 'DisposalSite'
+            else if (key.toUpperCase().includes('S')) nodeType = 'StorageSite'
+            else if (key.toUpperCase().includes('N')) nodeType = 'NetworkNode'
+            else if (key.toUpperCase().includes('O')) nodeType = 'ReuseOption'
+            else {
+                console.log('nodetype not found')
+                nodeType = 'NetworkNode'
+
+            }
+            tempDataObject.nodeType = nodeType
             tempDataObject.coordinates = coordinates
             tempNodeData.push(tempDataObject)
 
@@ -115,8 +137,9 @@ export default function NetworkMap(props) {
         }
 
         let tempMapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
-        console.log(tempMapCenter)
-        // console.log(tempLineDatas)
+        // console.log(points)
+        // console.log(tempMapCenter)
+        // console.log(tempNodeData)
         setLineData(tempLineDatas)
         setNodeData(tempNodeData)
         setMapCenter(tempMapCenter)
@@ -204,7 +227,8 @@ export default function NetworkMap(props) {
                                         value.coordinates[1],
                                         value.coordinates[0]
                                     ]}                        
-                                    icon={icons[0]}
+                                    icon={icons[value.nodeType]}
+                                    // icon={icons[0]}
                                 >
                                     <Tooltip>{value.name}</Tooltip>
                                 </Marker>

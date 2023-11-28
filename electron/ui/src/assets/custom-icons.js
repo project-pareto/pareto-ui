@@ -80,3 +80,65 @@ export let blackIcon = new Icon({
 	popupAnchor: [1, -34],
 	shadowSize: [41, 41]
 });
+
+export let treatmentIcon = new Icon({
+	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/target.png',
+	shadowUrl: 'img/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [20.5, 20.5],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
+
+export let disposalIcon = new Icon({
+	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/triangle.png',
+	shadowUrl: 'img/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [20.5, 20.5],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
+
+export let completionPadIcon = new Icon({
+	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/forbidden.png',
+	shadowUrl: 'img/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [20.5, 20.5],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
+
+export let productionPadIcon = new Icon({
+	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/donut.png',
+	shadowUrl: 'img/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [20.5, 20.5],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
+
+export let networkNodeIcon = new Icon({
+	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png',
+	iconSize: [30, 30],
+	iconAnchor: [15, 15],
+	popupAnchor: [1, -34],
+	shadowSize: [30, 30]
+});
+
+export let storageSiteIcon = new Icon({
+	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/polygon.png',
+	shadowUrl: 'img/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [20.5, 20.5],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
+
+export let reuseOptionIcon = new Icon({
+	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/open-diamond.png',
+	shadowUrl: 'img/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [20.5, 20.5],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
