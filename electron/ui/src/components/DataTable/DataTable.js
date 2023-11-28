@@ -96,18 +96,15 @@ const handleDoubleClick = (ind, index) => {
  }
 
  const handleEditRowValue = (event) => {
-  if (isNaN(event.target.value)) {
     setRowValue(event.target.value)
-  }else {
-    setRowValue(Number(event.target.value))
-  }
  }
 
  const handleUpdateRowValues = () => {
   let tempScenario = {...props.scenario}
   Object.entries(props.scenario.data_input.df_parameters[props.category]).map(([key, value], i) => {
-    if (i > 0 && !isNaN(value[doubleClickIndex])) {
-      value[doubleClickIndex] = rowValue
+    if (i > 0) {
+      if (isNaN(rowValue)) value[doubleClickIndex] = rowValue
+      else value[doubleClickIndex] = Number(rowValue)
     }
   })
   props.handleEditInput(true)
