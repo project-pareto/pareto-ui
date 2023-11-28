@@ -134,9 +134,6 @@ class ScenarioHandler:
             id_ = updatedScenario["id"]
             newName = updatedScenario["name"]
             oldName = self.scenario_list[id_]["name"]
-            # _log.info('trying to replace input diagram for scenarios renamed to SRA')
-            # _log.info(f'new scenario name is: {newName}')
-            # _log.info(f'previous name was {oldName}')
             if newName.upper() == "SRA" and oldName.upper() != "SRA":
                 ## move SRA image into input network diagram spot
                 _log.info('scenario has been RENAMED to SRA')
@@ -163,8 +160,14 @@ class ScenarioHandler:
                 new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
                 shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
                 updatedScenario[f'inputDiagramExtension'] = 'png'
+            if newName.upper() == "WORKSHOP BENEFICIAL REUSE OVERRIDE" and oldName.upper() != "WORKSHOP BENEFICIAL REUSE OVERRIDE":
+                input_diagramFileType = 'png'
+                original_input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_override_input.png'
+                new_input_diagram_path = f"{self.input_diagrams_path}/{id_}.{input_diagramFileType}"
+                shutil.copyfile(original_input_diagram_path, new_input_diagram_path)
+                updatedScenario[f'inputDiagramExtension'] = 'png'
         except:
-            _log.error('unable to check and/or replace input diagram for SRA')
+            _log.error('unable to check and/or replace input diagram based on scenario name')
 
         # check if db is in use. if so, wait til its done being used
         locked = self.LOCKED
@@ -288,6 +291,13 @@ class ScenarioHandler:
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_sra_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE":
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_{diagramType}.png'
+            elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE OVERRIDE":
+                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_override_{diagramType}.png'
+                ## do input for Workshop beneficial reuse override
+                input_diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_override_input.png'
+                input_scenario_diagram_path = f"{self.input_diagrams_path}/{id}.{extension}"
+                shutil.copyfile(input_diagram_path, input_scenario_diagram_path)
+                scenario[f"inputDiagramExtension"] = extension
             else: 
                 diagram_path = files('pareto').parent.joinpath(f"docs/img/{diagramIdentifier}.{extension}")
             _log.info(f'diagram_path is : {diagram_path}')

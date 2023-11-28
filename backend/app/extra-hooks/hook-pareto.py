@@ -62,5 +62,7 @@ datas.append(('internal/assets/workshop_SRA_input.png', 'app/internal/assets'))
 datas.append(('internal/assets/workshop_SRA_output.png', 'app/internal/assets'))
 datas.append(('internal/assets/workshop_beneficial_reuse_input.png', 'app/internal/assets'))
 datas.append(('internal/assets/workshop_beneficial_reuse_output.png', 'app/internal/assets'))
+datas.append(('internal/assets/workshop_beneficial_reuse_override_input.png', 'app/internal/assets'))
+datas.append(('internal/assets/workshop_beneficial_reuse_override_output.png', 'app/internal/assets'))
 
 print(datas)
