@@ -6,7 +6,7 @@ import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
 // import MapLegend from './maplegend';
 import { blueIcon, disposalIcon, treatmentIcon, completionPadIcon, productionPadIcon, networkNodeIcon, storageSiteIcon, reuseOptionIcon } from '../../assets/custom-icons';
 // import { kmz_data } from '../../assets/kmz_output';
-import CustomIcon from '../CustomIcon/CustomIcon';
+// import CustomIcon from '../CustomIcon/CustomIcon';
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 
