@@ -82,7 +82,7 @@ export let blackIcon = new Icon({
 });
 
 export let treatmentIcon = new Icon({
-	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/target.png',
+	iconUrl: 'img/target.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -91,7 +91,7 @@ export let treatmentIcon = new Icon({
 });
 
 export let disposalIcon = new Icon({
-	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/triangle.png',
+	iconUrl: 'img/triangle.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -100,7 +100,7 @@ export let disposalIcon = new Icon({
 });
 
 export let completionPadIcon = new Icon({
-	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/forbidden.png',
+	iconUrl: 'img/forbidden.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -109,7 +109,7 @@ export let completionPadIcon = new Icon({
 });
 
 export let productionPadIcon = new Icon({
-	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/donut.png',
+	iconUrl: 'img/donut.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -118,7 +118,7 @@ export let productionPadIcon = new Icon({
 });
 
 export let networkNodeIcon = new Icon({
-	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png',
+	iconUrl: 'img/placemark_circle.png',
 	iconSize: [30, 30],
 	iconAnchor: [15, 15],
 	popupAnchor: [1, -34],
@@ -126,7 +126,7 @@ export let networkNodeIcon = new Icon({
 });
 
 export let storageSiteIcon = new Icon({
-	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/polygon.png',
+	iconUrl: 'img/polygon.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -135,7 +135,7 @@ export let storageSiteIcon = new Icon({
 });
 
 export let reuseOptionIcon = new Icon({
-	iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/open-diamond.png',
+	iconUrl: 'img/open-diamond.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
