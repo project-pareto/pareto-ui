@@ -3,6 +3,7 @@ import pprint
 import xml.sax, xml.sax.handler
 import shutil
 import math
+import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
@@ -211,7 +212,9 @@ def ParseKMZ(filename):
     return data 
 
 
-def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = "pareto_input_template.xlsx"):
+def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = None):
+    if template_location is None:
+        template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
 
     # some defaults:
     treatment_technologies = {

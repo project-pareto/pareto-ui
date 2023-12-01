@@ -68,8 +68,8 @@ async def upload(scenario_name: str, file: UploadFile = File(...)):
                 await out_file.write(content) 
             kmz_data = ParseKMZ(kmz_path)
             _log.info(f'got kmz_data')
-            template_location = f'{os.path.dirname(os.path.abspath(__file__))}/../internal/assets/pareto_input_template.xlsx'
-            WriteDataToExcel(kmz_data, excel_path, template_location)
+            # template_location = f'{os.path.dirname(os.path.abspath(__file__))}/../internal/assets/pareto_input_template.xlsx'
+            WriteDataToExcel(kmz_data, excel_path)
             _log.info('finished writing data to excel')
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, kmz_data=kmz_data)
         except Exception as e:
