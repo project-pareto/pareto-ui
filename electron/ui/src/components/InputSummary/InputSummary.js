@@ -11,6 +11,7 @@ export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
     const [ updatedExcelFile, setUpdatedExcelFile ] = useState(null)
     const [ showError, setShowError ] = useState(false)
+    const [ disableUpload, setDisableUpload ] = useState(false)
     const [ errorMessage, setErrorMessage ] = useState("")
     const fileTypes = ["xlsx"];
     const [ sumValues, setSumValues ] = useState([
@@ -197,6 +198,7 @@ export default function InputSummary(props) {
                 console.error("error on file upload: ",err)
                 setErrorMessage(String(err))
                 setShowError(true)
+                setDisableUpload(false)
             })
         }
         /*
@@ -208,10 +210,12 @@ export default function InputSummary(props) {
                 console.error("error on file upload: ",data.detail)
                 setErrorMessage(data.detail)
                 setShowError(true)
+                setDisableUpload(false)
             }).catch((err)=>{
                 console.error("error on file upload: ",err)
                 setErrorMessage(response.statusText)
                 setShowError(true)
+                setDisableUpload(false)
             })
         }
         })
@@ -229,7 +233,7 @@ export default function InputSummary(props) {
         return (
             <>
                 <Box sx={styles.inputFileTextBox}>
-                    <Button variant="outlined" sx={styles.uploadInput}>Upload PARETO input file</Button>
+                    <Button variant="outlined" sx={styles.uploadInput} disabled={disableUpload}>Upload PARETO input file</Button>
                 </Box>
                 <Box sx={{display: 'flex'}}>
                     <p style={{marginBottom:0, paddingTop:0}}>{updatedExcelFile === null ? "" : updatedExcelFile.name}</p>
@@ -243,6 +247,7 @@ export default function InputSummary(props) {
             console.log('setting file: '+file.name)
             setUpdatedExcelFile(file);
             handleReplaceExcel(file)
+            setDisableUpload(true)
         };
         return (
           <FileUploader 
