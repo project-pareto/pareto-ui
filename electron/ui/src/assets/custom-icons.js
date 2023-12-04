@@ -82,7 +82,7 @@ export let blackIcon = new Icon({
 });
 
 export let treatmentIcon = new Icon({
-	iconUrl: 'img/target.png',
+	iconUrl: 'img/target-green.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -91,7 +91,7 @@ export let treatmentIcon = new Icon({
 });
 
 export let disposalIcon = new Icon({
-	iconUrl: 'img/triangle.png',
+	iconUrl: 'img/triangle-green.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -100,7 +100,7 @@ export let disposalIcon = new Icon({
 });
 
 export let completionPadIcon = new Icon({
-	iconUrl: 'img/forbidden.png',
+	iconUrl: 'img/forbidden-green.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -109,7 +109,7 @@ export let completionPadIcon = new Icon({
 });
 
 export let productionPadIcon = new Icon({
-	iconUrl: 'img/donut.png',
+	iconUrl: 'img/donut-green.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -126,7 +126,7 @@ export let networkNodeIcon = new Icon({
 });
 
 export let storageSiteIcon = new Icon({
-	iconUrl: 'img/polygon.png',
+	iconUrl: 'img/polygon-green.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
@@ -135,7 +135,7 @@ export let storageSiteIcon = new Icon({
 });
 
 export let reuseOptionIcon = new Icon({
-	iconUrl: 'img/open-diamond.png',
+	iconUrl: 'img/open-diamond-green.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],
 	iconAnchor: [20.5, 20.5],
