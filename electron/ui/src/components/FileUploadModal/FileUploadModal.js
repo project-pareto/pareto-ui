@@ -180,14 +180,15 @@ export default function Dashboard(props) {
         </Grid>
         <Grid item xs={6}>
             <p ><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
-        </Grid>
-        <Grid item xs={6}>
-            {showWarning && <p style={{color:'red'}}>{warningMessage}</p>}
-        </Grid>
-        <Grid item xs={6}>
             <p ><a data-cy="excel-download" style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
         </Grid>
-        <Grid item xs={6}></Grid>
+        <Grid item xs={6}>
+            {showWarning && <p style={{color:'red', }}>{warningMessage}</p>}
+        </Grid>
+        {/* <Grid item xs={6}>
+            <p ><a data-cy="excel-download" style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
+        </Grid>
+        <Grid item xs={6}></Grid> */}
         <Grid item xs={12}>
             <Button id="create-scenario-button" style={styles.button} onClick={handleCreateScenario}>Create Scenario</Button>
         </Grid>
