@@ -33,7 +33,7 @@ export default function ScenarioList(props) {
     const [ name, setName ] = useState('')
     const [ id, setId ] = useState(null)
     let navigate = useNavigate();
-    const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
+    const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible', 'Incomplete']
     const enabledStatusListCompare = ['Optimized']
 
     useEffect(()=> {
@@ -132,9 +132,16 @@ export default function ScenarioList(props) {
             in the case of bad file type
         */
         else if (response.status === 400) {
-            console.error("error on file upload: ",response.statusText)
-            setErrorMessage(response.statusText)
-            setShowError(true)
+            response.json()
+            .then((data)=>{
+                console.error("error on file upload: ",data.detail)
+                setErrorMessage(data.detail)
+                setShowError(true)
+            }).catch((err)=>{
+                console.error("error on file upload: ",err)
+                setErrorMessage(response.statusText)
+                setShowError(true)
+            })
         }
         })
   }
@@ -266,7 +273,7 @@ export default function ScenarioList(props) {
             width={400}
         />
         {
-            showError && <ErrorBar duration={2000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
+            showError && <ErrorBar duration={15000} setOpen={setShowError} severity="error" errorMessage={errorMessage} />
         }
         <Box sx={{display: 'flex', justifyContent: 'flex-start'}}>
         <h3 style={{color: '#0083b5'}}>PARETO documentation can be found <a href="https://pareto.readthedocs.io/en/stable/" target="_blank">here</a>.</h3>
