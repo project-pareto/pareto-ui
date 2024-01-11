@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "map-visualization"
+      - "0.9.1"
 
 defaults:
   run:
