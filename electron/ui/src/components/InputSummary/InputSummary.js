@@ -291,7 +291,7 @@ export default function InputSummary(props) {
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key="headRow2">
                     {Object.entries(props.completionsDemand).map(([key,value], index) => {
-                        return <TableCell align="right" style={index > 0 ? styles.headerCell : styles.headerCell}>{index > 0 ? key : ""}</TableCell>
+                        return <TableCell key={""+key+index} align="right" style={index > 0 ? styles.headerCell : styles.headerCell}>{index > 0 ? key : ""}</TableCell>
                     })}
                 </TableRow>
                 </TableHead>
@@ -302,9 +302,9 @@ export default function InputSummary(props) {
                         {statistic.map((value, index) => {
                             return (
                             index > 0 ? 
-                            <TableCell align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
+                            <TableCell key={""+value+index} align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                             :
-                            <TableCell style={styles.firstCol}><Typography noWrap={true}>{key}</Typography></TableCell>
+                            <TableCell key={""+value+index} style={styles.firstCol}><Typography noWrap={true}>{key}</Typography></TableCell>
                             )
                         })}
                     </TableRow>
