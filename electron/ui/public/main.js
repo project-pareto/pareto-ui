@@ -145,8 +145,8 @@ const startServer = () => {
       //   ]
       // );
 
-      log.info("Python Started in dev mode");
-      console.log("Python Started in dev mode");
+      // log.info("Python Started in dev mode");
+      // console.log("Python Started in dev mode");
 
     } else {
       try {
@@ -189,8 +189,8 @@ const startServer = () => {
 app.whenReady().then(() => {
     // Entry point
     if (isDev) {
-      log.info('starting electron app in dev mode')
-      console.log('starting electron app in dev mode')
+      // log.info('starting electron app in dev mode')
+      // console.log('starting electron app in dev mode')
       createWindow();
     } else {
       let win = createWindow();

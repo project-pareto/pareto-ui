@@ -168,6 +168,8 @@ export default function Dashboard(props) {
           edited={inputDataEdited} 
           handleEditInput={setInputDataEdited}
           syncScenarioData={props.syncScenarioData}
+          handleSetCategory={props.handleSetCategory} 
+          updateScenario={props.updateScenario}
         />
       }
       {(scenario && props.section===1) && 

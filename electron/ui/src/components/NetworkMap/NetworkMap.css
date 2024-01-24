@@ -1,0 +1,33 @@
+
+  
+  /* .leaflet-container {
+    width: 100%;
+    height: 85vh;
+    z-index: 0;
+  } */
+
+  
+  .custom_break {
+    flex-basis: 100%;
+  }
+  
+
+  #legend {
+    margin-top:10px;
+  }
+  
+  #legend label {
+    float: left;
+  }
+  #legend ul {
+    margin: 0;
+    list-style: none;
+    float: left;
+  }
+  
+  .legend-box {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid rgba(0, 0, 0, .2);
+  }

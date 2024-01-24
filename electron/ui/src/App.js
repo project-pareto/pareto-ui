@@ -33,6 +33,10 @@ function App() {
   const [ showCompletedOptimization, setShowCompletedOptimization ] = useState(false)
   const [ lastCompletedScenario, setLastCompletedScenario ] = useState(null)
   const [ compareScenarioIndexes, setCompareScenarioIndexes ] = useState([])
+  const INITIAL_STATES = ['Draft','Incomplete']
+  const RUNNING_STATES = ['Initializing', 'Solving Model','Generating Output']
+  const STABLE_STATES = ['Draft','none', 'Optimized','failure', 'Not Optimized', 'complete', 'Infeasible']
+  const COMPLETED_STATES = ['Optimized','failure', 'Infeasible']
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
 
@@ -61,7 +65,7 @@ function App() {
           for (var key in data.data){
             let scenario = {...data.data[key]}
             tempScenarios[key] = scenario
-            if (!['Optimized','Draft','failure', 'Not Optimized', 'complete', 'none', 'Infeasible'].includes(scenario.results.status) && !tasks.includes(scenario.id)) {
+            if (RUNNING_STATES.includes(scenario.results.status) && !tasks.includes(scenario.id)) {
               scenario.results.status = 'Draft'
               updateScenario({'updatedScenario': {...scenario}})
               .then(response => response.json())
@@ -107,7 +111,7 @@ useEffect(()=> {
         let task = backgroundTasks[i]
         let tempScenario = tempScenarios[task]
         if(tempScenario.results.status !== scenarios[task].results.status) updated=true
-        if(tempScenario.results.status === "Optimized" || tempScenario.results.status === "failure" || tempScenario.results.status === "Infeasible") completed = true
+        if(COMPLETED_STATES.includes(tempScenario.results.status)) completed = true
       }
       if (completed) {
           /*
@@ -336,7 +340,7 @@ useEffect(()=> {
       let tempSection
       let tempCategory
       if (appState) {
-        if (scenarios[index].results.status === "Draft" && appState.section === 2) {
+        if (INITIAL_STATES.includes(scenarios[index].results.status) && appState.section === 2) {
           tempSection = 0
           tempCategory = appState.category
         } else {
@@ -345,7 +349,7 @@ useEffect(()=> {
         }
       } else {
         // console.log('in else')
-        if(["Initializing", "Solving model", "Generating output", "Optimized", "failure"].includes(scenarios[index].results.status)) {
+        if(COMPLETED_STATES.includes(scenarios[index].results.status) || RUNNING_STATES.includes(scenarios[index].results.status)) {
           tempSection = 2
         } else {
           tempSection = 0

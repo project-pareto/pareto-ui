@@ -303,6 +303,9 @@ const handleRowFilter = (row) => {
                 flowbackRates={scenario.data_input.df_parameters['FlowbackRates']}
                 initialDisposalCapacity={scenario.data_input.df_parameters['InitialDisposalCapacity']}
                 initialTreatmentCapacity={scenario.data_input.df_parameters['InitialTreatmentCapacity']}
+                scenario={scenario}
+                handleSetCategory={props.handleSetCategory} 
+                updateScenario={props.updateScenario}
               />
             </Box>
           )

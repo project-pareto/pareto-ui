@@ -56,9 +56,14 @@ export default function DataTable(props) {
     let ind = parseInt(inds[0])
     let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
     let tempScenario = {...props.scenario}
+    console.log('setting value to : ')
+    console.log(event.target.value)
     if (isNaN(event.target.value)) {
       tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
-    }else {
+    }else if(event.target.value === "") {
+      tempScenario.data_input.df_parameters[props.category][colName][ind] = event.target.value
+    }
+    else {
       tempScenario.data_input.df_parameters[props.category][colName][ind] = Number(event.target.value)
     }
     props.setScenario(tempScenario)
@@ -70,7 +75,7 @@ const handleDoubleClick = (ind, index) => {
     ind: row number, starting at 0, excluding header row
     index: column number, starting at 0
   */
-  if (['Optimized','Draft','failure', 'Not Optimized'].includes(props.scenario.results.status)) {
+  if (['Optimized','Draft','failure', 'Not Optimized', 'Incomplete'].includes(props.scenario.results.status)) {
     if(index === 0) //when double clicking column index, allow user to input value to apply to that entire row
     { 
       setShowRowValueInput(true)

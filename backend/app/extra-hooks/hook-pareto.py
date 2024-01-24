@@ -65,4 +65,7 @@ datas.append(('internal/assets/workshop_beneficial_reuse_output.png', 'app/inter
 datas.append(('internal/assets/workshop_beneficial_reuse_override_input.png', 'app/internal/assets'))
 datas.append(('internal/assets/workshop_beneficial_reuse_override_output.png', 'app/internal/assets'))
 
+# add input template
+datas.append(('internal/assets/pareto_input_template.xlsx', 'app/internal/assets'))
+
 print(datas)
