@@ -19,6 +19,7 @@ export default function FileUploadModal(props) {
     const fileTypes = ["xlsx", "kmz", "kml"];
     // const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.6_rel/pareto/case_studies/strategic_small_case_study.xlsx"
     const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_permian_demo.xlsx"
+    const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/workshop_baseline_all_data.xlsx"
 
 
   useEffect(()=>{
@@ -179,10 +180,15 @@ export default function FileUploadModal(props) {
         </Grid>
         <Grid item xs={6}>
             <p ><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
+            <p ><a data-cy="excel-download2" style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
         </Grid>
         <Grid item xs={6}>
-            {showWarning && <p style={{color:'red'}}>{warningMessage}</p>}
+            {showWarning && <p style={{color:'red', }}>{warningMessage}</p>}
         </Grid>
+        {/* <Grid item xs={6}>
+            <p ><a data-cy="excel-download" style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
+        </Grid>
+        <Grid item xs={6}></Grid> */}
         <Grid item xs={12}>
             <Button id="create-scenario-button" style={styles.button} onClick={handleCreateScenario}>Create Scenario</Button>
         </Grid>
