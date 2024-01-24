@@ -5,7 +5,7 @@ describe('scenario testing', () => {
     */
     // let strategic_small_case_study_url = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_small_case_study.xlsx"
     // let strategic_toy_case_study_url = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_toy_case_study.xlsx"
-    let strategic_toy_case_study_url = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/strategic_permian_demo.xlsx"
+    let strategic_toy_case_study_url = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/strategic_toy_case_study.xlsx"
     let sc_count = 10
     it('test that scenario list loads properly', () => {
         //load webpage
