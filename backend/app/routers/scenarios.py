@@ -298,3 +298,17 @@ async def delete_diagram(diagram_type: str, id: int):
     """
     data = scenario_handler.delete_diagram(diagram_type, id)
     return {"data":data}
+
+@router.get("/get_excel_file/{filename}")
+async def delete_diagram(filename: str):
+    """Fetch excel input file
+
+    Args:
+        filename: name of excel file
+
+    Returns:
+        Excel file
+    """
+    assets_path = scenario_handler.get_assets_dir()
+    excel_path = assets_path / filename
+    return FileResponse(excel_path)

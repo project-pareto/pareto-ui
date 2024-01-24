@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import { FileUploader } from "react-drag-drop-files";
+import { fetchExcelFile } from '../../services/app.service';
 
 
 
@@ -19,7 +20,10 @@ export default function FileUploadModal(props) {
     const fileTypes = ["xlsx", "kmz", "kml"];
     // const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_permian_demo.xlsx"
     const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/strategic_permian_demo.xlsx"
-    const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/workshop_baseline_all_data.xlsx"
+
+    // need to create API call to fetch this
+    // const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/workshop_baseline_all_data.xlsx"
+    const workshopFileName = "workshop_baseline_all_data_0.9.0.xlsx"
 
 
   useEffect(()=>{
@@ -57,7 +61,8 @@ export default function FileUploadModal(props) {
     sampleFile:{
         color:"#0884b4",
         textDecoration: "none",
-        fontWeight: "bold"
+        fontWeight: "bold",
+        cursor: 'pointer'
     },
     fileUploaderBox: {
         border: '2px dashed black',
@@ -73,6 +78,25 @@ export default function FileUploadModal(props) {
 
    const handleClose = () => {
     props.setShowFileModal(false)
+   }
+
+   const handleDownloadWorkshopFile = () => {
+        fetchExcelFile(workshopFileName).then(response => {
+        if (response.status === 200) {
+                response.blob().then((data)=>{
+                let excelURL = window.URL.createObjectURL(data);
+                let tempLink = document.createElement('a');
+                tempLink.href = excelURL;
+                tempLink.setAttribute('download', 'workshop_baseline_all_data.xlsx');
+                tempLink.click();
+            }).catch((err)=>{
+                console.error("error fetching excel template path: ",err)
+            })
+        }
+        else {
+            console.error("error fetching excel template path: ",response.statusText)
+        }
+        })
    }
 
    const handleCreateScenario = () => {
@@ -180,7 +204,7 @@ export default function FileUploadModal(props) {
         </Grid>
         <Grid item xs={6}>
             <p ><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
-            <p ><a data-cy="excel-download2" style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
+            <p style={styles.sampleFile} onClick={handleDownloadWorkshopFile} download>Download Workshop Input File</p>
         </Grid>
         <Grid item xs={6}>
             {showWarning && <p style={{color:'red', }}>{warningMessage}</p>}
