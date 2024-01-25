@@ -694,5 +694,9 @@ class ScenarioHandler:
             _log.error(f"unable to remove diagram for #{index}: {e}")
             raise HTTPException(400, detail=f"unable to remove diagram: {e}")
         return self.scenario_list[index]
+    
+    def get_assets_dir(self):
+        return Path(f'{os.path.dirname(os.path.abspath(__file__))}/assets/')
+
 
 scenario_handler = ScenarioHandler()

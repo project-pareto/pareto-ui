@@ -65,3 +65,10 @@ export const replaceExcelSheet = (data, id) => {
         body: data
     });
 }; 
+
+export const fetchExcelFile = (filename) => {
+    return fetch('http://localhost:8001/get_excel_file/'+filename, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}; 
