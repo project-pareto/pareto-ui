@@ -18,11 +18,12 @@ export default function FileUploadModal(props) {
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
     const fileTypes = ["xlsx", "kmz", "kml"];
-    // const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_permian_demo.xlsx"
-    const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/strategic_permian_demo.xlsx"
+    const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_permian_demo.xlsx"
+    // const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/strategic_permian_demo.xlsx"
 
     // need to create API call to fetch this
     // const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/workshop_baseline_all_data.xlsx"
+    const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/workshop_baseline_all_data.xlsx"
     const workshopFileName = "workshop_baseline_all_data_0.9.0.xlsx"
 
 
@@ -203,8 +204,9 @@ export default function FileUploadModal(props) {
             {DragDrop()}
         </Grid>
         <Grid item xs={6}>
-            <p ><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
-            <p style={styles.sampleFile} onClick={handleDownloadWorkshopFile} download>Download Workshop Input File</p>
+            <p><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
+            <p><a style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
+            {/* <p style={styles.sampleFile} onClick={handleDownloadWorkshopFile} download>Download Workshop Input File</p> */}
         </Grid>
         <Grid item xs={6}>
             {showWarning && <p style={{color:'red', }}>{warningMessage}</p>}
