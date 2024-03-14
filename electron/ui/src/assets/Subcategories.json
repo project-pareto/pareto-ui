@@ -2,15 +2,16 @@
     "Dynamic": [
         "CompletionsDemand","DisposalOperationalCost","TreatmentOperationalCost","CompletionsPadOutsideSystem",
         "DesalinationTechnologies","DesalinationSites","TruckingTime","PadRates","FlowbackRates","NodeCapacities",
-        "InitialPipelineCapacity","InitialPipelineDiameters", "InitialDisposalCapacity","InitialTreatmentCapacity","FreshwaterSourcingAvailability",
+        "InitialPipelineCapacity","InitialPipelineDiameters", "InitialDisposalCapacity","InitialTreatmentCapacity","ExtWaterSourcingAvailability",
         "PadOffloadingCapacity","CompletionsPadStorage","ReuseOperationalCost","PipelineOperationalCost",
-        "FreshSourcingCost","TruckingHourlyCost","PipelineDiameterValues","DisposalCapacityIncrements",
+        "ExternalSourcingCost","TruckingHourlyCost","PipelineDiameterValues","DisposalCapacityIncrements",
         "InitialStorageCapacity","StorageCapacityIncrements","TreatmentCapacityIncrements","TreatmentEfficiency",
         "DisposalExpansionCost","StorageExpansionCost","TreatmentExpansionCost","PipelineCapexDistanceBased",
         "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","WellPressure", "Hydraulics","Elevation",
         "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity", "RemovalEfficiency",
         "ReuseCapacity", "ReuseMinimum", "BeneficialReuseCost", "BeneficialReuseCredit", "TreatmentExpansionLeadTime", "DisposalExpansionLeadTime", 
-        "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac"
+        "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac", "ExternalWaterQuality", "SWDDeep",
+        "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors"
     ],
     "Static": [
         "PNA", "CNA", "CCA", "NNA", "NCA", "NKA", "NRA", "NSA", "FCA", "RCA", "RNA", "RSA",
