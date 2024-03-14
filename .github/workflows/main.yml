@@ -39,13 +39,13 @@ jobs:
           miniforge-version: latest
           activate-environment: pareto-ui-env
 
-      # - name: Install correct branch of pareto
-      #   working-directory: ../
-      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
-
-      - name: Install Pareto (0.9_rel) locally
+      - name: Install correct branch of pareto
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.9_rel && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+
+      # - name: Install Pareto (0.9_rel) locally
+      #   working-directory: ../
+      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.9_rel && pip install --progress-bar off .
 
       - name: Install electron JS dependencies
         run: |
