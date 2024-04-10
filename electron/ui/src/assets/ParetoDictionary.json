@@ -124,5 +124,13 @@
     "v_S_StorageCapacity_dict": "",
     "v_S_DisposalCapacity_dict": "",
     "v_S_TreatmentCapacity_dict": "",
-    "v_S_ReuseCapacity_dict": ""
+    "v_S_ReuseCapacity_dict": "",
+    "SWDDeep": "Binary parameter designating which disposal sites are shallow (0) and which are deep (1)",
+    "SWDAveragePressure": "Average pressure/depth in vicinity of well",
+    "SWDProxPAWell": "Proximity to Plugged & Abandoned wells",
+    "SWDProxInactiveWell": "Proximity to inactive/temporarily abandoned formerly producing well (completed prior to 2000)",
+    "SWDProxEQ": "Proximity to earthquakes >= 3.0 magnitude",
+    "SWDProxFault": "Disposal proximity to Fault",
+    "SWDProxHpOrLpWell": "Disposal proximity to high pressure or low pressure injection well",
+    "SWDRiskFactors": "Disposal Risk Factors"
 }
