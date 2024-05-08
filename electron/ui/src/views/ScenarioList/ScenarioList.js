@@ -38,7 +38,6 @@ export default function ScenarioList(props) {
 
     useEffect(()=> {
         setShowHeader(true)
-        // console.log('setting show header true')
     }, [props]) 
 
     useEffect(() => {
@@ -78,7 +77,6 @@ export default function ScenarioList(props) {
     }
 
     const handleCopyScenario = (index) => {
-        // console.log('copying scenario: ',index)
         copyScenario(index, scenarios[index].name+' copy')
         .then(response => response.json())
         .then((data) => {

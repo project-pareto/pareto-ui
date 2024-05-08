@@ -101,11 +101,6 @@ export default function DataInput(props) {
     
   }, [props.category, props.scenario, scenario.data_input.df_parameters]);
 
-  useEffect(()=>{
-    // console.log('keyindex mapping: ')
-    // console.log(keyIndexMapping)
-    
-  }, [keyIndexMapping]);
   
    const handlePlotCategoryChange = (event) => {
     setPlotCategory(event.target.value)
@@ -165,7 +160,7 @@ export default function DataInput(props) {
     else {
       tempCols = [...filteredColumnNodes]
       const index = tempCols.indexOf(col);
-      if (index > -1) { // only splice array when item is found
+      if (index > -1) {
         tempCols.splice(index, 1); // 2nd parameter means remove one item only
       } else{
         tempCols.push(col)
@@ -343,20 +338,6 @@ const handleRowFilter = (row) => {
           </Grid>
           <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
-            {/* <FilterDropdown
-                width="300px"
-                maxHeight="300px"
-                option1="Column"
-                filtered1={filteredColumnNodes}
-                total1={columnNodesMapping}
-                isAllSelected1={isAllColumnsSelected}
-                handleFilter1={handleColumnFilter}
-                option2="Row"
-                filtered2={filteredRowNodes}
-                total2={rowNodesMapping}
-                isAllSelected2={isAllRowsSelected}
-                handleFilter2={handleRowFilter}
-            /> */}
             <FilterDropdown
                 width="300px"
                 maxHeight="300px"

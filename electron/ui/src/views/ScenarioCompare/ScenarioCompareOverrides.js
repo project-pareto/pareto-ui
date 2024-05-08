@@ -1,8 +1,7 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Grid, Box, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip } from '@mui/material';
+import { Grid, Box, Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import { INFRASTRUCTURE_CAPEX_MAPPING }  from '../../assets/InfrastructureCapexMapping'
-import DataTable from '../../components/DataTable/DataTable';
 
 const INFRASTRUCTURE_VARIABLES = ["vb_y_Pipeline_dict", "vb_y_Treatment_dict", "vb_y_Storage_dict", "vb_y_Disposal_dict"]
 
@@ -483,12 +482,10 @@ export default function ScenarioCompareOverrides(props) {
                                 </TableRow>
                                 {Object.entries(primaryScenario.optimized_override_values.vb_y_overview_dict).map(([key,value]) => (
                                     <TableRow key = {`${key}_${value}`}>
-                                        {/* <TableCell></TableCell> */}
                                         <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                         <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
                                         <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
                                         <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
-                                        {/* <TableCell style={styles.other}>{value.indexes[value.indexes.length-1]}</TableCell> */}
                                         <TableCell style={styles.other} align="right">{formatNumber(value.number_value)}</TableCell>
                                         <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
                                     </TableRow>

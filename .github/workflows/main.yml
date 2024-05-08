@@ -23,7 +23,6 @@ jobs:
         os:
           - linux
           - win64
-          # - macos
         include:
           - os: linux
             os-version: ubuntu-latest
@@ -43,10 +42,6 @@ jobs:
         working-directory: ../
         run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
-      # - name: Install Pareto (0.9_rel) locally
-      #   working-directory: ../
-      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all && git checkout 0.9_rel && pip install --progress-bar off .
-
       - name: Install electron JS dependencies
         run: |
           npm --prefix electron clean-install
@@ -57,14 +52,6 @@ jobs:
 
       - name: get idaes extensions
         run: idaes get-extensions
-
-      # - name: get idaes extensions
-      #   run: |
-      #    if [ "$RUNNER_OS" == "Linux" ]; then
-      #         idaes get-extensions --platform ubuntu2104
-      #    else
-      #         idaes get-extensions
-      #    fi
 
       - name: run component tests
         run: npm --prefix electron/ui test
