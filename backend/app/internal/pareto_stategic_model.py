@@ -27,6 +27,7 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
 from pyomo.opt import TerminationCondition
 from pareto.utilities.get_data import get_data
 from pareto.utilities.results import generate_report, PrintValues, OutputUnits, is_feasible, nostdout
+from pareto.utilities.model_modifications import fix_vars
 import idaes.logger as idaeslog
 
 from app.internal.get_data import get_input_lists
@@ -37,38 +38,6 @@ from app.internal.scenario_handler import (
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
-
-## this code will be in PARETO repo eventually
-from pyomo.environ import Var, Binary, units as pyunits
-def fix_vars(model, vars_to_fix, indexes, v_val, upper_bound=None, lower_bound=None, fixvar=True):
-    _log.info('inside fix vars')
-    for var in model.component_objects(Var):
-        if var.name in vars_to_fix:
-            _log.info("\nFixing this variable")
-            _log.info(var)
-            for index in var:
-                if index == indexes:
-                    if fixvar is True:
-                        if var[index].domain is Binary:
-                            var[index].fix(v_val)
-                        else:
-                            v_val = pyunits.convert_value(
-                                                v_val,
-                                                from_units=model.user_units["volume_time"],
-                                                to_units=model.model_units["volume_time"],
-                                            )
-                            var[index].fix(v_val)
-                    else:
-                        #TODO check units
-                        var[index].setlb(lower_bound)
-                        var[index].setub(upper_bound)
-                else:
-                    pass
-            else:
-                pass
-        else:
-            continue
-##
 
 
 def run_strategic_model(input_file, output_file, id, modelParameters, overrideValues={}):
