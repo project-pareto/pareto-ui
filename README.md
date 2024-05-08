@@ -42,6 +42,8 @@ cd <pareto-ui-path>/electron/ui
 npm clean-install
 ```
 
+** If you run into ```npm ERR!```, try running ```npm clean-install -d```
+
 ## Install On MacOS ARM64
 
 ### 1. Creating the Conda environment
