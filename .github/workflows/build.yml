@@ -24,8 +24,8 @@ jobs:
     #   CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
@@ -65,7 +65,7 @@ jobs:
           AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-24.01.24-win64.exe
 
       - name: Upload artifact for windows build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
             name: windows-pareto-dist
