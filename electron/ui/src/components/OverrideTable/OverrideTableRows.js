@@ -395,7 +395,6 @@ function RegularVariableRow(props) {
       border:"1px solid #ddd"
       },
   }
-  // const [ displayValue, setDisplayValue ] = useState()
   const [ showData, setShowData ] = useState(false)
   const [ overrideChecked, setOverrideChecked ] = useState(false)
   const [ rowName, setRowName ] = useState("")
@@ -403,15 +402,12 @@ function RegularVariableRow(props) {
 
   useEffect(() => {
     let tempDisplayValue = [...value]
-    // setDisplayValue(tempDisplayValue)
     setRowName(value[0])
     setShowData(true)
   }, [value, overrideChecked])
 
   useEffect(() => {
     let newIndex = `${value[0]}:${value[1]}:${value[2]}`
-    // console.log('new index is: ')
-    // console.log(newIndex)
     setUniqueIndex(newIndex)
     if(Object.keys(scenario.override_values[category]).includes(""+newIndex) && !overrideChecked) setOverrideChecked(true)
     else if (!Object.keys(scenario.override_values[category]).includes(""+newIndex) && overrideChecked) setOverrideChecked(false)

@@ -1,8 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Grid, Box, FormControl, MenuItem, Select, Button, Typography } from '@mui/material';
-import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
-import ErrorBar from '../../components/ErrorBar/ErrorBar'
+import { Grid, Box } from '@mui/material';
 import DataTable from '../../components/DataTable/DataTable';
 
 export default function ScenarioCompareInput(props) {
@@ -14,8 +12,6 @@ export default function ScenarioCompareInput(props) {
   const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
   const [ rowNodes, setRowNodes ] = useState([])
   const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
-  // const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
-  // const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
 
   const styles = {
     boxView: showSidebar ? {
@@ -38,7 +34,6 @@ export default function ScenarioCompareInput(props) {
           let tempRowNodesMapping = []
           Object.entries(primaryScenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
             if (ind === 0) {
-              // tempRowNodesMapping = value
               value.map ((v,i) => {
                 tempRowNodesMapping.push(i+"::"+v)
                 tempRowNodes[i+"::"+v] = true

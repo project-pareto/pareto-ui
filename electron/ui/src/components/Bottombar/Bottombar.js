@@ -18,8 +18,6 @@ export default function Bottombar(props) {
     const [ newScenarioName, setNewScenarioName ] = useState('')
     const [ showModalError, setShowModalError ] = useState(false)
     const [ modalError, setModalError ] = useState('')
-    
-    // const [ disableOptimize, setDisableOptimize ] = useState(false) 
     const [ key, setKey ] =  useState(null)
     const [ hasOverride, setHasOverride ] = useState(false)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
@@ -44,10 +42,8 @@ export default function Bottombar(props) {
       // check if override values are present
       try {
         let tempHasOverride = false
-        // if(props.scenario.results.status === "Not Optimized"){
           for (let key of Object.keys(props.scenario.override_values)) {
             if(Object.keys(props.scenario.override_values[key]).length>0) tempHasOverride = true
-          // }    
         }
 
         setHasOverride(tempHasOverride)
@@ -82,7 +78,6 @@ export default function Bottombar(props) {
     
 
     const handleSaveModal = () => {
-        // console.log('saving this thing')
         props.handleUpdateExcel(props.scenario.id, props.category, props.scenario.data_input.df_parameters[props.category])
         handleCloseSaveModal()
         props.setInputDataEdited(false)
@@ -114,14 +109,12 @@ export default function Bottombar(props) {
       }
 
       const reoptimizeNewScenario = () => {
-        // create function in app.js for this
         if (newScenarioName === '') {
           // show error
           setModalError(' *You must provide a name if creating a new scenario*')
           setShowModalError(true)
 
         } else {
-          // console.log(newScenarioName)
           setShowModalError(false)
           handleCloseRerunModal()
           props.copyAndRunOptimization(newScenarioName)

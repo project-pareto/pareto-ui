@@ -64,10 +64,7 @@ export default function NetworkMap(props) {
         mapTypeToggle: {
             paddingTop: 20, 
             paddingRight: 20, 
-            // position: 'absolute', 
             borderRadius: 3, 
-            // backgroundColor:'rgba(255,255,255, 1)', 
-            // boxShadow:'0px 5px 10px 0px rgba(0, 0, 0, 0.5)'
         }
     }
 
@@ -137,9 +134,6 @@ export default function NetworkMap(props) {
         }
 
         let tempMapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
-        // console.log(points)
-        // console.log(tempMapCenter)
-        // console.log(tempNodeData)
         setLineData(tempLineDatas)
         setNodeData(tempNodeData)
         setMapCenter(tempMapCenter)
@@ -148,11 +142,6 @@ export default function NetworkMap(props) {
         setShowMap(true)
 
     }, [])
-
-    // const handleCheckLegendItem = (index) => {
-    //     legendData[index].checked = !legendData[index].checked
-    //     setLegendData([...legendData])
-    // }
 
     const handleToggleRoadtripLines = (event) => {
         setShowRoadtripLines(!showRoadtripLines)
@@ -179,11 +168,6 @@ export default function NetworkMap(props) {
                 </Grid>
                 <Grid item xs={4}></Grid>
                 <Grid item xs={2}>
-                    {/* <Box sx={{ pt:4 }} >
-                    <FormGroup>
-                        <FormControlLabel control={<Switch />} label="roadtrip lines" value={showRoadtripLines} onChange={handleToggleRoadtripLines}/>
-                    </FormGroup>
-                    </Box> */}
                     
                 </Grid>
             </Grid>
@@ -213,11 +197,6 @@ export default function NetworkMap(props) {
                         url={`https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`}
                         subdomains={['mt1','mt2','mt3']}
                     />
-                    
-                    {/* <TileLayer
-                        attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                        url={`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`}
-                    /> */}
         
                         {nodeData.map((value, i) => {
                             return (
@@ -241,10 +220,6 @@ export default function NetworkMap(props) {
                     ))}
                     </MapContainer>
                 }
-            
-            {/* <Box style={styles.legendBox}>
-                <MapLegend data={legendData} handleChange={handleCheckLegendItem}/>
-            </Box> */}
             </Box>
             
         </Box>

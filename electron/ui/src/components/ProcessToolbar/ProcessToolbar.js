@@ -24,7 +24,6 @@ export default function ProcessToolbar(props) {
   const handleCloseSaveModal = () => setOpenSaveModal(false);
 
   const handleSaveModal = () => {
-    // console.log('saving this thing')
     handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
     handleCloseSaveModal()
     setInputDataEdited(false)

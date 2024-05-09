@@ -5,8 +5,6 @@ import CategoryNames from '../../assets/CategoryNames.json'
 export default function ComparisonTable(props) {
     const { scenarios, scenarioIndex, secondaryScenarioIndex } = props;
     const [ indices, setIndices ] = useState([scenarioIndex, secondaryScenarioIndex])
-    const [ isInput, setIsInput ] = useState(false)
-    const [ inputCategory, setInputCategory ] = useState(null)
     const category = "v_F_Overview_dict"
     const styles ={
         firstCol: {

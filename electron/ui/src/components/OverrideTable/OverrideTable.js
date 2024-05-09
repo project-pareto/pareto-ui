@@ -36,8 +36,6 @@ export default function OverrideTable(props) {
     },[scenario.id, category])
 
     useEffect(() => {
-      // console.log('rowfilterset initiated useeffect')
-      // console.log(rowFilterSet)
       let tempRows
       if (Object.keys(rowFilterSet).length > 0) {
         try {
@@ -52,20 +50,15 @@ export default function OverrideTable(props) {
       } else {
         tempRows = data[category].slice(1)
       }
-      // console.log('setting rows to')
-      // console.log(tempRows)
       setRows(tempRows)
 
     },[scenario, rowFilterSet])
 
     useEffect(() => {
-      // let tempRows = data[category].slice(1)
       let tempVisibleRows = rows.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       )
-      // console.log('setting visible rows to')
-      // console.log(tempVisibleRows)
       setVisibleRows(tempVisibleRows)
 
     },[page, rowsPerPage, rows])
@@ -84,8 +77,6 @@ export default function OverrideTable(props) {
 
 
     const handleCheckOverride = (index, value) => {
-      // console.log(value)
-      
       let variable = category
       if(category ==="vb_y_overview_dict") variable = INFRASTRUCTURE_CAPEX_MAPPING[value[0]].variable_name
       let override_object = {variable: variable, isZero: false}
@@ -96,7 +87,6 @@ export default function OverrideTable(props) {
       override_object.indexes=indexes
       if(category ==="vb_y_overview_dict") override_object.value=1
       else override_object.value=""
-      // console.log(override_object)
         let tempOverrideValues = {...scenario.override_values}
         if(Object.keys(tempOverrideValues[category]).includes(""+index)) {
         delete tempOverrideValues[category][index]
@@ -138,8 +128,6 @@ export default function OverrideTable(props) {
             if (number_value === 0 || number_value === "0") tempOverrideValues[category][idx].isZero = true
           }
 
-          // if(isZero) tempOverrideValues[category][idx].isZero = true
-          // else tempOverrideValues[category][idx].isZero = false
           const tempScenario = {...scenario}
           tempScenario.override_values = tempOverrideValues
           updateScenario(tempScenario, true)
@@ -197,9 +185,6 @@ const renderOutputTable = () => {
                 <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12%"}}>Unit</TableCell>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "7.5%"}}>Override</TableCell>
                 <TableCell style={{backgroundColor:"#6094bc", color:"white", width: "12.5%"}}>Value</TableCell>
-                {/* <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Bound</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Floor</TableCell>
-                <TableCell style={{backgroundColor:"#6094bc", color:"white"}}>Ceilling</TableCell> */}
               </>
               
               :
@@ -218,7 +203,6 @@ const renderOutputTable = () => {
               </TableHead>
               <OverrideTableRows
                 category={category}
-                // data={data[category].slice(1)}
                 data={visibleRows}
                 columnNodes={columnNodes}
                 columnNodesMapping={columnNodesMapping}
@@ -233,17 +217,9 @@ const renderOutputTable = () => {
                 <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[25, 50, 100]}
-                  // colSpan={3}
                   count={rows.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
-                  // component="div"
-                  // SelectProps={{
-                  //   inputProps: {
-                  //     'aria-label': 'rows per page',
-                  //   },
-                  //   native: true,
-                  // }}
                   onPageChange={handleChangePage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
                   ActionsComponent={TablePaginationActions}

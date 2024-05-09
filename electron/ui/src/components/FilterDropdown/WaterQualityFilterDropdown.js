@@ -1,15 +1,6 @@
 import React from 'react';
-import {useState} from 'react';
-import Grid from '@mui/material/Grid';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ListItemText from '@mui/material/ListItemText';
-import Checkbox from '@mui/material/Checkbox';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import Typography from '@mui/material/Typography';
+import { Accordion, AccordionSummary, AccordionDetails} from '@mui/material';
+import { ListItemText, ListItemIcon, Checkbox, MenuItem, Typography } from '@mui/material';
 
 
 export default function FilterDropdown(props) {

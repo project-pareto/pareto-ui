@@ -34,8 +34,8 @@ export default function SankeyPlot(props) {
         else {
             tempNodes = [...filteredNodes]
             const index = tempNodes.indexOf(node);
-            if (index > -1) { // only splice array when item is found
-                tempNodes.splice(index, 1); // 2nd parameter means remove one item only
+            if (index > -1) {
+                tempNodes.splice(index, 1);
             } else{
                 tempNodes.push(node)
             }
@@ -54,8 +54,8 @@ export default function SankeyPlot(props) {
         else {
             tempTimes = [...filteredTimes]
             const index = tempTimes.indexOf(time);
-            if (index > -1) { // only splice array when item is found
-                tempTimes.splice(index, 1); // 2nd parameter means remove one item only
+            if (index > -1) {
+                tempTimes.splice(index, 1);
             } else{
                 tempTimes.push(time)
             }
@@ -99,7 +99,6 @@ export default function SankeyPlot(props) {
             let source = props.data[sankeyCategory][i][0]
             let target = props.data[sankeyCategory][i][1]
             let label = props.data[sankeyCategory][i][2]
-            let value = props.data[sankeyCategory][i][3]
             
             nodeSet.add(source)
             nodeSet.add(target)
@@ -115,7 +114,6 @@ export default function SankeyPlot(props) {
         setFilteredNodes(Array.from(nodeSet))
         setFilteredTimes(Array.from(tempFilteredTimes))
         
-        // console.log(d)
         unpackData(false, totalNodes, tempFilteredTimes)
           
     }
@@ -132,7 +130,6 @@ export default function SankeyPlot(props) {
             tempFilteredNodes = filteredNodes
             tempFilteredTimes = filteredTimes
         }
-        // console.log('unpacking data with unpackall = '+unpackAll)
         let d = {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
         let locationsInArray = {}
         for (let i = 1; i < props.data[sankeyCategory].length; i++) {
@@ -206,7 +203,7 @@ export default function SankeyPlot(props) {
                         width: 0.5
                         },
                     label: plotData.node.label,
-                    // color: fig.data[0].node.color
+
                         },
 
                     link: {
@@ -216,7 +213,7 @@ export default function SankeyPlot(props) {
                         label: plotData.link.label,
                     }
                 },
-                // {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]},
+
                 ]}
                 layout={ {width: 1118,   height: 772, font: { size: 10 }} }
             />

@@ -1,10 +1,7 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
+import { Box, Grid, Button, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import IconButton from '@mui/material/IconButton';
 import { FileUploader } from "react-drag-drop-files";
 import { fetchDiagram, uploadDiagram, deleteDiagram } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
@@ -174,7 +171,6 @@ export default function NetworkDiagram(props) {
         />
         :
         <>
-        {/* <NetworkMap></NetworkMap> */}
         {UploadBox()}
         </>
         

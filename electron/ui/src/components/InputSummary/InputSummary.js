@@ -336,9 +336,6 @@ export default function InputSummary(props) {
                     </p>
                     
                 </Box>
-                {/* <Box sx={styles.inputFileTextBox}>
-                    <Button variant="outlined" sx={styles.uploadInput}>Upload PARETO input file</Button>
-                </Box> */}
                 {DragDrop()}
             </Grid>
             <Grid item xs={1}></Grid>

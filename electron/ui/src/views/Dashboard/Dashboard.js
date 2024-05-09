@@ -28,16 +28,8 @@ export default function Dashboard(props) {
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
-  // const handleEditInput = (bool) => setInputDataEdited(bool)
 
   useEffect(()=>{
-    // let guy = "["
-    // Object.entries(props.section === 0 ? props.scenario.data_input.df_parameters : props.section === 1 ? props.scenario.optimization : props.scenario.results.data).map( ([key, value]) => ( 
-    //   guy+=`"${key}",`
-      
-    // ))
-    // guy+="]"
-    // console.log(guy)
     try {
       if(!scenario) {
         props.navigateHome()
@@ -66,15 +58,12 @@ export default function Dashboard(props) {
    }
 
    const handleRunModel = () => {
-    // console.log('running model')
       runModel({"scenario": scenario})
       .then(r =>  r.json().then(data => ({status: r.status, body: data})))
       .then((response) => {
         let responseCode = response.status
         let data = response.body
         if(responseCode === 200) {
-          // console.log('run model successful: ')
-          // console.log(data)
           props.updateScenario(data)
           props.updateAppState({action:'section',section:2},scenario.id)
           props.addTask(scenario.id)
@@ -96,12 +85,7 @@ export default function Dashboard(props) {
     props.handleEditScenarioName(name, scenario.id, true)
     setOpenEditName(false)
   }
-
-  // const handleSaveInputChanges = () => {
-  //   props.handleSaveInputChanges()
-  //   setInputDataEdited(false)
-  // }
-
+  
   return (
     <>
       <ProcessToolbar 

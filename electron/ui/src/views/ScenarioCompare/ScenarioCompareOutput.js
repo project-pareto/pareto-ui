@@ -126,7 +126,6 @@ export default function ScenarioCompareOutput(props) {
         border:"1px solid #ddd"
     },
     hover: {
-        // backgroundColor: "rgb(255,215,0, 0.4)"
         backgroundColor: "#F2F3F5"
     },
     hoverSameValue: {
@@ -153,7 +152,6 @@ export default function ScenarioCompareOutput(props) {
         if (diff > 0) tempStyle.color = "green"
         else if(diff < 0) tempStyle.color = "red"
         else tempStyle.color = "grey"
-        // tempStyle.fontSize="20px"
         return tempStyle
     }
     
@@ -187,7 +185,6 @@ export default function ScenarioCompareOutput(props) {
   }
 
   const handleHover = (target, table, value) => {
-    // console.log('hovering on',target)
     setHoverRow(target)
     setHoverTable(table)
     setHoverValue(value)
@@ -253,10 +250,8 @@ export default function ScenarioCompareOutput(props) {
                                 
                                 <TableRow    
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
-                                    // style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
                                     style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', value[3])}
                                     onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', value[3])}
-                                    // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
                                 >
                                     {[0,1,2,5,3,4].map((cellIdx, i) => (
                                         <TableCell key={`${cellIdx}_${i}`} style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
@@ -297,10 +292,8 @@ export default function ScenarioCompareOutput(props) {
                                 &&
                                 <TableRow 
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
-                                    // style={hoverRow === `${value[0]}:${value[1]}:${value[2]}:${value[5]}` ? styles.hover : null}
                                     style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', value[3])}
                                     onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', value[3])}
-                                    // onHover={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`)}
                                 >
                                     {[0,1,2,5,3,4].map((cellIdx, i) => (
                                         <TableCell key={`${cellIdx}_${i}`} style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
@@ -339,12 +332,6 @@ export default function ScenarioCompareOutput(props) {
     <Box sx={styles.boxView}>
         {compareCategory === "output::dashboard" && kpiDataPrimary ? 
         <Grid container spacing={2}>
-
-            {/* <Grid item xs={12}>
-                <Box sx={{display: 'flex', justifyContent: 'left'}}>
-                    <h2>Key KPIs</h2>
-                </Box>
-            </Grid> */}
 
             <Grid item xs={3}>
             <Box style={{backgroundColor:'white'}} sx={styles.kpiBox}>
@@ -397,7 +384,6 @@ export default function ScenarioCompareOutput(props) {
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
                         <Typography noWrap style={styles.kpiTitle}><IconButton disabled><RemoveCircleOutlineIcon sx={{ color: "#fc2414" }}/></IconButton>Disposal</Typography>
-                        {/* <p style={styles.kpiTitle}><IconButton disabled><RemoveCircleOutlineIcon sx={{ color: "#fc2414" }}/></IconButton>Disposal</p> */}
                         <Typography noWrap style={getStyle("v_F_TotalDisposed")}>{getValue("v_F_TotalDisposed")}&nbsp;{kpiDataPrimary.v_F_TotalDisposed.unit}</Typography>
                     </Box>
                 </Grid>

@@ -92,7 +92,6 @@ export default function Sidebar(props) {
   }
 
   const handleSaveModal = () => {
-    // console.log('saving this thing')
     handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
     handleCloseSaveModal()
     setInputDataEdited(false)
@@ -107,7 +106,6 @@ export default function Sidebar(props) {
   }
 
   const handleClick = (key) => {
-    // console.log(key)
     setKey(key)
     if (inputDataEdited) {
       handleOpenSaveModal()
@@ -129,17 +127,6 @@ export default function Sidebar(props) {
   }
 
   const renderAdditionalCategories = () => {
-    // let additionalCategories = {}
-    // if (section === 0) {
-    //   if (scenario.results.status === "Incomplete") additionalCategories["PARETO Input File"] = null
-    //   else additionalCategories["Input Summary"] = null
-    //   additionalCategories["Network Diagram"] = null
-    //   additionalCategories["Plots"] = null
-    // } else if (section === 2) {
-    //   additionalCategories["Dashboard"] = null
-    //   additionalCategories["Sankey"] = null
-    //   additionalCategories["Network Diagram"] = null
-    // }
     let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
