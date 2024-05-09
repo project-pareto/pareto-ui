@@ -1,16 +1,7 @@
 import React from 'react';
-import {useState} from 'react';
-import Grid from '@mui/material/Grid';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ListItemText from '@mui/material/ListItemText';
-import Checkbox from '@mui/material/Checkbox';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
+import { useState } from 'react';
+import { Grid, Accordion, AccordionSummary, AccordionDetails, ListItemText} from '@mui/material';
+import { Button, MenuItem, Typography, IconButton, Checkbox, ListItemIcon} from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 

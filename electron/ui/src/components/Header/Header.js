@@ -2,8 +2,7 @@ import './Header.css';
 import React from 'react';
 import {useEffect, useState} from 'react';   
 import logo from "../../images/pareto-logo.png";
-import { Button, MenuItem, FormControl, Select, IconButton, Tooltip } from '@mui/material'
-import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
+import { Button, MenuItem, FormControl, Select } from '@mui/material'
  
 
 export default function Header(props) {  
@@ -19,11 +18,6 @@ export default function Header(props) {
       let tempLocation = tempLocationSplit[tempLocationSplit.length-1]
       setLocation(tempLocation)
     }, [window.location.href])
-
-    // useEffect(() => {
-    //   console.log('scenarios updated in header : ')
-    //   console.log(scenarios)
-    // }, [scenarios])
 
     return (
       <>

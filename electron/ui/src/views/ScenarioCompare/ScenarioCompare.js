@@ -1,6 +1,5 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
-import { Box, Grid, IconButton } from '@mui/material'
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
@@ -35,7 +34,6 @@ export default function ScenarioCompare(props) {
             let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
             for (let i = 0; i < tableKeys.length; i++) {
                 let primaryValueSet = primaryValues[tableKeys[i]]
-                let referenceValueSet = referenceValues[tableKeys[i]]
                 for (let j = 0; j < primaryValueSet.length; j++) {
                     try {
                         let primaryValue = primaryValues[tableKeys[i]][j]
@@ -58,7 +56,6 @@ export default function ScenarioCompare(props) {
             let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
             for (let i = 0; i < tableKeys.length; i++) {
                 let primaryValueSet = primaryValues[tableKeys[i]]
-                let referenceValueSet = referenceValues[tableKeys[i]]
                 for (let j = 0; j < primaryValueSet.length; j++) {
                     try {
                         let primaryValue = primaryValues[tableKeys[i]][j]
@@ -132,7 +129,6 @@ export default function ScenarioCompare(props) {
             }
         }
         
-        
         setCompareScenarioIndexes([tempIndexes[0],tempIndexes[1]])
         return
     }
@@ -154,7 +150,6 @@ export default function ScenarioCompare(props) {
         let value = item[3]
         tempData[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[0]].name}
     }
-    // console.log(tempData)
     setKpiDataPrimary(tempData)
     let tempData2 = {}
     for (var index in scenarios[tempIndexes[1]].results.data['v_F_Overview_dict']) {
@@ -165,7 +160,6 @@ export default function ScenarioCompare(props) {
         let value = item[3]
         tempData2[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[1]].name}
     }
-    // console.log(tempData2)
     setKpiDataReference(tempData2)
     unpackBarChartData(tempData,tempData2)
 }, [compareScenarioIndexes]);

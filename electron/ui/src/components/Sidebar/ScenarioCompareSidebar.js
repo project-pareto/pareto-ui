@@ -51,8 +51,6 @@ export default function Sidebar(props) {
         }
         catch(e) {
           console.error('error checking delta categories')
-          // console.log(tempDeltaCategories)
-          // setDeltaCategories(tempDeltaCategories)
         }
       }
       
@@ -154,9 +152,6 @@ export default function Sidebar(props) {
   const renderTopLevelCategories = () => {
       return (
         <div>
-          {/* <div style={category==="output" ? styles.selected : styles.unselected} onClick={() => handleClick("output")}> 
-              <p style={styles.topLevelCategory}>Output</p>
-          </div> */}
           <div style={category.includes("output") ? styles.selected : styles.unselected}  onClick={() => setOpenOutputs(!openOutputs)}> 
               <p style={styles.topLevelCategory}>
                 <span style={{display:"flex", justifyContent: "space-between"}}>
@@ -203,15 +198,7 @@ export default function Sidebar(props) {
           {renderOverrideCategories()}
           </Fragment>
           }
-          {/* {hasOverrides && 
-            <div style={category==="overrides" ? styles.selected : styles.inputDifference} onClick={() => handleClick("overrides")}> 
-              <p style={styles.topLevelCategory}>
-                <span style={{display:"flex", justifyContent: "space-between"}}>
-                  Manual Overrides
-                </span>
-              </p>
-          </div>
-          } */}
+
         </div>
       ) 
   }
@@ -236,7 +223,6 @@ export default function Sidebar(props) {
         if (overridesList[0].includes(key) || overridesList[1].includes(key))
         return (
           <div key={key}>
-            {/* <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)}>  */}
             <div style={category.includes(key) ? styles.selected : styles.unselected} onClick={() => handleClick('overrides::'+key)}>
                 <p style={styles.subcategory}>
                 {value.name}
@@ -258,7 +244,6 @@ export default function Sidebar(props) {
         return(
           <div key={value+""+index}>
             <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
-            {/* <div style={category===value ? styles.selected : styles.unselected} onClick={() => handleClick(value)}>  */}
             <div style={handleCheckForDifference(value)} onClick={() => handleClick(value)}>
                 <p style={styles.subcategory}>
                 {CategoryNames[value] ? CategoryNames[value] :
@@ -332,8 +317,6 @@ export default function Sidebar(props) {
           PaperProps={{
               sx: {
               width: 240,
-              // marginTop: '71px',
-              // paddingBottom: '71px'
               marginTop: '152px',
               paddingBottom: '102px'
               }
@@ -343,11 +326,6 @@ export default function Sidebar(props) {
           <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
               {renderTopLevelCategories()}
           </Box>
-          {/* <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
-              <List key="drawer_list" aria-label="sidebar_table" sx={{paddingTop:'0px'}}>
-              {renderTopLevelCategories()}
-            </List>
-          </Box> */}
         </Drawer>
       </Box>
     }

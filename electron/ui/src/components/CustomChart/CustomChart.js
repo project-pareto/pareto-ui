@@ -44,8 +44,6 @@ export default function AreaChart(props) {
         } else {
             let tempData = {}
             // organize area chart data
-            // console.log('setting chart data for '+props.title+': ')
-            // console.log(props.data)
             for (var index = 1; index < props.data.length; index++) {
                 let item = props.data[index]
                 let key = item[props.labelIndex]
@@ -68,7 +66,6 @@ export default function AreaChart(props) {
                 tempAreaChartData.push({x: value.x, y: value.y, stackgroup: props.stackgroup, name: key, mode: "lines"})
                 return 1
             })
-            // console.log(tempAreaChartData)
             setAreaChartData(tempAreaChartData)
         }
 

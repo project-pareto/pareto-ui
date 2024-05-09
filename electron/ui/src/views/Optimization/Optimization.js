@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from 'react';   
 import { Box, Grid, InputAdornment, Checkbox, FormControlLabel, FormControl, Button } from '@mui/material';
-import { MenuItem, Radio, RadioGroup, Select, IconButton, Tooltip, Collapse, OutlinedInput } from '@mui/material';
+import { MenuItem, Select, IconButton, Tooltip, Collapse, OutlinedInput } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -76,9 +76,6 @@ export default function Optimization(props) {
       },
       advancedOptions: {
         color: "#0083b5",
-        // "&:hover": {
-        //   backgroundColor: "black"
-        // },
       },
       filled: {
         backgroundColor: '#01678f',
@@ -89,10 +86,6 @@ export default function Optimization(props) {
       },
   }
 
-  //  useEffect(()=>{
-  //   props.setDisabled(!['Optimized','Draft','failure', 'Not Optimized', 'Infeasible'].includes(props.scenario.results.status))
-  //   // setScenario(props.scenario)
-  //  }, [props.scenario]);
 
    const handleChange = (event) => {
      const name = event.target.name
@@ -154,16 +147,6 @@ export default function Optimization(props) {
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <FormControl disabled={props.disabled}>
-            {/* <RadioGroup
-              name="objective"
-              aria-labelledby="objectives-select"
-              value={props.scenario.optimization.objective}
-              name="objectives-select"
-              onChange={handleObjectiveChange}
-            >
-              <FormControlLabel value="cost" control={<Radio />} label="Minimize Cost" />
-              <FormControlLabel value="reuse" control={<Radio />} label="Maximize Reuse" />
-            </RadioGroup> */}
             <FormControlLabel control={<Checkbox defaultChecked />} label="Minimize Cost" />
             <FormControlLabel control={<Checkbox />} label="Maximize Reuse" />
             <FormControlLabel control={<Checkbox />} label="Maximize Profits" />

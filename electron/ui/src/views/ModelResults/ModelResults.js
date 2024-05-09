@@ -16,10 +16,6 @@ const OVERRIDE_CATEGORIES = [
   "v_F_Trucked_dict",
   "v_L_Storage_dict",
   "v_L_PadStorage_dict",
-  // "vb_y_Pipeline_dict",
-  // "vb_y_Disposal_dict",
-  // "vb_y_Storage_dict",
-  // "vb_y_Treatment_dict"
 ]
 
 export default function ModelResults(props) {
@@ -119,7 +115,6 @@ export default function ModelResults(props) {
     let tempScenario = {}
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
-    // console.log(`termination condition is ${tempScenario.results.terminationCondition}`)
     if (typeof(tempScenario.results.terminationCondition) === 'undefined') {
       console.log('term condition is undefined, rolling forward as good')
       setTerminationCondition('good')
@@ -193,8 +188,6 @@ export default function ModelResults(props) {
       setColumnNodes(tempColumnNodes)
       setFilteredColumnNodes(tempCols)
     }
-    // console.log(tempColumnNodes)
-    // console.log(tempCols)
 }
 
 const handleRowFilter = (row) => {
@@ -252,7 +245,6 @@ const handleRowFilter = (row) => {
 }
 
 const handleNewInfrastructureOverride = () => {
-  // console.log('new infrastructure override')
   window.scrollTo(0, document.body.scrollHeight);
   setNewInfrastructureOverrideRow(true);
  }
@@ -314,7 +306,6 @@ const handleNewInfrastructureOverride = () => {
                 rowFilterSet={rowFilterSet}
                 columnFilterSet={columnFilterSet}
               />
-              {/* } */}
               
             </Grid>
             <Grid item xs={0.5}>
@@ -456,7 +447,6 @@ const handleNewInfrastructureOverride = () => {
           </Box>
           
           <p>Status: <b>{props.scenario.results.status}</b></p>
-          {/* <Button onClick={() => props.handleSetSection(2)}>Refresh Status</Button> */}
         </Box>
         }
       </Grid>

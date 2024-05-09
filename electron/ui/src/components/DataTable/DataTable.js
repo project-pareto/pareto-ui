@@ -1,6 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip } from '@mui/material';
 import OverrideTable from '../OverrideTable/OverrideTable';
 import ParetoDictionary from '../../assets/ParetoDictionary.json'
 import CategoryNames from '../../assets/CategoryNames.json'
@@ -26,7 +26,6 @@ export default function DataTable(props) {
     setShowOverrideTables(true)
     
   }, [props.data]);
-  // const [ props.overrideValues, props.setOverrideValues ] = useState({})
 
   var keyIndexMapping = {}
 
@@ -167,7 +166,6 @@ const handleKeyDown = (e) => {
         }
         else if(props.section === "compare") {
           return (
-            // <TableCell onKeyDown={handleKeyDown} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
             <TableCell onKeyDown={handleKeyDown} key={""+ind+":"+index} name={""+ind+":"+index} style={index === 0 ? styles.firstCol : props.deltaDictionary[props.category].includes(index+"::"+ind) ? styles.inputDifference : styles.other}>
             {
               value.toLocaleString('en-US', {maximumFractionDigits:2})

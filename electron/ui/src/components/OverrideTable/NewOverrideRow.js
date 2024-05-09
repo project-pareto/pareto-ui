@@ -1,11 +1,9 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { TableBody, TableCell, TableRow, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
+import { TableCell, TableRow, Checkbox, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { INFRASTRUCTURE_CAPEX_MAPPING, VARIABLE_INDEXES }  from '../../assets/InfrastructureCapexMapping'
-import CategoryNames from '../../assets/CategoryNames.json'
 
 
 export default function NewBinaryVariableRow(props) {  
@@ -90,14 +88,10 @@ export default function NewBinaryVariableRow(props) {
               
             }
           }
-          // console.log(connections)
-        //   console.log(connectionsDictionary)
-          // console.log(allNodes)
           setNodeConnections(connectionsDictionary)
         
       } catch (e) {
         console.error(e)
-        // console.log("unable to generate infrastructure buildout options from input table, using generic input")
         return 
       }
     },[scenario, category])
@@ -134,14 +128,12 @@ export default function NewBinaryVariableRow(props) {
             variable: variable,
             number_value: capacityNumberValue
         }
-        // console.log(new_override_value)
         addNewRow(new_override_value, newRow)
         setNewInfrastructureOverrideRow(false)
 
     }
   
     const generateValueOptions = () => {
-      // if (Object.keys(INFRASTRUCTURE_CAPEX_MAPPING).includes(rowName)) {
         try {
           if (rowName === "Treatment Facility") {
             return (
@@ -164,11 +156,8 @@ export default function NewBinaryVariableRow(props) {
           
           
         } catch (e) {
-          // console.error(e)
-          // console.log("unable to generate infrastructure buildout options from input table, using generic input")
           return 
         }
-      // }
         
     }
   
@@ -214,7 +203,6 @@ export default function NewBinaryVariableRow(props) {
         
       } catch (e) {
         console.error(e)
-        // console.log("unable to generate infrastructure buildout options from input table, using generic input")
         return 
       }
   
@@ -272,11 +260,7 @@ export default function NewBinaryVariableRow(props) {
       }
   
     }
-  
-    // const generateCapacityOptions = () => {
-  
-    // }
-  
+
   
     const handleSelectRowName = (event) => {
       let row_name = event.target.value
@@ -285,7 +269,6 @@ export default function NewBinaryVariableRow(props) {
       setLocation("")
       setDestination("")
       setTechnology("")
-      // setComplete(false)
       generatePresetValues(row_name)
     }
   
@@ -467,7 +450,6 @@ export default function NewBinaryVariableRow(props) {
                 style={styles.other}>
                   <Checkbox
                       checked={overrideChecked}
-                      // onChange={() => handleCheckOverride(uniqueIndex, displayValue)}
                   />
               </TableCell>
               <TableCell 

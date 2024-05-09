@@ -4,7 +4,6 @@ import { Box, Grid, IconButton, Tooltip } from '@mui/material';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import WaterIcon from '@mui/icons-material/Water';
-import InfoIcon from '@mui/icons-material/Info';
 import Plot from 'react-plotly.js';
 import CustomChart from '../../components/CustomChart/CustomChart'
 import FilterDropdown from '../../components/FilterDropdown/WaterQualityFilterDropdown';
@@ -63,11 +62,9 @@ export default function KPIDashboard(props) {
     const styles = {
           kpiBox: 
           {
-            // m:2, 
             paddingTop:2, 
             boxShadow:3,
             height: "140px"
-            // paddingBottom: "50px" 
           },
           pieChartBox: 
           {
@@ -76,7 +73,6 @@ export default function KPIDashboard(props) {
           },
           areaChartBox: 
           {
-            // m:2, 
             paddingTop:2, 
             boxShadow:3,
             paddingBottom: "50px" 
@@ -124,8 +120,8 @@ export default function KPIDashboard(props) {
         } else {
             if(tempFilteredNodes[key]) {
                 const index = tempFilterSet.indexOf(key);
-                if (index > -1) { // only splice array when item is found
-                    tempFilterSet.splice(index, 1); // 2nd parameter means remove one item only
+                if (index > -1) {
+                    tempFilterSet.splice(index, 1);
                 }
             } else {
                 tempFilterSet.push(key)
@@ -283,7 +279,6 @@ export default function KPIDashboard(props) {
                             ]
                             },
                         textinfo: "percent",
-                        // insidetextorientation: "radial"
                         }
                     ]}
 
@@ -348,7 +343,6 @@ export default function KPIDashboard(props) {
                     <Grid container>
                     <Grid item xs={1}></Grid>
                     <Grid item xs={10}>
-                        {/* <Box sx={{display: 'flex', justifyContent: 'center', overflow: "scroll"}}> */}
                         <Box display="flex" justifyContent="center" sx={{overflow: "scroll"}}>
                             <CustomChart
                                 data={waterQualityData} 
@@ -383,8 +377,6 @@ export default function KPIDashboard(props) {
                     </Grid>
                     
                     </Grid>
-                    
-                    {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
                 </Box>
             }
         
@@ -412,7 +404,6 @@ export default function KPIDashboard(props) {
                     </Grid>
                     <Grid item xs={1}></Grid>
                     </Grid>
-                    {/* <Tooltip title={"Doubleclick any item in the legend to view only that node"} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip> */}
                 </Box>
             }
         </Grid>
