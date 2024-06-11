@@ -40,7 +40,7 @@ app.add_middleware(
 app.include_router(scenarios.router)
 
 def getPort():
-    port = 8001
+    port = 50011
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     foundOpenPort = False
     while not foundOpenPort:

@@ -7,7 +7,7 @@ export const useApp = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  const [ port, setPort ] = useState(8001);
+  const [ port, setPort ] = useState(50011);
   const [ foundPort, setFoundPort ] = useState(false)
 
   useEffect(() => {
