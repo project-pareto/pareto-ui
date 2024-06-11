@@ -13,9 +13,7 @@ import ScenarioList from './views/ScenarioList/ScenarioList';
 import ScenarioCompare from './views/ScenarioCompare/ScenarioCompare';
 import LandingPage from './views/LandingPage/LandingPage';
 import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
-import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
-import { deleteScenario, copyScenario } from './services/scenariolist.service'
-import { runModel } from './services/homepage.service';
+import { updateScenario, updateExcel, fetchScenarios, checkTasks, deleteScenario, copyScenario, runModel } from './services/app.service'
 
 
 function App() {

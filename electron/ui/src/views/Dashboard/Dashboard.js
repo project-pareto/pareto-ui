@@ -11,7 +11,7 @@ import Optimization from '../Optimization/Optimization'
 import ModelResults from '../ModelResults/ModelResults'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import PopupModal from '../../components/PopupModal/PopupModal'
-import { runModel } from '../../services/homepage.service'
+import { runModel } from '../../services/app.service'
 
 
 

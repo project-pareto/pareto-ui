@@ -6,8 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
 import CompareIcon from '@mui/icons-material/Compare';
-import { uploadExcelSheet } from '../../services/sidebar.service'
-import { copyScenario } from '../../services/scenariolist.service'
+import { uploadExcelSheet, copyScenario } from '../../services/app.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
 import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'

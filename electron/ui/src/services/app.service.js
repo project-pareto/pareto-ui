@@ -72,3 +72,34 @@ export const fetchExcelFile = (filename) => {
         mode: 'cors'
     });
 }; 
+
+export const runModel = (data) => {
+    return fetch('http://localhost:8001/run_model/', {
+        method: 'POST', 
+        mode: 'cors',
+        body: JSON.stringify(data)
+    });
+}; 
+
+export const deleteScenario = (data) => {
+    return fetch('http://localhost:8001/delete_scenario/', {
+        method: 'POST', 
+        mode: 'cors',
+        body: JSON.stringify(data)
+    });
+}; 
+
+export const copyScenario = (id, newScenarioName) => {
+    return fetch('http://localhost:8001/copy/'+id+'/'+newScenarioName, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+};
+
+export const uploadExcelSheet = (data, name) => {
+    return fetch('http://localhost:8001/upload/'+name, {
+        method: 'POST', 
+        mode: 'cors',
+        body: data
+    });
+}; 
