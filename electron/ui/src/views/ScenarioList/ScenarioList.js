@@ -10,6 +10,7 @@ import { uploadExcelSheet, copyScenario } from '../../services/app.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
 import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'
+import { useApp } from '../../AppContext';
 
 export default function ScenarioList(props) {
     const { 
@@ -32,6 +33,7 @@ export default function ScenarioList(props) {
     const [ name, setName ] = useState('')
     const [ id, setId ] = useState(null)
     let navigate = useNavigate();
+    const { port } = useApp()
     const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible', 'Incomplete']
     const enabledStatusListCompare = ['Optimized']
 
@@ -76,7 +78,7 @@ export default function ScenarioList(props) {
     }
 
     const handleCopyScenario = (index) => {
-        copyScenario(index, scenarios[index].name+' copy')
+        copyScenario(port, index, scenarios[index].name+' copy')
         .then(response => response.json())
         .then((data) => {
           setScenarios(data.scenarios)
@@ -112,7 +114,7 @@ export default function ScenarioList(props) {
         const formData = new FormData();
         formData.append('file', file, file.name);
 
-        uploadExcelSheet(formData, name)
+        uploadExcelSheet(port, formData, name)
         .then(response => {
         if (response.status === 200) {
             response.json()

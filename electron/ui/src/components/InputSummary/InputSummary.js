@@ -6,6 +6,7 @@ import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.servic
 import NetworkMap from '../NetworkMap/NetworkMap';
 import { FileUploader } from "react-drag-drop-files";
 import ErrorBar from '../ErrorBar/ErrorBar'
+import { useApp } from '../../AppContext';
 
 export default function InputSummary(props) {
     const [ tableType, setTableType ] = useState("Input Summary")
@@ -14,6 +15,7 @@ export default function InputSummary(props) {
     const [ disableUpload, setDisableUpload ] = useState(false)
     const [ errorMessage, setErrorMessage ] = useState("")
     const fileTypes = ["xlsx"];
+    const { port } = useApp()
     const [ sumValues, setSumValues ] = useState([
         {statistic: 'Total Completions Demand', value: 0, units: 'bbl'},
         {statistic: 'Total Produced Water', value: 0, units: 'bbl'},
@@ -166,7 +168,7 @@ export default function InputSummary(props) {
     }
 
     const handleDownloadExcel = () => {
-        fetchExcelTemplate(props.scenario.id).then(response => {
+        fetchExcelTemplate(port, props.scenario.id).then(response => {
         if (response.status === 200) {
                 response.blob().then((data)=>{
                 let excelURL = window.URL.createObjectURL(data);
@@ -187,7 +189,7 @@ export default function InputSummary(props) {
     const handleReplaceExcel = (file) => {
         const formData = new FormData();
         formData.append('file', file, file.name);
-        replaceExcelSheet(formData, props.scenario.id)
+        replaceExcelSheet(port, formData, props.scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
