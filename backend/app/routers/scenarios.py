@@ -34,6 +34,13 @@ router = APIRouter(
     responses={404: {"description": "Scenario not found"}},
 )
 
+@router.get("/get_project_name")
+async def get_scenario_list():
+    """
+    Get project name.
+    """
+    return "pareto"
+
 @router.get("/get_scenario_list")
 async def get_scenario_list():
     """

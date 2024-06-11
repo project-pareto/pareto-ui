@@ -38,18 +38,22 @@ app.add_middleware(
 
 app.include_router(scenarios.router)
 
+def getPort():
+    return 8006
+
 if __name__ == '__main__':
+    port = getPort()
     if('i' in sys.argv or 'install' in sys.argv):
         _log.info('running get_extensions()')
         if not check_for_idaes_extensions():
             get_idaes_extensions()
 
     elif('d' in sys.argv or 'dev' in sys.argv):
-        _log.info(f"starting app")
+        _log.info(f"starting app in dev")
         multiprocessing.freeze_support()
-        uvicorn.run("__main__:app", host="127.0.0.1", port=8001, reload=True)
+        uvicorn.run("__main__:app", host="127.0.0.1", port=port, reload=True)
 
     else:
         _log.info(f"starting app")
         multiprocessing.freeze_support()
-        uvicorn.run(app, host="127.0.0.1", port=8001, reload=False)
+        uvicorn.run(app, host="127.0.0.1", port=port, reload=False)
