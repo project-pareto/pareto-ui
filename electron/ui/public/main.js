@@ -17,7 +17,7 @@ const { spawn, execFile } = require("child_process")
 
 // Python server parameters
 const PY_HOST = "127.0.0.1";
-const PY_PORT = 8001;
+const PY_PORT = 50011;
 const UI_PORT = 3000;
 const PY_LOG_LEVEL = "info";
 let uiReady = false
