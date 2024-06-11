@@ -23,7 +23,7 @@ export const AppProvider = ({ children }) => {
             response.json()
             .then((data)=>{
                 if (data === "pareto") { 
-                    console.log("found pareto on port "+ port)
+                    // console.log("found pareto on port "+ port)
                     setFoundPort(true)
                 }
                 else  {
