@@ -1,6 +1,4 @@
 let BACKEND_URL = "http://localhost"
-// let backend_port = await getPort(BACKEND_URL, 8001)
-let backend_port = 8001
 
 
 

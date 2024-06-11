@@ -18,8 +18,6 @@ import { useApp } from './AppContext';
 
 
 function App() {
-  // const [ port, setPort ] = useState(8001)
-  // const [ foundPort, setFoundPort ] = useState(true)
   const [ scenarioData, setScenarioData ] = useState(null);
   const [ scenarios, setScenarios ] = useState({}); 
   const [ appState, setAppState ] = useState(null)
