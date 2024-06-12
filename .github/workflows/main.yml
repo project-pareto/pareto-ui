@@ -57,7 +57,7 @@ jobs:
         run: npm --prefix electron/ui test
 
       - name: run backend server
-        working-directory: ./app
+        working-directory: app/backend
         run: python main.py & sleep 10
 
       - name: run frontend
