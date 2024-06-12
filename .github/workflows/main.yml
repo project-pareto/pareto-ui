@@ -57,7 +57,8 @@ jobs:
         run: npm --prefix electron/ui test
 
       - name: run backend server
-        run: uvicorn --app-dir backend/app python main.py & sleep 10
+        working-directory: ./app
+        run: python main.py & sleep 10
 
       - name: run frontend
         run: npm --prefix electron/ui start & sleep 30

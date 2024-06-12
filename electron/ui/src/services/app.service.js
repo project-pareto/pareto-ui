@@ -1,7 +1,5 @@
 let BACKEND_URL = "http://localhost"
 
-
-
 export const updateScenario = (backend_port, data) => {
     return fetch(BACKEND_URL+':'+backend_port+'/update', {
         method: 'POST', 
