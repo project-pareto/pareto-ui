@@ -13,13 +13,11 @@ import ScenarioList from './views/ScenarioList/ScenarioList';
 import ScenarioCompare from './views/ScenarioCompare/ScenarioCompare';
 import LandingPage from './views/LandingPage/LandingPage';
 import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
-import { updateScenario, updateExcel, fetchScenarios, checkTasks } from './services/app.service'
-import { deleteScenario, copyScenario } from './services/scenariolist.service'
-import { runModel } from './services/homepage.service';
+import { updateScenario, updateExcel, fetchScenarios, checkTasks, deleteScenario, copyScenario, runModel } from './services/app.service'
+import { useApp } from './AppContext';
 
 
 function App() {
-  
   const [ scenarioData, setScenarioData ] = useState(null);
   const [ scenarios, setScenarios ] = useState({}); 
   const [ appState, setAppState ] = useState(null)
@@ -39,6 +37,7 @@ function App() {
   const COMPLETED_STATES = ['Optimized','failure', 'Infeasible']
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
+  const { port } = useApp()
 
   useEffect(()=>{
     /*
@@ -47,12 +46,12 @@ function App() {
       3) if a scenario is a draft, is optimized, or is currently running, leave it as is
       4) if a scenario was running when the app was previously quit, reset it to draft
     */
-    checkTasks()
+    checkTasks(port)
     .then(response => response.json())
     .then((data)=>{
       let tasks = data.tasks
       setBackgroundTasks(tasks)
-      fetchScenarios()
+      fetchScenarios(port)
       .then(response => response.json())
       .then((data)=>{
         // console.log('loaded landing page on try #'+loadLandingPage)
@@ -67,7 +66,7 @@ function App() {
             tempScenarios[key] = scenario
             if (RUNNING_STATES.includes(scenario.results.status) && !tasks.includes(scenario.id)) {
               scenario.results.status = 'Draft'
-              updateScenario({'updatedScenario': {...scenario}})
+              updateScenario(port, {'updatedScenario': {...scenario}})
               .then(response => response.json())
               .then((data) => {
                 console.log('reset scenario')
@@ -101,7 +100,7 @@ useEffect(()=> {
     make api call to get status of each running task
   */
 //  console.log('checking model results')
-  fetchScenarios()
+  fetchScenarios(port)
     .then(response => response.json())
     .then((data)=>{
       let tempScenarios = data.data
@@ -152,7 +151,7 @@ useEffect(()=> {
   const handleCompletedOptimization = (newScenarios, id) => {
     setCheckModelResults(0)
     setScenarios(newScenarios)
-    checkTasks()
+    checkTasks(port)
       .then(response => response.json())
       .then((data)=>{
         setBackgroundTasks(data.tasks)
@@ -193,7 +192,7 @@ useEffect(()=> {
     setSection(0)
     setCategory(null)
     setScenarioIndex(null)
-    fetchScenarios()
+    fetchScenarios(port)
     .then(response => response.json())
     .then((data)=>{
       console.log('setscenarios: ',data.data)
@@ -234,7 +233,7 @@ useEffect(()=> {
     setScenarioData({...updatedScenario})
     // console.log('new scenario: ')
     // console.log({...updatedScenario})
-    updateScenario({'updatedScenario': {...updatedScenario}})
+    updateScenario(port, {'updatedScenario': {...updatedScenario}})
     .then(response => response.json())
     .then((data) => {
       // console.log('updated scenarios on backend')
@@ -267,7 +266,7 @@ useEffect(()=> {
     if (updateScenarioData) {
       setScenarioData(tempScenario)
     }
-    updateScenario({'updatedScenario': tempScenario})
+    updateScenario(port, {'updatedScenario': tempScenario})
     .then(response => response.json())
     .then((data) => {
       // console.log('updated scenarios on backend')
@@ -279,7 +278,7 @@ useEffect(()=> {
 
   const handleDeleteScenario = (index) => {
     // console.log('deleting scenario: ',index)
-    deleteScenario({'id': index})
+    deleteScenario(port, {'id': index})
     .then(response => response.json())
     .then((data) => {
       setScenarios(data.data)
@@ -294,7 +293,7 @@ useEffect(()=> {
     function for updating an input table for excel sheet
   */
   const handleUpdateExcel = (id, tableKey, updatedTable) => {
-    updateExcel({"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
+    updateExcel(port, {"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
     .then(response => response.json())
     .then((data)=>{
       // console.log('return from update excel: ')
@@ -313,7 +312,7 @@ useEffect(()=> {
     fetch scenarios and update frontend data
   */
   const syncScenarioData = () => {
-    fetchScenarios()
+    fetchScenarios(port)
       .then(response => response.json())
       .then((data)=>{
         setScenarios(data.data)
@@ -386,7 +385,7 @@ useEffect(()=> {
   */
   const copyAndRunOptimization = (newScenarioName) => {
     //copy scenario
-    copyScenario(scenarioIndex, newScenarioName)
+    copyScenario(port, scenarioIndex, newScenarioName)
     .then(response => response.json())
     .then((copy_data) => {
       // update data
@@ -397,14 +396,14 @@ useEffect(()=> {
       setScenarioData(copy_data.scenarios[copy_data.new_id])
 
       // run model on new id
-      runModel({"scenario": copy_data.scenarios[copy_data.new_id]})
+      runModel(port, {"scenario": copy_data.scenarios[copy_data.new_id]})
         .then(r =>  r.json().then(data => ({status: r.status, body: data})))
         .then((response) => {
           let responseCode = response.status
           let data = response.body
           if(responseCode === 200) {
             // handleScenarioUpdate(data)
-            updateScenario({'updatedScenario': {...data}})
+            updateScenario(port, {'updatedScenario': {...data}})
             .then(response => response.json())
             .then((updateScenario_data) => {
               // console.log('returned from update scenario call')

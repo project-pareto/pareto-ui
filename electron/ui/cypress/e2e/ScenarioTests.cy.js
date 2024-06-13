@@ -69,7 +69,7 @@ describe('scenario testing', () => {
         sc_count+=1
         cy.intercept({
             method: "POST",
-            url: "http://localhost:8001/**",
+            url: "http://localhost:50011/**",
         }).as("createScenario");
         // cy.findByRole('button', {name: /create scenario/i}).click()
         cy.get('button[id="create-scenario-button"]').click()

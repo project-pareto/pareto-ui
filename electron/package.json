@@ -22,7 +22,7 @@
     "build-frontend-win": "npm --prefix ui run build && npm run move-frontend-build-win || npm run move-frontend-build-win",
     "move-frontend-build-win": "move /Y ui/build build",
     "start-frontend": "npm --prefix ui run start",
-    "start-backend": "cd ../backend/app && uvicorn main:app --reload --host 127.0.0.1 --port 8001",
+    "start-backend": "cd ../backend/app && python main.py -d",
     "build-backend": "cd ../backend/app && pyinstaller -y --clean --distpath ../../electron/py_dist main.spec",
     "build-replace-backend": "npm run remove-previous-backend-build && npm run build-backend || npm run build-backend",
     "build-replace-backend-win": "npm run remove-previous-backend-build-win && npm run build-backend || npm run build-backend",

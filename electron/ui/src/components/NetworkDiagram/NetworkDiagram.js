@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { FileUploader } from "react-drag-drop-files";
 import { fetchDiagram, uploadDiagram, deleteDiagram } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
+import { useApp } from '../../AppContext';
 
 export default function NetworkDiagram(props) {
     const [ file, setFile ] = useState(null)
@@ -13,6 +14,7 @@ export default function NetworkDiagram(props) {
     const [ diagramImage, setDiagramImage ] = useState(null)
     const [ showWarning, setShowWarning ] = useState(false)
     const [ warningMessage, setWarningMessage ] = useState("")
+    const { port } = useApp()
     const styles = {
         fileUploaderBox: {
             border: '2px dashed black',
@@ -41,7 +43,7 @@ export default function NetworkDiagram(props) {
    }
 
     const handleDelete = () => {
-        deleteDiagram(props.type, props.scenario.id)
+        deleteDiagram(port, props.type, props.scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
@@ -61,7 +63,7 @@ export default function NetworkDiagram(props) {
     }
 
     const fetchNetworkDiagram = () => {
-    fetchDiagram(props.type, props.scenario.id)
+    fetchDiagram(port, props.type, props.scenario.id)
     .then(response => {
     if (response.status === 200) {
         response.json()
@@ -88,7 +90,7 @@ export default function NetworkDiagram(props) {
         formData.append('file', file, name);
 
 
-        uploadDiagram(formData, props.type, props.scenario.id)
+        uploadDiagram(port, formData, props.type, props.scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()

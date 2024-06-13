@@ -9,6 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import { FileUploader } from "react-drag-drop-files";
 import { fetchExcelFile } from '../../services/app.service';
+import { useApp } from '../../AppContext';
 
 
 
@@ -25,6 +26,7 @@ export default function FileUploadModal(props) {
     // const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/workshop_baseline_all_data.xlsx"
     const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/workshop_baseline_all_data.xlsx"
     const workshopFileName = "workshop_baseline_all_data_0.9.0.xlsx"
+  const { port } = useApp()
 
 
   useEffect(()=>{
@@ -82,7 +84,7 @@ export default function FileUploadModal(props) {
    }
 
    const handleDownloadWorkshopFile = () => {
-        fetchExcelFile(workshopFileName).then(response => {
+        fetchExcelFile(port, workshopFileName).then(response => {
         if (response.status === 200) {
                 response.blob().then((data)=>{
                 let excelURL = window.URL.createObjectURL(data);

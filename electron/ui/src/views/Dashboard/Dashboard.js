@@ -11,11 +11,8 @@ import Optimization from '../Optimization/Optimization'
 import ModelResults from '../ModelResults/ModelResults'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import PopupModal from '../../components/PopupModal/PopupModal'
-import { runModel } from '../../services/homepage.service'
-
-
-
-
+import { runModel } from '../../services/app.service'
+import { useApp } from '../../AppContext';
 
 export default function Dashboard(props) {
   const scenario = props.scenario
@@ -28,6 +25,7 @@ export default function Dashboard(props) {
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
+  const { port } = useApp()
 
   useEffect(()=>{
     try {
@@ -58,7 +56,7 @@ export default function Dashboard(props) {
    }
 
    const handleRunModel = () => {
-      runModel({"scenario": scenario})
+      runModel(port, {"scenario": scenario})
       .then(r =>  r.json().then(data => ({status: r.status, body: data})))
       .then((response) => {
         let responseCode = response.status
