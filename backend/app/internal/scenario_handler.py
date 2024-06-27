@@ -231,7 +231,7 @@ class ScenarioHandler:
 
         # convert pandas series into lists
         for key in df_sets:
-            df_sets[key] = df_sets[key].tolist()
+            df_sets[key] = df_sets[key].values.tolist()
 
         # create scenario object
         current_day = datetime.date.today()
@@ -321,7 +321,7 @@ class ScenarioHandler:
 
         # convert pandas series into lists
         for key in df_sets:
-            df_sets[key] = df_sets[key].tolist()
+            df_sets[key] = df_sets[key].values.tolist()
 
         scenario = self.get_scenario(id)
         scenario["results"]["status"] = "Draft"

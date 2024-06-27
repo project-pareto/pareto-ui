@@ -40,7 +40,7 @@ def _read_data(_fname, _set_list, _parameter_list):
         header=0,
         index_col=None,
         usecols="A",
-        squeeze=True,
+        # squeeze=True,
         dtype="string",
         keep_default_na=False,
     )
@@ -59,7 +59,7 @@ def _read_data(_fname, _set_list, _parameter_list):
         header=1,
         index_col=None,
         usecols=None,
-        squeeze=True,
+        # squeeze=True,
         keep_default_na=False,
     )
     # A parameter can be defined in column format or table format.
