@@ -65,7 +65,7 @@ pip uninstall -y numpy pandas
 ### 3. Install osx/arm64 versions of numpy and pandas
 
 ```sh
-conda install -y -c conda-forge/osx-arm64 numpy pandas=1.4.0
+conda install -y -c conda-forge/osx-arm64 numpy pandas=2.0.3
 ```
 
 ### 4. Install the IDAES solver dependencies
