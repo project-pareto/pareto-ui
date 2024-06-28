@@ -38,6 +38,11 @@ jobs:
           miniforge-version: latest
           activate-environment: pareto-ui-env
 
+      - name: Add project pareto version to .env file
+        working-directory: ../electron/ui
+        run: |
+            echo REACT_APP_PARETO_VERSION=1.0.0rc1 >> .env
+
       - name: Install correct branch of pareto
         working-directory: ../
         run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .

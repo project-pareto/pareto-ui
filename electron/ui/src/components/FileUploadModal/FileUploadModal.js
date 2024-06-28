@@ -19,13 +19,11 @@ export default function FileUploadModal(props) {
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
     const fileTypes = ["xlsx", "kmz", "kml"];
-    const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_permian_demo.xlsx"
-    // const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/strategic_permian_demo.xlsx"
 
-    // need to create API call to fetch this
-    // const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/workshop_baseline_all_data.xlsx"
-    const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/workshop_baseline_all_data.xlsx"
-    const workshopFileName = "workshop_baseline_all_data_0.9.0.xlsx"
+    const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/strategic_permian_demo.xlsx"
+    const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/workshop_baseline_all_data.xlsx"
+    const workshopFileName = "workshop_baseline_all_data_"+process.env.REACT_APP_PARETO_VERSION+".xlsx"
+    
   const { port } = useApp()
 
 
