@@ -7,6 +7,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { descriptions } from './Descriptions';
+import { advancedOptions } from './AdvancedOptions';
 
 
 export default function Optimization(props) {
@@ -15,6 +16,16 @@ export default function Optimization(props) {
   const columnWidths = [5,7]
   const defaultRuntimes = {"cbc": 900, "gurobi": 180}
   const defaultScaleModel = {"cbc": true, "gurobi": false}
+  const defaults = {
+    scale_model: true,
+    pipeline_capacity: "input",
+    pipeline_cost: "capacity_based",
+    node_capacity: true,
+    infrastructure_timing: "false",
+    subsurface_risk: "false",
+    removal_efficiency_method: "concentration_based",
+    desalination_model: "false"
+  }
   const styles = {
     objectiveSelection: 
       {
@@ -293,119 +304,27 @@ export default function Optimization(props) {
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
 
-          <Box>
-            <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="scale_model"
-                value={props.scenario.optimization.scale_model}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem key={"false"} value={false}>No</MenuItem>
-                <MenuItem key={"true"} value={true}>Yes</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="pipeline_capacity"
-                value={props.scenario.optimization.pipeline_capacity}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem value={"calculated"}>Calculated</MenuItem>
-                <MenuItem value={"input"}>Input</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="pipeline_cost"
-                value={props.scenario.optimization.pipeline_cost}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem value={"distance_based"}>Distance Based</MenuItem>
-                <MenuItem value={"capacity_based"}>Capacity Based</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="node_capacity"
-                value={props.scenario.optimization.node_capacity}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem value={false}>No</MenuItem>
-                <MenuItem value={true}>Yes</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="infrastructure_timing"
-                value={props.scenario.optimization.infrastructure_timing}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem value={"false"}>False</MenuItem>
-                <MenuItem value={"true"}>True</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="subsurface_risk"
-                value={props.scenario.optimization.subsurface_risk}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem value={"false"}>False</MenuItem>
-                <MenuItem value={"exclude_over_and_under_pressured_wells"}>Exclude Over/Under PW</MenuItem>
-                <MenuItem value={"calculate_risk_metrics"}>Calculate Risk Metrics</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="removal_efficiency_method"
-                value={props.scenario.optimization.removal_efficiency_method}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem value={"load_based"}>Load Based</MenuItem>
-                <MenuItem value={"concentration_based"}>Concentration Based</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
-              <Select
-                name="desalination_model"
-                value={props.scenario.optimization.desalination_model}
-                onChange={handleChange}
-                sx={{color:'#0b89b9', fontWeight: "bold"}}
-              >
-                <MenuItem value={"false"}>False</MenuItem>
-                <MenuItem value={"mvc"}>MVC</MenuItem>
-                <MenuItem value={"md"}>MD</MenuItem>
-              </Select>
-              </FormControl>
-            </Box>
+            {/*
+              advanced options:
+            */}
+            {
+              Object.entries(advancedOptions).map(([ key, data ]) => (
+                <Box key={key}>
+                <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+                  <Select
+                    name={key}
+                    value={props.scenario.optimization[key] || data.defaultValue}
+                    onChange={handleChange}
+                    sx={{color:'#0b89b9', fontWeight: "bold"}}
+                  >
+                    {Object.entries(data.options).map(([displayText, optionValue]) => (
+                      <MenuItem key={optionValue} value={optionValue}>{displayText}</MenuItem>
+                    ))}
+                  </Select>
+                  </FormControl>
+                </Box>
+              ))
+            }
           </Collapse>
           </Grid>
         </Grid>
