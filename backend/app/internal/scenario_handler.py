@@ -249,7 +249,7 @@ class ScenarioHandler:
                 {
                     "objective":"cost", 
                     "runtime": 900, 
-                    "pipelineCostCalculation": "distance_based", 
+                    "pipeline_cost": "distance_based", 
                     "waterQuality": "false", 
                     "hydraulics": "false",
                     "solver": "cbc",

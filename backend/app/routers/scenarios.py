@@ -166,7 +166,7 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         modelParameters = {
             "objective": optimizationSettings.get('objective',"cost"),
             "runtime": optimizationSettings.get('runtime',900),
-            "pipeline_cost": optimizationSettings.get("pipeline_cost", "capacity_based"),
+            "pipeline_cost": optimizationSettings.get("pipeline_cost", "distance_based"),
             "pipeline_capacity": optimizationSettings.get("pipeline_capacity", "input"),
             "node_capacity": optimizationSettings.get("node_capacity", True),
             "water_quality": optimizationSettings.get("waterQuality", "false"),
