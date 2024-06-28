@@ -313,7 +313,7 @@ export default function Optimization(props) {
                 <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
                   <Select
                     name={key}
-                    value={props.scenario.optimization[key] || data.defaultValue}
+                    value={[null, undefined].includes(props.scenario.optimization[key]) ? data.defaultValue : props.scenario.optimization[key]}
                     onChange={handleChange}
                     sx={{color:'#0b89b9', fontWeight: "bold"}}
                   >
