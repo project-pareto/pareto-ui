@@ -41,20 +41,20 @@ app.include_router(scenarios.router)
 
 def getPort():
     port = 50011
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    foundOpenPort = False
-    while not foundOpenPort:
-        try:
-            s.bind(("127.0.0.1", port))
-            _log.info(f"found open port: {port}")
-            foundOpenPort = True
-        except socket.error as e:
-            if e.errno == errno.EADDRINUSE:
-                _log.info(f"Port {port} is already in use")
-            else:
-                _log.error(f"Error while trying to connect to port {port}: {e}")
-            port += 1
-    s.close()
+    # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # foundOpenPort = False
+    # while not foundOpenPort:
+    #     try:
+    #         s.bind(("127.0.0.1", port))
+    #         _log.info(f"found open port: {port}")
+    #         foundOpenPort = True
+    #     except socket.error as e:
+    #         if e.errno == errno.EADDRINUSE:
+    #             _log.info(f"Port {port} is already in use")
+    #         else:
+    #             _log.error(f"Error while trying to connect to port {port}: {e}")
+    #         port += 1
+    # s.close()
     return port
 
 if __name__ == '__main__':
