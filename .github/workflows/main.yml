@@ -43,8 +43,8 @@ jobs:
         run: |
             echo REACT_APP_PARETO_VERSION=1.0.0rc1 >> .env
 
-      - name: Install pint
-        run: pip install pint
+      - name: pip freeze
+        run: pip freeze
 
       - name: get idaes extensions
         run: idaes get-extensions
