@@ -27,10 +27,12 @@ export default function Optimization(props) {
       optimizationSettings: 
       {
         m:3, 
-        boxShadow:3
+        boxShadow:3,
+        maxHeight: "70vh",
+        overflow: "scroll"
       },
       gridContainer: {
-        marginBottom: "100px"
+        marginBottom: "100px",
       }, 
       gridItems: {
         marginTop: "5px"
@@ -45,6 +47,12 @@ export default function Optimization(props) {
             opacity: 0.9
         },
       },
+      settingName: {
+        display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'
+      },
+      settingDropdown: {
+        m: 1, width: "25ch"
+      }
   }
 
 
@@ -99,7 +107,7 @@ export default function Optimization(props) {
           </Box>
           </Grid>
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p>
                 Objective Selection
                 <Tooltip title={descriptions.objective} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
@@ -107,7 +115,7 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
+          <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
             <Select
               name="objective"
               value={props.scenario.optimization.objective}
@@ -124,14 +132,14 @@ export default function Optimization(props) {
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p>Solver
               <Tooltip title={descriptions.solver} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
+          <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
             <Select
               name="solver"
               value={props.scenario.optimization.solver}
@@ -145,7 +153,7 @@ export default function Optimization(props) {
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p>Maximum Runtime
               <Tooltip title={descriptions.runtime} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
@@ -168,7 +176,7 @@ export default function Optimization(props) {
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p>Optimality Gap
               <Tooltip title={descriptions.optimalityGap} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
@@ -191,14 +199,14 @@ export default function Optimization(props) {
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p>Water Quality
               <Tooltip title={descriptions.waterQuality} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
+          <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
             <Select
               name="waterQuality"
               value={props.scenario.optimization.waterQuality}
@@ -213,14 +221,14 @@ export default function Optimization(props) {
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p>Hydraulics
               <Tooltip title={descriptions.hydraulics} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
               </p>
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
+          <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
             <Select
               name="hydraulics"
               value={props.scenario.optimization.hydraulics}
@@ -230,12 +238,13 @@ export default function Optimization(props) {
               <MenuItem key={0} value={"false"}>False</MenuItem>
               <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
               <MenuItem key={2} value={"co_optimize"}>Co-Optimize</MenuItem>
+              <MenuItem key={2} value={"co_optimize_linearized"}>Co-Optimize Linearized</MenuItem>
             </Select>
             </FormControl>
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p style={styles.advancedOptions}>
                 Advanced User Options 
                 <IconButton onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>{showAdvancedOptions ? <ExpandLess /> : <ExpandMore />}</IconButton>
@@ -247,26 +256,120 @@ export default function Optimization(props) {
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
-            <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'40px'}}>
+            <Box sx={styles.settingName}>
               <p>Scale Model</p>
               <Tooltip title={descriptions.scaleModel} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            <Box sx={styles.settingName}>
+              <p>Pipeline Capacity</p>
+              <Tooltip title={descriptions.pipelineCapacity} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            <Box sx={styles.settingName}>
+              <p>Pipeline Cost</p>
+              <Tooltip title={descriptions.pipelineCost} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            <Box sx={styles.settingName}>
+              <p>Node Capacity</p>
+              <Tooltip title={descriptions.nodeCapacity} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            <Box sx={styles.settingName}>
+              <p>Removal Efficiency Method</p>
+              <Tooltip title={descriptions.removalEfficiencyMethod} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            <Box sx={styles.settingName}>
+              <p>Desalination Model</p>
+              <Tooltip title={descriptions.desalinationModel} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
             </Box>
             </Collapse>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
-          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
-            <Select
-              name="scale_model"
-              value={props.scenario.optimization.scale_model}
-              onChange={handleChange}
-              sx={{color:'#0b89b9', fontWeight: "bold"}}
-            >
-              <MenuItem key={"false"} value={false}>No</MenuItem>
-              <MenuItem key={"true"} value={true}>Yes</MenuItem>
-            </Select>
-            </FormControl>
-            </Collapse>
+
+          <Box>
+            <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="scale_model"
+                value={props.scenario.optimization.scale_model}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem key={"false"} value={false}>No</MenuItem>
+                <MenuItem key={"true"} value={true}>Yes</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+
+            <Box>
+              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="pipeline_capacity"
+                value={props.scenario.optimization.pipeline_capacity}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem value={"calculated"}>Calculated</MenuItem>
+                <MenuItem value={"input"}>Input</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+
+            <Box>
+              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="pipeline_cost"
+                value={props.scenario.optimization.pipeline_cost}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem value={"distance_based"}>Distance Based</MenuItem>
+                <MenuItem value={"capacity_based"}>Capacity Based</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+
+            <Box>
+              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="node_capacity"
+                value={props.scenario.optimization.node_capacity}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem value={false}>No</MenuItem>
+                <MenuItem value={true}>Yes</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+
+            <Box>
+              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="removal_efficiency_method"
+                value={props.scenario.optimization.removal_efficiency_method}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem value={"load_based"}>Load Based</MenuItem>
+                <MenuItem value={"concentration_based"}>Concentration Based</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+
+            <Box>
+              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="desalination_model"
+                value={props.scenario.optimization.desalination_model}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem value={"false"}>False</MenuItem>
+                <MenuItem value={"mvc"}>MVC</MenuItem>
+                <MenuItem value={"md"}>MD</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+          </Collapse>
           </Grid>
         </Grid>
         <Grid item xs={12} style={styles.gridItems}>
