@@ -9,9 +9,9 @@ idaes_path = str(Path.home() / ".idaes")
 
 if sys.platform == 'darwin':
     extra_data = [
-        (f'{idaes_path}/bin/ipopt_sens', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/cubic_roots.so', 'extensions/.idaes/bin/'), 
+        (f'{idaes_path}/bin/ipopt_sens', 'extensions/.idaes/bin/'),
         (f'{idaes_path}/bin/libstdc++.6.dylib', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/version_lib.txt', 'extensions/.idaes/bin/'), 
-        (f'{idaes_path}/bin/libsipopt.dylib', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/libadolc.2.dylib', 'extensions/.idaes/bin/'), 
+        (f'{idaes_path}/bin/libsipopt.dylib', 'extensions/.idaes/bin/'), 
         (f'{idaes_path}/bin/general_helmholtz_external.so', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/libadolc.dylib', 'extensions/.idaes/bin/'), 
         (f'{idaes_path}/bin/libipopt.3.dylib', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/libadolc.la', 'extensions/.idaes/bin/'), 
         (f'{idaes_path}/bin/ipopt', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/couenne', 'extensions/.idaes/bin/'), 
@@ -27,7 +27,7 @@ if sys.platform == 'darwin':
         (f'{idaes_path}/bin/dot_sens', 'extensions/.idaes/bin/')]
 elif sys.platform == 'linux':
     extra_data = [
-    (f'{idaes_path}/bin/ipopt_sens', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/cubic_roots.so', 'extensions/.idaes/bin/'), 
+    (f'{idaes_path}/bin/ipopt_sens', 'extensions/.idaes/bin/'), 
     (f'{idaes_path}/bin/libadolc.so', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/version_lib.txt', 'extensions/.idaes/bin/'), 
     (f'{idaes_path}/bin/libadolc.so.2', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/libadolc.so.2.2.0', 'extensions/.idaes/bin/'), 
     (f'{idaes_path}/bin/general_helmholtz_external.so', 'extensions/.idaes/bin/'), (f'{idaes_path}/bin/libipopt.so', 'extensions/.idaes/bin/'), 
@@ -59,7 +59,8 @@ a = Analysis(
     'pint', 
     'numbers', 
     'pyutilib', 
-    'pyomo'],
+    'pyomo',
+    'pkg_resources.extern'],
     hookspath=['extra-hooks'],
     hooksconfig={},
     runtime_hooks=[],
