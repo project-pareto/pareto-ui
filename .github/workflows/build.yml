@@ -44,9 +44,13 @@ jobs:
       - name: Get idaes extensions
         run: idaes get-extensions
 
-      - name: Install Pareto locally
+      # - name: Install Pareto locally
+      #   working-directory: ../
+      #   run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+
+      - name: Install correct tag of pareto
         working-directory: ../
-        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && git fetch --all --tags && git checkout tags/1.0.0rc1 -b 1.0.0rc1 && cd project-pareto && pip install --progress-bar off .
 
       - name: Install numpy 1.24.3
         run: |
