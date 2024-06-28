@@ -28,7 +28,7 @@ export default function Optimization(props) {
       {
         m:3, 
         boxShadow:3,
-        maxHeight: "70vh",
+        maxHeight: "74vh",
         overflow: "scroll"
       },
       gridContainer: {
@@ -273,6 +273,14 @@ export default function Optimization(props) {
               <Tooltip title={descriptions.nodeCapacity} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
             </Box>
             <Box sx={styles.settingName}>
+              <p>Infrastructure Timing</p>
+              <Tooltip title={descriptions.infrastructureTiming} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            <Box sx={styles.settingName}>
+              <p>Subsurface Risk</p>
+              <Tooltip title={descriptions.subsurfaceRisk} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+            </Box>
+            <Box sx={styles.settingName}>
               <p>Removal Efficiency Method</p>
               <Tooltip title={descriptions.removalEfficiencyMethod} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
             </Box>
@@ -337,6 +345,35 @@ export default function Optimization(props) {
               >
                 <MenuItem value={false}>No</MenuItem>
                 <MenuItem value={true}>Yes</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+
+            <Box>
+              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="infrastructure_timing"
+                value={props.scenario.optimization.infrastructure_timing}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem value={"false"}>False</MenuItem>
+                <MenuItem value={"true"}>True</MenuItem>
+              </Select>
+              </FormControl>
+            </Box>
+
+            <Box>
+              <FormControl sx={styles.settingDropdown} size="small" disabled={props.disabled}>
+              <Select
+                name="subsurface_risk"
+                value={props.scenario.optimization.subsurface_risk}
+                onChange={handleChange}
+                sx={{color:'#0b89b9', fontWeight: "bold"}}
+              >
+                <MenuItem value={"false"}>False</MenuItem>
+                <MenuItem value={"exclude_over_and_under_pressured_wells"}>Exclude Over/Under PW</MenuItem>
+                <MenuItem value={"calculate_risk_metrics"}>Calculate Risk Metrics</MenuItem>
               </Select>
               </FormControl>
             </Box>
