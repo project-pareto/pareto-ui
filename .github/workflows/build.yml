@@ -50,7 +50,7 @@ jobs:
 
       - name: Install correct tag of pareto
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && git fetch --all --tags && git checkout tags/1.0.0rc1 -b 1.0.0rc1 && cd project-pareto && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/1.0.0rc1 -b 1.0.0rc1 && pip install --progress-bar off .
 
       - name: Install numpy 1.24.3
         run: |
