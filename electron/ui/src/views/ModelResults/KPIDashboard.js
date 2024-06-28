@@ -68,8 +68,6 @@ export default function KPIDashboard(props) {
                 let value = item[3]
                 tempData[key] = {"description": description, "unit": unit, "value": value}
             }
-            console.log("setting kpi data: ")
-            console.log(tempData)
             setKpiData(tempData)
         } catch(e) {
             console.log("error setting kpi data:")
@@ -169,7 +167,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{Math.round(kpiData.reuse_CompletionsDemandKPI?.value)}%</p>
+                <p style={styles.kpiValue}>{Math.round(kpiData.e_CompletionsReusedFrac?.value * 100)}%</p>
                 </Box>
             </Grid>
             </Grid>
