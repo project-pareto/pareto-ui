@@ -35,7 +35,7 @@ _log = logging.getLogger(__name__)
 class ScenarioHandler:
     """Manage the saved scenarios."""
 
-    VERSION = 2
+    VERSION = 3
     SCENARIO_DB_FILE = f"scenarios.json"
     LOCKED = False
 
