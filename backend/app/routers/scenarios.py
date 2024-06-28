@@ -162,19 +162,24 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
     try:
         excel_path = "{}/{}.xlsx".format(scenario_handler.excelsheets_path,data['scenario']['id'])
         output_path = "{}/{}.xlsx".format(scenario_handler.outputs_path,data['scenario']['id'])
+        optimizationSettings = data['scenario']['optimization']
         modelParameters = {
-            "objective": data['scenario']['optimization']['objective'],
-            "runtime": data['scenario']['optimization']['runtime'],
-            "pipelineCost": data['scenario']['optimization']['pipelineCostCalculation'],
-            "waterQuality": data['scenario']['optimization']['waterQuality']
+            "objective": optimizationSettings.get('objective',"cost"),
+            "runtime": optimizationSettings.get('runtime',900),
+            "pipeline_cost": optimizationSettings.get("pipeline_cost", "capacity_based"),
+            "pipeline_capacity": optimizationSettings.get("pipeline_capacity", "input"),
+            "node_capacity": optimizationSettings.get("node_capacity", True),
+            "water_quality": optimizationSettings.get("waterQuality", "false"),
+            "solver": optimizationSettings.get('solver',None),
+            "build_units": optimizationSettings.get('build_units',"user_units"),
+            "optimalityGap": optimizationSettings.get("optimalityGap", 5),
+            "scale_model": optimizationSettings.get("scale_model", True),
+            "hydraulics": optimizationSettings.get('hydraulics',"false"),
+            "removal_efficiency_method": optimizationSettings.get('removal_efficiency_method',"concentration_based"),
+            "desalination_model": optimizationSettings.get("desalination_model", "false"),
+            "infrastructure_timing": optimizationSettings.get("infrastructure_timing", "false"),
+            "subsurface_risk": optimizationSettings.get("subsurface_risk", "false"),
         }
-        defaultParams = {'solver': None, 'build_units': 'user_units', 'optimalityGap': 5, 'scale_model': True, 'hydraulics': 'false'}
-        for param in ['solver', 'build_units', 'optimalityGap', 'scale_model', 'hydraulics']:
-            try:
-                modelParameters[param]=data['scenario']['optimization'][param]
-            except:
-                _log.error(f'unable to find {param}, using {defaultParams[param]}')
-                modelParameters[param]=defaultParams[param]
 
         _log.info(f"modelParameters: {modelParameters}")
 
