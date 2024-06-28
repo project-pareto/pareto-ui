@@ -37,4 +37,36 @@ export const descriptions = {
     scaleModel: <div>
             Choose whether you would like to scale the model or not.
           </div>,
+
+    pipelineCapacity: <div>
+        Alternate pipeline capacity selection:<br/>
+        -input: use input for pipeline capacity<br/>
+        -calculated: calculate pipeline capacity from pipeline diameters</div>,
+    nodeCapacity: <div>
+        Selection to include Node Capacity<br/>
+        -True: Include network node capacity constraints<br/>
+        -False: Exclude network node capacity constraints
+    </div>,
+    infrastructureTiming: <div>
+        Selection to include infrastructure timing<br/>
+        -false: Exclude infrastructure timing from model<br/>
+        -true: Include infrastructure timing in model
+    </div>,
+    subsurfaceRisk: <div>
+        Selection to include subsurface risk<br/>
+        -false: Exclude subsurface risk from model unless the subsurface risk objective function is selected<br/>
+        -Exclude Over/Under PW: Calculate subsurface risk metrics and disallow disposal to overpressured and underpressured wells<br/>
+        -Calculate Risk Metrics: Calculate subsurface risk metrics for the user to view, but don't change the optimization model
+    </div>,
+    removalEfficiencyMethod: <div>
+        Method for calculating removal efficiency<br/>
+        -Load based: use contaminant load (flow times concentration) to calculate removal efficiency<br/>
+        -Concentration based: use contaminant concentration to calculate removal efficiency
+    </div>,
+    desalinationModel: <div>
+        Selection to include Desalination Model<br/>
+        -False: Exclude surrogate constraints for desalination model<br/>
+        -MVC: Include surrogate constraints for MVC (Mechanical Vapor Compressor) desalination model<br/>
+        -MD: Include surrogate constraints for MD (Membrane Distillation) desalination model,
+    </div>,
   }
