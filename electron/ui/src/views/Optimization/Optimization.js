@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from 'react';   
 import { Box, Grid, InputAdornment, Checkbox, FormControlLabel, FormControl, Button } from '@mui/material';
-import { MenuItem, Select, IconButton, Tooltip, Collapse, OutlinedInput } from '@mui/material';
+import { MenuItem, Select, IconButton, Tooltip, Collapse, OutlinedInput, Radio, RadioGroup } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -107,11 +107,20 @@ export default function Optimization(props) {
             </Box>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
-          <FormControl disabled={props.disabled}>
-            <FormControlLabel control={<Checkbox defaultChecked />} label="Minimize Cost" />
-            <FormControlLabel control={<Checkbox />} label="Maximize Reuse" />
-            <FormControlLabel control={<Checkbox />} label="Maximize Profits" />
-          </FormControl>
+          <FormControl sx={{ m: 1, width: "25ch" }} size="small" disabled={props.disabled}>
+            <Select
+              name="objective"
+              value={props.scenario.optimization.objective}
+              onChange={handleChange}
+              sx={{color:'#0b89b9', fontWeight: "bold"}}
+            >
+              <MenuItem value={"cost"}>Minimize Cost</MenuItem>
+              <MenuItem value={"reuse"}>Maximize Reuse</MenuItem>
+              {props.scenario.optimization.desalination_model && <MenuItem value={"cost_surrogate"}>Minimize Cost Surrogate</MenuItem>}
+              <MenuItem value={"subsurface_risk"}>Minimize Subsurface Risk</MenuItem>
+              <MenuItem value={"environmental"}>Minimize Emissions</MenuItem>
+            </Select>
+            </FormControl>
           </Grid>
 
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
