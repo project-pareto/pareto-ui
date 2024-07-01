@@ -22,7 +22,11 @@ from pareto.strategic_water_management.strategic_produced_water_optimization imp
     PipelineCost,
     PipelineCapacity,
     Hydraulics,
-    WaterQuality
+    WaterQuality,
+    RemovalEfficiencyMethod,
+    InfrastructureTiming,
+    SubsurfaceRisk,
+    DesalinationModel
 )
 from pyomo.opt import TerminationCondition
 from pareto.utilities.get_data import get_data
@@ -49,18 +53,23 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
     [df_sets, df_parameters] = get_data(input_file, set_list, parameter_list)
 
     _log.info(f"creating model")
+    default={
+            "objective": Objectives[modelParameters["objective"]],
+            "pipeline_cost": PipelineCost[modelParameters["pipeline_cost"]],
+            "pipeline_capacity": PipelineCapacity[modelParameters["pipeline_capacity"]],
+            "node_capacity": modelParameters["node_capacity"],
+            "water_quality": WaterQuality[modelParameters["water_quality"]],
+            "hydraulics": Hydraulics[modelParameters["hydraulics"]],
+            "removal_efficiency_method": RemovalEfficiencyMethod[modelParameters["removal_efficiency_method"]],
+            "infrastructure_timing": InfrastructureTiming[modelParameters["infrastructure_timing"]],
+            "subsurface_risk": SubsurfaceRisk[modelParameters["subsurface_risk"]],
+            "desalination_model": DesalinationModel[modelParameters["desalination_model"]],
+            # "build_units": BuildUnits[modelParameters["build_units"]]
+    }
     strategic_model = create_model(
         df_sets,
         df_parameters,
-        default={
-            "objective": Objectives[modelParameters["objective"]],
-            "pipeline_cost": PipelineCost[modelParameters["pipelineCost"]],
-            "pipeline_capacity": PipelineCapacity.input,
-            "node_capacity": True,
-            "water_quality": WaterQuality[modelParameters["waterQuality"]],
-            "hydraulics": Hydraulics[modelParameters["hydraulics"]],
-            # "build_units": BuildUnits[modelParameters["build_units"]]
-        },
+        default=default
     )
     
     scenario = scenario_handler.get_scenario(int(id))

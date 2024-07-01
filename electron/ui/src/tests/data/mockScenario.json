@@ -10453,136 +10453,208 @@
                     "Total"
                 ],
                 [
-                    "v_Z",
-                    "Objective function variable [currency]",
-                    "USD",
-                    32945113.999999993
-                ],
-                [
                     "v_F_TotalTrucked",
                     "Total volume water trucked [volume]",
-                    "bbl",
-                    2305354.1
+                    null,
+                    0
                 ],
                 [
                     "v_F_TotalSourced",
-                    "Total volume freshwater sourced [volume]",
+                    "Total volume of externally sourced water [volume]",
                     "bbl",
-                    2068750
+                    761604.99
                 ],
                 [
                     "v_F_TotalDisposed",
                     "Total volume of water disposed [volume]",
                     "bbl",
-                    12577901
+                    1045956.0000000001
                 ],
                 [
                     "v_F_TotalReused",
-                    "Total volume of produced water reused [volume]",
+                    "Total volume of produced water reused at completions [volume]",
                     "bbl",
-                    12286250
+                    1268395
+                ],
+                [
+                    "v_F_TotalBeneficialReuse",
+                    "Total volume of water beneficially reused [volume]",
+                    null,
+                    0
                 ],
                 [
                     "v_C_TotalSourced",
-                    "Total cost of sourcing freshwater [currency]",
+                    "Total cost of externally sourced water [currency]",
                     "USD",
-                    0
+                    1142407.5
                 ],
                 [
                     "v_C_TotalDisposal",
                     "Total cost of injecting produced water [currency]",
                     "USD",
-                    2037493.4
+                    2091912.1
                 ],
                 [
                     "v_C_TotalTreatment",
                     "Total cost of treating produced water [currency]",
                     "USD",
-                    4458289.5
+                    208083.16
                 ],
                 [
                     "v_C_TotalReuse",
                     "Total cost of reusing produced water [currency]",
-                    "USD",
+                    null,
                     0
                 ],
                 [
                     "v_C_TotalPiping",
                     "Total cost of piping produced water [currency]",
                     "USD",
-                    947946.59
+                    1188.2397
                 ],
                 [
                     "v_C_TotalStorage",
                     "Total cost of storing produced water [currency]",
                     "USD",
-                    7202686.399999999
+                    988395.01
                 ],
                 [
                     "v_C_TotalTrucking",
                     "Total cost of trucking produced water [currency]",
-                    "USD",
-                    25327504.999999996
+                    null,
+                    0
+                ],
+                [
+                    "v_C_TotalBeneficialReuse",
+                    "Total processing cost for sending water to beneficial reuse [currency]",
+                    null,
+                    0
                 ],
                 [
                     "v_C_Slack",
                     "Total cost of slack variables [currency]",
-                    "USD",
+                    null,
                     0
                 ],
                 [
                     "v_R_TotalStorage",
                     "Total credit for withdrawing produced water [currency]",
                     "USD",
-                    7130659.5
+                    978511.0599999999
+                ],
+                [
+                    "v_R_TotalBeneficialReuse",
+                    "Total credit for sending water to beneficial reuse [currency]",
+                    null,
+                    0
                 ],
                 [
                     "v_C_DisposalCapEx",
                     "Capital cost of constructing or expanding disposal capacity [currency]",
-                    "USD",
+                    null,
                     0
                 ],
                 [
                     "v_C_PipelineCapEx",
                     "Capital cost of constructing or expanding piping capacity [currency]",
                     "USD",
-                    0
+                    17927700
                 ],
                 [
                     "v_C_StorageCapEx",
                     "Capital cost of constructing or expanding storage capacity [currency]",
-                    "USD",
+                    null,
                     0
                 ],
                 [
                     "v_C_TreatmentCapEx",
                     "Capital cost of constructing or expanding treatment capacity [currency]",
                     "USD",
-                    1000000
+                    3750000
                 ],
                 [
-                    "reuse_WaterKPI",
-                    "Reuse Fraction Produced Water [%]",
-                    null,
-                    58.656710873601604
+                    "v_Z",
+                    "Objective function variable - minimize cost [currency]",
+                    "USD",
+                    5661396.6
                 ],
                 [
-                    "disposal_WaterKPI",
-                    "Disposal Fraction Produced Water [%]",
+                    "v_Z_Reuse",
+                    "Objective function variable - maximize reuse [dimensionless]",
                     null,
-                    60.04910386438372
+                    0.53600832
                 ],
                 [
-                    "fresh_CompletionsDemandKPI",
-                    "Fresh Fraction Completions Demand [%]",
-                    null,
-                    14.41135492859631
+                    "e_TotalEmissions",
+                    "Total emissions [mass]",
+                    "g",
+                    5148350261.2019825
                 ],
                 [
-                    "reuse_CompletionsDemandKPI",
-                    "Reuse Fraction Completions Demand [%]",
+                    "e_DisposalFraction",
+                    "Fraction of produced and flowback water that is disposed [fraction]",
                     null,
-                    85.5886450714037
+                    0.4420083012587404
+                ],
+                [
+                    "e_TotalCompletionsDeliveries",
+                    "Total deliveries to completions pads to meet completions demand [volume]",
+                    "bbl",
+                    2029999.9999999998
+                ],
+                [
+                    "e_CompletionsSourcedFrac",
+                    "Fraction of completions deliveries using externally sourced water [fraction]",
+                    null,
+                    0.3751748719211823
+                ],
+                [
+                    "e_CompletionsReusedFrac",
+                    "Fraction of completions deliveries using reused water [fraction]",
+                    null,
+                    0.6248251231527094
+                ],
+                [
+                    "e_TotalResidualWater",
+                    "Total residual water from treatment sites [volume]",
+                    "bbl",
+                    52020.78949999999
+                ],
+                [
+                    "e_TotalResidualDesalinationWater",
+                    "Total residual water from desalination treatment sites [volume]",
+                    null,
+                    0
+                ],
+                [
+                    "e_TotalResidualNonDesalWater",
+                    "Total residual water from non-desalination treatment sites [volume]",
+                    "bbl",
+                    52020.78949999999
+                ],
+                [
+                    "e_TotalReused",
+                    "Total water reused to meet completions demand [volume]",
+                    "bbl",
+                    1268394.9999999998
+                ],
+                [
+                    "e_TotalReusedInternal",
+                    "Total water reused to meet completions demand internal to system [volume]",
+                    "bbl",
+                    988394.9999999998
+                ],
+                [
+                    "e_TotalReusedExternal",
+                    "Total water reused to meet completions demand external to system [volume]",
+                    "bbl",
+                    280000
+                ],
+                [
+                    "e_TotalEvaporated",
+                    "Total water evaporated [volume]",
+                    null,
+                    0
                 ]
             ],
             "v_F_Piped_dict": [

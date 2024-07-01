@@ -133,5 +133,19 @@
     "StorageExpansionLeadTime": "Storage Expansion",
     "PipelineExpansionLeadTime_Dist": "Pipeline Expansion Distance Based", 
     "PipelineExpansionLeadTime_Capac": "Pipeline Expansion Capacity Based",
-    "Solver_Stats_dict": "Solver Stats"
+    "Solver_Stats_dict": "Solver Stats",
+    "e_TotalTruckingEmissions_dict": "Trucking Emissions",
+    "e_TotalPipeOperationsEmissions_dict": "Pipe Operation Emissions",
+    "e_TotalPipeInstallEmissions_dict": "Pipe Installation Emissions",
+    "e_TotalDisposalEmissions_dict": "Disposal Emissions",
+    "e_TotalStorageEmissions_dict": "Storage Emissions",
+    "e_TotalTreatmentEmissions_dict": "Treatment Emissions",
+    "e_TotalEmissionsByComponent_dict": "Emissions by Component",
+    "e_TotalPW_dict": "Total Produced Water",
+    "e_MaxPWCapacity_dict": "Produced Water Capacity",
+    "e_TimePeriodDemand_dict": "Demand Over Time",
+    "e_WaterAvailable_dict": "Available Water",
+    "e_capacity_check_dict": "Capacity Check",
+    "e_demand_check_dict": "Demand Check"
+
 }
