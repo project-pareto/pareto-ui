@@ -41,7 +41,7 @@ jobs:
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
         run: |
-            echo REACT_APP_PARETO_VERSION=1.0.0 >> .env
+            echo REACT_APP_PARETO_VERSION=1.0.0rc1 >> .env
 
       # - name: Install pint
       #   run: pip install pint==0.23

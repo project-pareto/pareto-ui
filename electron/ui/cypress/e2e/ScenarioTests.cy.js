@@ -4,7 +4,7 @@ describe('scenario testing', () => {
         start with 10 because starting with 0 would stop working when it hits 10
     */
     let strategic_toy_case_study_url = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_toy_case_study.xlsx"
-    let workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/1.0.0/pareto/case_studies/workshop_baseline_all_data.xlsx"
+    let workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/workshop_baseline_all_data.xlsx"
     let sc_count = 10
     it('test that scenario list loads properly', () => {
         //load webpage
