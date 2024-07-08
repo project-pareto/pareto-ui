@@ -3,8 +3,8 @@ export const advancedOptions = {
         displayName: "Scale Model",
         defaultValue: true,
         options: {
-            "No": false,
-            "Yes": true
+            "True": true,
+            "False": false
         }
     },
     pipeline_capacity: {
@@ -19,24 +19,24 @@ export const advancedOptions = {
         displayName: "Pipeline Capacity",
         defaultValue: "distance_based",
         options: {
-            "Distance Based": "distance_based",
-            "Capacity Based": "capacity_based"
+            "Distance-based": "distance_based",
+            "Capacity-based": "capacity_based"
         }
     },
     node_capacity: {
         displayName: "Node Capacity",
         defaultValue: true,
         options: {
-            "No": false,
-            "Yes": true
+            "True": true,
+            "False": false
         }
     },
     infrastructure_timing: {
         displayName: "Infrastructure Timing",
         defaultValue: "false",
         options: {
-            "False": "false",
-            "True": "true"
+            "True": "true",
+            "False": "false"
         }
     },
     subsurface_risk: {
@@ -58,7 +58,7 @@ export const advancedOptions = {
         }
     },
     desalination_model: {
-        displayName: "Desalination Model",
+        displayName: "Desalination Surrogate Model",
         defaultValue: "false",
         options: {
             "False": "false",

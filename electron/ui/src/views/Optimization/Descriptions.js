@@ -1,13 +1,13 @@
 export const descriptions = {
-    objective: <div>Select what you would like to solve for.</div>,
+    objective: <div>Select what you would like to minimize or maximize.</div>,
     runtime:  <div> 
                   This setting limits the runtime for the solver to find a solution. 
                   Note that this time does not include time to build the model and process output.
               </div>,
     pipelineCost: <div>
                         There are two ways pipeline capacity expansion costs can be calculated:<br/>
-                        -Distance based:  Uses pipeline distance, diameter and  $/inch-mile rate<br/>
-                        -Capacity based: Uses pipeline capacity and $/bbl rate
+                        -Distance-based:  Uses pipeline distance, diameter and  $/inch-mile rate<br/>
+                        -Capacity-based: Uses pipeline capacity and $/bbl rate
                   </div>,
     optimalityGap: <div>
                   Measure of optimality guaranteed 
@@ -16,45 +16,44 @@ export const descriptions = {
                   Please note that runtime limits may supersede the optimality gap settings.
             </div>,
     waterQuality: <div>
-                      PARETO can also consider water quality in the model, select how you would like to include it in the model:<br/>
+                      PARETO can consider water quality in the model; select if/how you would like to include it:<br/>
                       -False: Model does not consider water quality.<br/>
-                      -Post Process: Calculates the water quality after optimization. The model cannot impose quality restrictions.<br/>
+                      -Post Process: Calculate the water quality after optimization. The model cannot impose quality restrictions.<br/>
                       -Discrete: Utilize a discrete model to incorporate water quality into decisions. This model can impose quality restrictions. For example, a maximum TDS allowed at a treatment facility.
                   </div>,
     hydraulics: <div>
                   PARETO's hydraulics module allows the user to determine pumping needs and compute pressures at every node in the network while considering maximum allowable operating pressure (MAOP) constraints. Select how you would like to include it in the model:<br/>
                   -False: This option allows the user to skip the hydraulics computations in the PARETO model.<br/>
-                  -Post Process: PARETO first solves for optimal flows and network design. Afterwards, the hydraulics block containing constraints for pressure balances and losses is solved.<br/>
-                  -Co-Optimize: In this method, the hydraulics model block is solved together with the produced water flow and network design. Note: The co-optimize model as currently implemented requires the following MINLP solvers: SCIP and BARON.
+                  -Post-process: PARETO first solves for optimal flows and network design. Afterwards, the hydraulics block containing constraints for pressure balances and losses is solved.<br/>
+                  -Co-optimize: In this method, the hydraulics model block is solved together with the produced water flow and network design. Note: The co-optimize model as currently implemented requires the following MINLP solvers: SCIP and BARON.<br/>
+                  -Co-optimize linearized: A linearized approximation of the co-optimize method.
               </div>,
     solver: <div>
               Select the solver you would like to use. Note: Gurobi requires a license. 
               If you do not have a Gurobi licence, select "CBC", an open source solver.
             </div>,
-    units: <div>
-            Choose whether you would like to build the model with scaled units or user units.
-          </div>,
     scaleModel: <div>
             Choose whether you would like to scale the model or not.
           </div>,
 
     pipelineCapacity: <div>
         Alternate pipeline capacity selection:<br/>
-        -input: use input for pipeline capacity<br/>
-        -calculated: calculate pipeline capacity from pipeline diameters</div>,
+        -Input: use input for pipeline capacity<br/>
+        -Calculated: calculate pipeline capacity from pipeline diameters</div>,
     nodeCapacity: <div>
-        Selection to include Node Capacity<br/>
+        Selection to include Node Capacity:<br/>
         -True: Include network node capacity constraints<br/>
         -False: Exclude network node capacity constraints
     </div>,
     infrastructureTiming: <div>
-        Selection to include infrastructure timing<br/>
-        -false: Exclude infrastructure timing from model<br/>
-        -true: Include infrastructure timing in model
+        Selection to include infrastructure timing:<br/>
+        -True: Include infrastructure timing in model<br/>
+        -False: Exclude infrastructure timing from model<br/>
+        Note that infrastructure timing calculations are performed post-optimization.
     </div>,
     subsurfaceRisk: <div>
         Selection to include subsurface risk<br/>
-        -false: Exclude subsurface risk from model unless the subsurface risk objective function is selected<br/>
+        -False: Exclude subsurface risk from model unless the subsurface risk objective function is selected<br/>
         -Exclude Over/Under PW: Calculate subsurface risk metrics and disallow disposal to overpressured and underpressured wells<br/>
         -Calculate Risk Metrics: Calculate subsurface risk metrics for the user to view, but don't change the optimization model
     </div>,
@@ -64,9 +63,9 @@ export const descriptions = {
         -Concentration based: use contaminant concentration to calculate removal efficiency
     </div>,
     desalinationModel: <div>
-        Selection to include Desalination Model<br/>
-        -False: Exclude surrogate constraints for desalination model<br/>
-        -MVC: Include surrogate constraints for MVC (Mechanical Vapor Compressor) desalination model<br/>
-        -MD: Include surrogate constraints for MD (Membrane Distillation) desalination model,
+        Selection to include surrogate model for desalination:<br/>
+        -False: Do not use surrogate model for desalination<br/>
+        -MVC: Use MVC (Mechanical Vapor Compressor) surrogate model<br/>
+        -MD: Use MD (Membrane Distillation) surrogate model
     </div>,
   }
