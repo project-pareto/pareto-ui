@@ -3,9 +3,8 @@ describe('scenario testing', () => {
         use sc_count for screenshot names to ensure they are saved in chronological order
         start with 10 because starting with 0 would stop working when it hits 10
     */
-    // let strategic_small_case_study_url = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_small_case_study.xlsx"
     let strategic_toy_case_study_url = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/strategic_toy_case_study.xlsx"
-    // let strategic_toy_case_study_url = "https://github.com/project-pareto/project-pareto/raw/0.9_rel/pareto/case_studies/strategic_toy_case_study.xlsx"
+    let workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/main/pareto/case_studies/workshop_baseline_all_data.xlsx"
     let sc_count = 10
     it('test that scenario list loads properly', () => {
         //load webpage
@@ -31,7 +30,7 @@ describe('scenario testing', () => {
     })
 
     it('download strategic toy case study', () => {
-        cy.downloadFile(strategic_toy_case_study_url,'cypress/downloads','strategic_toy_case_study.xlsx')
+        cy.downloadFile(workshopFileUrl,'cypress/downloads','strategic_toy_case_study.xlsx')
     })
 
     it('creates a new scenario by uploading excel sheet', () => {

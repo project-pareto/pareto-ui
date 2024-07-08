@@ -35,7 +35,7 @@ _log = logging.getLogger(__name__)
 class ScenarioHandler:
     """Manage the saved scenarios."""
 
-    VERSION = 2
+    VERSION = 3
     SCENARIO_DB_FILE = f"scenarios.json"
     LOCKED = False
 
@@ -231,7 +231,7 @@ class ScenarioHandler:
 
         # convert pandas series into lists
         for key in df_sets:
-            df_sets[key] = df_sets[key].tolist()
+            df_sets[key] = df_sets[key].values.tolist()
 
         # create scenario object
         current_day = datetime.date.today()
@@ -249,7 +249,7 @@ class ScenarioHandler:
                 {
                     "objective":"cost", 
                     "runtime": 900, 
-                    "pipelineCostCalculation": "distance_based", 
+                    "pipeline_cost": "distance_based", 
                     "waterQuality": "false", 
                     "hydraulics": "false",
                     "solver": "cbc",
@@ -321,7 +321,7 @@ class ScenarioHandler:
 
         # convert pandas series into lists
         for key in df_sets:
-            df_sets[key] = df_sets[key].tolist()
+            df_sets[key] = df_sets[key].values.tolist()
 
         scenario = self.get_scenario(id)
         scenario["results"]["status"] = "Draft"

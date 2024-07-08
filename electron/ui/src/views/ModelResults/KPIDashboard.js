@@ -17,46 +17,63 @@ export default function KPIDashboard(props) {
     const isAllNodesSelected = totalSet.length > 0 && totalSet.length === filterSet.length;
 
     useEffect(()=>{
-        // set data for water quality drop down filters
-        let tempWaterQualityData = [props.waterQualityData[0]]
-        for (var index = 1; index < props.waterQualityData.length; index++) {
-            let item = props.waterQualityData[index]
-            let nodeType = item[1]
-            if (filterSet.includes(nodeType)) tempWaterQualityData.push(item)
+        try {
+            // set data for water quality drop down filters
+            let tempWaterQualityData = [props.waterQualityData[0]]
+            for (var index = 1; index < props.waterQualityData.length; index++) {
+                let item = props.waterQualityData[index]
+                let nodeType = item[1]
+                if (filterSet.includes(nodeType)) tempWaterQualityData.push(item)
+            }
+            setWaterQualityData(tempWaterQualityData)
+        } catch (e) {
+            console.log("error setting water quality data")
+            console.log(e)
         }
-        setWaterQualityData(tempWaterQualityData)
+
     }, [filterSet]);
 
     useEffect(()=>{
-        let tempNodes = new Set()
-        let tempRowFilteredNodes = {}
-        
-        for (var index = 1; index < props.waterQualityData.length; index++) {
-            let item = props.waterQualityData[index]
-            let nodeType = item[1]
-            tempNodes.add(nodeType)
-            tempRowFilteredNodes[nodeType] = true
+        try {
+            let tempNodes = new Set()
+            let tempRowFilteredNodes = {}
+            
+            for (var index = 1; index < props.waterQualityData.length; index++) {
+                let item = props.waterQualityData[index]
+                let nodeType = item[1]
+                tempNodes.add(nodeType)
+                tempRowFilteredNodes[nodeType] = true
+            }
+            tempNodes = Array.from(tempNodes)
+            setTotalSet(tempNodes)
+            setFilterSet(tempNodes)
+            setFilteredNodes(tempRowFilteredNodes)
+        } catch(e) {
+            console.log("error setting filtered nodes: ")
+            console.log(e)
         }
-        tempNodes = Array.from(tempNodes)
-        setTotalSet(tempNodes)
-        setFilterSet(tempNodes)
-        setFilteredNodes(tempRowFilteredNodes)
+        
 
     }, [props.waterQualityData]);
 
     useEffect(()=>{
-        let tempData = {}
-        // organize results dict data
-        for (var index in props.overviewData) {
-            let item = props.overviewData[index]
-            let key = item[0]
-            let description = item[1]
-            let unit = item[2]
-            let value = item[3]
-            tempData[key] = {"description": description, "unit": unit, "value": value}
+        try {
+            let tempData = {}
+            // organize results dict data
+            for (var index in props.overviewData) {
+                let item = props.overviewData[index]
+                let key = item[0]
+                let description = item[1]
+                let unit = item[2]
+                let value = item[3]
+                tempData[key] = {"description": description, "unit": unit, "value": value}
+            }
+            setKpiData(tempData)
+        } catch(e) {
+            console.log("error setting kpi data:")
+            console.log(e)
         }
 
-        setKpiData(tempData)
     }, [props]);
 
     const styles = {
@@ -150,7 +167,7 @@ export default function KPIDashboard(props) {
             </Grid>
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <p style={styles.kpiValue}>{Math.round(kpiData.reuse_CompletionsDemandKPI.value)}%</p>
+                <p style={styles.kpiValue}>{Math.round(kpiData.e_CompletionsReusedFrac?.value * 100)}%</p>
                 </Box>
             </Grid>
             </Grid>

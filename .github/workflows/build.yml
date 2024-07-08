@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "jan-release"
+      - "1.0rc0"
 
 defaults:
   run:
@@ -30,22 +30,33 @@ jobs:
         run: |
           dotnet tool install --global AzureSignTool
 
+      - name: Add project pareto version to .env file
+        working-directory: ./electron/ui
+        run: |
+            echo REACT_APP_PARETO_VERSION=1.0.0rc1 >> .env
+
       - name: Install Electron JS dependencies
         run: |
           npm --prefix electron clean-install
       - name: Install frontend JS dependencies
         run: |
           npm --prefix electron/ui clean-install
+
       - name: Get idaes extensions
         run: idaes get-extensions
 
-      - name: Install Pareto locally
-        working-directory: ../
-        run: git clone https://github.com/MichaelPesce/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+      # - name: Install correct tag of pareto
+      #   working-directory: ../
+      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/1.0.0 -b 1.0.0 && pip install --progress-bar off .
 
-      - name: Install numpy 1.24.3
+      - name: Install correct branch of pareto
+        working-directory: ../
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+
+      - name: Install build requirements
+        working-directory: ./backend
         run: |
-          pip uninstall -y numpy && pip install numpy==1.24.3
+          pip install -r requirements-build.txt
 
       - name: Build Backend
         run: npm --prefix electron run build-backend
@@ -58,7 +69,7 @@ jobs:
 
       - name: Sign Windows Distribution
         run: |
-          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-24.01.24-win64.exe
+          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-24.07.01-win64.exe
 
       - name: Upload artifact for windows build
         uses: actions/upload-artifact@v4
@@ -66,4 +77,4 @@ jobs:
         with:
             name: windows-pareto-dist
             path: |
-              electron/dist/ParetoUI-24.01.24-win64.exe
+              electron/dist/ParetoUI-24.07.01-win64.exe
