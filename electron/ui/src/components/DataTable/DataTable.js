@@ -48,6 +48,14 @@ export default function DataTable(props) {
     },
   }
 
+  const roundKPI = (value) => {
+      if (isNaN(value)) return value
+      else if (value >= 1000) return value.toLocaleString('en-US', {maximumFractionDigits:0})
+      else if (value >= 100) return value.toLocaleString('en-US', {maximumFractionDigits:1})
+      else if (value >= 10) return value.toLocaleString('en-US', {maximumFractionDigits:2})
+      else return value.toLocaleString('en-US', {maximumFractionDigits:3})
+  }
+
    const handleChangeValue = (event) => {
     let inds = event.target.getAttribute('name').split(":")
     //ind[0] is the index inside the array
@@ -286,7 +294,8 @@ const renderOutputTable = () => {
                   key={"" + index + i} 
                   style={i === 0 ? styles.firstCol : styles.other}>
                     {(i === (value.length - 1)) ? 
-                    cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : 
+                    // cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : 
+                    roundKPI(cellValue) : 
                     cellValue ? CategoryNames[cellValue] ? CategoryNames[cellValue] :
                     cellValue.replace('v_F_','')
                              .replace('e_','')
