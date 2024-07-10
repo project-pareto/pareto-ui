@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "1.0.0"
+      - "main"
 
 defaults:
   run:
