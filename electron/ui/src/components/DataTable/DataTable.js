@@ -294,7 +294,6 @@ const renderOutputTable = () => {
                   key={"" + index + i} 
                   style={i === 0 ? styles.firstCol : styles.other}>
                     {(i === (value.length - 1)) ? 
-                    // cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : 
                     roundKPI(cellValue) : 
                     cellValue ? CategoryNames[cellValue] ? CategoryNames[cellValue] :
                     cellValue.replace('v_F_','')
