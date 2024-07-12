@@ -10,40 +10,112 @@
 # in the Software to reproduce, distribute copies to the public, prepare derivative works, and perform
 # publicly and display publicly, and to permit other to do so.
 #####################################################################################################
-"""
-Module to read in input data from Excel spreadsheets and convert it into the
-format that Pyomo requires
 
-Authors: PARETO Team (Andres J. Calderon, Markus G. Drouven)
-"""
-
-from operator import index
+import warnings
 import pandas as pd
-import requests
 import numpy as np
+from pareto.utilities.get_data import (
+    set_tabs_operational_model,
+    set_tabs_strategic_model,
+    set_tabs_all_models,
+    parameter_tabs_operational_model,
+    parameter_tabs_strategic_model,
+    parameter_tabs_critical_mineral_model,
+    parameter_tabs_all_models,
+    get_valid_input_set_tab_names,
+    get_valid_input_parameter_tab_names,
+    _sheets_to_dfs,
+    _cleanup_data,
+    _df_to_param
+)
 
 
-def _read_data(_fname, _set_list, _parameter_list):
+
+try:
+    _dataframe_map = pd.DataFrame.map
+except AttributeError:
+    # compatibility with pandas 2.0.x
+    _dataframe_map = pd.DataFrame.applymap
+
+try:
+    pd.set_option("future.no_silent_downcasting", True)
+except pd.errors.OptionError:
+    # future.no_silent_downcasting not available for pandas 2.0,
+    # which is the latest available for Python 3.8
+    pass
+
+
+def _read_data(_fname, _set_list, _parameter_list, _model_type="strategic", raises: bool = True,):
     """
     This methods uses Pandas methods to read from an Excel spreadsheet and output a data frame
     Two data frames are created, one that contains all the Sets: _df_sets, and another one that
     contains all the parameters in raw format: _df_parameters
     """
     frontend_parameters = {}
+    pareto_input_set_tab_names = get_valid_input_set_tab_names(_model_type)
+    pareto_input_parameter_tab_names = get_valid_input_parameter_tab_names(_model_type)
+
+    if _set_list is not None:
+        _set_list = list(_set_list)
+        valid_set_tab_names = pareto_input_set_tab_names.copy()
+        valid_set_tab_names.extend(_set_list)
+        # De-duplicate
+        valid_set_tab_names = list(set(valid_set_tab_names))
+    else:
+        valid_set_tab_names = pareto_input_set_tab_names
+    if _parameter_list is not None:
+        _parameter_list = list(_parameter_list)
+        valid_parameter_tab_names = pareto_input_parameter_tab_names.copy()
+        valid_parameter_tab_names.extend(_parameter_list)
+        # De-duplicate
+        valid_parameter_tab_names = list(set(valid_parameter_tab_names))
+    else:
+        valid_parameter_tab_names = pareto_input_parameter_tab_names
+
+    # Check all names available in the input sheet
+    # If the sheet name is unused (not a valid Set or Parameter tab, not "Overview", and not "Schematic"), raise a warning.
+    unused_tab_list = []
+    df = pd.ExcelFile(_fname)
+    sheet_list = df.sheet_names
+    for name in sheet_list:
+        if (
+            name not in valid_set_tab_names
+            and name not in valid_parameter_tab_names
+            and name != "Overview"
+            and name != "Schematic"
+        ):
+            unused_tab_list.append(name)
+
+    if len(unused_tab_list) > 0:
+        warning_message = (
+            f"Invalid PARETO input has been provided. Check that the input tab names match valid PARETO input. If you'd like to read custom tabs (e.g., PARETO output files), please pass a list of the custom tab names to get_data(). The following tabs are not standard PARETO inputs for the selected model type: "
+            + str(unused_tab_list)
+        )
+        warnings.warn(
+            warning_message,
+            UserWarning,
+            stacklevel=3,
+        )
+    _df_sets = {}
     _df_parameters = {}
-    _temp_df_parameters = {}
     _data_column = ["value"]
     proprietary_data = False
-    _df_sets = pd.read_excel(
+    # Read all tabs in the input file
+    _df_sets = _sheets_to_dfs(
         _fname,
-        sheet_name=_set_list,
+        raises=raises,
         header=0,
         index_col=None,
         usecols="A",
-        # squeeze=True,
         dtype="string",
         keep_default_na=False,
     )
+
+    # Filter for sets - remove tabs that are not specified as sets by user and
+    # are not valid PARETO inputs
+    _df_sets = {
+        key: value for key, value in _df_sets.items() if key in valid_set_tab_names
+    }
 
     # Cleaning Sets. Checking for empty entries, and entries with the keyword: PROPRIETARY DATA
     for df in _df_sets:
@@ -53,33 +125,41 @@ def _read_data(_fname, _set_list, _parameter_list):
         _df_sets[df].replace("", np.nan, inplace=True)
         _df_sets[df].dropna(inplace=True)
 
-    _df_parameters = pd.read_excel(
+    _df_parameters = _sheets_to_dfs(
         _fname,
-        sheet_name=_parameter_list,
+        raises=raises,
         header=1,
         index_col=None,
         usecols=None,
-        # squeeze=True,
         keep_default_na=False,
     )
+
+    # Remove tabs that are not specified by user and are not valid PARETO inputs
+    _df_parameters = {
+        key: value
+        for key, value in _df_parameters.items()
+        if key in valid_parameter_tab_names
+    }
+
+    # Cleaning Parameters.
     # A parameter can be defined in column format or table format.
     # Detect if columns which will be used to reshape the dataframe by defining
     # what columns are Sets or generic words
-    # If _set_list is empty, it is assummed that a parameter is column format is being read.
-    # and _set_list is created based on the DataFrame column names, except for the last name,
-    # which is used as the data column name.
-    if len(_set_list) == 0:
+
+    # If _model_type is "none" and _df_sets is empty, it is assumed that a parameter in column format is being read.
+    # _df_sets is created based on the DataFrame column names, except for the last name,
+    # which is used as the data column name. See test_plot_scatter.py for an example of this use case.
+    if len(_df_sets.keys()) == 0:
         for i in _df_parameters:
-            _set_list.extend(list(_df_parameters[i].columns)[:-1])
+            valid_set_tab_names.extend(list(_df_parameters[i].columns)[:-1])
             _data_column.append(list(_df_parameters[i].columns)[-1])
 
-    _set_list = list(set(_set_list))
+    valid_set_tab_names = list(set(valid_set_tab_names))
     _data_column = list(set(_data_column))
     generic_words = ["index", "nodes", "time", "pads", "quantity"]
     remove_columns = ["unnamed", "proprietary data"]
     keyword_strings = ["PROPRIETARY DATA", "proprietary data", "Proprietary Data"]
     for i in _df_parameters:
-        
         if proprietary_data is False:
             proprietary_data = any(
                 x in _df_parameters[i].values.astype(str) for x in keyword_strings
@@ -98,8 +178,8 @@ def _read_data(_fname, _set_list, _parameter_list):
             to_replace=[r"\\t|\\n|\\r", "\t|\n|\r"], value="", regex=True, inplace=True
         )
         # Removing whitespaces
-        _df_parameters[i] = _df_parameters[i].applymap(
-            lambda x: x.strip() if isinstance(x, str) else x
+        _df_parameters[i] = _dataframe_map(
+            _df_parameters[i], lambda x: x.strip() if isinstance(x, str) else x
         )
         # Removing all the columns that contain only empty strings
         # _df_parameters[i] = _df_parameters[i][_df_parameters[i].columns[~_df_parameters[i].eq('').all(0)]]
@@ -118,9 +198,9 @@ def _read_data(_fname, _set_list, _parameter_list):
         index_col = []
         for j in _df_parameters[i].columns:
             # If a column name is in the set_list or in the list of keywords, it is assumed the column is an index and saved in index_col
-            if str(j).split(".")[0].lower() in [s.lower() for s in _set_list] or any(
-                x in str(j).lower() for x in generic_words
-            ):
+            if str(j).split(".")[0].lower() in [
+                s.lower() for s in valid_set_tab_names
+            ] or any(x in str(j).lower() for x in generic_words):
                 index_col.append(j)
 
         # If the number of index_col is equal to the total columns of the dataframe
@@ -141,50 +221,14 @@ def _read_data(_fname, _set_list, _parameter_list):
     return [_df_sets, _df_parameters, _data_column, frontend_parameters]
 
 
-def _cleanup_data(_df_parameters):
-    """
-    This method does two things:
-    1) It replaces empty strings cells with a Numpy nan
-    2) It formats the headers and column names as strings
-    """
-    for i in _df_parameters:
-        _df_parameters[i].replace("", np.nan, inplace=True)
-        _df_parameters[i].columns = _df_parameters[i].columns.astype(str)
-
-    return _df_parameters
-
-
-def _df_to_param(data_frame, data_column):
-    """
-    This module converts the data frame that contains Parameters into the adequate
-    format that Pyomo expects for paramerters:
-    Input_parameter = {(column_index, row_header): value}
-    """
-    _df_parameters = {}
-    _temp_df_parameters = {}
-    for i in data_frame:
-
-        # If the data frame is empty, that is, no input data was provided in the Excel
-        # file then an empty parameter is created:
-        if data_frame[i].empty:
-            _df_parameters[i] = data_frame[i].to_dict()
-        # If the data frame has one column named "value", it means the dataframe corresponds to
-        # a parameter in column format. In this case, the dataframe is converted directly
-        # to a dictionary and the column name is used as the key of said dictionary
-        elif str(data_frame[i].columns[0]).split(".")[0].lower() in [
-            i.lower() for i in data_column
-        ]:
-            data_column_key = data_frame[i].columns[0]
-            _temp_df_parameters[i] = data_frame[i].to_dict()
-            _df_parameters[i] = _temp_df_parameters[i][data_column_key]
-
-        else:
-            _df_parameters[i] = data_frame[i].stack().to_dict()
-
-    return _df_parameters
-
-
-def get_data(fname, set_list, parameter_list):
+def get_data(
+  fname,
+  set_list=None,
+  parameter_list=None,
+  model_type="strategic",
+  sum_repeated_indexes=False,
+  raises: bool = False,
+):
     """
     This method uses Pandas methods to read data for Sets and Parameters from excel spreadsheets.
     - Sets are assumed to not have neither a header nor an index column. In addition, the data
@@ -194,10 +238,18 @@ def get_data(fname, set_list, parameter_list):
       The header should start in row 2, and the index column should start in cell A3.
       Column format: Does not require a header. Each set should be placed in one column,
       starting from column A and row 3. Data should be provided in the last column.
+    - set_list and parameter_list are optional parameters. When they are not given, tabs with
+      valid PARETO labels are read. Otherwise, the specified tabs in set_list and
+      parameter_list are read in addition to valid PARETO input tabs.
+    - model_type is an additional optional parameter which indicates why type of model data is being read for.
+      Valid inputs: 'strategic', 'operational', 'critical_mineral', 'none'. The default is 'strategic'.
+
+    By default, errors encountered while performing data pre-processing are collected and displayed as warnings.
+    If ``raises=True``, an exception will be raised instead.
 
     Outputs:
     The method returns one dictionary that contains a list for each set, and one dictionary that
-    contains parameters in format {‘param1’:{(set1, set2): value}, ‘param1’:{(set1, set2): value}}
+    contains parameters in format {`param1`:{(set1, set2): value}, `param1`:{(set1, set2): value}}
 
     To use this method:
 
@@ -236,480 +288,52 @@ def get_data(fname, set_list, parameter_list):
     It is worth highlighting that the Set for time periods "model.s_T" is derived by the
     method based on the Parameter: CompletionsDemand which is indexed by T
 
-    Similarly, the Set for Water Quality Index "model.s_W" is derived by the method based
-    on the Parameter: PadWaterQuality which is indexed by W
+    Similarly, the Set for Water Quality Index "model.s_QC" is derived by the method based
+    on the input tab: PadWaterQuality which is indexed by QC and the Set for Air Quality Index
+    "model.s_AQ" is derived by the method based on the input tab AirEmissionCoefficients.
     """
-    # Reading raw data, two data frames are output, one for Sets, and another one for Parameters
-    [_df_sets, _df_parameters, data_column, frontend_parameters] = _read_data(
-        fname, set_list, parameter_list
-    )
-    
+    # Call _read_data with the correct model type
+    if model_type in ["strategic", "operational", "critical_mineral", "none"]:
+        # Reading raw data, two data frames are output, one for Sets, and another one for Parameters
+        [_df_sets, _df_parameters, data_column, frontend_parameters] = _read_data(
+            fname, set_list, parameter_list, model_type, raises=raises
+        )
+    else:
+        # Invalid model type provided, raise warning and use default (strategic)
+        warning_message = f"An invalid model type has been provided. Strategic model type has been assumed. If you would like to run as a different model type, please re-run with one of the following model types: 'strategic', 'operational', 'extra_models', 'none'"
+        warnings.warn(
+            warning_message,
+            UserWarning,
+            stacklevel=3,
+        )
+        # Reading raw data, two data frames are output, one for Sets, and another one for Parameters
+        [_df_sets, _df_parameters, data_column] = _read_data(
+            fname, set_list, parameter_list, _model_type="strategic", raises=raises
+        )
+
     # Parameters are cleaned up, e.g. blank cells are replaced by NaN
     _df_parameters = _cleanup_data(_df_parameters)
-    
-    # for each in _df_parameters:
-    #     frontend_parameters[each] = _df_parameters[each].fillna('').to_dict('list')
 
     # The set for time periods is defined based on the columns of the parameter for
     # Completions Demand. This is done so the user does not have to add an extra tab
     # in the spreadsheet for the time period set
-    if "CompletionsDemand" in parameter_list:
+    if "CompletionsDemand" in _df_parameters.keys():
         _df_sets["TimePeriods"] = _df_parameters[
             "CompletionsDemand"
         ].columns.to_series()
-
-    # The set for water quality components (e.g. TDS, Cl) is defined based on the columns of the parameter for
-    # PadWaterQuality. This is done so the user does not have to add an extra tab
-    # in the spreadsheet for the water quality component set
-    if "PadWaterQuality" in parameter_list:
-        _df_sets["WaterQualityComponents"] = _df_parameters[
-            "PadWaterQuality"
-        ].columns.to_series()
-
     # The data frame for Parameters is preprocessed to match the format required by Pyomo
-    _df_parameters = _df_to_param(_df_parameters, data_column)
+    _df_parameters = _df_to_param(_df_parameters, data_column, sum_repeated_indexes)
     return [_df_sets, _df_parameters, frontend_parameters]
 
 
-def set_consistency_check(param, *args):
-    """
-    Purpose:    This method checks if the elements included in a table or parameter have been defined as part of the
-                Sets that index such parameter.
+def get_input_lists(_model_type="strategic"):
+    set_list = set_tabs_all_models
+    parameter_list = parameter_tabs_all_models
+    if _model_type == "strategic":
+        set_list = set_list + set_tabs_strategic_model
+        parameter_list = parameter_list + parameter_tabs_strategic_model
+    elif _model_type == "operational":
+        set_list = set_list + set_tabs_operational_model
+        parameter_list = parameter_list + parameter_tabs_operational_model
 
-    How to use: The method requires one specified parameter (e.g. ProductionRates) AND one OR several sets over which
-                the aforementioned parameter is declared (e.g.ProductionPads, ProductionTanks, TimePeriods). In general,
-                the method can be run as follows: set_consistency_check(Parameter, set_1, set_2, etc)
-
-    Output:     set_consistency_check() raises a TypeError exception If there are entries in the Parameter that are not
-                contained in the Sets, and prints out a list with all the entries that require revision
-    """
-    # Getting a net list of all the elements that are part of the parameter
-    raw_param_elements = list([*param.keys()])
-    temp_param_elements = []
-    i = []
-    for i in raw_param_elements:
-        # The if condition checks if the parameter has only one index or more. If it is a tuple, it means the
-        # parameter has 2 indices or more, and the second loop is required. If it is not a tuple,
-        # then the second loop is skipped to avoid looping through the characters of the element i,
-        # which would cause a wrong warning
-        if type(i) == tuple:
-            for j in i:
-                temp_param_elements.append(j)
-        else:
-            temp_param_elements.append(i)
-    net_param_elements = set(temp_param_elements)
-
-    # Getting a net list of all the elements that are part of the Sets that index the parameter
-    temp_sets_elements = []
-    for i in args:
-        for j in i:
-            temp_sets_elements.append(j)
-    net_sets_elements = set(temp_sets_elements)
-
-    net_elements = net_param_elements - net_sets_elements
-
-    # If net_elements contains elements, it means the parameter constains elements that have not
-    # been defined as part of its Sets, therefore, an exception is raised
-    if net_elements:
-        raise TypeError(
-            f"The following elements have not been declared as part of a Set: {sorted(net_elements)}"
-        )
-    else:
-        return 0
-
-
-def od_matrix(inputs):
-
-    """
-    This method allows the user to request drive distances and drive times using Bing maps API and
-    Open Street Maps API.
-    The method accept the following input arguments:
-    - origin:   REQUIRED. Data containing information regarding location name, and coordinates
-                latitude and longitude. Two formats are acceptable:
-                {(origin1,"latitude"): value1, (origin1,"longitude"): value2} or
-                {origin1:{"latitude":value1, "longitude":value2}}
-                The first format allows the user to include a tab with the corresponding data
-                in a table format as part of the workbook casestudy.
-
-    - destination:  OPTIONAL. If no data for destination is provided, it is assumed that the
-                    origins are also destinations.
-
-    - api:  OPTIONAL. Specify the type of API service, two options are supported:
-                Bing maps: https://docs.microsoft.com/en-us/bingmaps/rest-services/
-                Open Street Maps: https://www.openstreetmap.org/
-                If no API is selected, Open Street Maps is used by default
-
-    - api_key:  An API key should be provided in order to use Bing maps. The key can be obtained at:
-                https://www.microsoft.com/en-us/maps/create-a-bing-maps-key
-
-    - output:   OPTIONAL. Define the paramters that the method will output. The user can select:
-                'time': A list containing the drive times between the locations is returned
-                'distance': A list containing the drive distances between the locations is returned
-                'time_distance': Two lists containing the drive times and drive distances betweent
-                the locations is returned
-                If not output is specified, 'time_distance' is the default
-
-    - fpath:    OPTIONAL. od_matrix() will ALWAYS output an Excel workbook with two tabs, one that
-                contains drive times, and another that contains drive distances. If not path is
-                specified, the excel file is saved with the name 'od_output.xlsx' in the current
-                directory.
-
-    - create_report OPTIONAL. if True an Excel report with drive distances and drive times is created
-    """
-    # Information for origing should be provided
-    if "origin" not in inputs.keys():
-        raise Exception("The input dictionary must contain the key *origin*")
-    else:
-        origin = inputs["origin"]
-
-    inputs_default = {
-        "destination": None,
-        "api": None,
-        "api_key": None,
-        "output": None,
-        "fpath": None,
-        "create_report": True,
-    }
-
-    for i in inputs_default.keys():
-        if i not in list(inputs.keys()):
-            inputs[i] = inputs_default[i]
-
-    destination = inputs["destination"]
-    api = inputs["api"]
-    api_key = inputs["api_key"]
-    output = inputs["output"]
-    fpath = inputs["fpath"]
-    create_report = inputs["create_report"]
-
-    # Check that a valid API service has been selected and make sure an api_key was provided
-    if api in ("open_street_map", None):
-        api_url_base = "https://router.project-osrm.org/table/v1/driving/"
-
-    elif api == "bing_maps":
-        api_url_base = "https://dev.virtualearth.net/REST/v1/Routes/DistanceMatrix?"
-        if api_key is None:
-            raise Warning("Please provide a valid api_key")
-    else:
-        raise Warning("{0} API service is not supported".format(api))
-
-    # If no destinations were provided, it is assumed that the origins are also destinations
-    if destination is None:
-        destination = origin
-
-    origins_loc = []
-    destination_loc = []
-    origins_dict = {}
-    destination_dict = {}
-
-    # =======================================================================
-    #                          PREPARING DATA FORMAT
-    # =======================================================================
-    # Check if the input data has a Pyomo format:
-    #   origin={(origin1,"latitude"): value1, (origin1,"longitude"): value2}
-    # if it does, the input is modified to a Dict format:
-    #   origin={origin1:{"latitude":value1, "longitude":value2}}
-    if isinstance(list(origin.keys())[0], tuple):
-        for i in list(origin.keys()):
-            origins_loc.append(i[0])
-        origins_loc = list(sorted(set(origins_loc)))
-
-        for i in origins_loc:
-            origins_dict[i] = {
-                "latitude": origin[i, "latitude"],
-                "longitude": origin[i, "longitude"],
-            }
-        origin = origins_dict
-
-    if isinstance(list(destination.keys())[0], tuple):
-        for i in list(destination.keys()):
-            destination_loc.append(i[0])
-        destination_loc = list(sorted(set(destination_loc)))
-
-        for i in destination_loc:
-            destination_dict[i] = {
-                "latitude": destination[i, "latitude"],
-                "longitude": destination[i, "longitude"],
-            }
-        destination = destination_dict
-
-    # =======================================================================
-    #                           SELECTING API
-    # =======================================================================
-
-    if api in (None, "open_street_map"):
-        # This API works with GET requests. The general format is:
-        # https://router.project-osrm.org/table/v1/driving/Lat1,Long1;Lat2,Long2?sources=index1;index2&destinations=index1;index2&annotations=[duration|distance|duration,distance]
-        coordinates = ""
-        origin_index = ""
-        destination_index = ""
-        # Building strings for coordinates, source indices, and destination indices
-        for index, location in enumerate(origin.keys()):
-            coordinates += (
-                str(origin[location]["longitude"])
-                + ","
-                + str(origin[location]["latitude"])
-                + ";"
-            )
-            origin_index += str(index) + ";"
-
-        for index, location in enumerate(destination.keys()):
-            coordinates += (
-                str(destination[location]["longitude"])
-                + ","
-                + str(destination[location]["latitude"])
-                + ";"
-            )
-            destination_index += str(index + len(origin)) + ";"
-
-        # Dropping the last character ";" of each string so the API get request is valid
-        coordinates = coordinates[:-1]
-        origin_index = origin_index[:-1]
-        destination_index = destination_index[:-1]
-        response = requests.get(
-            api_url_base
-            + coordinates
-            + "?sources="
-            + origin_index
-            + "&destinations="
-            + destination_index
-            + "&annotations=duration,distance"
-        )
-        response_json = response.json()
-
-        df_times = pd.DataFrame(
-            index=list(origin.keys()), columns=list(destination.keys())
-        )
-        df_distance = pd.DataFrame(
-            index=list(origin.keys()), columns=list(destination.keys())
-        )
-        output_times = {}
-        output_distance = {}
-
-        # Loop for reading the output JSON file
-        if response_json["code"].lower() == "ok":
-            for index_i, o_name in enumerate(origin):
-                for index_j, d_name in enumerate(destination):
-
-                    output_times[(o_name, d_name)] = (
-                        response_json["durations"][index_i][index_j] / 3600
-                    )
-                    output_distance[(o_name, d_name)] = (
-                        response_json["distances"][index_i][index_j] / 1000
-                    ) * 0.621371
-
-                    df_times.loc[o_name, d_name] = output_times[(o_name, d_name)]
-                    df_distance.loc[o_name, d_name] = output_distance[(o_name, d_name)]
-        else:
-            raise Warning("Error when requesting data, make sure your API key is valid")
-
-    elif api == "bing_maps":
-        # Formating origin and destination dicts for Bing Maps POST request, that is, converting this structure:
-        # origin={origin1:{"latitude":value1, "longitude":value2},
-        #           origin2:{"latitude":value3, "longitude":value4}}
-        # destination={destination1:{"latitude":value5, "longitude":value6,
-        #               destination2:{"latitude":value7, "longitude":value8}}
-        # Into the following structure:
-        # data={"origins":[{"latitude":value1, "longitude":value2},
-        #                   {"latitude":value3, "longitude":value4}],
-        #       "destinations":[{"latitude":value5, "longitude":value6},
-        #                       {"latitude":value7, "longitude":value8}]}
-
-        origins_post = []
-        destinations_post = []
-        for i in origin.keys():
-            origins_post.append(
-                {"latitude": origin[i]["latitude"], "longitude": origin[i]["longitude"]}
-            )
-
-        for i in destination.keys():
-            destinations_post.append(
-                {"latitude": origin[i]["latitude"], "longitude": origin[i]["longitude"]}
-            )
-
-        # Building the dictionary with the adequate structure compatible with Bing Maps
-        data = {
-            "origins": origins_post,
-            "destinations": destinations_post,
-            "travelMode": "driving",
-        }
-
-        # Sending a POST request to the API
-        header = {"Content-Type": "application/json"}
-        response = requests.post(
-            api_url_base + "key=" + api_key, headers=header, json=data
-        )
-        response_json = response.json()
-
-        # Definition of two empty dataframes that will contain drive times and distances.
-        # These dataframes wiil be exported to an Excel workbook
-        df_times = pd.DataFrame(
-            index=list(origin.keys()), columns=list(destination.keys())
-        )
-        df_distance = pd.DataFrame(
-            index=list(origin.keys()), columns=list(destination.keys())
-        )
-        output_times = {}
-        output_distance = {}
-
-        # Loop for reading the output JSON file
-        if response_json["statusDescription"].lower() == "ok":
-            for i in range(
-                len(response_json["resourceSets"][0]["resources"][0]["results"])
-            ):
-                data_temp = response_json["resourceSets"][0]["resources"][0]["results"][
-                    i
-                ]
-                origin_index = data_temp["originIndex"]
-                destination_index = data_temp["destinationIndex"]
-
-                o_name = list(origin.keys())[origin_index]
-                d_name = list(destination.keys())[destination_index]
-                output_times[(o_name, d_name)] = data_temp["travelDuration"] / 60
-                output_distance[(o_name, d_name)] = (
-                    data_temp["travelDistance"] * 0.621371
-                )
-
-                df_times.loc[o_name, d_name] = output_times[(o_name, d_name)]
-                df_distance.loc[o_name, d_name] = output_distance[(o_name, d_name)]
-        else:
-            raise Warning("Error when requesting data, make sure your API key is valid")
-
-    # Define the default name of the Excel workbook
-    if fpath is None:
-        fpath = "od_output.xlsx"
-
-    if create_report is True:
-        # Dataframes df_times and df_distance are output as sheets in an Excel workbook whose directory
-        # and name are defined by variable 'fpath'
-        with pd.ExcelWriter(fpath) as writer:
-            df_times.to_excel(writer, sheet_name="DriveTimes")
-            df_distance.to_excel(writer, sheet_name="DriveDistances")
-
-    # Identify what type of data is returned by the method
-    if output in ("time", None):
-        return_output = output_times
-    elif output == "distance":
-        return_output = output_distance
-    elif output == "time_distance":
-        return_output = [output_times, output_distance]
-    else:
-        raise Warning(
-            "Provide a valid type of output, valid options are:\
-                        time, distance, time_distance"
-        )
-
-    return return_output
-
-
-def get_input_lists():
-    set_list = [
-        "ProductionPads",
-        "CompletionsPads",
-        "SWDSites",
-        "ExternalWaterSources",
-        "WaterQualityComponents",
-        "StorageSites",
-        "TreatmentSites",
-        "ReuseOptions",
-        "NetworkNodes",
-        "PipelineDiameters",
-        "StorageCapacities",
-        "InjectionCapacities",
-        "TreatmentCapacities",
-        "TreatmentTechnologies",
-    ]
-
-    parameter_list = [
-        "Units",
-        "PNA",
-        "CNA",
-        "CCA",
-        "NNA",
-        "NCA",
-        "NKA",
-        "NRA",
-        "NSA",
-        "FCA",
-        "RCA",
-        "RNA",
-        "RSA",
-        "SCA",
-        "SNA",
-        "ROA",
-        "RKA",
-        "SOA",
-        "NOA",
-        "PCT",
-        "PKT",
-        "FCT",
-        "CST",
-        "CCT",
-        "CKT",
-        "RST",
-        "ROT",
-        "SOT",
-        "RKT",
-        "Elevation",
-        "CompletionsPadOutsideSystem",
-        "DesalinationTechnologies",
-        "DesalinationSites",
-        "BeneficialReuseCost",
-        "BeneficialReuseCredit",
-        "TruckingTime",
-        "CompletionsDemand",
-        "PadRates",
-        "FlowbackRates",
-        "WellPressure",
-        "NodeCapacities",
-        "InitialPipelineCapacity",
-        "InitialPipelineDiameters",
-        "InitialDisposalCapacity",
-        "InitialTreatmentCapacity",
-        "ReuseMinimum",
-        "ReuseCapacity",
-        "ExtWaterSourcingAvailability",
-        "PadOffloadingCapacity",
-        "CompletionsPadStorage",
-        "DisposalOperationalCost",
-        "TreatmentOperationalCost",
-        "ReuseOperationalCost",
-        "PipelineOperationalCost",
-        "ExternalSourcingCost",
-        "TruckingHourlyCost",
-        "PipelineDiameterValues",
-        "DisposalCapacityIncrements",
-        "InitialStorageCapacity",
-        "StorageCapacityIncrements",
-        "TreatmentCapacityIncrements",
-        "TreatmentEfficiency",
-        "RemovalEfficiency",
-        "DisposalExpansionCost",
-        "StorageExpansionCost",
-        "TreatmentExpansionCost",
-        "PipelineCapexDistanceBased",
-        "PipelineCapexCapacityBased",
-        "PipelineCapacityIncrements",
-        "PipelineExpansionDistance",
-        "Hydraulics",
-        "Economics",
-        "ExternalWaterQuality",
-        "PadWaterQuality",
-        "StorageInitialWaterQuality",
-        "PadStorageInitialWaterQuality",
-        "DisposalOperatingCapacity",
-        "TreatmentExpansionLeadTime",
-        "DisposalExpansionLeadTime",
-        "StorageExpansionLeadTime",
-        "PipelineExpansionLeadTime_Dist",
-        "PipelineExpansionLeadTime_Capac",
-        "SWDDeep",
-        "SWDAveragePressure",
-        "SWDProxPAWell",
-        "SWDProxInactiveWell",
-        "SWDProxEQ",
-        "SWDProxFault",
-        "SWDProxHpOrLpWell",
-        "SWDRiskFactors",
-    ]
     return [set_list, parameter_list]
