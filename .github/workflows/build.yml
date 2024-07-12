@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "1.0rc0"
+      - "main"
 
 defaults:
   run:
@@ -25,6 +25,7 @@ jobs:
         with:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
+          miniforge-version: latest
       
       - name: Install Azure Signtool
         run: |
@@ -33,7 +34,7 @@ jobs:
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
         run: |
-            echo REACT_APP_PARETO_VERSION=1.0.0rc1 >> .env
+            echo REACT_APP_PARETO_VERSION=1.0.0 >> .env
 
       - name: Install Electron JS dependencies
         run: |
@@ -69,7 +70,7 @@ jobs:
 
       - name: Sign Windows Distribution
         run: |
-          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-24.07.01-win64.exe
+          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-24.07.10-win64.exe
 
       - name: Upload artifact for windows build
         uses: actions/upload-artifact@v4
@@ -77,4 +78,4 @@ jobs:
         with:
             name: windows-pareto-dist
             path: |
-              electron/dist/ParetoUI-24.07.01-win64.exe
+              electron/dist/ParetoUI-24.07.10-win64.exe
