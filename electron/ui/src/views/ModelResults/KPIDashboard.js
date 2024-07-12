@@ -180,7 +180,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
                 <IconButton disabled><RemoveCircleOutlineIcon sx={{ color: "#fc2414" }}/></IconButton>
-                <p style={styles.kpiTitle}>Annual Disposal</p>
+                <p style={styles.kpiTitle}>Total Disposal</p>
                 </Box>
             </Grid>
             <Grid item xs={12}>
