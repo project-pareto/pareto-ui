@@ -177,7 +177,7 @@ describe('scenario testing', () => {
 
         //validate results
         cy.contains(/recycling rate/i).should('be.visible')
-        cy.contains(/annual disposal/i).should('be.visible')
+        cy.contains(/total disposal/i).should('be.visible')
         cy.contains(/groundwater source/i).should('be.visible')
         cy.contains(/capex/i).should('be.visible')
         cy.contains(/opex/i).should('be.visible')
