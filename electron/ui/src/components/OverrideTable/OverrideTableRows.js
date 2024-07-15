@@ -137,6 +137,7 @@ function BinaryVariableRow(props) {
   const [ rowName, setRowName ] = useState("")
   const [ presetValues, setPresetValues ] = useState({})
   const [ technology, setTechnology ] = useState(null)
+  const [ disposalLocation, setDisposalLocation ] = useState(null)
   const [ uniqueIndex, setUniqueIndex ] = useState('')
 
   useEffect(() => {
@@ -145,9 +146,11 @@ function BinaryVariableRow(props) {
     */
     let tempDisplayValue = [...value]
     setDisplayValue(tempDisplayValue)
-
+    // console.log(value)
     try {
       let preset_value_table = scenario.data_input.df_parameters[INFRASTRUCTURE_CAPEX_MAPPING[tempDisplayValue[0]].input_table]
+      // console.log("preset_value_table")
+      // console.log(preset_value_table)
       let preset_values = {}
         if(tempDisplayValue[0] === "Treatment Facility") {
           // check for technology in override values. if found, use that. else, use the value from scenario
@@ -171,11 +174,29 @@ function BinaryVariableRow(props) {
             }
           }
           setTechnology(tempTechnology)
+        } else if(tempDisplayValue[0] === "Disposal Facility") {
+          let disposalKey = "SWDSites"
+          let disposalOptions = scenario.data_input.df_parameters[INFRASTRUCTURE_CAPEX_MAPPING[tempDisplayValue[0]].input_table][disposalKey]
+          let len = disposalOptions.length
+          for (let i = 0; i < len; i++) {
+            let each = disposalOptions[i]
+            preset_values[each] = {}
+            for (let row of Object.keys(preset_value_table)) {
+              if (row !== disposalKey) {
+                preset_values[each][row] = preset_value_table[row][i]
+              }
+            }
+          }
+
+          let disposalLocation = tempDisplayValue[1]
+          setDisposalLocation(disposalLocation)
         } else {
   
           // this is janky but not sure how else to standardize reading the data from these different tables
           for (let key of Object.keys(preset_value_table)) {
             if(key !== "VALUE") {
+              // console.log("preset_value_table")
+              // console.log(preset_value_table)
               let leng = preset_value_table[key].length
               for(let i = 0; i < leng; i++) {
                 preset_values[preset_value_table[key][i]] = preset_value_table.VALUE[i]
@@ -219,13 +240,11 @@ function BinaryVariableRow(props) {
     let number_value
     if (displayValue[0] === "Treatment Facility") {
       number_value = presetValues[technology][event.target.value]
+    } else if (displayValue[0] === "Disposal Facility") {
+      number_value = presetValues[disposalLocation][event.target.value]
     } else {
       number_value = presetValues[event.target.value]
-    } 
-    // console.log("number_value")
-    // console.log(number_value)
-    // if(number_value === 0) handleInputOverrideValue(event, true)
-    // else handleInputOverrideValue(event, false)
+    }
     handleInputOverrideValue(event, number_value)
   }
 
@@ -252,6 +271,13 @@ function BinaryVariableRow(props) {
               {
                 value[0] === "Treatment Facility" ? 
                 Object.entries(presetValues[technology]).map(([key,value]) => (
+                  <MenuItem key={`${key}_${value}`} value={key}>
+                    {value}
+                  </MenuItem>
+                ))
+                : 
+                value[0] === "Disposal Facility" ? 
+                Object.entries(presetValues[disposalLocation]).map(([key,value]) => (
                   <MenuItem key={`${key}_${value}`} value={key}>
                     {value}
                   </MenuItem>
