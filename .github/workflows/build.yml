@@ -46,13 +46,13 @@ jobs:
       - name: Get idaes extensions
         run: idaes get-extensions
 
-      # - name: Install correct tag of pareto
-      #   working-directory: ../
-      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/1.0.0 -b 1.0.0 && pip install --progress-bar off .
-
-      - name: Install correct branch of pareto
+      - name: Install correct tag of pareto
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+        run: git clone https://github.com/tarnold17/project-pareto.git && cd project-pareto && git fetch --all && git checkout generate_report_fix && pip install --progress-bar off .
+
+      # - name: Install correct branch of pareto
+      #   working-directory: ../
+      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
       - name: Install build requirements
         working-directory: ./backend
