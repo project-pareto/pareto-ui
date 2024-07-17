@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "fix-compare-page"
+      - "1.0.0"
 
 defaults:
   run:
