@@ -127,7 +127,8 @@ export default function ModelResults(props) {
         setTerminationCondition('bad')
       }
     }
-    
+    // console.log("current scenario:")
+    // console.log(props.scenario)
     
     
   }, [props.category, props.scenario, props.scenario.results.status, props.scenario.data_input.df_parameters, props.scenario.results.data]);

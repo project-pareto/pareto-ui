@@ -137,51 +137,75 @@ export default function ScenarioCompareOutput(props) {
    }
 
    const getStyle = (key) => {
-    if (key === "totalCapex") {
-        if (totalCapex[0] > totalCapex[1]) return {color:"green"}
-        else if (totalCapex[0] < totalCapex[1]) return {color:"red"}
-        else if (totalCapex[0] === totalCapex[1]) return {color:"#989698"}
-    } else if (key === "totalOpex") {
-        if (totalOpex[0] > totalOpex[1]) return {color:"green"}
-        else if (totalOpex[0] < totalOpex[1]) return {color:"red"}
-        else if (totalOpex[0] === totalOpex[1]) return {color:"#989698"}
+    try {
+        if (key === "totalCapex") {
+            if (totalCapex[0] > totalCapex[1]) return {color:"green"}
+            else if (totalCapex[0] < totalCapex[1]) return {color:"red"}
+            else if (totalCapex[0] === totalCapex[1]) return {color:"#989698"}
+        } else if (key === "totalOpex") {
+            if (totalOpex[0] > totalOpex[1]) return {color:"green"}
+            else if (totalOpex[0] < totalOpex[1]) return {color:"red"}
+            else if (totalOpex[0] === totalOpex[1]) return {color:"#989698"}
+        }
+        else {
+            let tempStyle = {...styles.kpiTitle}
+            let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
+            if (diff > 0) tempStyle.color = "green"
+            else if(diff < 0) tempStyle.color = "red"
+            else tempStyle.color = "grey"
+            return tempStyle
+        }
+    } catch (e) {
+        return {...styles.kpiTitle}
     }
-    else {
-        let tempStyle = {...styles.kpiTitle}
-        let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
-        if (diff > 0) tempStyle.color = "green"
-        else if(diff < 0) tempStyle.color = "red"
-        else tempStyle.color = "grey"
-        return tempStyle
-    }
+   
     
    }
 
    const getValue = (key) => {
-    if (key === "totalCapex") {
-        let capexDiff = ""
-        if (totalCapex[0] > totalCapex[1]) capexDiff+="+"
-        capexDiff+=(((totalCapex[0] - totalCapex[1])/totalCapex[1])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
-        return capexDiff
-    } else if (key === "totalOpex") {
-        let opexDiff = ""
-        if (totalOpex[0] > totalOpex[1]) opexDiff+="+"
-        opexDiff+=(((totalOpex[0] - totalOpex[1])/totalOpex[1])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
-        return opexDiff
+    try {
+        if (key === "totalCapex") {
+            let capexDiff = ""
+            if (totalCapex[0] > totalCapex[1]) capexDiff+="+"
+            capexDiff+=(((totalCapex[0] - totalCapex[1])/totalCapex[1])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
+            return capexDiff
+        } else if (key === "totalOpex") {
+            let opexDiff = ""
+            if (totalOpex[0] > totalOpex[1]) opexDiff+="+"
+            opexDiff+=(((totalOpex[0] - totalOpex[1])/totalOpex[1])*100).toLocaleString('en-US', {maximumFractionDigits: 0})
+            return opexDiff
+        }
+        else {
+            let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
+            let returnGuy
+            // if (key === "e_CompletionsReusedFrac") returnGuy = Math.round(diff)
+            if (key === "e_CompletionsReusedFrac") returnGuy = formatPercentage(diff, 0)
+            else returnGuy = diff.toLocaleString('en-US', {maximumFractionDigits:0})
+            returnGuy = ""+returnGuy
+            if (diff > 0) returnGuy = "+" + returnGuy
+            return returnGuy
+        }
+    } catch(e) {
+        return null
     }
-    else {
-        let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
-        let returnGuy
-        if (key === "reuse_CompletionsDemandKPI") returnGuy = Math.round(diff)
-        else returnGuy = diff.toLocaleString('en-US', {maximumFractionDigits:0})
-        returnGuy = ""+returnGuy
-        if (diff > 0) returnGuy = "+" + returnGuy
-        return returnGuy
-    }
+    
    }
+
    const formatNumber = (value) => {
     if (value === undefined) return value
     else return value.toLocaleString('en-US', {maximumFractionDigits:2})
+  }
+
+  const formatPercentage = (num, scale) => {
+    console.log("formatting: "+num)
+    num *= 100
+    if (scale > 0) {
+        num = num * (10 ** scale)
+        num = Math.round(num)
+        num = num / (10 ** scale)
+        return num
+    }else return Math.round(num)
+      
   }
 
   const handleHover = (target, table, value) => {
@@ -361,17 +385,17 @@ export default function ScenarioCompareOutput(props) {
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
                         <Typography noWrap style={styles.kpiTitle}><IconButton disabled><ChangeCircleIcon sx={{ color: "#947eaa" }}/></IconButton>Recycling Rate &nbsp;&nbsp;</Typography>
-                        <Typography noWrap style={getStyle("reuse_CompletionsDemandKPI")}>{getValue("reuse_CompletionsDemandKPI")}%</Typography>
+                        <Typography noWrap style={getStyle("e_CompletionsReusedFrac")}>{getValue("e_CompletionsReusedFrac")}%</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <Typography noWrap style={styles.kpiValue}>{Math.round(kpiDataPrimary.reuse_CompletionsDemandKPI.value)}%</Typography>
+                        <Typography noWrap style={styles.kpiValue}>{formatPercentage(kpiDataPrimary.e_CompletionsReusedFrac.value, 0)}%</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <Typography noWrap style={styles.kpiReferenceValue}>vs {Math.round(kpiDataReference.reuse_CompletionsDemandKPI.value)}%</Typography>
+                        <Typography noWrap style={styles.kpiReferenceValue}>vs {formatPercentage(kpiDataReference.e_CompletionsReusedFrac.value, 0)}%</Typography>
                     </Box>
                 </Grid>
                 </Grid>

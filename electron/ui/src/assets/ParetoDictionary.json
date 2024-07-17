@@ -132,5 +132,8 @@
     "SWDProxEQ": "Proximity to earthquakes >= 3.0 magnitude",
     "SWDProxFault": "Disposal proximity to Fault",
     "SWDProxHpOrLpWell": "Disposal proximity to high pressure or low pressure injection well",
-    "SWDRiskFactors": "Disposal Risk Factors"
+    "SWDRiskFactors": "Disposal Risk Factors",
+    "AirEmissionCoefficients": "Air Emissions Coeficcients",
+    "TreatmentEmissionCoefficients": "Treatment Emission Coefficients",
+    "DesalinationSurrogate": "Desalination Surrogate"
 }
