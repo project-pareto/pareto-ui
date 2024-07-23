@@ -32,40 +32,47 @@ export const descriptions = {
               Select the solver you would like to use. Note: Gurobi requires a license. 
               If you do not have a Gurobi licence, select "CBC", an open source solver.
             </div>,
-    scaleModel: <div>
+    scale_model: <div>
             Choose whether you would like to scale the model or not.
           </div>,
 
-    pipelineCapacity: <div>
+    pipeline_capacity: <div>
         Alternate pipeline capacity selection:<br/>
-        -Input: use input for pipeline capacity<br/>
+        -Input: use pipeline capacities and rate in [currency/volume] to calculate pipeline capex costs<br/>
         -Calculated: calculate pipeline capacity from pipeline diameters</div>,
-    nodeCapacity: <div>
+    pipeline_cost: <div>
+        Alternate pipeline capex cost structures (distance or capacity based):<br/>
+        -Capacity Based: use input for pipeline capacity<br/>
+        -Distance Based: use pipeline distances and rate in [currency/(diameter-distance)] to calculate pipeline capex costs</div>,
+    node_capacity: <div>
         Selection to include Node Capacity:<br/>
         -True: Include network node capacity constraints<br/>
         -False: Exclude network node capacity constraints
     </div>,
-    infrastructureTiming: <div>
+    infrastructure_timing: <div>
         Selection to include infrastructure timing:<br/>
         -True: Include infrastructure timing in model<br/>
         -False: Exclude infrastructure timing from model<br/>
         Note that infrastructure timing calculations are performed post-optimization.
     </div>,
-    subsurfaceRisk: <div>
+    subsurface_risk: <div>
         Selection to include subsurface risk<br/>
         -False: Exclude subsurface risk from model unless the subsurface risk objective function is selected<br/>
         -Exclude Over/Under PW: Calculate subsurface risk metrics and disallow disposal to overpressured and underpressured wells<br/>
         -Calculate Risk Metrics: Calculate subsurface risk metrics for the user to view, but don't change the optimization model
     </div>,
-    removalEfficiencyMethod: <div>
+    removal_efficiency_method: <div>
         Method for calculating removal efficiency<br/>
         -Load based: use contaminant load (flow times concentration) to calculate removal efficiency<br/>
         -Concentration based: use contaminant concentration to calculate removal efficiency
     </div>,
-    desalinationModel: <div>
+    desalination_model: <div>
         Selection to include surrogate model for desalination:<br/>
         -False: Do not use surrogate model for desalination<br/>
         -MVC: Use MVC (Mechanical Vapor Compressor) surrogate model<br/>
         -MD: Use MD (Membrane Distillation) surrogate model
+    </div>,
+    deactivate_slacks: <div>
+        True to deactivate slack variables, False to use slack variables. Default is True<br/>
     </div>,
   }
