@@ -268,7 +268,7 @@ export default function Optimization(props) {
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
             {
               Object.entries(advancedOptions).map(([ key, data ]) => (
-                <Box sx={styles.settingName}>
+                <Box key={key} sx={styles.settingName}>
                   <p>{data.displayName}</p>
                   <Tooltip title={descriptions[key]} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
                 </Box>
