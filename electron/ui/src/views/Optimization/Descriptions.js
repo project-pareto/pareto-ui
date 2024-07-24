@@ -42,8 +42,8 @@ export const descriptions = {
         -Calculated: calculate pipeline capacity from pipeline diameters</div>,
     pipeline_cost: <div>
         Alternate pipeline capex cost structures (distance or capacity based):<br/>
-        -Capacity Based: use input for pipeline capacity<br/>
-        -Distance Based: use pipeline distances and rate in [currency/(diameter-distance)] to calculate pipeline capex costs</div>,
+        -Capacity-based: use pipeline capacities and rate in [currency/volume] to calculate pipeline CAPEX costs<br/>
+        -Distance-based: use pipeline distances and rate in [currency/(diameter-distance)] to calculate pipeline CAPEX costs</div>,
     node_capacity: <div>
         Selection to include Node Capacity:<br/>
         -True: Include network node capacity constraints<br/>
