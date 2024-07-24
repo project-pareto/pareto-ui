@@ -38,7 +38,7 @@ export const descriptions = {
 
     pipeline_capacity: <div>
         Alternate pipeline capacity selection:<br/>
-        -Input: use pipeline capacities and rate in [currency/volume] to calculate pipeline capex costs<br/>
+        -Input: use input for pipeline capacity<br/>
         -Calculated: calculate pipeline capacity from pipeline diameters</div>,
     pipeline_cost: <div>
         Alternate pipeline capex cost structures (distance or capacity based):<br/>
