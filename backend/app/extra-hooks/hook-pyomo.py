@@ -62,3 +62,4 @@ for package in ["pyomo"]:
                 continue
 
 hiddenimports = list(imports)
+hiddenimports.append("pkg_resources.py2_warn")
