@@ -4,11 +4,6 @@ export const descriptions = {
                   This setting limits the runtime for the solver to find a solution. 
                   Note that this time does not include time to build the model and process output.
               </div>,
-    pipelineCost: <div>
-                        There are two ways pipeline capacity expansion costs can be calculated:<br/>
-                        -Distance-based:  Uses pipeline distance, diameter and  $/inch-mile rate<br/>
-                        -Capacity-based: Uses pipeline capacity and $/bbl rate
-                  </div>,
     optimalityGap: <div>
                   Measure of optimality guaranteed 
                   (example: 0% gap is the mathematically proven best possible solution, 3% optimality 
