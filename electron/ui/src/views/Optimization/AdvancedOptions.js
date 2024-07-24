@@ -19,8 +19,8 @@ export const advancedOptions = {
         displayName: "Pipeline Cost",
         defaultValue: "distance_based",
         options: {
-            "Distance based": "distance_based",
-            "Capacity based": "capacity_based"
+            "Distance-based": "distance_based",
+            "Capacity-based": "capacity_based"
         }
     },
     node_capacity: {
