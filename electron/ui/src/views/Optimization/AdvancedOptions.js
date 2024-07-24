@@ -70,7 +70,7 @@ export const advancedOptions = {
         defaultValue: true,
         options: {
             "True": true,
-            "False": "false"
+            "False": false
         },
     },
   }
