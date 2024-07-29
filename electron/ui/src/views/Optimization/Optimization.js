@@ -264,49 +264,20 @@ export default function Optimization(props) {
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           </Grid>
-
           <Grid item xs={columnWidths[0]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
-            <Box sx={styles.settingName}>
-              <p>Scale Model</p>
-              <Tooltip title={descriptions.scaleModel} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            <Box sx={styles.settingName}>
-              <p>Pipeline Capacity</p>
-              <Tooltip title={descriptions.pipelineCapacity} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            <Box sx={styles.settingName}>
-              <p>Pipeline Cost</p>
-              <Tooltip title={descriptions.pipelineCost} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            <Box sx={styles.settingName}>
-              <p>Node Capacity</p>
-              <Tooltip title={descriptions.nodeCapacity} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            <Box sx={styles.settingName}>
-              <p>Infrastructure Timing</p>
-              <Tooltip title={descriptions.infrastructureTiming} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            <Box sx={styles.settingName}>
-              <p>Subsurface Risk</p>
-              <Tooltip title={descriptions.subsurfaceRisk} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            <Box sx={styles.settingName}>
-              <p>Removal Efficiency Method</p>
-              <Tooltip title={descriptions.removalEfficiencyMethod} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
-            <Box sx={styles.settingName}>
-              <p>Desalination Model</p>
-              <Tooltip title={descriptions.desalinationModel} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
-            </Box>
+            {
+              Object.entries(advancedOptions).map(([ key, data ]) => (
+                <Box key={key} sx={styles.settingName}>
+                  <p>{data.displayName}</p>
+                  <Tooltip title={descriptions[key]} placement="right-start"><IconButton><InfoIcon fontSize='small'/></IconButton></Tooltip>
+                </Box>
+              ))
+            }
             </Collapse>
           </Grid>
           <Grid item xs={columnWidths[1]} style={styles.gridItems}>
           <Collapse in={showAdvancedOptions} timeout="auto" unmountOnExit>
-
-            {/*
-              advanced options:
-            */}
             {
               Object.entries(advancedOptions).map(([ key, data ]) => (
                 <Box key={key}>

@@ -179,6 +179,7 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
             "desalination_model": optimizationSettings.get("desalination_model", "false"),
             "infrastructure_timing": optimizationSettings.get("infrastructure_timing", "false"),
             "subsurface_risk": optimizationSettings.get("subsurface_risk", "false"),
+            "deactivate_slacks": optimizationSettings.get("deactivate_slacks", True),
         }
 
         _log.info(f"modelParameters: {modelParameters}")
