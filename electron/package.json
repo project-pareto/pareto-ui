@@ -1,6 +1,6 @@
 {
   "name": "pareto-ui",
-  "version": "24.07.24",
+  "version": "24.08.06",
   "author": "Michael Pesce",
   "private": true,
   "main": "build/main.js",
@@ -74,10 +74,10 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "ParetoUI-24.07.24-win64.exe"
+      "artifactName": "ParetoUI-24.08.06-win64.exe"
     },
     "dmg": {
-      "artifactName": "ParetoUI-24.07.24-arm64.dmg"
+      "artifactName": "ParetoUI-24.08.06-arm64.dmg"
     },
     "deb": {
       "depends": [
@@ -86,7 +86,7 @@
         "liblapack3",
         "libblas3"
       ],
-      "artifactName": "ParetoUI-24.07.24-amd64.deb"
+      "artifactName": "ParetoUI-24.08.06-amd64.deb"
     },
     "directories": {
       "buildResources": "assets"
@@ -106,7 +106,7 @@
     "win": {
       "target": "nsis",
       "icon": "build/pareto-logo.ico",
-      "artifactName": "ParetoUI-24.07.24-win64.exe"
+      "artifactName": "ParetoUI-24.08.06-win64.exe"
     },
     "linux": {
       "target": "Deb",
