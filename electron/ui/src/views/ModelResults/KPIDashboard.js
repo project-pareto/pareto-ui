@@ -198,7 +198,7 @@ export default function KPIDashboard(props) {
             <Grid item xs={12}>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
                 <IconButton disabled><WaterIcon sx={{ color:"#59b8d6" }}/></IconButton>
-                <p style={styles.kpiTitle}>Groundwater Sourced</p>
+                <p style={styles.kpiTitle}>Sourced Water</p>
                 </Box>
             </Grid>
             <Grid item xs={12}>
