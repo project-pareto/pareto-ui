@@ -48,7 +48,7 @@ jobs:
 
       - name: Install correct branch of pareto
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && git fetch --all --tags && git checkout tags/1.0.0 -b 1.0.0 && cd project-pareto && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/1.0.0 -b 1.0.0 && pip install --progress-bar off .
 
       - name: Install build requirements
         working-directory: ./backend
