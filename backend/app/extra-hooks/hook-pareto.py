@@ -81,4 +81,7 @@ datas.append(('internal/assets/workshop_beneficial_reuse_override_output.png', '
 datas.append(('internal/assets/pareto_input_template.xlsx', 'app/internal/assets'))
 datas.append(('internal/assets/workshop_baseline_all_data_0.9.0.xlsx', 'app/internal/assets'))
 
+# add lorem ipsum.txt for jaraco
+datas.append(('internal/assets/Lorem ipsum.txt', 'jaraco/text'))
+
 print(datas)

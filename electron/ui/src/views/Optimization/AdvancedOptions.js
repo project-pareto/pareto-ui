@@ -16,7 +16,7 @@ export const advancedOptions = {
         }
     },
     pipeline_cost: {
-        displayName: "Pipeline Capacity",
+        displayName: "Pipeline Cost",
         defaultValue: "distance_based",
         options: {
             "Distance-based": "distance_based",
@@ -46,7 +46,6 @@ export const advancedOptions = {
             "False": "false",
             "Exclude Over/Under PW": "exclude_over_and_under_pressured_wells",
             "Calculate Risk Metrics": "calculate_risk_metrics"
-
         }
     },
     removal_efficiency_method: {
@@ -64,6 +63,14 @@ export const advancedOptions = {
             "False": "false",
             "MVC": "mvc",
             "MD": "md"
+        },
+    },
+    deactivate_slacks: {
+        displayName: "Deactivate Slacks",
+        defaultValue: true,
+        options: {
+            "True": true,
+            "False": false
         },
     },
   }
