@@ -3,7 +3,7 @@ name: App build
 on:
   push:
     branches:
-      - "sourced-water"
+      - "1.0.0"
 
 defaults:
   run:
@@ -48,7 +48,7 @@ jobs:
 
       - name: Install correct branch of pareto
         working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
+        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && git fetch --all --tags && git checkout tags/1.0.0 -b 1.0.0 && pip install --progress-bar off .
 
       - name: Install build requirements
         working-directory: ./backend
@@ -66,7 +66,7 @@ jobs:
 
       - name: Sign Windows Distribution
         run: |
-          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-24.08.06-win64.exe
+          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v electron/dist/ParetoUI-24.08.13-win64.exe
 
       - name: Upload artifact for windows build
         uses: actions/upload-artifact@v4
@@ -74,4 +74,4 @@ jobs:
         with:
             name: windows-pareto-dist
             path: |
-              electron/dist/ParetoUI-24.08.06-win64.exe
+              electron/dist/ParetoUI-24.08.13-win64.exe
