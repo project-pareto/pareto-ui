@@ -1,6 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import { Box, Grid, LinearProgress, Button } from '@mui/material';
+import { Box, Grid, LinearProgress, Button, Typography } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
@@ -349,23 +349,32 @@ const handleNewInfrastructureOverride = () => {
       console.log('unable to render table for this category: ',e)
     }
   }
- const checkForOverride = () => {
+
+  const showDisclaimer = () => {
+    let isUnsure = terminationCondition === "unsure"
     if(scenario.results.status==="Optimized") {
       if (scenario.optimized_override_values !== undefined)  {
         for(let key of Object.keys(scenario.optimized_override_values)) {
-          if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
-            return <span style={{color:"red"}}>* Scenario has been optimized with manual override.</span>
+          if(Object.keys(scenario.optimized_override_values[key]).length > 0) { // 
+            if (isUnsure) { // show both disclaimers
+              let text = `*${TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.`
+              text+= " Scenario has been optimized with manual override."
+              return <span style={{color:"red"}}>{text}</span>
+            } else { // show ONLY disclaimer for override
+              return <span style={{color:"red"}}>*Scenario has been optimized with manual override.</span>
+            }
+            
+          } else if (isUnsure) { // show ONLY disclaimer for unsure termination
+            return <span style={{color:"red"}}>*{TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.</span>
+          } else {
+            return null
           }
         }
       return null
       }
       else return null
   }else return null
- }
-
-  const showDisclaimer = () => {
-    return (<h3 style={{color: 'red'}}>*{TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.</h3>)
-  }
+}
 
   const resetOverrides = () => {
     console.log('resetting overrides')
@@ -409,8 +418,15 @@ const handleNewInfrastructureOverride = () => {
     */}
     {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
-      {terminationCondition === "unsure" && showDisclaimer()}
-      {checkForOverride()}
+        <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+          <Box flexGrow={1} display="flex" justifyContent="center">
+            {showDisclaimer()}
+          </Box>
+
+          <Button sx={{paddingRight: 10}}>Generate Report</Button>
+        </Box>
+
+      
       <Box sx={props.category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
         {renderOutputCategory()}
       </Box>
@@ -452,7 +468,6 @@ const handleNewInfrastructureOverride = () => {
         }
       </Grid>
       <Grid item xs={3}>
-
       </Grid>
     </Grid>
     
