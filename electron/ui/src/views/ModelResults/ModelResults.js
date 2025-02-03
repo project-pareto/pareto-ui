@@ -1,6 +1,6 @@
 import React from 'react';
 import {useEffect, useState} from 'react';   
-import { Box, Grid, LinearProgress, Button, Typography } from '@mui/material';
+import { Box, Grid, LinearProgress, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
@@ -8,6 +8,9 @@ import TerminationConditions from '../../assets/TerminationConditions.json'
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
+import { generateReport } from '../../services/app.service';
+import { useApp } from '../../AppContext';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
@@ -19,6 +22,7 @@ const OVERRIDE_CATEGORIES = [
 ]
 
 export default function ModelResults(props) {
+  const { port } = useApp()
   const [ scenario, setScenario] = useState({...props.scenario})
   const [ terminationCondition, setTerminationCondition ] = useState(null)
   const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) // the column mapping; set once and remains the same
@@ -410,6 +414,25 @@ const handleNewInfrastructureOverride = () => {
     return <p>Please try increasing optimization runtime</p>
   }
 
+  const handleGenerateReport = () => {
+    generateReport(port, props.scenario.id).then(response => {
+      if (response.status === 200) {
+              response.blob().then((data)=>{
+              let excelURL = window.URL.createObjectURL(data);
+              let tempLink = document.createElement('a');
+              tempLink.href = excelURL;
+              tempLink.setAttribute('download', props.scenario.name+'.xlsx');
+              tempLink.click();
+          }).catch((err)=>{
+              console.error("error fetching excel template path: ",err)
+          })
+      }
+      else {
+          console.error("error fetching excel template path: ",response.statusText)
+      }
+      })
+  }
+
   return ( 
     <>
     {/*
@@ -423,7 +446,13 @@ const handleNewInfrastructureOverride = () => {
             {showDisclaimer()}
           </Box>
 
-          <Button sx={{paddingRight: 10}}>Generate Report</Button>
+          <Button 
+            sx={{marginRight: 10, color: "#0b89b9"}} 
+            onClick={handleGenerateReport}
+            endIcon={<FileDownloadIcon/>}
+          >
+              Generate Excel Report
+          </Button>
         </Box>
 
       
