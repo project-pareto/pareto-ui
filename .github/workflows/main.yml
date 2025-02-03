@@ -34,7 +34,6 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v3
         with:
           environment-file: environment.yml
-          miniforge-variant: Mambaforge
           miniforge-version: latest
           activate-environment: pareto-ui-env
 
