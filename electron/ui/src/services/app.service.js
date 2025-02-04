@@ -104,3 +104,10 @@ export const uploadExcelSheet = (backend_port, data, name) => {
         body: data
     });
 }; 
+
+export const generateReport = (backend_port, id) => {
+    return fetch(BACKEND_URL+':'+backend_port+'/generate_report/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}

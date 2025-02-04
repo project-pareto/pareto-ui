@@ -246,7 +246,6 @@ export default function InputSummary(props) {
 
     function DragDrop() {
         const handleChange = (file) => {
-            console.log('setting file: '+file.name)
             setUpdatedExcelFile(file);
             handleReplaceExcel(file)
             setDisableUpload(true)

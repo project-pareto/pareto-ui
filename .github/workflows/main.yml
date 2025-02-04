@@ -25,7 +25,7 @@ jobs:
           - win64
         include:
           - os: linux
-            os-version: ubuntu-latest
+            os-version: ubuntu-22.04
           - os: win64
             os-version: windows-latest
 
@@ -34,7 +34,6 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v3
         with:
           environment-file: environment.yml
-          miniforge-variant: Mambaforge
           miniforge-version: latest
           activate-environment: pareto-ui-env
 

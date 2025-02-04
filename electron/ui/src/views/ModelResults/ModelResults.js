@@ -8,6 +8,9 @@ import TerminationConditions from '../../assets/TerminationConditions.json'
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
+import { generateReport } from '../../services/app.service';
+import { useApp } from '../../AppContext';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
@@ -19,6 +22,7 @@ const OVERRIDE_CATEGORIES = [
 ]
 
 export default function ModelResults(props) {
+  const { port } = useApp()
   const [ scenario, setScenario] = useState({...props.scenario})
   const [ terminationCondition, setTerminationCondition ] = useState(null)
   const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) // the column mapping; set once and remains the same
@@ -116,7 +120,7 @@ export default function ModelResults(props) {
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
     if (typeof(tempScenario.results.terminationCondition) === 'undefined') {
-      console.log('term condition is undefined, rolling forward as good')
+      // console.log('term condition is undefined, rolling forward as good')
       setTerminationCondition('good')
     }else {
       if (["locallyOptimal", "globallyOptimal", "optimal"].includes(tempScenario.results.terminationCondition)) {
@@ -349,23 +353,32 @@ const handleNewInfrastructureOverride = () => {
       console.log('unable to render table for this category: ',e)
     }
   }
- const checkForOverride = () => {
+
+  const showDisclaimer = () => {
+    let isUnsure = terminationCondition === "unsure"
     if(scenario.results.status==="Optimized") {
       if (scenario.optimized_override_values !== undefined)  {
         for(let key of Object.keys(scenario.optimized_override_values)) {
-          if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
-            return <span style={{color:"red"}}>* Scenario has been optimized with manual override.</span>
+          if(Object.keys(scenario.optimized_override_values[key]).length > 0) { // 
+            if (isUnsure) { // show both disclaimers
+              let text = `*${TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.`
+              text+= " Scenario has been optimized with manual override."
+              return <span style={{color:"red"}}>{text}</span>
+            } else { // show ONLY disclaimer for override
+              return <span style={{color:"red"}}>*Scenario has been optimized with manual override.</span>
+            }
+            
+          } else if (isUnsure) { // show ONLY disclaimer for unsure termination
+            return <span style={{color:"red"}}>*{TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.</span>
+          } else {
+            return null
           }
         }
       return null
       }
       else return null
   }else return null
- }
-
-  const showDisclaimer = () => {
-    return (<h3 style={{color: 'red'}}>*{TerminationConditions[props.scenario.results.terminationCondition]}, results may be invalid.</h3>)
-  }
+}
 
   const resetOverrides = () => {
     console.log('resetting overrides')
@@ -401,6 +414,25 @@ const handleNewInfrastructureOverride = () => {
     return <p>Please try increasing optimization runtime</p>
   }
 
+  const handleGenerateReport = () => {
+    generateReport(port, props.scenario.id).then(response => {
+      if (response.status === 200) {
+              response.blob().then((data)=>{
+              let excelURL = window.URL.createObjectURL(data);
+              let tempLink = document.createElement('a');
+              tempLink.href = excelURL;
+              tempLink.setAttribute('download', props.scenario.name+'.xlsx');
+              tempLink.click();
+          }).catch((err)=>{
+              console.error("error fetching excel template path: ",err)
+          })
+      }
+      else {
+          console.error("error fetching excel template path: ",response.statusText)
+      }
+      })
+  }
+
   return ( 
     <>
     {/*
@@ -409,8 +441,21 @@ const handleNewInfrastructureOverride = () => {
     */}
     {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
-      {terminationCondition === "unsure" && showDisclaimer()}
-      {checkForOverride()}
+        <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+          <Box flexGrow={1} display="flex" justifyContent="center">
+            {showDisclaimer()}
+          </Box>
+
+          <Button 
+            sx={{marginRight: 10, color: "#0b89b9"}} 
+            onClick={handleGenerateReport}
+            endIcon={<FileDownloadIcon/>}
+          >
+              Generate Excel Report
+          </Button>
+        </Box>
+
+      
       <Box sx={props.category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
         {renderOutputCategory()}
       </Box>
@@ -452,7 +497,6 @@ const handleNewInfrastructureOverride = () => {
         }
       </Grid>
       <Grid item xs={3}>
-
       </Grid>
     </Grid>
     

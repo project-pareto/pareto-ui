@@ -573,6 +573,9 @@ class ScenarioHandler:
 
     def get_excelsheet_path(self, id):
         return f"{self.excelsheets_path}/{id}.xlsx"
+    
+    def get_excel_output_path(self, id):
+        return f"{self.outputs_path}/{id}.xlsx"
 
     def get_diagram(self, diagram_type, id):
         try:
