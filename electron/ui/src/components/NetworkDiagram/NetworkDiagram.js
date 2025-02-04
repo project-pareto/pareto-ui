@@ -134,7 +134,6 @@ export default function NetworkDiagram(props) {
     
        const  UploadBox = () => {
         const handleChange = (file) => {
-            console.log('setting file: '+file.name)
           setFile(file);
           handleDiagramUpload(file,file.name);
         };

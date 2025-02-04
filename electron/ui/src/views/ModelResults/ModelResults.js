@@ -120,7 +120,7 @@ export default function ModelResults(props) {
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
     if (typeof(tempScenario.results.terminationCondition) === 'undefined') {
-      console.log('term condition is undefined, rolling forward as good')
+      // console.log('term condition is undefined, rolling forward as good')
       setTerminationCondition('good')
     }else {
       if (["locallyOptimal", "globallyOptimal", "optimal"].includes(tempScenario.results.terminationCondition)) {

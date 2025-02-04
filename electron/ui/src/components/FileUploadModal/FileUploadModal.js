@@ -27,12 +27,6 @@ export default function FileUploadModal(props) {
 
   const { port } = useApp()
 
-
-  useEffect(()=>{
-    console.log('fileuploadmodal props: ')
-    console.log(props)
-  }, [props]);
-
    const styles = {
     modalStyle: {
       position: 'absolute',
@@ -115,7 +109,6 @@ export default function FileUploadModal(props) {
             setShowWarning(false)
           }, 5000)
     }else {
-        console.log('valid file entry')
         props.handleFileUpload(file, scenarioName)
         setShowWarning(false)
         props.setShowFileModal(false)
@@ -151,7 +144,6 @@ export default function FileUploadModal(props) {
 
    function DragDrop() {
     const handleChange = (file) => {
-        console.log('setting file: '+file.name)
       setFile(file);
     };
     return (

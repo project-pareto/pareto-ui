@@ -109,8 +109,6 @@ export default function ScenarioList(props) {
     }
 
     const handleFileUpload = (file, name) => {
-        console.log('handle file upload')
-        console.log('creating scenario with name '+name)
         const formData = new FormData();
         formData.append('file', file, file.name);
 
@@ -119,10 +117,8 @@ export default function ScenarioList(props) {
         if (response.status === 200) {
             response.json()
             .then((data)=>{
-                console.log('fileupload successful: ',data)
                 handleNewScenario(data)
             }).catch((err)=>{
-                console.error("error on file upload: ",err)
                 setErrorMessage(String(err))
                 setShowError(true)
             })
