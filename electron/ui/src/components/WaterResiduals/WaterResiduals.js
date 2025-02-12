@@ -66,7 +66,7 @@ export default function WaterResiduals(props) {
         
     }
 
-    function padZero(number) {
+    const padZero = (number) => {
         return (number < 10 ? '0' : '') + number;
     }
 
@@ -87,6 +87,16 @@ export default function WaterResiduals(props) {
         return `${formattedStartDate} - ${formattedEndDate}`
     }
 
+    const calculateIndex = (tableIdx, idx) => {
+        console.log('tableidx: ' + tableIdx)
+        console.log('idx: ' + idx)
+        let index = idx + 1;
+        for (let i = 0; i < tableIdx; i+=1) {
+            index+=residualTables[i].rows.length
+        }
+        return index
+    }
+
     return (
         <Box>
             <h3>
@@ -99,7 +109,7 @@ export default function WaterResiduals(props) {
                             <Table style={styles.table} size='small' >
                                 <TableHead style={styles.tableHead}>
                                     <TableRow>
-                                        <TableCell sx={styles.headerCell} colSpan={3}>Water {residualTable.type}</TableCell>
+                                        <TableCell sx={styles.headerCell} colSpan={3}>{calculateIndex(tableIdx, idx)}. Water {residualTable.type}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
