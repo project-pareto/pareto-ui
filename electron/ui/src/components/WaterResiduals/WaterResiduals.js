@@ -99,8 +99,6 @@ export default function WaterResiduals(props) {
     }
 
     const calculateIndex = (tableIdx, idx) => {
-        console.log('tableidx: ' + tableIdx)
-        console.log('idx: ' + idx)
         let index = idx + 1;
         for (let i = 0; i < tableIdx; i+=1) {
             index+=residualTables[i].rows.length
