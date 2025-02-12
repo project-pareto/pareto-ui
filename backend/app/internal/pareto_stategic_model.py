@@ -80,7 +80,7 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
         optimality_gap = int(modelParameters["optimalityGap"])/100
     except:
         optimality_gap = 0
-    # _log.info(f'deactivating slacks: {modelParameters["deactivate_slacks"]}')
+        
     options = {
         "deactivate_slacks": modelParameters["deactivate_slacks"],
         "scale_model": modelParameters["scale_model"],
@@ -115,10 +115,11 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
     model_results = solve_model(model=strategic_model, options=options)
     with nostdout():
         feasibility_status = is_feasible(strategic_model)
+        _log.info(f"feasibility status is: {feasibility_status}")
 
     if not feasibility_status:
-        _log.error(f"feasibility status check failed, setting termination condition to infeasible")
-        termination_condition = "infeasible"
+        _log.error(f"feasibility status check failed")
+        termination_condition = model_results.solver.termination_condition
     else:
         print("\nModel results validated and found to pass feasibility tests\n" + "-" * 60)
         termination_condition = model_results.solver.termination_condition

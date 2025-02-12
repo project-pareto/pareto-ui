@@ -451,7 +451,7 @@ const handleNewInfrastructureOverride = () => {
     {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
         <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-          <Box flexGrow={1} display="flex" justifyContent="center">
+          <Box flexGrow={1} display="flex" justifyContent="flex-start" sx={{marginLeft: 4}}>
             {showDisclaimer()}
           </Box>
 
