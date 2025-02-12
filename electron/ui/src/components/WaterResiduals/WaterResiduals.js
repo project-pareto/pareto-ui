@@ -1,7 +1,7 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip, Box } from '@mui/material';
-import PopupModal from '../../components/PopupModal/PopupModal'
+import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Stack, TableFooter, Box, Button } from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 export default function WaterResiduals(props) {  
     const { scenario } = props;
@@ -53,6 +53,17 @@ export default function WaterResiduals(props) {
         },
         tableContainer: {
             padding: 2
+        },
+        button: {
+            backgroundColor: '#0884b4',
+            '&:hover': {
+                backgroundColor: '#0884b4',
+                opacity: 0.9
+            },
+        },
+        stack: {
+            margin: 1,
+            width: '100%'
         }
     }
 
@@ -158,6 +169,26 @@ export default function WaterResiduals(props) {
                                             align='right'
                                         >
                                             {formatNumberValue(row[2])}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell colSpan={3}>
+                                        <Stack direction='row' justifyContent='space-around' sx={styles.stack} component='span'>
+                                            <Button 
+                                                sx={styles.button}
+                                                variant='contained'
+                                                endIcon={<OpenInNewIcon/>}
+                                            >
+                                                Send Details to Aquatrade
+                                            </Button>
+                                            <Button
+                                                sx={styles.button}
+                                                variant='contained'
+                                                endIcon={<OpenInNewIcon/>}
+                                            >
+                                                Send Details to Aquashare
+                                            </Button>
+                                        </Stack>
                                         </TableCell>
                                     </TableRow>
                                 </TableBody>
