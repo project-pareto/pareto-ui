@@ -5,6 +5,7 @@ import PopupModal from '../../components/PopupModal/PopupModal'
 
 export default function WaterResiduals(props) {  
     const { scenario } = props;
+    const [ convertTime, setConvertTime ] = useState(true)
 
     const residualTables = [
         {
@@ -36,10 +37,18 @@ export default function WaterResiduals(props) {
         },
         bodyCell: {
             left: {
-                backgroundColor: '#F2F2F2'
+                backgroundColor: '#F2F2F2',
+                width: '66%'
             }, 
             right: {
-                width: '33%'
+                widt: '34%'
+            },
+            splitLeft: {
+                borderRight: '1px solid #ddd',
+                width:  '17%'
+            },
+            splitRight: {
+                width:  '17%'
             }
         },
         tableContainer: {
@@ -47,9 +56,35 @@ export default function WaterResiduals(props) {
         }
     }
 
-    const formatValue = (val) => {
+    const formatNumberValue = (val) => {
         if (isNaN(val)) return val
         else return val.toLocaleString('en-US', {maximumFractionDigits:2})
+    }
+
+    const calculateTotalVolume = (val, num_units=1, timeUnit='week') => {
+        if (timeUnit == 'week') return formatNumberValue(val * num_units * 7)
+        
+    }
+
+    function padZero(number) {
+        return (number < 10 ? '0' : '') + number;
+    }
+
+    const formatTimeValues = (val, timeUnit='week') => {
+        if (!convertTime) return val
+
+        const number = parseInt(val.replace(/[^0-9]/g, ''));
+    
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() + (number - 1) * 7);
+    
+        const endDate = new Date(startDate.getTime());
+        endDate.setDate(endDate.getDate() + 6);
+
+        const formattedStartDate = `${padZero(startDate.getMonth() + 1)}-${padZero(startDate.getDate())}-${startDate.getFullYear()}`;
+        const formattedEndDate = `${padZero(endDate.getMonth() + 1)}-${padZero(endDate.getDate())}-${endDate.getFullYear()}`;
+    
+        return `${formattedStartDate} - ${formattedEndDate}`
     }
 
     return (
@@ -64,25 +99,56 @@ export default function WaterResiduals(props) {
                             <Table style={styles.table} size='small' >
                                 <TableHead style={styles.tableHead}>
                                     <TableRow>
-                                        <TableCell sx={styles.headerCell} colSpan={2}>Water {residualTable.type}</TableCell>
+                                        <TableCell sx={styles.headerCell} colSpan={3}>Water {residualTable.type}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     <TableRow>
                                         <TableCell sx={styles.bodyCell.left}>Location</TableCell>
-                                        <TableCell sx={styles.bodyCell.right} align='right'>{row[0]}</TableCell>
+                                        <TableCell 
+                                            sx={styles.bodyCell.right}
+                                            colSpan={2}
+                                        >
+                                            {row[0]}
+                                        </TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell sx={styles.bodyCell.left}>Date Range</TableCell>
-                                        <TableCell sx={styles.bodyCell.right} align='right'>{row[1]}</TableCell>
+                                        <TableCell 
+                                            sx={styles.bodyCell.right}
+                                            onClick={() => setConvertTime(!convertTime)}
+                                            colSpan={2}
+                                        >
+                                            {formatTimeValues(row[1])}
+                                        </TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell sx={styles.bodyCell.left}>Total Volume</TableCell>
-                                        <TableCell sx={styles.bodyCell.right} align='right'>{formatValue(row[2])}</TableCell>
+                                        <TableCell 
+                                            sx={styles.bodyCell.splitLeft}
+                                        >
+                                            bbl
+                                        </TableCell>
+                                        <TableCell 
+                                            sx={styles.bodyCell.splitRight}
+                                            align='right'
+                                        >
+                                            {calculateTotalVolume(row[2])}
+                                        </TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell sx={styles.bodyCell.left}>Approximate Daily Volume</TableCell>
-                                        <TableCell sx={styles.bodyCell.right} align='right'></TableCell>
+                                        <TableCell 
+                                            sx={styles.bodyCell.splitLeft}
+                                        >
+                                            bpd
+                                        </TableCell>
+                                        <TableCell 
+                                            sx={styles.bodyCell.splitRight}
+                                            align='right'
+                                        >
+                                            {formatNumberValue(row[2])}
+                                        </TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
