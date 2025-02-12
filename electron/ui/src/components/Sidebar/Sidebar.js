@@ -128,6 +128,9 @@ export default function Sidebar(props) {
 
   const renderAdditionalCategories = () => {
     let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
+    if (section === 2) { // && !scenario.optimization_settings.deactivate_slacks
+      additionalCategories["Water Residuals"] = null
+    }
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
