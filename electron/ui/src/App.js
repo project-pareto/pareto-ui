@@ -15,6 +15,7 @@ import LandingPage from './views/LandingPage/LandingPage';
 import ModelCompletionBar from './components/ModelCompletionBar/ModelCompletionBar';
 import { updateScenario, updateExcel, fetchScenarios, checkTasks, deleteScenario, copyScenario, runModel } from './services/app.service'
 import { useApp } from './AppContext';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 
 function App() {
@@ -38,6 +39,33 @@ function App() {
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
   const { port } = useApp()
+
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#0884b4',
+        // contrastText: "#fff"
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: { // Common styles for all buttons
+            // textTransform: "none", // Prevent uppercase text
+            // we'll want to be more precise with our casing before making this ^ change, though it would allow for more control
+          },
+          containedPrimary: {
+            backgroundColor: '#0884b4',
+            '&:hover': {
+                backgroundColor: '#0884b4',
+                opacity: 0.9
+            },
+          },
+        },
+      },
+    },
+  });
+
 
   useEffect(()=>{
     /*
@@ -430,6 +458,8 @@ useEffect(()=> {
   }
 
   return (
+
+    <ThemeProvider theme={theme}>
     <div className="App">  
       <Header 
           showHeader={showHeader}
@@ -513,6 +543,8 @@ useEffect(()=> {
       }
       
     </div> 
+
+    </ThemeProvider>
   );
   
 }

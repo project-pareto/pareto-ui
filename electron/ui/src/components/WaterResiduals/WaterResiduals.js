@@ -54,13 +54,6 @@ export default function WaterResiduals(props) {
         tableContainer: {
             padding: 2
         },
-        button: {
-            backgroundColor: '#0884b4',
-            '&:hover': {
-                backgroundColor: '#0884b4',
-                opacity: 0.9
-            },
-        },
         stack: {
             margin: 1,
             width: '100%'
@@ -172,15 +165,13 @@ export default function WaterResiduals(props) {
                                     <TableRow>
                                         <TableCell colSpan={3}>
                                         <Stack direction='row' justifyContent='space-around' sx={styles.stack} component='span'>
-                                            <Button 
-                                                sx={styles.button}
+                                            <Button
                                                 variant='contained'
                                                 endIcon={<OpenInNewIcon/>}
                                             >
                                                 Send Details to Aquatrade
                                             </Button>
                                             <Button
-                                                sx={styles.button}
                                                 variant='contained'
                                                 endIcon={<OpenInNewIcon/>}
                                             >
