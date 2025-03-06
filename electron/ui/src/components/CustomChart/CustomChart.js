@@ -37,7 +37,7 @@ export default function AreaChart(props) {
             let keys = Object.keys(tempData).sort().reverse()
             keys.map((key, ind) => {
                 let value = tempData[key]
-                tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key})
+                tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key, line: { width: 0 }})
                 return 1
             })
             setAreaChartData(tempAreaChartData)
