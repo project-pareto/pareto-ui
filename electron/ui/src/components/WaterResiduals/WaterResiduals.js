@@ -6,6 +6,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 export default function WaterResiduals(props) {  
     const { scenario } = props;
     const [ convertTime, setConvertTime ] = useState(true)
+    const aquatrade_baseURL = "https://share.producedwater.org"
+    //"water-trading/share-requests/?type=share_supply&well_name=Well+Pad+1&latitude=40.0521&longitude=-80.2437&rate_bpd=1000&transport_radius=300&water_quality=good"
 
     const residualTables = [
         {
@@ -74,7 +76,7 @@ export default function WaterResiduals(props) {
         return (number < 10 ? '0' : '') + number;
     }
 
-    const formatTimeValues = (val, timeUnit='week') => {
+    const formatTimeValues = (val, divider='-', timeUnit='week') => {
         if (!convertTime) return val
 
         const number = parseInt(val.replace(/[^0-9]/g, ''));
@@ -85,8 +87,8 @@ export default function WaterResiduals(props) {
         const endDate = new Date(startDate.getTime());
         endDate.setDate(endDate.getDate() + 6);
 
-        const formattedStartDate = `${padZero(startDate.getMonth() + 1)}-${padZero(startDate.getDate())}-${startDate.getFullYear()}`;
-        const formattedEndDate = `${padZero(endDate.getMonth() + 1)}-${padZero(endDate.getDate())}-${endDate.getFullYear()}`;
+        const formattedStartDate = `${padZero(startDate.getMonth() + 1)}${divider}${padZero(startDate.getDate())}${divider}${startDate.getFullYear()}`;
+        const formattedEndDate = `${padZero(endDate.getMonth() + 1)}${divider}${padZero(endDate.getDate())}${divider}${endDate.getFullYear()}`;
     
         return `${formattedStartDate} - ${formattedEndDate}`
     }
@@ -97,6 +99,17 @@ export default function WaterResiduals(props) {
             index+=residualTables[i].rows.length
         }
         return index
+    }
+
+    const redirectData = (model, type, well_name, date, rate_bpd) => {
+        //TODO (optional): create a popup form that allows the user to enter additional data: coordinates, bid amt ...
+        let formattedDate = formatTimeValues(date, '/').split(' - ')
+        const start_date = formattedDate[0]
+        const end_date = formattedDate[1]
+        if (type === "Shortage") type = 'share_demand'
+        else if (type === "Surplus") type = 'share_supply'
+        let fullURL = `${aquatrade_baseURL}/${model}/share-requests/?type=${type}&well_name=${well_name}&start_date=${start_date}&end_date=${end_date}&rate_bpd=${rate_bpd}`
+        window.open(fullURL, '_blank').focus();
     }
 
     return (
@@ -168,12 +181,14 @@ export default function WaterResiduals(props) {
                                             <Button
                                                 variant='contained'
                                                 endIcon={<OpenInNewIcon/>}
+                                                onClick={() => redirectData('water-trading', residualTable.type, row[0], row[1], row[2])}
                                             >
                                                 Send Details to Aquatrade
                                             </Button>
                                             <Button
                                                 variant='contained'
                                                 endIcon={<OpenInNewIcon/>}
+                                                onClick={() => redirectData('watersharing', residualTable.type, row[0], row[1], row[2])}
                                             >
                                                 Send Details to Aquashare
                                             </Button>
