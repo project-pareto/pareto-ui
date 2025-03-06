@@ -174,6 +174,7 @@ export default function Dashboard(props) {
           syncScenarioData={props.syncScenarioData}
           scenarios={props.scenarios}
           updateScenario={props.updateScenario}
+          handleSetCategory={props.handleSetCategory} 
         />
       }
       </Grid>

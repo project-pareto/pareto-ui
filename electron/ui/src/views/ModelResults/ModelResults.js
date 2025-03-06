@@ -12,6 +12,7 @@ import { generateReport } from '../../services/app.service';
 import { useApp } from '../../AppContext';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WaterResiduals from '../../components/WaterResiduals/WaterResiduals';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
@@ -441,7 +442,7 @@ const handleNewInfrastructureOverride = () => {
       }
       })
   }
-
+  
   return ( 
     <>
     {/*
@@ -451,17 +452,26 @@ const handleNewInfrastructureOverride = () => {
     {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
         <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-          <Box flexGrow={1} display="flex" justifyContent="flex-start" sx={{marginLeft: 4}}>
-            {showDisclaimer()}
-          </Box>
-
           <Button 
-            sx={{marginRight: 10, color: "#0b89b9"}} 
+            sx={{marginLeft: 10}} 
             onClick={handleGenerateReport}
             endIcon={<FileDownloadIcon/>}
           >
               Generate Excel Report
           </Button>
+          {props.scenario.optimization.deactivate_slacks === false && props.category === 'Dashboard' &&
+            <Button 
+            sx={{marginRight: 10}} 
+              onClick={() => props.handleSetCategory('Water Residuals')}
+              endIcon={<OpenInNewIcon/>}
+            >
+                Export Water Residuals
+            </Button>
+          }
+          
+        </Box>
+        <Box display="flex" justifyContent="center" sx={{marginLeft: 4}}>
+            {showDisclaimer()}
         </Box>
 
       
