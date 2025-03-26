@@ -128,9 +128,6 @@ export default function Sidebar(props) {
 
   const renderAdditionalCategories = () => {
     let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
-    if (section === 2 && scenario.optimization.deactivate_slacks === false) { // 
-      additionalCategories["Water Residuals"] = null
-    }
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
@@ -246,6 +243,13 @@ export default function Sidebar(props) {
   const renderResultsTables = () => {
     return (
       <Collapse in={openResultsTables} timeout="auto" unmountOnExit>
+        {scenario.optimization.deactivate_slacks === false && (
+          <div style={getStyle("Water Residuals")} onClick={() => handleClick("Water Residuals")} key={"Water Residuals"}> 
+              <p style={styles.subcategory}>
+                Water Residuals
+              </p>
+          </div>
+        )}
         {Object.entries(scenario.results.data).map( ([key, value]) => ( 
           <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
               <p style={styles.subcategory}>
