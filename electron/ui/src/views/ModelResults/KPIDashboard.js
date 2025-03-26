@@ -190,7 +190,7 @@ try {
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalDisposed.unit}</p>
+                    <p style={styles.kpiValue}>{kpiData.v_F_TotalDisposed?.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalDisposed?.unit}</p>
                     </Box>
                 </Grid>
                 </Grid>
@@ -208,7 +208,7 @@ try {
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalSourced.unit}</p>
+                    <p style={styles.kpiValue}>{kpiData.v_F_TotalSourced?.value.toLocaleString('en-US', {maximumFractionDigits:0})+" "+kpiData.v_F_TotalSourced?.unit}</p>
                     </Box>
                 </Grid>
                 </Grid>
@@ -230,10 +230,10 @@ try {
                         {
                             type: "pie",
                             values: [
-                                kpiData.v_C_StorageCapEx.value, 
-                                kpiData.v_C_TreatmentCapEx.value, 
-                                kpiData.v_C_DisposalCapEx.value, 
-                                kpiData.v_C_PipelineCapEx.value],
+                                kpiData.v_C_StorageCapEx?.value, 
+                                kpiData.v_C_TreatmentCapEx?.value, 
+                                kpiData.v_C_DisposalCapEx?.value, 
+                                kpiData.v_C_PipelineCapEx?.value],
                             labels: [
                                 "Storage", 
                                 "Treatment", 
@@ -280,11 +280,11 @@ try {
                         {
                             type: "pie",
                             values: [
-                                kpiData.v_C_TotalSourced.value >= 0 ? kpiData.v_C_TotalSourced.value : 0, 
-                                kpiData.v_C_TotalTreatment.value >= 0 ? kpiData.v_C_TotalTreatment.value : 0, 
-                                kpiData.v_C_TotalDisposal.value >= 0 ? kpiData.v_C_TotalDisposal.value : 0, 
-                                kpiData.v_C_TotalPiping.value >= 0 ? kpiData.v_C_TotalPiping.value : 0,
-                                kpiData.v_C_TotalTrucking.value >= 0 ? kpiData.v_C_TotalTrucking.value : 0],
+                                kpiData.v_C_TotalSourced?.value >= 0 ? kpiData.v_C_TotalSourced?.value : 0, 
+                                kpiData.v_C_TotalTreatment?.value >= 0 ? kpiData.v_C_TotalTreatment.value : 0, 
+                                kpiData.v_C_TotalDisposal?.value >= 0 ? kpiData.v_C_TotalDisposal?.value : 0, 
+                                kpiData.v_C_TotalPiping?.value >= 0 ? kpiData.v_C_TotalPiping?.value : 0,
+                                kpiData.v_C_TotalTrucking?.value >= 0 ? kpiData.v_C_TotalTrucking?.value : 0],
                             labels: [
                                 "Source", 
                                 "Treatment", 
