@@ -112,11 +112,27 @@ export default function WaterResiduals(props) {
         window.open(fullURL, '_blank').focus();
     }
 
+    const hasResiduals = () => {
+        let totalAmt = 0;
+        for (let residual of residualTables) {
+            if (!isNaN(residual?.rows?.length)) totalAmt += residual?.rows?.length
+        }
+        if (totalAmt === 0) return false
+        else return true
+    }
+
     return (
         <Box>
             <h3>
                 Water Residuals
             </h3>
+            {
+                !hasResiduals() && (
+                    <p>
+                        This scenario did not produce any shortages or surpluses of water.
+                    </p>
+                )
+            }
             {
                 residualTables.map((residualTable, tableIdx) => (
                     residualTable.rows.map((row, idx) => (
