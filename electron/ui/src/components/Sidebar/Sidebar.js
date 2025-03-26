@@ -241,8 +241,16 @@ export default function Sidebar(props) {
     )
   }
   const renderResultsTables = () => {
+    let hasResiduals = checkForResiduals()
     return (
       <Collapse in={openResultsTables} timeout="auto" unmountOnExit>
+        {hasResiduals && (
+          <div style={getStyle("Water Residuals")} onClick={() => handleClick("Water Residuals")} key={"Water Residuals"}> 
+              <p style={styles.subcategory}>
+                Water Residuals
+              </p>
+          </div>
+        )}
         {Object.entries(scenario.results.data).map( ([key, value]) => ( 
           <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
               <p style={styles.subcategory}>
@@ -263,6 +271,12 @@ export default function Sidebar(props) {
         ))}
       </Collapse>
     )
+  }
+
+  const checkForResiduals = () => {
+    if (scenario.optimization.deactivate_slacks === false) {
+      return true
+    } else return false
   }
 
   return (

@@ -11,6 +11,8 @@ import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 import { generateReport } from '../../services/app.service';
 import { useApp } from '../../AppContext';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import WaterResiduals from '../../components/WaterResiduals/WaterResiduals';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
@@ -69,7 +71,7 @@ export default function ModelResults(props) {
       when category is changed, reset the nodes for filtering (columns and rows of current table)
     */
     try {
-      if (props.category !== "Dashboard" && props.category !== "Network Diagram" && props.category !== "Sankey" && scenario.results.status==="Optimized") {
+      if (props.category !== "Dashboard" && props.category !== "Network Diagram" && props.category !== "Sankey" && props.category !== "Water Residuals" && scenario.results.status==="Optimized") {
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
@@ -279,11 +281,19 @@ const handleNewInfrastructureOverride = () => {
                 />
       }
       /*
-        if category is network diagram, return demo image
+        if category is network diagram, return network diagram
       */
         else if(props.category === "Network Diagram"){
           return (
               <NetworkDiagram scenario={props.scenario} type={"output"} syncScenarioData={props.syncScenarioData}></NetworkDiagram>
+          )
+        }
+      /*
+        if category is water residuals, return water residuals component
+      */
+        else if(props.category === "Water Residuals"){
+          return (
+              <WaterResiduals scenario={props.scenario} />
           )
         }
       /*
@@ -324,7 +334,7 @@ const handleNewInfrastructureOverride = () => {
                 
                 :
                 
-                props.category !== "v_F_Overview_dict" && 
+                !["v_F_Overview_dict", "Water Residuals"].includes(props.category) && 
 
                 <FilterDropdown
                   width="300px"
@@ -432,7 +442,7 @@ const handleNewInfrastructureOverride = () => {
       }
       })
   }
-
+  
   return ( 
     <>
     {/*
@@ -442,17 +452,26 @@ const handleNewInfrastructureOverride = () => {
     {props.scenario.results.status.includes("Optimized") && (terminationCondition === "good" ||  terminationCondition === "unsure") ? 
     <Box>
         <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-          <Box flexGrow={1} display="flex" justifyContent="center">
-            {showDisclaimer()}
-          </Box>
-
           <Button 
-            sx={{marginRight: 10, color: "#0b89b9"}} 
+            sx={{marginLeft: 10}} 
             onClick={handleGenerateReport}
             endIcon={<FileDownloadIcon/>}
           >
               Generate Excel Report
           </Button>
+          {props.scenario.optimization.deactivate_slacks === false && props.category === 'Dashboard' &&
+            <Button 
+            sx={{marginRight: 10}} 
+              onClick={() => props.handleSetCategory('Water Residuals')}
+              endIcon={<OpenInNewIcon/>}
+            >
+                Export Water Residuals
+            </Button>
+          }
+          
+        </Box>
+        <Box display="flex" justifyContent="center" sx={{marginLeft: 4}}>
+            {showDisclaimer()}
         </Box>
 
       
