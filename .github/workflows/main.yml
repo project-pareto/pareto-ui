@@ -80,3 +80,22 @@ jobs:
             path: |
               electron/ui/cypress/screenshots/
               electron/ui/cypress/videos/
+
+      ## The following 2 steps attempt to ensure that the 
+      ## Post Run conda-incubator/setup-miniconda@v3 won't fail
+      - name: Kill Python processes
+        if: always()
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            taskkill /IM python.exe /F || echo "No Python processes found"
+          else
+            pkill -f python || echo "No Python processes found"
+          fi
+
+      - name: Clean up Conda environment
+        if: always()
+        shell: bash
+        run: |
+          conda deactivate || true
+          conda env remove --name test-env || true
