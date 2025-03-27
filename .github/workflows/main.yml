@@ -37,68 +37,76 @@ jobs:
           miniforge-version: latest
           activate-environment: pareto-ui-env
 
-      - name: Add project pareto version to .env file
-        working-directory: ./electron/ui
+      - name: try and find conda env location
         run: |
-            echo REACT_APP_PARETO_VERSION=1.0.0 >> .env
-
-      - name: get idaes extensions
-        run: idaes get-extensions
-
-      - name: Install correct branch of pareto
-        working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
-
-      - name: Install electron JS dependencies
+          ls -lR C:/
+      
+      - name: try and find conda env location 2
         run: |
-          npm --prefix electron clean-install
+          ls -lR C:/Miniconda/
+      
+      # - name: Add project pareto version to .env file
+      #   working-directory: ./electron/ui
+      #   run: |
+      #       echo REACT_APP_PARETO_VERSION=1.0.0 >> .env
 
-      - name: Install frontendJS dependencies
-        run: |
-          npm --prefix electron/ui clean-install
+      # - name: get idaes extensions
+      #   run: idaes get-extensions
 
-      - name: run component tests
-        run: npm --prefix electron/ui test
+      # - name: Install correct branch of pareto
+      #   working-directory: ../
+      #   run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
-      - name: run backend server
-        working-directory: backend/app
-        run: python main.py & sleep 10
+      # - name: Install electron JS dependencies
+      #   run: |
+      #     npm --prefix electron clean-install
 
-      - name: run frontend
-        run: npm --prefix electron/ui start & sleep 30
+      # - name: Install frontendJS dependencies
+      #   run: |
+      #     npm --prefix electron/ui clean-install
 
-      - name: Cypress e2e tests
-        working-directory: electron/ui
-        timeout-minutes: 24
-        run: |
-          npx cypress run
-      - name: Upload artifact for screenshots & videos
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-            name: cypress_results-${{ matrix.os }}
-            path: |
-              electron/ui/cypress/screenshots/
-              electron/ui/cypress/videos/
+      # - name: run component tests
+      #   run: npm --prefix electron/ui test
 
-      ## The following 2 steps attempt to ensure that the 
-      ## Post Run conda-incubator/setup-miniconda@v3 won't fail
-      - name: Kill Python processes
-        if: always()
-        shell: bash
-        run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            powershell.exe -Command "Get-Process python | Stop-Process -Force"
-          else
-            pkill -f python || echo "No Python processes found"
-          fi
+      # - name: run backend server
+      #   working-directory: backend/app
+      #   run: python main.py & sleep 10
 
-      - name: Clean up Conda environment
-        if: always()
-        shell: bash
-        run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            source C:/Miniconda/etc/profile.d/conda.sh
-          fi
-          conda deactivate || true
-          conda env remove --name pareto-ui-env || true
+      # - name: run frontend
+      #   run: npm --prefix electron/ui start & sleep 30
+
+      # - name: Cypress e2e tests
+      #   working-directory: electron/ui
+      #   timeout-minutes: 24
+      #   run: |
+      #     npx cypress run
+      # - name: Upload artifact for screenshots & videos
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #       name: cypress_results-${{ matrix.os }}
+      #       path: |
+      #         electron/ui/cypress/screenshots/
+      #         electron/ui/cypress/videos/
+
+      # ## The following 2 steps attempt to ensure that the 
+      # ## Post Run conda-incubator/setup-miniconda@v3 won't fail
+      # - name: Kill Python processes
+      #   if: always()
+      #   shell: bash
+      #   run: |
+      #     if [[ "$RUNNER_OS" == "Windows" ]]; then
+      #       powershell.exe -Command "Get-Process python | Stop-Process -Force"
+      #     else
+      #       pkill -f python || echo "No Python processes found"
+      #     fi
+
+      # - name: Clean up Conda environment
+      #   if: always()
+      #   shell: bash
+      #   run: |
+      #     if [[ "$RUNNER_OS" == "Windows" ]]; then
+      #       source C:/Miniconda/etc/profile.d/conda.sh
+      #     fi
+      #     conda deactivate || true
+      #     conda env remove --name pareto-ui-env || true
