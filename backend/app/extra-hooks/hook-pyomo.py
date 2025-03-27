@@ -62,3 +62,5 @@ for package in ["pyomo"]:
                 continue
 
 hiddenimports = list(imports)
+hiddenimports.append("ipaddress")
+hiddenimports.append("pyimod02_importers")
