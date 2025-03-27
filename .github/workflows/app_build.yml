@@ -145,14 +145,19 @@ jobs:
         run: idaes get-extensions
 
       - name: Build Backend
-        working-directory: ./pyinstaller
-        run: pyinstaller -y --clean --distpath ../electron/py_dist main.spec
+        working-directory: ./electron
+        run: npm run build-backend
 
       - name: Build Frontend
-        working-directory: ./electron/idaes-flowsheet-processor-ui/frontend
+        working-directory: ./electron
         env:
           CI: false
-        run: npm run build
+        run: |
+          if [ "${{ inputs.os-version }}" == "windows-latest" ]; then
+            npm run build-frontend-win
+          else
+            npm run build-frontend
+          fi
 
       - name: Build ${{ steps.os-specific-values.outputs.os }} Distribution
         env:
