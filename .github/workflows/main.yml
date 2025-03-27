@@ -39,11 +39,11 @@ jobs:
 
       - name: try and find conda env location
         run: |
-          ls -lR C:\Users\runneradmin\miniconda3
+          ls -lR C:/Users/runneradmin/miniconda3
       
       - name: try and find conda env location 2
         run: |
-          ls -lR C:\Users\runneradmin\miniconda3\condabin\
+          ls -lR C:/Users/runneradmin/miniconda3/condabin
       
       # - name: Add project pareto version to .env file
       #   working-directory: ./electron/ui
