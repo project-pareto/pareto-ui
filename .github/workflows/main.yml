@@ -36,14 +36,6 @@ jobs:
           environment-file: environment.yml
           miniforge-version: latest
           activate-environment: pareto-ui-env
-
-      # - name: try and find conda env location
-      #   run: |
-      #     ls -lR C:/Users/runneradmin/miniconda3
-      
-      # - name: try and find conda env location 2
-      #   run: |
-      #     ls -lR C:/Users/runneradmin/miniconda3/condabin
       
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
