@@ -28,7 +28,7 @@ on:
 jobs:
   electron-build:
     uses: ./.github/workflows/app_build.yml
-    name: PARETO-UI Build
+    name: PARETO-UI Build ${{ inputs.os-version }}
     with:
       os-version: ${{ inputs.os-version }}
       package-build-number: ${{ inputs.package-build-number }}
