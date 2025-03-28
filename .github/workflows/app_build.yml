@@ -128,6 +128,10 @@ jobs:
         working-directory: ../
         run: git clone https://github.com/${{ inputs.project-pareto-repo }}.git && cd project-pareto && git fetch --all --tags && git checkout ${{ inputs.project-pareto-branch }} && pip install --progress-bar off .
 
+      - name: install exact buld requirements
+        working-directory: ./backend
+        run: pip install -r requirements-build.txt
+
       - name: pip freeze
         run: pip freeze
 
