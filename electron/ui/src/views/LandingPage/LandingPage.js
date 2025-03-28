@@ -4,7 +4,19 @@ import Box from '@mui/material/Box';
 import BackgroundPic from '../../assets/homepage-background.jpg'
 import FullLogo from '../../assets/pareto-full-logo.png'
 
+export function getVersionDate() {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    yyyy = yyyy.toString().substring(2)
+    
+    let version = `${yyyy}.${mm}.${dd}`
+    return version
+}
+
 export default function LandingPage(props) {
+    const versionNumber = process.env.REACT_APP_BUILD_NUMBER || getVersionDate()
 
     const styles = {
         background: {
@@ -58,7 +70,7 @@ export default function LandingPage(props) {
                 <Grid item xs={3}> </Grid>
                 <Grid item xs={6}> 
                     <Box>
-                        <p style={{paddingTop:0, marginTop: 0, color:"#9c9c9c"}}>v24.08.13 (PARETO v{process.env.REACT_APP_PARETO_VERSION})</p>
+                        <p style={{paddingTop:0, marginTop: 0, color:"#9c9c9c"}}>v{versionNumber} (PARETO v{process.env.REACT_APP_PARETO_VERSION})</p>
                     </Box>
                 </Grid>
                 <Grid item xs={3}> </Grid>
