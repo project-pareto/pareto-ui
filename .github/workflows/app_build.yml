@@ -14,7 +14,7 @@ on:
         default: main
       project-pareto-version:
         type: string
-        default: '1.1'
+        default: '1.1.0'
       package-build-number:
         type: string
     secrets:
@@ -131,9 +131,6 @@ jobs:
       - name: install exact buld requirements
         working-directory: ./backend
         run: pip install -r requirements-build.txt
-
-      - name: pip freeze
-        run: pip freeze
 
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
