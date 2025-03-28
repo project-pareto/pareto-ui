@@ -28,7 +28,7 @@ grpcio==1.64.1
 gurobipy==10.0.0
 h11==0.13.0
 h5py==3.11.0
-idaes-pse==2.4.0
+idaes-pse==2.5.0
 idna==3.3
 importlib_metadata==7.1.0
 importlib_resources==6.4.0
@@ -70,14 +70,17 @@ pydantic==1.9.1
 Pygments==2.18.0
 pyinstaller==5.3
 pyinstaller-hooks-contrib==2022.9
-Pyomo==6.7.1
+Pyomo==6.9.1
 pyparsing==3.1.2
 pyproj==3.6.1
+python-dateutil
 python-multipart==0.0.5
+pytz
 requests==2.32.3
 requests-oauthlib==2.0.0
 rsa==4.9
 scipy==1.13.1
+six
 sniffio==1.2.0
 stack-data==0.6.3
 starlette==0.19.1
@@ -91,6 +94,7 @@ termcolor==2.4.0
 tinydb==4.7.1
 traitlets==5.14.3
 typing_extensions==4.2.0
+tzdata
 urllib3==2.2.1
 uvicorn==0.17.6
 wcwidth==0.2.13
