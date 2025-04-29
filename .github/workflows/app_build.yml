@@ -143,7 +143,7 @@ jobs:
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
         run: |
-            echo REACT_APP_BUILD_NUMBER=${{ inputs.package-build-number }} >> .env
+            echo REACT_APP_BUILD_NUMBER=${{ steps.generate-build-number.outputs.build-number }} >> .env
 
       - name: Install Electron JS dependencies
         working-directory: ./electron
