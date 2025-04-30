@@ -303,7 +303,7 @@ export default function ScenarioCompareOverrides(props) {
                     <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                         <TableRow>
                             <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"20%"}}>Scenario</TableCell> 
-                            <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"20%"}}>Fresh water source</TableCell> 
+                            <TableCell style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc", width:"20%"}}>External water source</TableCell> 
                             <TableCell style={{color:"white", width:"20%"}}>Completion Pad</TableCell>
                             <TableCell style={{color:"white", width:"20%"}}>Time</TableCell>
                             <TableCell style={{color:"white", width:"20%"}} align="right">Override Value</TableCell>
