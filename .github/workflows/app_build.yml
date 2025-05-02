@@ -112,7 +112,11 @@ jobs:
         run: |
           if [ "${{ inputs.os-version }}" == "windows-latest" ]; then
             echo "os=win64" >> $GITHUB_OUTPUT
-            echo "artifact-file-extension=exe" >> $GITHUB_OUTPUT
+            if [ "${{ inputs.windows-installer-target }}" == "zip" ]; then
+              echo "artifact-file-extension=zip" >> $GITHUB_OUTPUT
+            else
+              echo "artifact-file-extension=exe" >> $GITHUB_OUTPUT
+            fi
           else
             echo "os=arm64" >> $GITHUB_OUTPUT
             echo "artifact-file-extension=dmg" >> $GITHUB_OUTPUT
