@@ -1,4 +1,4 @@
-name: PARETO-UI Build
+name: Build Dispatch
 
 on:
   workflow_dispatch:
