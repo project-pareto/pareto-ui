@@ -76,7 +76,6 @@
       "allowToChangeInstallationDirectory": true
     },
     "dmg": {},
-    "zip": {},
     "deb": {
       "depends": [
         "libgfortran5", 
