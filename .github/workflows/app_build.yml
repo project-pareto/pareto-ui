@@ -119,7 +119,13 @@ jobs:
         ## set full path for artifact (useful to define here because it is referenced multiple times later)
       - name: Set artifact path
         id: artifact-path
-        run: echo "path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ inputs.os-version }}" == "windows-latest" ]; then
+            echo "path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}_${{ inputs.windows-installer-target }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}" >> $GITHUB_OUTPUT
+          else
+            echo "path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}" >> $GITHUB_OUTPUT
+          fi
+        
 
       - name: Update package.json with correct build version, name
         uses: restackio/update-json-file-action@2.1
