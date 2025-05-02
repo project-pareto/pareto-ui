@@ -37,22 +37,26 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      job-name: ${{ steps.generate-job-name.outputs.job-name }}
+      job-name: ${{ steps.generate-dynamic-inputs.outputs.job-name }}
+      os: ${{ steps.generate-dynamic-inputs.outputs.os }}
     steps:
-      - name: Generate job name
-        id: generate-job-name
+      - name: Generate dynamic inputs
+        id: generate-dynamic-inputs
         run: |
           if [ "${{ inputs.os-version }}" == "windows-latest" ]; then
-            echo "job-name=${{ inputs.windows-installer-target }} Build" >> $GITHUB_OUTPUT
+            echo "job-name=build ${{ inputs.windows-installer-target }}" >> $GITHUB_OUTPUT
+            echo "os=windows" >> $GITHUB_OUTPUT
           else
-            echo "job-name=DMG Build" >> $GITHUB_OUTPUT
+            echo "job-name=build dmg" >> $GITHUB_OUTPUT
+            echo "os=mac" >> $GITHUB_OUTPUT
           fi
 
   electron-build:
     needs: prepare
     uses: ./.github/workflows/app_build.yml
-    name: ${{ needs.prepare.outputs.job-name }}
+    name: ${{ needs.prepare.outputs.os }}
     with:
+      job-name:  ${{ needs.prepare.outputs.job-name }}
       os-version: ${{ inputs.os-version }}
       package-build-number: ${{ inputs.package-build-number }}
       project-pareto-repo: ${{ inputs.project-pareto-repo }}

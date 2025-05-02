@@ -3,6 +3,8 @@ run-name: PARETO UI Build
 on:
   workflow_call:
     inputs:
+      job-name:
+        type: string
       os-version:
         type: string
         default: windows-latest
@@ -53,7 +55,7 @@ defaults:
 
 jobs:
   electron-build:
-    name: ${{ inputs.os-version }} build
+    name: ${{ inputs.job-name }}
     runs-on: ${{ inputs.os-version }}
     steps:
       - uses: actions/checkout@v4
