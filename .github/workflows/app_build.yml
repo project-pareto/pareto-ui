@@ -52,7 +52,7 @@ defaults:
   run:
     # -l: use login shell (required when using Conda)
     shell: bash -l {0}
-
+## TODO: handle portable target (or remove it because ZIP is a more efficient alternative)
 jobs:
   electron-build:
     name: ${{ inputs.job-name }}
@@ -71,8 +71,8 @@ jobs:
         run: |
           dotnet tool install --global AzureSignTool
 
-      - name: DEBUG - Check for zip command
-        run: which zip || echo "zip not found"
+      - name: DEBUG - Test PowerShell availability
+        run: powershell -Command "Write-Output 'PowerShell is available'"
       
         ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
@@ -226,7 +226,9 @@ jobs:
         if: runner.os == 'Windows' && inputs.windows-installer-target == 'zip'
         working-directory: ./electron/dist
         run: |
-          zip -r ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }} ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}
+          powershell -Command "Compress-Archive -Path '${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}' -DestinationPath '${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}'"
+        # run: |
+        #   zip -r ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }} ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}
 
       - name: Upload artifact for ${{ steps.dynamic-variables.outputs.os }} build
         uses: actions/upload-artifact@v4
