@@ -52,7 +52,7 @@ defaults:
   run:
     # -l: use login shell (required when using Conda)
     shell: bash -l {0}
-## TODO: handle portable target (or remove it because ZIP is a more efficient alternative)
+
 jobs:
   electron-build:
     name: ${{ inputs.job-name }}
@@ -106,7 +106,8 @@ jobs:
             echo "build-number=${{ inputs.package-build-number }}" >> $GITHUB_OUTPUT
           fi
 
-        ## Generate os name, file extension based on os-version
+        ## Generate os name, artifact file name, extensions
+        ## For build type of zip, we build it unpacked so it can be codesigned before being zipped up
       - name: Generate os name, file extension, artifact path
         id: dynamic-variables
         run: |
@@ -140,7 +141,6 @@ jobs:
             echo "final-artifact=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64.dmg" >> $GITHUB_OUTPUT
           fi
         
-
       - name: Update package.json with correct build version, name
         uses: restackio/update-json-file-action@2.1
         with:
@@ -199,7 +199,8 @@ jobs:
           else
             npm run electron-build-win
           fi
-
+      
+        ## If building a zip, we build it unpacked so that it can be code signed. It is then zipped up as a github artifact
       - name: Sign Windows Distribution
         if: runner.os == 'Windows' && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_CLIENT_SECRET != '' && env.AZURE_CERT_NAME != ''
         env:
