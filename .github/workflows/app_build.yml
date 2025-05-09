@@ -224,7 +224,7 @@ jobs:
         if: runner.os == 'Windows' && inputs.windows-installer-target == 'zip'
         working-directory: ./electron/dist
         run: |
-          powershell -Command "Compress-Archive -Path '${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.build-target }}' -DestinationPath '${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}'"
+          powershell -Command "Compress-Archive -Path 'win-unpacked' -DestinationPath '${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}'"
         # run: |
         #   zip -r ${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }} ${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.build-target }}
 
