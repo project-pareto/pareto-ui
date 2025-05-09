@@ -29,7 +29,7 @@ on:
         type: choice
         options:
           - nsis
-          - portable
+          # - portable
           - zip
         default: windows-latest
 
