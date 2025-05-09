@@ -70,9 +70,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           dotnet tool install --global AzureSignTool
-
-      - name: DEBUG - Test PowerShell availability
-        run: powershell -Command "Write-Output 'PowerShell is available'"
       
         ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
