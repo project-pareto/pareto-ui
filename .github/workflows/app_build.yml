@@ -70,6 +70,9 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           dotnet tool install --global AzureSignTool
+
+      - name: DEBUG - Check for zip command
+        run: which zip || echo "zip not found"
       
         ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
@@ -107,29 +110,28 @@ jobs:
           fi
 
         ## Generate os name, file extension based on os-version
-      - name: Generate os name, file extension
-        id: os-specific-values
+      - name: Generate os name, file extension, artifact path
+        id: dynamic-variables
         run: |
           if [ "${{ inputs.os-version }}" == "windows-latest" ]; then
             echo "os=win64" >> $GITHUB_OUTPUT
             if [ "${{ inputs.windows-installer-target }}" == "zip" ]; then
               echo "artifact-file-extension=zip" >> $GITHUB_OUTPUT
+              echo "build-label=portable" >> $GITHUB_OUTPUT
+              echo "build-target=dir" >> $GITHUB_OUTPUT
+              echo "artifact-path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_portable" >> $GITHUB_OUTPUT
             else
               echo "artifact-file-extension=exe" >> $GITHUB_OUTPUT
+              echo "build-label=nsis" >> $GITHUB_OUTPUT
+              echo "build-target=exe" >> $GITHUB_OUTPUT
+              echo "artifact-path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_nsis" >> $GITHUB_OUTPUT
             fi
           else
             echo "os=arm64" >> $GITHUB_OUTPUT
             echo "artifact-file-extension=dmg" >> $GITHUB_OUTPUT
-          fi
-
-        ## set full path for artifact (useful to define here because it is referenced multiple times later)
-      - name: Set artifact path
-        id: artifact-path
-        run: |
-          if [ "${{ inputs.os-version }}" == "windows-latest" ]; then
-            echo "path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}_${{ inputs.windows-installer-target }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}" >> $GITHUB_OUTPUT
-          else
-            echo "path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}" >> $GITHUB_OUTPUT
+            echo "build-label=dmg" >> $GITHUB_OUTPUT
+            echo "build-target=dmg" >> $GITHUB_OUTPUT
+            echo "artifact-path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64" >> $GITHUB_OUTPUT
           fi
         
 
@@ -137,7 +139,7 @@ jobs:
         uses: restackio/update-json-file-action@2.1
         with:
           file: ./electron/package.json
-          fields: "{\"version\": \"${{ steps.generate-build-number.outputs.build-number }}\", \"build.win.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}_${{ inputs.windows-installer-target }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}\", \"build.mac.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}\", \"build.nsis.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}_${{ inputs.windows-installer-target }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}\", \"build.dmg.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.os-specific-values.outputs.os }}.${{ steps.os-specific-values.outputs.artifact-file-extension }}\", \"build.win.target\": \"${{ inputs.windows-installer-target }}\"}"
+          fields: "{\"version\": \"${{ steps.generate-build-number.outputs.build-number }}\", \"build.win.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.dynamic-variables.outputs.os }}_${{ steps.dynamic-variables.outputs.build_label }}.${{ steps.dynamic-variables.outputs.build-target }}\", \"build.mac.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.dynamic-variables.outputs.os }}.${{ steps.dynamic-variables.outputs.build-target }}\", \"build.nsis.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.dynamic-variables.outputs.os }}_${{ steps.dynamic-variables.outputs.build_label }}.${{ steps.dynamic-variables.outputs.build-target }}\", \"build.dmg.artifactName\": \"PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_${{ steps.dynamic-variables.outputs.os }}.${{ steps.dynamic-variables.outputs.build-target }}\", \"build.win.target\": \"${{ steps.dynamic-variables.outputs.build-target }}\"}"
 
       - name: Install project pareto locally
         working-directory: ../
@@ -178,7 +180,7 @@ jobs:
           CI: false
         run: npm run build-frontend
 
-      - name: Build ${{ steps.os-specific-values.outputs.os }} Distribution
+      - name: Build ${{ steps.dynamic-variables.outputs.os }} Distribution
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
@@ -186,11 +188,15 @@ jobs:
           TEAM_ID: ${{ secrets.TEAM_ID }}
         working-directory: ./electron
         run: |
-          if [ "${{ steps.os-specific-values.outputs.os }}" = "arm64" ]; then
+          if [ "${{ steps.dynamic-variables.outputs.os }}" = "arm64" ]; then
             npm run electron-build-mac
           else
             npm run electron-build-win
           fi
+
+      - name: DEBUG - display windows output
+        working-directory: ./electron/dist
+        run: ls -a
 
       - name: Sign Windows Distribution
         if: runner.os == 'Windows' && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_CLIENT_SECRET != '' && env.AZURE_CERT_NAME != ''
@@ -201,11 +207,30 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
         run: |
-          AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v ${{ steps.artifact-path.outputs.path }}
+          if [ "${{ inputs.windows-installer-target }}" = "zip" ]; then
+            echo "Signing individual files in dir target"
+            cd ${{ steps.dynamic-variables.outputs.artifact-path }}
+            ls -a
+            for exe in *.exe; do
+              azuresigntool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "$exe"
+            done
+            for dll in *.dll; do
+              azuresigntool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "$dll"
+          done
+          else
+            echo "Signing windows artifact"
+            AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}
+          fi
 
-      - name: Upload artifact for ${{ steps.os-specific-values.outputs.os }} build
+      - name: Zip portable Windows distribution
+        if: runner.os == 'Windows' && inputs.windows-installer-target == 'zip'
+        working-directory: ./electron/dist
+        run: |
+          zip -r ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }} ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}
+
+      - name: Upload artifact for ${{ steps.dynamic-variables.outputs.os }} build
         uses: actions/upload-artifact@v4
         if: always()
         with:
-            name: ${{ steps.os-specific-values.outputs.os }}-pareto-dist
-            path: ${{ steps.artifact-path.outputs.path }}
+            name: ${{ steps.dynamic-variables.outputs.os }}-pareto-dist
+            path: ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}
