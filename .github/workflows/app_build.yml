@@ -119,19 +119,19 @@ jobs:
               echo "artifact-file-extension=zip" >> $GITHUB_OUTPUT
               echo "build-label=portable" >> $GITHUB_OUTPUT
               echo "build-target=dir" >> $GITHUB_OUTPUT
-              echo "artifact-path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_portable" >> $GITHUB_OUTPUT
+              echo "artifact-name=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_portable" >> $GITHUB_OUTPUT
             else
               echo "artifact-file-extension=exe" >> $GITHUB_OUTPUT
               echo "build-label=nsis" >> $GITHUB_OUTPUT
               echo "build-target=exe" >> $GITHUB_OUTPUT
-              echo "artifact-path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_nsis" >> $GITHUB_OUTPUT
+              echo "artifact-name=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_nsis" >> $GITHUB_OUTPUT
             fi
           else
             echo "os=arm64" >> $GITHUB_OUTPUT
             echo "artifact-file-extension=dmg" >> $GITHUB_OUTPUT
             echo "build-label=dmg" >> $GITHUB_OUTPUT
             echo "build-target=dmg" >> $GITHUB_OUTPUT
-            echo "artifact-path=electron/dist/PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64" >> $GITHUB_OUTPUT
+            echo "artifact-name=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64" >> $GITHUB_OUTPUT
           fi
         
 
@@ -206,10 +206,11 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+        working-directory: electron/dist
         run: |
           if [ "${{ inputs.windows-installer-target }}" = "zip" ]; then
             echo "Signing individual files in dir target"
-            cd ${{ steps.dynamic-variables.outputs.artifact-path }}
+            cd win-unpacked
             ls -a
             for exe in *.exe; do
               azuresigntool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "$exe"
@@ -219,20 +220,20 @@ jobs:
           done
           else
             echo "Signing windows artifact"
-            AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}
+            AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v ${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.build-target }}
           fi
 
       - name: Zip portable Windows distribution
         if: runner.os == 'Windows' && inputs.windows-installer-target == 'zip'
         working-directory: ./electron/dist
         run: |
-          powershell -Command "Compress-Archive -Path '${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}' -DestinationPath '${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}'"
+          powershell -Command "Compress-Archive -Path '${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.build-target }}' -DestinationPath '${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}'"
         # run: |
-        #   zip -r ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }} ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.build-target }}
+        #   zip -r ${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }} ${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.build-target }}
 
       - name: Upload artifact for ${{ steps.dynamic-variables.outputs.os }} build
         uses: actions/upload-artifact@v4
         if: always()
         with:
             name: ${{ steps.dynamic-variables.outputs.os }}-pareto-dist
-            path: ${{ steps.dynamic-variables.outputs.artifact-path }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}
+            path: electron/dist/${{ steps.dynamic-variables.outputs.artifact-name }}.${{ steps.dynamic-variables.outputs.artifact-file-extension }}
