@@ -118,6 +118,12 @@ jobs:
               echo "build-target=dir" >> $GITHUB_OUTPUT
               echo "artifact-name=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_portable" >> $GITHUB_OUTPUT
               echo "final-artifact=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_portable" >> $GITHUB_OUTPUT
+            elif [ "${{ inputs.windows-installer-target }}" == "portable" ]; then
+              echo "artifact-file-extension=exe" >> $GITHUB_OUTPUT
+              echo "build-label=portable" >> $GITHUB_OUTPUT
+              echo "build-target=portable" >> $GITHUB_OUTPUT
+              echo "artifact-name=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_portable" >> $GITHUB_OUTPUT
+              echo "final-artifact=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_win64_portable.exe" >> $GITHUB_OUTPUT
             else
               echo "artifact-file-extension=exe" >> $GITHUB_OUTPUT
               echo "build-label=nsis" >> $GITHUB_OUTPUT
