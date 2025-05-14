@@ -204,9 +204,9 @@ app.whenReady().then(() => {
         serverProcess = startServer()
   
         // let uiProcess = startUI()
-        let noTrails = 0
+        let noTrials = 0
         // Start Window 
-        var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=5) => {
+        var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=25) => {
             
             axios.get(url).then(() => {
                 console.log(`${appName} is ready at ${url}!`)
@@ -219,8 +219,8 @@ app.whenReady().then(() => {
                 console.log(`Waiting to be able to connect ${appName} at ${url}...`)
                 log.info(`Waiting to be able to connect ${appName} at ${url}...`)
                 await new Promise(resolve => setTimeout(resolve, 10000))
-                noTrails += 1
-                if (noTrails < maxTrials) {
+                noTrials += 1
+                if (noTrials < maxTrials) {
                     startUp(url, appName, spawnedProcess, successFn, maxTrials)
                 }
                 else {
