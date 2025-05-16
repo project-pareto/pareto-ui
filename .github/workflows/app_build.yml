@@ -216,12 +216,26 @@ jobs:
             mv win-unpacked ${{ steps.dynamic-variables.outputs.artifact-name }}
             cd ${{ steps.dynamic-variables.outputs.artifact-name }}
             ls -a
-            for exe in *.exe; do
-              azuresigntool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "$exe"
-            done
-            for dll in *.dll; do
-              azuresigntool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "$dll"
-            done
+
+            echo "Recursively signing .exe files"
+            find . -type f -name "*.exe" -exec azuresigntool sign \
+              -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" \
+              -kvi "${{ secrets.AZURE_CLIENT_ID }}" \
+              -kvt "${{ secrets.AZURE_TENANT_ID }}" \
+              -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" \
+              -kvc "${{ secrets.AZURE_CERT_NAME }}" \
+              -tr http://timestamp.digicert.com \
+              -v {} \;
+
+            echo "Recursively signing .dll files"
+            find . -type f -name "*.dll" -exec azuresigntool sign \
+              -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" \
+              -kvi "${{ secrets.AZURE_CLIENT_ID }}" \
+              -kvt "${{ secrets.AZURE_TENANT_ID }}" \
+              -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" \
+              -kvc "${{ secrets.AZURE_CERT_NAME }}" \
+              -tr http://timestamp.digicert.com \
+              -v {} \;
           else
             echo "Signing windows artifact"
             AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v ${{ steps.dynamic-variables.outputs.artifact-name }}.exe
