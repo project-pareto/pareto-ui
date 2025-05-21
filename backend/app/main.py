@@ -27,7 +27,19 @@ import idaes.logger as idaeslog
 
 _log = idaeslog.getLogger(__name__)
 
-load_dotenv()
+## load environment differently depending on mode (prod or dev)
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        # PyInstaller bundle:
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+
+base_dir = get_base_dir()
+dotenv_path = os.path.join(base_dir, ".env")
+_log.info(f"checking for .env in {dotenv_path}")
+load_dotenv(dotenv_path)
+
 
 # add pareto idaes_extensions path, remove idaes default path
 is_prod = os.environ.get("production", None)

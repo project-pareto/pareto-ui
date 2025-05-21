@@ -94,9 +94,8 @@ else:
     idaes_extension_files = ["cbc.exe", "libgfortran-5.dll", "libquadmath-0.dll", "libstdc++-6.dll"]
 
 for file in idaes_extension_files:
-    try:
-        datas.append((f"idaes_extensions/{file}", "idaes_extensions"))
-    except Exception as e:
-        print(f"unable to add idaes extension file {file} : {e}")
+    datas.append((f"idaes_extensions/{file}", "idaes_extensions"))
+
+datas.append((".env"), "")
 
 print(datas)
