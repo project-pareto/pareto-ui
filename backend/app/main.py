@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import multiprocessing
-import socket, errno
+from dotenv import load_dotenv
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -27,13 +27,17 @@ import idaes.logger as idaeslog
 
 _log = idaeslog.getLogger(__name__)
 
+load_dotenv()
+
 # add pareto idaes_extensions path, remove idaes default path
-idaes_extensions_path = f"{SCRIPT_DIR}/idaes_extensions"
-os.environ["PATH"] = idaes_extensions_path + os.pathsep + os.environ["PATH"]
-original_path = os.environ["PATH"]
-paths = original_path.split(os.pathsep)
-filtered_paths = [p for p in paths if "idaes/bin" not in p]
-os.environ["PATH"] = os.pathsep.join(filtered_paths)
+if os.environ.get("production", None):
+    _log.info(f"PRODUCTION: using custom path for solver executables (cbc)")
+    idaes_extensions_path = f"{SCRIPT_DIR}/idaes_extensions"
+    os.environ["PATH"] = idaes_extensions_path + os.pathsep + os.environ["PATH"]
+    original_path = os.environ["PATH"]
+    paths = original_path.split(os.pathsep)
+    filtered_paths = [p for p in paths if "idaes/bin" not in p]
+    os.environ["PATH"] = os.pathsep.join(filtered_paths)
 
 app = FastAPI()
 
