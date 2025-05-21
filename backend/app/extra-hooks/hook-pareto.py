@@ -14,6 +14,7 @@ import importlib
 from pathlib import Path
 import re
 import os
+import sys
 
 datas = []
 
@@ -83,5 +84,19 @@ datas.append(('internal/assets/workshop_baseline_all_data_0.9.0.xlsx', 'app/inte
 
 # add lorem ipsum.txt for jaraco
 datas.append(('internal/assets/Lorem ipsum.txt', 'jaraco/text'))
+
+# add necessary idaes extensions files
+if sys.platform == "darwin":
+    idaes_extension_files = ["cbc", "libgfortran.5.dylib", "libquadmath.0.dylib", "libstdc++.6.dylib"]
+elif sys.platform == "linux":
+    idaes_extension_files = ["cbc"]
+else:
+    idaes_extension_files = ["cbc.exe", "libgfortran-5.dll", "libquadmath-0.dll", "libstdc++-6.dll"]
+
+for file in idaes_extension_files:
+    try:
+        datas.append((f"idaes_extensions/{file}", "idaes_extensions"))
+    except Exception as e:
+        print(f"unable to add idaes extension file {file} : {e}")
 
 print(datas)

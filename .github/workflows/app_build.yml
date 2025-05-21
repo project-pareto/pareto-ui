@@ -174,7 +174,10 @@ jobs:
         run: npm clean-install
 
       - name: Get idaes extensions
-        run: idaes get-extensions
+        working-directory: backend/app
+        run: |
+          mkdir idaes_extensions
+          idaes get-extensions --to .
 
       - name: Build Backend
         working-directory: ./electron

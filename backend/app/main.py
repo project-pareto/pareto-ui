@@ -27,6 +27,16 @@ import idaes.logger as idaeslog
 
 _log = idaeslog.getLogger(__name__)
 
+# add pareto idaes_extensions path, remove idaes default path
+idaes_extensions_path = f"{SCRIPT_DIR}/idaes_extensions"
+os.environ["PATH"] = idaes_extensions_path + os.pathsep + os.environ["PATH"]
+original_path = os.environ["PATH"]
+paths = original_path.split(os.pathsep)
+filtered_paths = [p for p in paths if "idaes/bin" not in p]
+os.environ["PATH"] = os.pathsep.join(filtered_paths)
+
+_log.info(f"path is now: {os.environ['PATH']}")
+
 app = FastAPI()
 
 app.add_middleware(
