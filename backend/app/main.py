@@ -35,8 +35,6 @@ paths = original_path.split(os.pathsep)
 filtered_paths = [p for p in paths if "idaes/bin" not in p]
 os.environ["PATH"] = os.pathsep.join(filtered_paths)
 
-_log.info(f"path is now: {os.environ['PATH']}")
-
 app = FastAPI()
 
 app.add_middleware(
