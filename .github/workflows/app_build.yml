@@ -173,6 +173,11 @@ jobs:
         working-directory: ./electron/ui
         run: npm clean-install
 
+      - name: Add .env file
+        working-directory: backend/app
+        run: |
+          echo production=true
+
       - name: Get idaes extensions
         working-directory: backend/app
         run: |

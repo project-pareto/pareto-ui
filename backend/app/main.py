@@ -30,7 +30,8 @@ _log = idaeslog.getLogger(__name__)
 load_dotenv()
 
 # add pareto idaes_extensions path, remove idaes default path
-if os.environ.get("production", None):
+is_prod = os.environ.get("production", None)
+if is_prod:
     _log.info(f"PRODUCTION: using custom path for solver executables (cbc)")
     idaes_extensions_path = f"{SCRIPT_DIR}/idaes_extensions"
     os.environ["PATH"] = idaes_extensions_path + os.pathsep + os.environ["PATH"]
@@ -38,6 +39,8 @@ if os.environ.get("production", None):
     paths = original_path.split(os.pathsep)
     filtered_paths = [p for p in paths if "idaes/bin" not in p]
     os.environ["PATH"] = os.pathsep.join(filtered_paths)
+else:
+    _log.info(f"rolling with default solvers path: {is_prod}")
 
 app = FastAPI()
 
