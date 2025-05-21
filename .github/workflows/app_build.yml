@@ -173,11 +173,17 @@ jobs:
         working-directory: ./electron/ui
         run: npm clean-install
 
+        ## if mac, use this url: https://github.com/IDAES/idaes-ext/releases/download/3.4.2/idaes-solvers-darwin-aarch64.tar.gz
+        ## ^will have to extract, move from bin^
       - name: Get idaes extensions
         working-directory: backend/app
         run: |
           mkdir idaes_extensions
-          idaes get-extensions --to .
+          idaes get-extensions --to ./idaes_extensions
+
+      - name: DEBUG - directory for idaes extensions
+        working-directory: backend/app/idaes_extensions
+        run: ls -a
 
       - name: Build Backend
         working-directory: ./electron
