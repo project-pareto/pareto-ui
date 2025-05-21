@@ -5,7 +5,8 @@ sys.setrecursionlimit(5000)
 
 block_cipher = None
 
-extra_data.append(('GUROBI_RUN.py','.'))
+
+extra_data = [('GUROBI_RUN.py','.')]
 
 a = Analysis(
     ['main.py'],
