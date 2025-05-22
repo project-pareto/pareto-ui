@@ -96,6 +96,6 @@ else:
 for file in idaes_extension_files:
     datas.append((f"idaes_extensions/{file}", "idaes_extensions"))
 
-datas.append((".env"), "")
+datas.append((".env", ""))
 
 print(datas)
