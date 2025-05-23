@@ -26,7 +26,7 @@ export const descriptions = {
               </div>,
     solver: <div>
               Select the solver you would like to use. Note: Gurobi requires a license. 
-              If you do not have a Gurobi license, select "CBC". "CBC" is an open source solver; see &nbsp;
+              If you do not have a Gurobi license, select "CBC". CBC is an open source solver; see &nbsp;
             <a 
                 style={{ color: "#FFFF13" }} 
                 href="https://github.com/coin-or/Cbc"
