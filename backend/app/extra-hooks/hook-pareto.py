@@ -87,14 +87,22 @@ datas.append(('internal/assets/Lorem ipsum.txt', 'jaraco/text'))
 
 # add necessary idaes extensions files
 if sys.platform == "darwin":
-    idaes_extension_files = ["cbc", "libgfortran.5.dylib", "libquadmath.0.dylib", "libstdc++.6.dylib"]
+    idaes_extension_files = ["cbc", "libgfortran.5.dylib", "libquadmath.0.dylib", "libstdc++.6.dylib", "libgcc_s.1.1.dylib"]
 elif sys.platform == "linux":
     idaes_extension_files = ["cbc"]
 else:
-    idaes_extension_files = ["cbc.exe", "libgfortran-5.dll", "libquadmath-0.dll", "libstdc++-6.dll"]
+    idaes_extension_files = ["cbc.exe", "libgfortran-5.dll", "libquadmath-0.dll", "libstdc++-6.dll", "libgcc_s_seh-1.dll"]
 
 for file in idaes_extension_files:
     datas.append((f"idaes_extensions/{file}", "idaes_extensions"))
+
+## alternatively, we can add them all:
+# idaes_extensions_directory = "idaes_extensions"
+# for file in os.listdir(idaes_extensions_directory):
+#     filepath = os.path.join(idaes_extensions_directory, file)
+#     if os.path.isfile(filepath):
+#         datas.append((filepath, idaes_extensions_directory))
+
 
 datas.append((".env", "."))
 
