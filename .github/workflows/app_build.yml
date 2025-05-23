@@ -266,5 +266,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
+            include-hidden-files: true
             name: ${{ steps.dynamic-variables.outputs.artifact-name }}
             path: electron/dist/${{ steps.dynamic-variables.outputs.final-artifact }}
