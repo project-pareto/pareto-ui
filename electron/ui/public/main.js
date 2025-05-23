@@ -85,6 +85,7 @@ function createWindow() {
 }
 
 const installExtensions = () => {
+    return 0;
 
     try{
     installationProcess = spawn(
