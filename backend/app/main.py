@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import multiprocessing
-import socket, errno
+from dotenv import load_dotenv
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -26,6 +26,33 @@ from app.routers import scenarios
 import idaes.logger as idaeslog
 
 _log = idaeslog.getLogger(__name__)
+
+## load environment differently depending on mode (prod or dev)
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        # PyInstaller bundle:
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+
+base_dir = get_base_dir()
+dotenv_path = os.path.join(base_dir, ".env")
+_log.info(f"checking for .env in {dotenv_path}")
+load_dotenv(dotenv_path)
+
+
+# add pareto idaes_extensions path, remove idaes default path
+is_prod = os.environ.get("production", None)
+if is_prod:
+    _log.info(f"PRODUCTION: using custom path for solver executables (cbc)")
+    idaes_extensions_path = f"{SCRIPT_DIR}/idaes_extensions"
+    os.environ["PATH"] = idaes_extensions_path + os.pathsep + os.environ["PATH"]
+    original_path = os.environ["PATH"]
+    paths = original_path.split(os.pathsep)
+    filtered_paths = [p for p in paths if "idaes/bin" not in p]
+    os.environ["PATH"] = os.pathsep.join(filtered_paths)
+else:
+    _log.info(f"rolling with default solvers path: {is_prod}")
 
 app = FastAPI()
 

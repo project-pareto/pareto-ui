@@ -1,3 +1,4 @@
+import Link from '@mui/material/Link';
 export const descriptions = {
     objective: <div>Select what you would like to minimize or maximize.</div>,
     runtime:  <div> 
@@ -25,7 +26,13 @@ export const descriptions = {
               </div>,
     solver: <div>
               Select the solver you would like to use. Note: Gurobi requires a license. 
-              If you do not have a Gurobi licence, select "CBC", an open source solver.
+              If you do not have a Gurobi license, select "CBC". CBC is an open source solver; see &nbsp;
+            <a 
+                style={{ color: "#FFFF13" }} 
+                href="https://github.com/coin-or/Cbc"
+            >
+                here
+            </a>.
             </div>,
     scale_model: <div>
             Choose whether you would like to scale the model or not.
