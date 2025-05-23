@@ -91,9 +91,6 @@ function createWindow() {
 }
 
 const installExtensions = () => {
-    _log("skipping extensions")
-    return 0;
-
     try{
     installationProcess = spawn(
       path.join(__dirname, "../py_dist/main/main"),
@@ -185,40 +182,40 @@ app.whenReady().then(() => {
     } else {
       let win = createWindow();
       let serverProcess
-      let installationProcess = installExtensions()
-      installationProcess.on('exit', code => {
-        _log('installation exit code is', code)
-        _log('starting server')
-        serverProcess = startServer()
-  
-        // let uiProcess = startUI()
-        let noTrials = 0
-        // Start Window 
-        var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=25) => {
-            
-            axios.get(url).then(() => {
-                _log(`${appName} is ready at ${url}!`)
-            })
-            .catch(async () => {
-                _log(`Waiting to be able to connect ${appName} at ${url}...`)
-                await new Promise(resolve => setTimeout(resolve, 10000))
-                noTrials += 1
-                if (noTrials < maxTrials) {
-                    startUp(url, appName, spawnedProcess, successFn, maxTrials)
-                }
-                else {
-                    _log(`Exceeded maximum trials to connect to ${appName}`)
-                    // spawnedProcess.kill('SIGINT')
-                    // win.close()
-                }
-            });
-        };
-        startUp(serverURL, 'FastAPI Server', serverProcess)
-        app.on('quit', () => {
-          _log('shutting down backend server')
-          serverProcess.kill()
-        })
+      // let installationProcess = installExtensions()
+      // installationProcess.on('exit', code => {
+      //   _log('installation exit code is', code)
+      _log('starting server')
+      serverProcess = startServer()
+
+      // let uiProcess = startUI()
+      let noTrials = 0
+      // Start Window 
+      var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=25) => {
+          
+          axios.get(url).then(() => {
+              _log(`${appName} is ready at ${url}!`)
+          })
+          .catch(async () => {
+              _log(`Waiting to be able to connect ${appName} at ${url}...`)
+              await new Promise(resolve => setTimeout(resolve, 10000))
+              noTrials += 1
+              if (noTrials < maxTrials) {
+                  startUp(url, appName, spawnedProcess, successFn, maxTrials)
+              }
+              else {
+                  _log(`Exceeded maximum trials to connect to ${appName}`)
+                  // spawnedProcess.kill('SIGINT')
+                  // win.close()
+              }
+          });
+      };
+      startUp(serverURL, 'FastAPI Server', serverProcess)
+      app.on('quit', () => {
+        _log('shutting down backend server')
+        serverProcess.kill()
       })
+      // })
     }
 
     
