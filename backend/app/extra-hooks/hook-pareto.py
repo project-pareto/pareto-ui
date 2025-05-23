@@ -16,6 +16,26 @@ import re
 import os
 import sys
 
+def add_cbc_and_dependencies():
+    cbc_datas = []
+    if sys.platform == "darwin":
+        cbc = "cbc"
+    elif sys.platform == "linux":
+        cbc = "cbc"
+    else:
+        cbc = "cbc.exe"
+    cbc_datas.append((f"idaes_extensions/{cbc}", "idaes_extensions"))
+    
+    # add every dynamic link library just to be safe 
+    idaes_extensions_directory = "idaes_extensions"
+    for file in os.listdir(idaes_extensions_directory):
+        if "dll" in file or "dylib" in file:
+            filepath = os.path.join(idaes_extensions_directory, file)
+            if os.path.isfile(filepath):
+                cbc_datas.append((filepath, idaes_extensions_directory))
+    print(f"cbc_datas: \n{cbc_datas}")
+    return cbc_datas
+
 datas = []
 
 skip_expr = re.compile(r"_test|test_|__")
@@ -86,23 +106,18 @@ datas.append(('internal/assets/workshop_baseline_all_data_0.9.0.xlsx', 'app/inte
 datas.append(('internal/assets/Lorem ipsum.txt', 'jaraco/text'))
 
 # add necessary idaes extensions files
-if sys.platform == "darwin":
-    idaes_extension_files = ["cbc", "libgfortran.5.dylib", "libquadmath.0.dylib", "libstdc++.6.dylib", "libgcc_s.1.1.dylib"]
-elif sys.platform == "linux":
-    idaes_extension_files = ["cbc"]
-else:
-    idaes_extension_files = ["cbc.exe", "libgfortran-5.dll", "libquadmath-0.dll", "libstdc++-6.dll", "libgcc_s_seh-1.dll"]
+# if sys.platform == "darwin":
+#     idaes_extension_files = ["cbc", "libgfortran.5.dylib", "libquadmath.0.dylib", "libstdc++.6.dylib", "libgcc_s.1.1.dylib"]
+# elif sys.platform == "linux":
+#     idaes_extension_files = ["cbc"]
+# else:
+#     idaes_extension_files = ["cbc.exe", "libgfortran-5.dll", "libquadmath-0.dll", "libstdc++-6.dll", "libgcc_s_seh-1.dll"]
 
-for file in idaes_extension_files:
-    datas.append((f"idaes_extensions/{file}", "idaes_extensions"))
+# for file in idaes_extension_files:
+#     datas.append((f"idaes_extensions/{file}", "idaes_extensions"))
 
-## alternatively, we can add them all:
-# idaes_extensions_directory = "idaes_extensions"
-# for file in os.listdir(idaes_extensions_directory):
-#     filepath = os.path.join(idaes_extensions_directory, file)
-#     if os.path.isfile(filepath):
-#         datas.append((filepath, idaes_extensions_directory))
-
+cbc_datas = add_cbc_and_dependencies()
+datas.extend(cbc_datas)
 
 datas.append((".env", "."))
 

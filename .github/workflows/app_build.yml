@@ -184,6 +184,10 @@ jobs:
           mkdir idaes_extensions
           idaes get-extensions --to ./idaes_extensions
 
+      - name: DEBUG - directory for .env
+        working-directory: backend/app
+        run: ls -a
+
       - name: DEBUG - directory for idaes extensions
         working-directory: backend/app/idaes_extensions
         run: ls -a
@@ -211,6 +215,11 @@ jobs:
           else
             npm run electron-build-win
           fi
+
+      - name: DEBUG - look for .env in windows dist
+        if: runner.os == 'Windows'
+        working-directory: electron/dist/win-unpacked/resources/app/py_dist/main
+        run: ls -a
       
         ## If building a zip, we build it unpacked so that it can be code signed. It is then zipped up as a github artifact
       - name: Sign Windows Distribution
