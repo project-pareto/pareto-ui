@@ -173,8 +173,16 @@ jobs:
         working-directory: ./electron/ui
         run: npm clean-install
 
+      - name: Add backend .env file
+        working-directory: backend/app
+        run: |
+          echo production=true >> .env
+
       - name: Get idaes extensions
-        run: idaes get-extensions
+        working-directory: backend/app
+        run: |
+          mkdir idaes_extensions
+          idaes get-extensions --to ./idaes_extensions
 
       - name: Build Backend
         working-directory: ./electron
@@ -245,5 +253,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
+            include-hidden-files: true
             name: ${{ steps.dynamic-variables.outputs.artifact-name }}
             path: electron/dist/${{ steps.dynamic-variables.outputs.final-artifact }}

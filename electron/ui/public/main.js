@@ -27,6 +27,12 @@ const uiURL = `http://localhost:${UI_PORT}`
 
 require('@electron/remote/main').initialize()
 
+// custom log function to make sure we log everything to console and file
+function _log (message) {
+  log.info(message);
+  console.log(message);
+}
+
 function getWindowSettings () {
   const default_bounds = [800, 600]
 
@@ -47,7 +53,7 @@ function saveBounds (bounds) {
 function createWindow() {
   
   const bounds = getWindowSettings();
-  console.log('bounds:',bounds)
+  _log('bounds:',bounds)
 
   // Create the browser window.
   const win = new BrowserWindow({
@@ -70,7 +76,7 @@ function createWindow() {
   }
   win.webContents.on('will-navigate', handleRedirect)
   win.webContents.on('new-window', handleRedirect)
-  console.log("storing user preferences in: ",app.getPath('userData'));
+  _log("storing user preferences in: ",app.getPath('userData'));
 
   // save size of window when resized
   win.on("resized", () => saveBounds(win.getSize()));
@@ -85,7 +91,6 @@ function createWindow() {
 }
 
 const installExtensions = () => {
-
     try{
     installationProcess = spawn(
       path.join(__dirname, "../py_dist/main/main"),
@@ -94,27 +99,24 @@ const installExtensions = () => {
       ]
     );
 
-    log.info("installation started");
-    console.log("installation started");
+    _log("installation started")
 
       var scriptOutput = "";
       installationProcess.stdout.setEncoding('utf8');
       installationProcess.stdout.on('data', function(data) {
-          // console.log('stdout: ' + data);
-          log.info('stdout: ' + data);
+          _log('stdout: ' + data);
           data=data.toString();
           scriptOutput+=data;
       });
 
       installationProcess.stderr.setEncoding('utf8');
       installationProcess.stderr.on('data', function(data) {
-          // console.log('stderr: ' + data);
-          log.info('stderr: ' + data);
+          _log('stderr: ' + data);
           data=data.toString();
           scriptOutput+=data;
       });
     } catch (error) {
-      log.info("unable to get extensions: ",error);
+      _log("unable to get extensions: ",error);
       console.error("unable to get extensions: ",error);
     }
     return installationProcess;
@@ -138,16 +140,6 @@ const startServer = () => {
         }
       );
 
-      // backendProcess = spawn(
-      //   path.join(__dirname, "../py_dist/main/main"),
-      //   [
-      //     ""
-      //   ]
-      // );
-
-      // log.info("Python Started in dev mode");
-      // console.log("Python Started in dev mode");
-
     } else {
       try {
         backendProcess = spawn(
@@ -159,24 +151,21 @@ const startServer = () => {
         var scriptOutput = "";
         backendProcess.stdout.setEncoding('utf8');
         backendProcess.stdout.on('data', function(data) {
-            // console.log('stdout: ' + data);
-            log.info('stdout: ' + data);
+            _log('stdout: ' + data);
             data=data.toString();
             scriptOutput+=data;
         });
 
         backendProcess.stderr.setEncoding('utf8');
         backendProcess.stderr.on('data', function(data) {
-            // console.log('stderr: ' + data);
-            log.info('stderr: ' + data);
+            _log('stderr: ' + data);
             data=data.toString();
             scriptOutput+=data;
         });
-        log.info("Python process started in built mode");
-        console.log("Python process started in built mode");
+        _log("Python process started in built mode");
       } catch (error) {
-        log.info("unable to start python process in build mode: ");
-        log.info(error)
+        _log("unable to start python process in build mode: ");
+        _log(error)
         console.error("unable to start python process in build mode: ");
         console.error(error)
       }
@@ -189,55 +178,44 @@ const startServer = () => {
 app.whenReady().then(() => {
     // Entry point
     if (isDev) {
-      // log.info('starting electron app in dev mode')
-      // console.log('starting electron app in dev mode')
       createWindow();
     } else {
       let win = createWindow();
       let serverProcess
-      let installationProcess = installExtensions()
-      installationProcess.on('exit', code => {
-        log.info('installation exit code is', code)
-        console.log('installation exit code is', code)
-        log.info('starting server')
-        console.log('starting server')
-        serverProcess = startServer()
-  
-        // let uiProcess = startUI()
-        let noTrials = 0
-        // Start Window 
-        var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=25) => {
-            
-            axios.get(url).then(() => {
-                console.log(`${appName} is ready at ${url}!`)
-                log.info(`${appName} is ready at ${url}!`)
-                // if (successFn) {
-                //     successFn()
-                // }
-            })
-            .catch(async () => {
-                console.log(`Waiting to be able to connect ${appName} at ${url}...`)
-                log.info(`Waiting to be able to connect ${appName} at ${url}...`)
-                await new Promise(resolve => setTimeout(resolve, 10000))
-                noTrials += 1
-                if (noTrials < maxTrials) {
-                    startUp(url, appName, spawnedProcess, successFn, maxTrials)
-                }
-                else {
-                    console.error(`Exceeded maximum trials to connect to ${appName}`)
-                    log.info(`Exceeded maximum trials to connect to ${appName}`)
-                    // spawnedProcess.kill('SIGINT')
-                    // win.close()
-                }
-            });
-        };
-        startUp(serverURL, 'FastAPI Server', serverProcess)
-        app.on('quit', () => {
-          console.log('shutting down backend server')
-          log.info('shutting down backend server')
-          serverProcess.kill()
-        })
+      // let installationProcess = installExtensions()
+      // installationProcess.on('exit', code => {
+      //   _log('installation exit code is', code)
+      _log('starting server')
+      serverProcess = startServer()
+
+      // let uiProcess = startUI()
+      let noTrials = 0
+      // Start Window 
+      var startUp = (url, appName, spawnedProcess, successFn=null, maxTrials=25) => {
+          
+          axios.get(url).then(() => {
+              _log(`${appName} is ready at ${url}!`)
+          })
+          .catch(async () => {
+              _log(`Waiting to be able to connect ${appName} at ${url}...`)
+              await new Promise(resolve => setTimeout(resolve, 10000))
+              noTrials += 1
+              if (noTrials < maxTrials) {
+                  startUp(url, appName, spawnedProcess, successFn, maxTrials)
+              }
+              else {
+                  _log(`Exceeded maximum trials to connect to ${appName}`)
+                  // spawnedProcess.kill('SIGINT')
+                  // win.close()
+              }
+          });
+      };
+      startUp(serverURL, 'FastAPI Server', serverProcess)
+      app.on('quit', () => {
+        _log('shutting down backend server')
+        serverProcess.kill()
       })
+      // })
     }
 
     
