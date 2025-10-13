@@ -9,6 +9,7 @@ import { blueIcon, disposalIcon, treatmentIcon, completionPadIcon, productionPad
 // import CustomIcon from '../CustomIcon/CustomIcon';
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
+import NetworkNodePopup from './NetworkNodePopup';
 
 // h = roads only
 // m = standard roadmap
@@ -39,10 +40,11 @@ export default function NetworkMap(props) {
     const [ googleMapType, setGoogleMapType ] = useState('y')
     const [ lineData, setLineData ] = useState([])
     const [ nodeData, setNodeData ] = useState([])
-    const [ showRoadtripLines, setShowRoadtripLines ] = useState(true)
     const [ mapCenter, setMapCenter ] = useState([38, -98])
     const [ mapZoom, setMapZoom ] = useState(5)
     const [ showMap, setShowMap ] = useState(false)
+    const [showNetworkNodePopup, setShowNetworkNodePopup] = useState(false)
+    const [selectedNode, setSelectedNode] = useState(null)
     const [ mapBounds, setMapBounds ] = useState(
         [// southwest, northeast
             [25.6866,-127.4969],
@@ -143,16 +145,17 @@ export default function NetworkMap(props) {
 
     }, [])
 
-    const handleToggleRoadtripLines = (event) => {
-        setShowRoadtripLines(!showRoadtripLines)
-    }
-
     function CustomMapHandler() {
         const map = useMap()
         // console.log('map bounds:', map.getBounds())
         // map.setMaxBounds(mapBounds)
         return null
       }
+
+    const handleClickNode = (node) => {
+        setSelectedNode(node)
+        setShowNetworkNodePopup(true)
+    }
 
     return (
         <Box sx={{ px: 4, pb: 5, pt: 3 }}>
@@ -208,6 +211,9 @@ export default function NetworkMap(props) {
                                     ]}                        
                                     icon={icons[value.nodeType]}
                                     // icon={icons[0]}
+                                    eventHandlers={{
+                                        click: () => handleClickNode(value)
+                                    }}
                                 >
                                     <Tooltip>{value.name}</Tooltip>
                                 </Marker>
@@ -221,6 +227,15 @@ export default function NetworkMap(props) {
                     </MapContainer>
                 }
             </Box>
+            {showNetworkNodePopup && 
+                <NetworkNodePopup
+                node={selectedNode}
+                open={showNetworkNodePopup}
+                handleClose={() => {setSelectedNode(null); setShowNetworkNodePopup(false)}}
+                width={400}
+            />
+            }
+            
             
         </Box>
       );
