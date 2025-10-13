@@ -10,6 +10,7 @@ import { blueIcon, disposalIcon, treatmentIcon, completionPadIcon, productionPad
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 import NetworkNodePopup from './NetworkNodePopup';
+import NetworkPipelinePopup from './NetworkPipelinePopup';
 
 // h = roads only
 // m = standard roadmap
@@ -44,6 +45,7 @@ export default function NetworkMap(props) {
     const [ mapZoom, setMapZoom ] = useState(5)
     const [ showMap, setShowMap ] = useState(false)
     const [showNetworkNodePopup, setShowNetworkNodePopup] = useState(false)
+    const [showNetworkPipelinePopup, setShowNetworkPipelinePopup] = useState(false)
     const [selectedNode, setSelectedNode] = useState(null)
     const [ mapBounds, setMapBounds ] = useState(
         [// southwest, northeast
@@ -123,8 +125,8 @@ export default function NetworkMap(props) {
             totalCoords[1] += parseFloat(coords[1])
         }
         for (let key of Object.keys(lines)) {
-            let tempLineObject = {name: key, data: [], color: "#A03232"}
             let line_object = lines[key]
+            let tempLineObject = {name: key, data: [], color: "#A03232", node_list: line_object.node_list}
             let tempDataObject = {name: key}
             let coords = line_object.coordinates[0]
             let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
@@ -137,7 +139,7 @@ export default function NetworkMap(props) {
 
         let tempMapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
         setLineData(tempLineDatas)
-        setNodeData(tempNodeData)
+        setNodeData(tempNodeData.sort((a,b) => a.name.localeCompare(b.name)))
         setMapCenter(tempMapCenter)
         setMapZoom(11)
         setMapBounds(bounds)
@@ -153,8 +155,14 @@ export default function NetworkMap(props) {
       }
 
     const handleClickNode = (node) => {
-        setSelectedNode(node)
-        setShowNetworkNodePopup(true)
+        setSelectedNode(node);
+        setShowNetworkNodePopup(true);
+    }
+
+    const handleClickPipeline = (node) => {
+        // console.log(node)
+        setSelectedNode(node);
+        setShowNetworkPipelinePopup(true);
     }
 
     return (
@@ -192,7 +200,6 @@ export default function NetworkMap(props) {
                         zoomControl={props.interactive}
                         // trackResize={props.interactive}
                         touchZoom={props.interactive}
-                        
                     >
                     <CustomMapHandler/>
                     <TileLayer
@@ -222,18 +229,42 @@ export default function NetworkMap(props) {
         
         
                     {lineData.map((value, index) => (
-                            <Polyline key={index} pathOptions={{ color: value.color }} positions={value.data}><Tooltip>{value.name}</Tooltip></Polyline>
+                            <Polyline
+                                key={index}
+                                pathOptions={{ color: value.color }}
+                                positions={value.data}
+                                eventHandlers={{
+                                    click: () => handleClickPipeline(value)
+                                }}
+                            >
+                                <Tooltip>
+                                    {value.name}
+                                </Tooltip>
+                            </Polyline>
                     ))}
                     </MapContainer>
                 }
             </Box>
-            {showNetworkNodePopup && 
+            {showNetworkNodePopup &&
                 <NetworkNodePopup
-                node={selectedNode}
-                open={showNetworkNodePopup}
-                handleClose={() => {setSelectedNode(null); setShowNetworkNodePopup(false)}}
-                width={400}
-            />
+                    node={selectedNode}
+                    open={showNetworkNodePopup}
+                    handleClose={() => {
+                        setSelectedNode(null);
+                        setShowNetworkNodePopup(false);
+                    }}
+                />
+            }
+            {showNetworkPipelinePopup &&
+                <NetworkPipelinePopup
+                    pipeline={selectedNode}
+                    open={showNetworkPipelinePopup}
+                    handleClose={() => {
+                        setSelectedNode(null);
+                        setShowNetworkPipelinePopup(false);
+                    }}
+                    availableNodes={nodeData}
+                />
             }
             
             
