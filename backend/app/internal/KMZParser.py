@@ -166,6 +166,7 @@ def ParseKMZ(filename):
     ## for each arc endpoint, determine the nearest node
     for arc_key in arcs:
         arc = arcs[arc_key]
+        nodes = []
         node_list = []
         for arc_coordinates in arc["coordinates"]:
             min_distance = 100000.0
@@ -203,9 +204,15 @@ def ParseKMZ(filename):
                 #     print(f'unable to add connection: {connection}')
 
 
-
+            nodes.append({
+                "name": closest_node,
+                "incoming": True,
+                "outgoing": True,
+                "coordinates": arc_coordinates,
+            })
             node_list.append(closest_node)
         arc['node_list'] = node_list
+        arc['nodes'] = nodes
 
     data['all_nodes'] = all_nodes
     data['ProductionPads'] = production_pads
