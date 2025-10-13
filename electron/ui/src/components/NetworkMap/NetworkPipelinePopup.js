@@ -37,22 +37,29 @@ export default function NetworkPipelinePopup(props) {
         )
     }
 
-    const handleUpdateNodeList = (name, idx) => {
+    const handleUpdateConnection = (name, idx) => {
         const node = availableNodes.find((node) => node.name === name);
-        console.log("updating to node")
-        console.log(node)
         setPipelineData(prev => {
             const updatedNodeList = idx === undefined
-                ? [...prev.node_list, name]
-                : prev.node_list.map((node, i) =>
-                    i === idx ? name : node
+                ? [...prev.nodes, {name: name, incoming: true, outgoing: true}]
+                : prev.nodes.map((n, i) =>
+                    i === idx ? {...n, name: name, coordinates: node.coordinates} : n
                 );
-            
-            // TODO: update coordinates list as well
-
             return {
                 ...prev,
-                node_list: updatedNodeList
+                nodes: updatedNodeList
+            };
+        });
+    }
+
+    const handleUpdatePipelineDirection = (direction, value, idx) => {
+        setPipelineData(prev => {
+            const updatedNodeList = prev.nodes.map((n, i) =>
+                    i === idx ? {...n, [direction]: value} : n
+                );
+            return {
+                ...prev,
+                nodes: updatedNodeList
             };
         });
 
@@ -74,44 +81,75 @@ export default function NetworkPipelinePopup(props) {
                 value={pipelineData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
             />
-            <Stack justifyContent={'space-between'} direction={'row'}>
-                <span style={styles.connections}>Connections</span>
+            <Stack justifyContent={'space-between'} direction={'row'} style={styles.connections}>
+                <span >Connections</span>
                 <Button
                     startIcon={<AddCircleIcon/>}
-                    onClick={() => handleUpdateNodeList("")}
+                    onClick={() => handleUpdateConnection("")}
                 >
                     Add Connection
                 </Button>
             </Stack>
             
             {
-                pipelineData?.node_list?.map((node, idx) => {
-                    return ( //TODO: add incoming, outgoing booleans
-                        <TextField
-                            key={idx}
-                            label="Node"
-                            fullWidth
-                            margin="normal"
-                            select
-                            value={node}
-                            onChange={(e) => handleUpdateNodeList(e.target.value, idx)}
-                            SelectProps={{
-                                MenuProps: {
-                                    PaperProps: {
-                                        style: {
-                                            maxHeight: 200
+                pipelineData?.nodes?.map((connectionNode, idx) => {
+                    const name = connectionNode.name;
+                    const incomingValue = connectionNode.incoming;
+                    const outgoingValue = connectionNode.outgoing;
+                    return (
+                        <Stack direction="row" key={idx} spacing={2} sx={{marginBottom: 3}}>
+                            <TextField
+                                label="Node"
+                                fullWidth
+                                select
+                                value={name}
+                                onChange={(e) => handleUpdateConnection(e.target.value, idx)}
+                                SelectProps={{
+                                    MenuProps: {
+                                        PaperProps: {
+                                            style: {
+                                                maxHeight: 200
+                                            }
                                         }
                                     }
-                                }
-                            }}
-
-                        >
-                            {availableNodes?.map((node) => (
-                                <MenuItem key={node.name} value={node.name}>
-                                    {node.name}
+                                }}
+                            >
+                                {availableNodes?.map((node) => (
+                                    <MenuItem key={node.name} value={node.name}>
+                                        {node.name}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                            <TextField
+                                label="Incoming"
+                                fullWidth
+                                select
+                                value={incomingValue}
+                                onChange={(e) => handleUpdatePipelineDirection("incoming", e.target.value, idx)}
+                            >
+                                <MenuItem value={true}>
+                                    true
                                 </MenuItem>
-                            ))}
-                        </TextField>
+                                <MenuItem value={false}>
+                                    false
+                                </MenuItem>
+                            </TextField>
+                            <TextField
+                                label="Outgoing"
+                                fullWidth
+                                select
+                                value={outgoingValue}
+                                onChange={(e) => handleUpdatePipelineDirection("outgoing", e.target.value, idx)}
+                            >
+                                <MenuItem value={true}>
+                                    true
+                                </MenuItem>
+                                <MenuItem value={false}>
+                                    false
+                                </MenuItem>
+                            </TextField>
+                        </Stack>
+                        
                     )
                     
                 })

@@ -126,7 +126,7 @@ export default function NetworkMap(props) {
         }
         for (let key of Object.keys(lines)) {
             let line_object = lines[key]
-            let tempLineObject = {name: key, data: [], color: "#A03232", node_list: line_object.node_list}
+            let tempLineObject = {name: key, data: [], color: "#A03232", node_list: line_object.node_list, nodes: line_object.nodes}
             let tempDataObject = {name: key}
             let coords = line_object.coordinates[0]
             let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
