@@ -12,7 +12,7 @@ export default function NetworkPipelinePopup(props) {
         modalStyle: {
             position: 'absolute',
             top: '50%',
-            left: '50%',
+            left: '25%',
             transform: 'translate(-50%, -50%)',
             width: 700,
             bgcolor: 'background.paper',
@@ -67,7 +67,7 @@ export default function NetworkPipelinePopup(props) {
 
     // TODO: add function for REMOVING a connection
     const handleRemoveConnection = () => {
-        
+
     }
 
     return (
