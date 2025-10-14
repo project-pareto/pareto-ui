@@ -1,5 +1,5 @@
 import './NetworkMap.css';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
 import { useMap } from 'react-leaflet/hooks'
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
@@ -53,6 +53,8 @@ export default function NetworkMap(props) {
             [25.6866,-127.4969],
             [50.7207, -66.0633]
         ])
+
+    const markerRefs = useRef({});
 
     const styles = {
         legendBox: {
@@ -140,6 +142,21 @@ export default function NetworkMap(props) {
         setShowMap(true)
 
     }, [])
+
+    useEffect(() => {
+        // Do we want to display all tooltips while a node is selected? 
+        // if (selectedNode) {
+        //     Object.keys(markerRefs.current)?.forEach((k) => {
+        //         const r = markerRefs.current?.[k];
+        //         r.openTooltip();
+        //     })
+        // } else {
+        //     Object.keys(markerRefs.current)?.forEach((k) => {
+        //         const r = markerRefs.current?.[k];
+        //         r.closeTooltip();
+        //     })
+        // }
+    }, [selectedNode])
 
     function CustomMapHandler() {
         const map = useMap()
@@ -243,6 +260,12 @@ export default function NetworkMap(props) {
                                     eventHandlers={{
                                         click: () => handleClickNode(value, index)
                                     }}
+                                    ref={(el) => {
+                                        const markerId = `node:${index}`
+                                        if (el) {
+                                            markerRefs.current[markerId] = el;
+                                        }
+                                    }}
                                 >
                                     <Tooltip>{value.name}</Tooltip>
                                 </Marker>
@@ -258,6 +281,12 @@ export default function NetworkMap(props) {
                                 positions={formatCoordinatesFromNodes(value.nodes)}
                                 eventHandlers={{
                                     click: () => handleClickPipeline(value, index)
+                                }}
+                                ref={(el) => {
+                                    const markerId = `line:${index}`
+                                    if (el) {
+                                        markerRefs.current[markerId] = el;
+                                    }
                                 }}
                             >
                                 <Tooltip>
