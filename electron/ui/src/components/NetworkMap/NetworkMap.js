@@ -11,6 +11,7 @@ import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 import NetworkNodePopup from './NetworkNodePopup';
 import NetworkPipelinePopup from './NetworkPipelinePopup';
+import { NetworkNodeTypes } from '../../assets/utils';
 
 // h = roads only
 // m = standard roadmap
@@ -101,18 +102,13 @@ export default function NetworkMap(props) {
             let tempDataObject = {name: key, styleUrl: styleUrl}
             let coords = node_object.coordinates
             let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
-            let nodeType
-            if (key.toUpperCase().includes('R')) nodeType = 'TreatmentSite'
-            else if (key.toUpperCase().includes('PP')) nodeType = 'ProductionPad'
-            else if (key.toUpperCase().includes('CP')) nodeType = 'CompletionPad'
-            else if (key.toUpperCase().includes('K')) nodeType = 'DisposalSite'
-            else if (key.toUpperCase().includes('S')) nodeType = 'StorageSite'
-            else if (key.toUpperCase().includes('N')) nodeType = 'NetworkNode'
-            else if (key.toUpperCase().includes('O')) nodeType = 'ReuseOption'
-            else {
-                console.log('nodetype not found')
-                nodeType = 'NetworkNode'
-
+            let nodeType = node_object.node_type;
+            if (nodeType && Object.keys(NetworkNodeTypes).includes(nodeType)) {
+                // console.log("setting node_type to "+node_object.node_type)
+                nodeType = node_object.node_type;
+            } else {
+                // console.log("node_type not found. using network node")
+                nodeType = "NetworkNode"
             }
             tempDataObject.nodeType = nodeType
             tempDataObject.coordinates = coordinates

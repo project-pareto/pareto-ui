@@ -1,16 +1,7 @@
 import {useState} from 'react';
 import { Button, Modal, TextField, Box, Typography, IconButton, MenuItem } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-
-const NodeTypes = {
-  TreatmentSite: 'R',
-  ProductionPad: 'PP',
-  CompletionPad: 'CP',
-  DisposalSite: 'K',
-  StorageSite: 'S',
-  NetworkNode: 'N',
-  ReuseOption: 'O'
-};
+import { NetworkNodeTypes } from '../../assets/utils';
 
 export default function NetworkNodePopup(props) {
     const { node, open, handleClose, handleSave } = props;
@@ -64,7 +55,7 @@ export default function NetworkNodePopup(props) {
                 value={nodeData.nodeType}
                 onChange={(e) => handleChange('nodeType', e.target.value)}
                 >
-                {Object.entries(NodeTypes).map(([name, key]) => (
+                {Object.entries(NetworkNodeTypes).map(([name, key]) => (
                     <MenuItem key={key} value={name}>
                     {name}
                     </MenuItem>
@@ -102,7 +93,7 @@ function CoordinatesInput({ coordinates, onChange }) {
   };
 
   return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
+    <Box sx={{ display: 'flex', gap: 2, marginTop: 2 }}>
       <TextField
         label="Latitude"
         value={coordinates[0] ?? ''}
