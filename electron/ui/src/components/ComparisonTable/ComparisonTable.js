@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
-import CategoryNames from '../../assets/CategoryNames.json'
+import { CategoryNames } from "../../assets/utils";
 
 export default function ComparisonTable(props) {
     const { scenarios, scenarioIndex, secondaryScenarioIndex } = props;

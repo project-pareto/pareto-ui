@@ -2,9 +2,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Button, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import ParetoDictionary from '../../assets/ParetoDictionary.json'
-import CategoryNames from '../../assets/CategoryNames.json'
-import Subcategories from '../../assets/Subcategories.json'
+import { CategoryNames, ParetoDictionary, Subcategories } from "../../assets/utils";
 import { OVERRIDE_CATEGORIES }  from '../../assets/InfrastructureCapexMapping'
 
 

@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import { TableBody, TableCell, TableRow, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import NewBinaryVariableRow from './NewOverrideRow';
 import { INFRASTRUCTURE_CAPEX_MAPPING }  from '../../assets/InfrastructureCapexMapping'
-import CategoryNames from '../../assets/CategoryNames.json'
+import { CategoryNames } from "../../assets/utils";
 
 export default function OverrideTableRows(props) {  
   const {

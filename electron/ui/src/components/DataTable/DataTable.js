@@ -2,8 +2,7 @@ import React from 'react';
 import {useEffect, useState} from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip } from '@mui/material';
 import OverrideTable from '../OverrideTable/OverrideTable';
-import ParetoDictionary from '../../assets/ParetoDictionary.json'
-import CategoryNames from '../../assets/CategoryNames.json'
+import { CategoryNames, ParetoDictionary } from "../../assets/utils";
 import PopupModal from '../../components/PopupModal/PopupModal'
 
 export default function DataTable(props) {  

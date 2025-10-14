@@ -5,7 +5,7 @@ import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
 import ScenarioCompareOverrides from './ScenarioCompareOverrides';
 import SubHeader from './SubHeader';
-import Subcategories from '../../assets/Subcategories.json'
+import { Subcategories } from '../../assets/utils';
 
 
 export default function ScenarioCompare(props) {
