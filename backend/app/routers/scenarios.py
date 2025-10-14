@@ -35,7 +35,7 @@ router = APIRouter(
 )
 
 @router.get("/get_project_name")
-async def get_scenario_list():
+async def get_project_name():
     """
     Get project name.
     """
@@ -48,6 +48,13 @@ async def get_scenario_list():
     """
     scenarios = scenario_handler.get_list()
     return {'data' : scenarios}
+
+@router.get("/get_scenario/{scenario_id}")
+async def get_scenario_list(scenario_id: str):
+    """
+    Get basic information about all saved scenarios.
+    """
+    return scenario_handler.retrieve_scenario(scenario_id)
 
 @router.post("/update")
 async def update(request: Request):

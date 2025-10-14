@@ -92,6 +92,7 @@ class ScenarioHandler:
         #     except Exception as e:
         #         _log.error(f'unable to import default data: {e}')
 
+        print(f"tindydb path: {self.scenarios_path}")
         # Connect to DB
         path = self.scenarios_path
         self._db = tinydb.TinyDB(path)
@@ -138,7 +139,16 @@ class ScenarioHandler:
 
 
         self.LOCKED = False
-        
+
+    def retrieve_scenario(self, id):
+        _log.info(f"retrieving scenario: {id}")
+        query = tinydb.Query()
+        res = self._db.search((query.id_ == id) & (query.version == self.VERSION))
+        if len(res) > 0:
+            return res[0]
+        _log.info(f"no scenario found for id: {id}")
+        return None
+    
     def update_scenario(self, updatedScenario):
         _log.info(f"Updating scenario list")
 
