@@ -1,3 +1,15 @@
+
+
+export const formatCoordinatesFromNodes = (nodes) => {
+  const coordinates = [];
+  for (let n of nodes) {
+      const coords = [parseFloat(n?.coordinates?.[1]), parseFloat(n?.coordinates?.[0])]
+      coordinates.push(coords)
+  }
+  return coordinates;
+}
+
+
 export const NetworkNodeTypes = {
   TreatmentSite: 'R',
   ProductionPad: 'PP',
@@ -7,8 +19,6 @@ export const NetworkNodeTypes = {
   NetworkNode: 'N',
   ReuseOption: 'O'
 };
-
-
 
 export const Subcategories = {
   "Dynamic": [

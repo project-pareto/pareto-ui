@@ -70,7 +70,7 @@ export default function NetworkNodePopup(props) {
             <Button variant="outlined" onClick={handleClose} sx={{ mr: 1 }}>
                 Close
             </Button>
-            <Button variant="contained" onClick={handleSave}>
+            <Button variant="contained" onClick={() => handleSave(nodeData)}>
                 Save Changes
             </Button>
             </Box>

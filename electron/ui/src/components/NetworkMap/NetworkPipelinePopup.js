@@ -65,6 +65,11 @@ export default function NetworkPipelinePopup(props) {
 
     }
 
+    // TODO: add function for REMOVING a connection
+    const handleRemoveConnection = () => {
+        
+    }
+
     return (
     <Modal open={open} onClose={handleClose}>
         <Box sx={styles.modalStyle}>
@@ -159,7 +164,7 @@ export default function NetworkPipelinePopup(props) {
             <Button variant="outlined" onClick={handleClose} sx={{ mr: 1 }}>
                 Close
             </Button>
-            <Button variant="contained" onClick={handleSave}>
+            <Button variant="contained" onClick={() => handleSave(pipelineData)}>
                 Save Changes
             </Button>
             </Box>

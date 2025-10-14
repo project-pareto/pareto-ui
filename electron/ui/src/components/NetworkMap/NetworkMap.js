@@ -11,7 +11,7 @@ import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 import NetworkNodePopup from './NetworkNodePopup';
 import NetworkPipelinePopup from './NetworkPipelinePopup';
-import { NetworkNodeTypes } from '../../assets/utils';
+import { NetworkNodeTypes, formatCoordinatesFromNodes } from '../../assets/utils';
 
 // h = roads only
 // m = standard roadmap
@@ -122,13 +122,11 @@ export default function NetworkMap(props) {
         }
         for (let key of Object.keys(lines)) {
             let line_object = lines[key]
-            let tempLineObject = {name: key, data: [], color: "#A03232", node_list: line_object.node_list, nodes: line_object.nodes}
-            let tempDataObject = {name: key}
-            let coords = line_object.coordinates[0]
-            let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
-            for (let each of line_object.coordinates) {
-                let coordinates = [parseFloat(each[1]), parseFloat(each[0])]
-                tempLineObject.data.push(coordinates)
+            let tempLineObject = {
+                name: key,
+                color: "#A03232",
+                node_list: line_object.node_list,
+                nodes: line_object.nodes,
             }
             tempLineDatas.push(tempLineObject)
         }
@@ -150,15 +148,43 @@ export default function NetworkMap(props) {
         return null
       }
 
-    const handleClickNode = (node) => {
-        setSelectedNode(node);
+    const handleClickNode = (node, idx) => {
+        setSelectedNode({node: node, idx: idx});
         setShowNetworkNodePopup(true);
     }
 
-    const handleClickPipeline = (node) => {
+    const handleClickPipeline = (node, idx) => {
         // console.log(node)
-        setSelectedNode(node);
+        setSelectedNode({node: node, idx: idx});
         setShowNetworkPipelinePopup(true);
+    }
+
+    const saveNodeChanges = (updatedNode) => {
+        const idx = selectedNode?.idx;
+        // console.log(selectedNode);
+        if (selectedNode) {
+            if (showNetworkNodePopup) {
+                setNodeData(data => {
+                    const updatedNodeList = [...data].map((n, i) =>
+                        i === idx ? updatedNode : n
+                    );
+                    return updatedNodeList;
+                })
+            }
+            else if (showNetworkPipelinePopup) {
+                setLineData(data => {
+                    const updatedNodeList = [...data].map((n, i) =>
+                        i === idx ? updatedNode : n
+                    );
+                    return updatedNodeList;
+                })
+            }
+            setSelectedNode(null);
+            setShowNetworkNodePopup(false);
+            setShowNetworkPipelinePopup(false);
+        } else {
+            console.error("No node selected, cannot save changes")
+        }
     }
 
     return (
@@ -204,10 +230,10 @@ export default function NetworkMap(props) {
                         subdomains={['mt1','mt2','mt3']}
                     />
         
-                        {nodeData.map((value, i) => {
+                        {nodeData.map((value, index) => {
                             return (
                                 <Marker
-                                    key={value.name}
+                                    key={index}
                                     position={[
                                         value.coordinates[1],
                                         value.coordinates[0]
@@ -215,7 +241,7 @@ export default function NetworkMap(props) {
                                     icon={icons[value.nodeType]}
                                     // icon={icons[0]}
                                     eventHandlers={{
-                                        click: () => handleClickNode(value)
+                                        click: () => handleClickNode(value, index)
                                     }}
                                 >
                                     <Tooltip>{value.name}</Tooltip>
@@ -224,42 +250,46 @@ export default function NetworkMap(props) {
                         })}
         
         
-                    {lineData.map((value, index) => (
+                    {lineData.map((value, index) => {
+                        return (
                             <Polyline
                                 key={index}
                                 pathOptions={{ color: value.color }}
-                                positions={value.data}
+                                positions={formatCoordinatesFromNodes(value.nodes)}
                                 eventHandlers={{
-                                    click: () => handleClickPipeline(value)
+                                    click: () => handleClickPipeline(value, index)
                                 }}
                             >
                                 <Tooltip>
                                     {value.name}
                                 </Tooltip>
                             </Polyline>
-                    ))}
+                        ) 
+                        })}
                     </MapContainer>
                 }
             </Box>
             {showNetworkNodePopup &&
                 <NetworkNodePopup
-                    node={selectedNode}
+                    node={selectedNode?.node}
                     open={showNetworkNodePopup}
                     handleClose={() => {
                         setSelectedNode(null);
                         setShowNetworkNodePopup(false);
                     }}
+                    handleSave={saveNodeChanges}
                 />
             }
             {showNetworkPipelinePopup &&
                 <NetworkPipelinePopup
-                    pipeline={selectedNode}
+                    pipeline={selectedNode?.node}
                     open={showNetworkPipelinePopup}
                     handleClose={() => {
                         setSelectedNode(null);
                         setShowNetworkPipelinePopup(false);
                     }}
                     availableNodes={nodeData}
+                    handleSave={saveNodeChanges}
                 />
             }
             
