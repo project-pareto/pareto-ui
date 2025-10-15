@@ -366,17 +366,18 @@ useEffect(()=> {
     if (action.action === 'select') {
       let tempSection
       let tempCategory
+      const status = scenarios[index].results.status;
       if (appState) {
-        if (INITIAL_STATES.includes(scenarios[index].results.status) && appState.section === 2) {
+        if (INITIAL_STATES.includes(status) && appState.section === 2) {
           tempSection = 0
           tempCategory = appState.category
         } else {
           tempSection = appState.section
-          tempCategory = appState.category
+          tempCategory = status === "Draft" ? appState.category : {0: "Input Summary", 1: null, 2: "Dashboard"}
         }
       } else {
         // console.log('in else')
-        if(COMPLETED_STATES.includes(scenarios[index].results.status) || RUNNING_STATES.includes(scenarios[index].results.status)) {
+        if(COMPLETED_STATES.includes(status) || RUNNING_STATES.includes(status)) {
           tempSection = 2
         } else {
           tempSection = 0

@@ -4,6 +4,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { CategoryNames, ParetoDictionary, Subcategories } from "../../assets/utils";
 import PopupModal from '../../components/PopupModal/PopupModal'
+import MapEditor from '../NetworkMap/MapEditor';
 
 
 const drawerWidth = 240;
@@ -18,7 +19,18 @@ export default function Sidebar(props) {
     handleUpdateExcel,
     setInputDataEdited,
     syncScenarioData,
-  } = props
+  } = props;
+
+  const {
+    networkMapData,
+    showNetworkNodePopup,
+    setShowNetworkNodePopup,
+    showNetworkPipelinePopup,
+    setShowNetworkPipelinePopup,
+    selectedNode,
+    setSelectedNode
+  } = props;
+  const isIncomplete = scenario?.results?.status === "Incomplete";
   const [ openSaveModal, setOpenSaveModal ] = useState(false)
   const [ key, setKey ] =  useState(null)
   const [ openDynamic, setOpenDynamic ] = useState(true)
@@ -124,12 +136,27 @@ export default function Sidebar(props) {
     }
   }
 
+  const renderMapOptions = () => {
+    let categories = {"Input Summary" :null, "Network Diagram": null}
+    return (
+      Object.entries(categories).map( ([key, value]) => ( 
+        <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
+            <p style={styles.topLevelCategory}>
+              {key === "Input Summary" ? "PARETO Input File" : key}
+            </p>
+        </div>
+      ))
+    )
+  }
+
   const renderAdditionalCategories = () => {
     let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
-            <p style={styles.topLevelCategory}>{key === "Input Summary" && scenario.results.status === "Incomplete" ? "PARETO Input File" : key}</p>
+            <p style={styles.topLevelCategory}>
+              {key === "Input Summary" && scenario.results.status === "Incomplete" ? "PARETO Input File" : key}
+            </p>
         </div>
       ))
     )
@@ -299,11 +326,24 @@ export default function Sidebar(props) {
         open={true}
       >
         <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
-            {scenario &&
+            {scenario && !isIncomplete &&
               renderAdditionalCategories()
             }
-            {scenario &&
+            {scenario && !isIncomplete &&
               renderTopLevelCategories()
+            }
+            {
+              scenario && isIncomplete && (
+                renderMapOptions()
+              )
+            }
+            {
+              scenario && isIncomplete && category === "Network Diagram" && (
+                <MapEditor
+                  nodeType={showNetworkNodePopup ? "node" : showNetworkPipelinePopup ? "pipeline" : null}
+                  selectedNode={selectedNode}
+                />
+              )
             }
         </Box>
       </Drawer>

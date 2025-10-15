@@ -143,20 +143,20 @@ export default function NetworkMap(props) {
 
     }, [])
 
-    useEffect(() => {
-        // Do we want to display all tooltips while a node is selected? 
-        // if (selectedNode) {
-        //     Object.keys(markerRefs.current)?.forEach((k) => {
-        //         const r = markerRefs.current?.[k];
-        //         r.openTooltip();
-        //     })
-        // } else {
-        //     Object.keys(markerRefs.current)?.forEach((k) => {
-        //         const r = markerRefs.current?.[k];
-        //         r.closeTooltip();
-        //     })
-        // }
-    }, [selectedNode])
+    // useEffect(() => {
+    //     // Do we want to display all tooltips while a node is selected? 
+    //     if (selectedNode) {
+    //         Object.keys(markerRefs.current)?.forEach((k) => {
+    //             const r = markerRefs.current?.[k];
+    //             r.openTooltip();
+    //         })
+    //     } else {
+    //         Object.keys(markerRefs.current)?.forEach((k) => {
+    //             const r = markerRefs.current?.[k];
+    //             r.closeTooltip();
+    //         })
+    //     }
+    // }, [selectedNode])
 
     function CustomMapHandler() {
         const map = useMap()
