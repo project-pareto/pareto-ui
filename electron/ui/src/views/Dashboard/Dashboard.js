@@ -13,6 +13,7 @@ import Sidebar from '../../components/Sidebar/Sidebar'
 import PopupModal from '../../components/PopupModal/PopupModal'
 import { runModel } from '../../services/app.service'
 import { useApp } from '../../AppContext';
+import { MapProvider } from '../../context/MapContext';
 
 export default function Dashboard(props) {
   const { 
@@ -149,7 +150,7 @@ export default function Dashboard(props) {
   }
   
   return (
-    <>
+    <MapProvider scenario={scenario}>
       <ProcessToolbar 
         handleSelection={handleSetSection} 
         selected={section} 
@@ -171,7 +172,6 @@ export default function Dashboard(props) {
           handleUpdateExcel={handleUpdateExcel}
           setInputDataEdited={setInputDataEdited}
           syncScenarioData={syncScenarioData}
-          // networkMapProps={networkMapProps}
           >
         </Sidebar>
       }
@@ -260,7 +260,7 @@ export default function Dashboard(props) {
       setDisableOptimize={setDisableOptimize}
       copyAndRunOptimization={copyAndRunOptimization}
       />
-    </>
+    </MapProvider>
   );
 
 }

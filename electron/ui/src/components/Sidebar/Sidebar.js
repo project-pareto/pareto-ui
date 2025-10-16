@@ -21,15 +21,6 @@ export default function Sidebar(props) {
     syncScenarioData,
   } = props;
 
-  const {
-    networkMapData,
-    showNetworkNodePopup,
-    setShowNetworkNodePopup,
-    showNetworkPipelinePopup,
-    setShowNetworkPipelinePopup,
-    selectedNode,
-    setSelectedNode
-  } = props;
   const isIncomplete = scenario?.results?.status === "Incomplete";
   const [ openSaveModal, setOpenSaveModal ] = useState(false)
   const [ key, setKey ] =  useState(null)
@@ -339,10 +330,7 @@ export default function Sidebar(props) {
             }
             {
               scenario && isIncomplete && category === "Network Diagram" && (
-                <MapEditor
-                  nodeType={showNetworkNodePopup ? "node" : showNetworkPipelinePopup ? "pipeline" : null}
-                  selectedNode={selectedNode}
-                />
+                <MapEditor/>
               )
             }
         </Box>

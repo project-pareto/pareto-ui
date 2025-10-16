@@ -12,6 +12,7 @@ import { Tooltip } from 'react-leaflet/Tooltip'
 import NetworkNodePopup from './NetworkNodePopup';
 import NetworkPipelinePopup from './NetworkPipelinePopup';
 import { NetworkNodeTypes, formatCoordinatesFromNodes } from '../../assets/utils';
+import { useMapValues } from '../../context/MapContext';
 
 // h = roads only
 // m = standard roadmap
@@ -39,15 +40,25 @@ const iconUrl = "http://maps.google.com/mapfiles/kml/"
 
 export default function NetworkMap(props) {
     const { points, lines } = props;
+    const { 
+        lineData,
+        setLineData,
+        nodeData,
+        setNodeData,
+        clickNode: handleClickNode,
+        clickPipeline: handleClickPipeline,
+        saveNodeChanges,
+        showNetworkNodePopup,
+        showNetworkPipelinePopup,
+        setShowNetworkNodePopup,
+        setShowNetworkPipelinePopup,
+        selectedNode,
+        setSelectedNode
+    } = useMapValues();
     const [ googleMapType, setGoogleMapType ] = useState('y')
-    const [ lineData, setLineData ] = useState([])
-    const [ nodeData, setNodeData ] = useState([])
     const [ mapCenter, setMapCenter ] = useState([38, -98])
     const [ mapZoom, setMapZoom ] = useState(5)
     const [ showMap, setShowMap ] = useState(false)
-    const [showNetworkNodePopup, setShowNetworkNodePopup] = useState(false)
-    const [showNetworkPipelinePopup, setShowNetworkPipelinePopup] = useState(false)
-    const [selectedNode, setSelectedNode] = useState(null)
     const [ mapBounds, setMapBounds ] = useState(
         [// southwest, northeast
             [25.6866,-127.4969],
@@ -143,67 +154,6 @@ export default function NetworkMap(props) {
 
     }, [])
 
-    // useEffect(() => {
-    //     // Do we want to display all tooltips while a node is selected? 
-    //     if (selectedNode) {
-    //         Object.keys(markerRefs.current)?.forEach((k) => {
-    //             const r = markerRefs.current?.[k];
-    //             r.openTooltip();
-    //         })
-    //     } else {
-    //         Object.keys(markerRefs.current)?.forEach((k) => {
-    //             const r = markerRefs.current?.[k];
-    //             r.closeTooltip();
-    //         })
-    //     }
-    // }, [selectedNode])
-
-    function CustomMapHandler() {
-        const map = useMap()
-        // console.log('map bounds:', map.getBounds())
-        // map.setMaxBounds(mapBounds)
-        return null
-      }
-
-    const handleClickNode = (node, idx) => {
-        setSelectedNode({node: node, idx: idx});
-        setShowNetworkNodePopup(true);
-    }
-
-    const handleClickPipeline = (node, idx) => {
-        // console.log(node)
-        setSelectedNode({node: node, idx: idx});
-        setShowNetworkPipelinePopup(true);
-    }
-
-    const saveNodeChanges = (updatedNode) => {
-        const idx = selectedNode?.idx;
-        // console.log(selectedNode);
-        if (selectedNode) {
-            if (showNetworkNodePopup) {
-                setNodeData(data => {
-                    const updatedNodeList = [...data].map((n, i) =>
-                        i === idx ? updatedNode : n
-                    );
-                    return updatedNodeList;
-                })
-            }
-            else if (showNetworkPipelinePopup) {
-                setLineData(data => {
-                    const updatedNodeList = [...data].map((n, i) =>
-                        i === idx ? updatedNode : n
-                    );
-                    return updatedNodeList;
-                })
-            }
-            setSelectedNode(null);
-            setShowNetworkNodePopup(false);
-            setShowNetworkPipelinePopup(false);
-        } else {
-            console.error("No node selected, cannot save changes")
-        }
-    }
-
     return (
         <Box sx={{ px: 4, pb: 5, pt: 3 }}>
             <style>{css}</style>
@@ -240,7 +190,6 @@ export default function NetworkMap(props) {
                         // trackResize={props.interactive}
                         touchZoom={props.interactive}
                     >
-                    <CustomMapHandler/>
                     <TileLayer
                         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         url={`https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`}
@@ -298,7 +247,7 @@ export default function NetworkMap(props) {
                     </MapContainer>
                 }
             </Box>
-            {showNetworkNodePopup &&
+            {/* {showNetworkNodePopup &&
                 <NetworkNodePopup
                     node={selectedNode?.node}
                     open={showNetworkNodePopup}
@@ -320,7 +269,7 @@ export default function NetworkMap(props) {
                     availableNodes={nodeData}
                     handleSave={saveNodeChanges}
                 />
-            }
+            } */}
             
             
         </Box>
