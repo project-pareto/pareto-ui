@@ -1,4 +1,65 @@
+import { 
+  blueIcon, 
+  disposalIcon, 
+  treatmentIcon, 
+  completionPadIcon, 
+  productionPadIcon, 
+  networkNodeIcon, 
+  storageSiteIcon, 
+  reuseOptionIcon 
+} from './custom-icons';
 
+export const NetworkNodeTypes = {
+  TreatmentSite: {
+    key: 'R',
+    name: 'TreatmentSite',
+    displayName: 'Treatment Site',
+    icon: treatmentIcon,
+	  iconUrl: 'img/target-green.png',
+  },
+  ProductionPad: {
+    key: 'PP',
+    name: 'ProductionPad',
+    displayName: 'Production Pad',
+    icon: productionPadIcon,
+	  iconUrl: 'img/donut-green.png',
+  },
+  CompletionPad: {
+    key: 'CP',
+    name: 'CompletionPad',
+    displayName: 'Completion Pad',
+    icon: completionPadIcon,
+	  iconUrl: 'img/forbidden-green.png',
+  },
+  DisposalSite: {
+    key: 'K',
+    name: 'DisposalSite',
+    displayName: 'Disposal Site',
+    icon: disposalIcon,
+	  iconUrl: 'img/triangle-green.png',
+  },
+  StorageSite: {
+    key: 'S',
+    name: 'StorageSite',
+    displayName: 'Storage Site',
+    icon: storageSiteIcon,
+	  iconUrl: 'img/polygon-green.png',
+  },
+  NetworkNode: {
+    key: 'N',
+    name: 'NetworkNode',
+    displayName: 'Network Node',
+    icon: networkNodeIcon,
+	  iconUrl: 'img/placemark_circle.png',
+  },
+  ReuseOption: {
+    key: 'O',
+    name: 'ReuseOption',
+    displayName: 'Reuse Option',
+    icon: reuseOptionIcon,
+    iconUrl: 'img/open-diamond-green.png',
+  }
+};
 
 export const formatCoordinatesFromNodes = (nodes) => {
   const coordinates = [];
@@ -8,17 +69,6 @@ export const formatCoordinatesFromNodes = (nodes) => {
   }
   return coordinates;
 }
-
-
-export const NetworkNodeTypes = {
-  TreatmentSite: 'R',
-  ProductionPad: 'PP',
-  CompletionPad: 'CP',
-  DisposalSite: 'K',
-  StorageSite: 'S',
-  NetworkNode: 'N',
-  ReuseOption: 'O'
-};
 
 export const Subcategories = {
   "Dynamic": [

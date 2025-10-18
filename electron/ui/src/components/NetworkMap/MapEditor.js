@@ -12,27 +12,33 @@ function isEmptyObject(obj) {
 
 export default function MapEditor(props) {
     const {
-        lineData,
-        setLineData,
         saveNodeChanges,
         setShowNetworkNodePopup,
         setShowNetworkPipelinePopup,
-        selectedNode,
-        setSelectedNode,
+        selectedNode: _selectedNode,
+        setSelectedNode: _setSelectedNode,
         addNode,
         addPipeline,
-        updateItem,
         nodeType
     } = useMapValues();
 
-    const [nodeData, setNodeData] = useState(selectedNode && !isEmptyObject(selectedNode) ? {...selectedNode?.node} : null)
+    const [nodeData, setNodeData] = useState(_selectedNode && !isEmptyObject(_selectedNode) ? {..._selectedNode?.node} : null)
     useEffect(() =>{
-        if (selectedNode && !isEmptyObject(selectedNode)) {
+        if (_selectedNode && !isEmptyObject(_selectedNode)) {
             console.log("setting node data")
-            console.log(selectedNode?.node)
-            setNodeData({...selectedNode?.node})
+            console.log(_selectedNode?.node)
+            setNodeData({..._selectedNode?.node})
         } else setNodeData(null);
-    }, [selectedNode])
+    }, [_selectedNode])
+
+    const styles = {
+        buttonStyle: {
+            margin: 2
+        },
+        stack: {
+            padding: 2,
+        }
+    }
 
     const handleChange = (key, val) => {
         setNodeData(prev => 
@@ -43,8 +49,16 @@ export default function MapEditor(props) {
         )
     }
     const handleClose = () => {
-        setSelectedNode(null);
+        _setSelectedNode(null);
         setShowNetworkNodePopup(false);
+        setShowNetworkPipelinePopup(false);
+    }
+
+    const getCoordinates = (n) => {
+        if (!n?.coordinates) return[0, 0];
+        const coords = [...n?.coordinates];
+        const reverseCoords = coords?.reverse()
+        return reverseCoords;
     }
 
     return (
@@ -52,21 +66,24 @@ export default function MapEditor(props) {
         <Typography variant="h6">
             Map Editor
         </Typography>
-
-        <Button variant="contained" onClick={addNode}>Add Node</Button>
-        <Button variant="contained" onClick={addPipeline}>Add Pipeline</Button>
+        <Stack direction='column' spacing={1}>
+            <Button variant="contained" onClick={addNode}>Add Node</Button>
+            <Button variant="contained" onClick={addPipeline}>Add Pipeline</Button>
+        </Stack>
+        
+        
 
         {nodeData && (
             <Box>
 
             {nodeType === 'node' && (
-                <Box>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Typography sx={{ mt: 0, mb: 0 }} variant="h6">Node {selectedNode?.node?.name}</Typography>
+                <Stack>
+                    <Stack justifyContent="space-between" alignItems="center" direction='row' sx={styles.stack}>
+                        <Typography variant="h6">Node {_selectedNode?.node?.name}</Typography>
                         <IconButton onClick={handleClose} size="small">
                         <CloseIcon />
                         </IconButton>
-                    </Box>
+                    </Stack>
                     <TextField
                         label="Name"
                         fullWidth
@@ -82,26 +99,30 @@ export default function MapEditor(props) {
                         value={nodeData?.nodeType}
                         onChange={(e) => handleChange('nodeType', e.target.value)}
                         >
-                        {Object.entries(NetworkNodeTypes).map(([name, key]) => (
-                            <MenuItem key={key} value={name}>
-                            {name}
-                            </MenuItem>
-                        ))}
+                        {Object.entries(NetworkNodeTypes).map(([key, v]) => {
+                            return (
+                                <MenuItem key={key} value={v.name}>
+                                    {v.displayName}
+                                </MenuItem>
+                            )
+                        }
+                            
+                        )}
                     </TextField>
                     <CoordinatesInput 
-                        coordinates={[...nodeData?.coordinates].reverse()}
+                        coordinates={getCoordinates(nodeData)}
                         onChange={handleChange}
                     />
-                </Box>
+                </Stack>
                 
             )}
-            <Box sx={{ display: 'flex', justifyContent: "space-around", marginTop: 0, paddingTop: 0 }}>
-                <Button variant="outlined" onClick={handleClose} sx={{margin: 0}}>
+            <Stack direction='row' justifyContent='space-around' sx={styles.stack}>
+                <Button variant="outlined" onClick={handleClose}>
                     Close
                 </Button>
 
                 <Button variant="contained" onClick={() => saveNodeChanges(nodeData)}>Save</Button>
-            </Box>
+            </Stack>
         </Box>
         )}
         </Box>
@@ -122,7 +143,7 @@ function CoordinatesInput({ coordinates, onChange }) {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+    <Stack spacing={2} sx={{pt: 1}}>
       <TextField
         label="Latitude"
         value={coordinates[0] ?? ''}
@@ -139,6 +160,6 @@ function CoordinatesInput({ coordinates, onChange }) {
         variant="outlined"
         fullWidth
       />
-    </Box>
+    </Stack>
   );
 }

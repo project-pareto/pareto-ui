@@ -44,7 +44,7 @@ export const MapProvider = ({ children, scenario }) => {
 
     const saveNodeChanges = (updatedNode) => {
         const idx = selectedNode?.idx;
-        // console.log(selectedNode);
+        // TODO:make backend api call to update this
         if (selectedNode) {
             if (showNetworkNodePopup) {
                 setNodeData(data => {

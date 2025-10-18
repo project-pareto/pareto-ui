@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
 import { useMap } from 'react-leaflet/hooks'
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
 // import MapLegend from './maplegend';
-import { blueIcon, disposalIcon, treatmentIcon, completionPadIcon, productionPadIcon, networkNodeIcon, storageSiteIcon, reuseOptionIcon } from '../../assets/custom-icons';
 // import { kmz_data } from '../../assets/kmz_output';
 // import CustomIcon from '../CustomIcon/CustomIcon';
 import { Box, Grid, Tabs, Tab } from '@mui/material';
@@ -26,15 +25,6 @@ import { useMapValues } from '../../context/MapContext';
 // TILELAYER OPTIONS: https://leaflet-extras.github.io/leaflet-providers/preview/
 // https://openmaptiles.org/styles/
 
-const icons = {
-    TreatmentSite: treatmentIcon,
-    StorageSite: storageSiteIcon,
-    DisposalSite: disposalIcon,
-    CompletionPad: completionPadIcon,
-    ProductionPad: productionPadIcon,
-    NetworkNode: networkNodeIcon,
-    ReuseOption: reuseOptionIcon,
-}
 const iconUrl = "http://maps.google.com/mapfiles/kml/"
 
 
@@ -47,13 +37,13 @@ export default function NetworkMap(props) {
         setNodeData,
         clickNode: handleClickNode,
         clickPipeline: handleClickPipeline,
-        saveNodeChanges,
-        showNetworkNodePopup,
-        showNetworkPipelinePopup,
-        setShowNetworkNodePopup,
-        setShowNetworkPipelinePopup,
-        selectedNode,
-        setSelectedNode
+        // saveNodeChanges,
+        // showNetworkNodePopup,
+        // showNetworkPipelinePopup,
+        // setShowNetworkNodePopup,
+        // setShowNetworkPipelinePopup,
+        // selectedNode,
+        // setSelectedNode
     } = useMapValues();
     const [ googleMapType, setGoogleMapType ] = useState('y')
     const [ mapCenter, setMapCenter ] = useState([38, -98])
@@ -204,7 +194,7 @@ export default function NetworkMap(props) {
                                         value.coordinates[1],
                                         value.coordinates[0]
                                     ]}                        
-                                    icon={icons[value.nodeType]}
+                                    icon={NetworkNodeTypes[value.nodeType]?.icon}
                                     // icon={icons[0]}
                                     eventHandlers={{
                                         click: () => handleClickNode(value, index)

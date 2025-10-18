@@ -55,9 +55,9 @@ export default function NetworkNodePopup(props) {
                 value={nodeData.nodeType}
                 onChange={(e) => handleChange('nodeType', e.target.value)}
                 >
-                {Object.entries(NetworkNodeTypes).map(([name, key]) => (
-                    <MenuItem key={key} value={name}>
-                    {name}
+                {Object.entries(NetworkNodeTypes).map(([v, key]) => (
+                    <MenuItem key={key} value={v.name}>
+                    {v.name}
                     </MenuItem>
                 ))}
             </TextField>
