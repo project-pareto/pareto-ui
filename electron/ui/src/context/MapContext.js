@@ -89,6 +89,7 @@ export const MapProvider = ({ children, scenario }) => {
         setNodeData,
         lineData,
         setLineData,
+        availableNodes: nodeData,
         nodeType: showNetworkNodePopup ? "node" : showNetworkPipelinePopup ? "pipeline" : null,
     };
 

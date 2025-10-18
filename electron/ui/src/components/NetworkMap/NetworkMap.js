@@ -237,17 +237,7 @@ export default function NetworkMap(props) {
                     </MapContainer>
                 }
             </Box>
-            {/* {showNetworkNodePopup &&
-                <NetworkNodePopup
-                    node={selectedNode?.node}
-                    open={showNetworkNodePopup}
-                    handleClose={() => {
-                        setSelectedNode(null);
-                        setShowNetworkNodePopup(false);
-                    }}
-                    handleSave={saveNodeChanges}
-                />
-            }
+            {/* 
             {showNetworkPipelinePopup &&
                 <NetworkPipelinePopup
                     pipeline={selectedNode?.node}
