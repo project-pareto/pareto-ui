@@ -102,7 +102,10 @@ export default function MapEditor(props) {
                         {Object.entries(NetworkNodeTypes).map(([key, v]) => {
                             return (
                                 <MenuItem key={key} value={v.name}>
-                                    {v.displayName}
+                                    <Stack direction='row' justifyContent='space-between'>
+                                        <span>{v.displayName} </span>
+                                        <NodeIcon src={v.iconUrl} alt={v.displayName} size={20}/>
+                                    </Stack>
                                 </MenuItem>
                             )
                         }
@@ -163,3 +166,20 @@ function CoordinatesInput({ coordinates, onChange }) {
     </Stack>
   );
 }
+
+const NodeIcon = ({ src, alt, size = 24 }) => {
+  return (
+    <Typography
+      component="img"
+      src={src}
+      alt={alt}
+      sx={{
+        width: size,
+        height: size,
+        objectFit: 'contain',
+        ml: 1
+      }}
+    />
+  );
+};
+
