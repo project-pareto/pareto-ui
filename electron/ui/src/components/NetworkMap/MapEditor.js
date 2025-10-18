@@ -11,7 +11,7 @@ function isEmptyObject(obj) {
 }
 
 
-export default function MapEditor(props) {
+export default function MapEditor() {
     const {
         saveNodeChanges,
         setShowNetworkNodePopup,

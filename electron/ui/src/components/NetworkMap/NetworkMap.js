@@ -8,8 +8,6 @@ import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
 // import CustomIcon from '../CustomIcon/CustomIcon';
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
-import NetworkNodePopup from './NetworkNodePopup';
-import NetworkPipelinePopup from './NetworkPipelinePopup';
 import { NetworkNodeTypes, formatCoordinatesFromNodes } from '../../assets/utils';
 import { useMapValues } from '../../context/MapContext';
 
@@ -237,21 +235,6 @@ export default function NetworkMap(props) {
                     </MapContainer>
                 }
             </Box>
-            {/* 
-            {showNetworkPipelinePopup &&
-                <NetworkPipelinePopup
-                    pipeline={selectedNode?.node}
-                    open={showNetworkPipelinePopup}
-                    handleClose={() => {
-                        setSelectedNode(null);
-                        setShowNetworkPipelinePopup(false);
-                    }}
-                    availableNodes={nodeData}
-                    handleSave={saveNodeChanges}
-                />
-            } */}
-            
-            
         </Box>
       );
 }
