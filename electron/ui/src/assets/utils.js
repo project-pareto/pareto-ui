@@ -70,6 +70,22 @@ export const formatCoordinatesFromNodes = (nodes) => {
   return coordinates;
 }
 
+export const reverseMapCoordinates = (coords) => {
+    try {
+      if (coords?.lat && coords?.lng) {
+        const coordinates = [String(coords?.lng), String(coords?.lat)];
+        return coordinates;
+      }
+      console.log(`coordinates formatted incorrectly: `);
+      console.log(coords)
+      console.log(`returning null`);
+      return null;
+    } catch(e) {
+      console.error(`unable to reverse coords ${coords} : ${e}`);
+      return null;
+    }
+}
+
 export const Subcategories = {
   "Dynamic": [
       "CompletionsDemand","DisposalOperationalCost","TreatmentOperationalCost","CompletionsPadOutsideSystem",

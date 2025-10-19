@@ -1,11 +1,8 @@
 import './NetworkMap.css';
 import React, { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMapEvents } from 'react-leaflet';
 import { useMap } from 'react-leaflet/hooks'
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
-// import MapLegend from './maplegend';
-// import { kmz_data } from '../../assets/kmz_output';
-// import CustomIcon from '../CustomIcon/CustomIcon';
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 import { NetworkNodeTypes, formatCoordinatesFromNodes } from '../../assets/utils';
@@ -35,6 +32,7 @@ export default function NetworkMap(props) {
         setNodeData,
         clickNode: handleClickNode,
         clickPipeline: handleClickPipeline,
+        handleMapClick,
         // saveNodeChanges,
         // showNetworkNodePopup,
         // showNetworkPipelinePopup,
@@ -81,6 +79,17 @@ export default function NetworkMap(props) {
             z-index: 0;
         }
     `
+
+    function MapClickHandler({ onClick }) {
+    useMapEvents({
+        click(e) {
+        const { lat, lng } = e.latlng; // coordinates
+        onClick({ lat, lng });
+        },
+    });
+    return null; // This component doesn't render anything visible
+    }
+
 
     // NOTEWORTHY: MY COORDINATES ARE REVERSED FROM HOW LEAFLET WANTS THEM
     useEffect(() => {
@@ -183,41 +192,50 @@ export default function NetworkMap(props) {
                         url={`https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`}
                         subdomains={['mt1','mt2','mt3']}
                     />
+                    <MapClickHandler onClick={handleMapClick} />
         
-                        {nodeData.map((value, index) => {
-                            return (
-                                <Marker
-                                    key={index}
-                                    position={[
-                                        value.coordinates[1],
-                                        value.coordinates[0]
-                                    ]}                        
-                                    icon={NetworkNodeTypes[value.nodeType]?.icon}
-                                    // icon={icons[0]}
-                                    eventHandlers={{
-                                        click: () => handleClickNode(value, index)
-                                    }}
-                                    ref={(el) => {
-                                        const markerId = `node:${index}`
-                                        if (el) {
-                                            markerRefs.current[markerId] = el;
-                                        }
-                                    }}
-                                >
-                                    <Tooltip>{value.name}</Tooltip>
-                                </Marker>
-                            )
-                        })}
+                    {nodeData.map((value, index) => {
+                        return (
+                            <Marker
+                                key={index}
+                                position={[
+                                    value.coordinates[1],
+                                    value.coordinates[0]
+                                ]}                        
+                                icon={NetworkNodeTypes[value.nodeType]?.icon}
+                                // icon={icons[0]}
+                                eventHandlers={{
+                                    click: (e) => {
+                                        e.originalEvent.stopPropagation();
+                                        handleClickNode(value, index);
+                                    }
+                                }}
+                                ref={(el) => {
+                                    const markerId = `node:${index}`
+                                    if (el) {
+                                        markerRefs.current[markerId] = el;
+                                    }
+                                }}
+                            >
+                                <Tooltip>{value.name}</Tooltip>
+                            </Marker>
+                        )
+                    })}
         
         
                     {lineData.map((value, index) => {
                         return (
                             <Polyline
                                 key={index}
-                                pathOptions={{ color: value.color }}
+                                pathOptions={{ 
+                                    color: value.color,
+                                    bubblingMouseEvents: false 
+                                }}
                                 positions={formatCoordinatesFromNodes(value.nodes)}
                                 eventHandlers={{
-                                    click: () => handleClickPipeline(value, index)
+                                    click: (e) => {
+                                        handleClickPipeline(value, index);
+                                    }
                                 }}
                                 ref={(el) => {
                                     const markerId = `line:${index}`

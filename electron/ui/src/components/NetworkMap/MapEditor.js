@@ -98,9 +98,14 @@ export default function MapEditor() {
 
     }
 
-    // TODO: add function for REMOVING a connection
-    const handleRemoveConnection = () => {
-
+    const handleRemoveConnection = (idx) => {
+        setNodeData(prev => {
+            const updatedNodeList = prev.nodes.filter((_, i) => i !== idx);
+            return {
+                ...prev,
+                nodes: updatedNodeList
+            };
+        });
     }
 
     return (
@@ -212,7 +217,7 @@ export default function MapEditor() {
                                             </MenuItem>
                                         ))}
                                         </TextField>
-                                    <IconButton onClick={() => handleRemoveConnection(connectionNode, idx)} size="small">
+                                    <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
                                         <CloseIcon />
                                     </IconButton>
                                     </Stack>

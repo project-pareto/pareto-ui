@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import { reverseMapCoordinates } from "../assets/utils";
 
 // Create the context
 const MapContext = createContext();
@@ -13,6 +14,12 @@ export const MapProvider = ({ children, scenario }) => {
     const [showNetworkNodePopup, setShowNetworkNodePopup] = useState(false);
     const [showNetworkPipelinePopup, setShowNetworkPipelinePopup] = useState(false);
 
+    const deselectActiveNode = () => {
+        setSelectedNode(null);
+        setShowNetworkNodePopup(false);
+        setShowNetworkPipelinePopup(false);
+    }
+
     const addNode = (node) => {
         // setNetworkMapData((prev) => [...prev, { ...node, type: "node" }]);
     };
@@ -21,13 +28,12 @@ export const MapProvider = ({ children, scenario }) => {
         // setNetworkMapData((prev) => [...prev, { ...pipeline, type: "pipeline" }]);
     };
 
-    const updateItem = (id, updatedData) => {
-        // setNetworkMapData((prev) =>
-        // prev.map((item) =>
-        //     item.id === id ? { ...item, ...updatedData } : item
-        // )
-        // );
-    };
+    const handleMapClick = (coords) => {
+        console.log("clicked coords")
+        console.log(coords)
+        const stringCoordinates = reverseMapCoordinates(coords);
+        deselectActiveNode();
+    }
 
     const clickNode = (node, idx) => {
         setSelectedNode({node: node, idx: idx});
@@ -81,7 +87,6 @@ export const MapProvider = ({ children, scenario }) => {
         setShowNetworkPipelinePopup,
         addNode,
         addPipeline,
-        updateItem,
         clickNode,
         clickPipeline,
         saveNodeChanges,
@@ -89,6 +94,7 @@ export const MapProvider = ({ children, scenario }) => {
         setNodeData,
         lineData,
         setLineData,
+        handleMapClick,
         availableNodes: nodeData,
         nodeType: showNetworkNodePopup ? "node" : showNetworkPipelinePopup ? "pipeline" : null,
     };
