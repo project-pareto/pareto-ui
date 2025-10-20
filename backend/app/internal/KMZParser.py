@@ -97,9 +97,6 @@ def ParseKMZ(filename):
     network_nodes = {}
     disposal_sites = {}
     treatment_sites = {}
-    # storage_sites = {}
-    # freshwater_sources = {}
-    # reuse_options = {}
     storage_sites = {}
     freshwater_sources = {}
     reuse_options = {}
@@ -233,8 +230,8 @@ def ParseKMZ(filename):
     data['FreshwaterSources'] = freshwater_sources
     data['ReuseOptions'] = reuse_options
     data['other_nodes'] = other_nodes
-    data['arcs'] = arcs
     data['connections'] = connections
+    data['arcs'] = arcs
 
 
     return data 
@@ -783,8 +780,7 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     wb.close()
 
 
-# data = ParseKMZ(filename="Demo_network_correct.kmz")
-# # print('got data')
+# data = ParseKMZ(filename="map_testing.kml")
 # pp = pprint.PrettyPrinter(indent=1)
-# pp.pprint(data['arcs'])
+# pp.pprint(data)
 # WriteDataToExcel(data)
