@@ -7,9 +7,9 @@ import zipfile, tempfile, os
 import pprint
 from collections.abc import Mapping
 
-def dms_to_dd(lat_str, lon_str):
-    p = Point(f"{lat_str} {lon_str}")
-    return (p.latitude, p.longitude)
+# def dms_to_dd(lat_str, lon_str):
+#     p = Point(f"{lat_str} {lon_str}")
+#     return (p.latitude, p.longitude)
 
 # def dms_to_dd(dms_str):
 #     dms_str = dms_str.strip()
@@ -23,13 +23,54 @@ def dms_to_dd(lat_str, lon_str):
 #         dd *= -1
 #     return dd
 
+# def parse_coord(coord_str):
+#     if isinstance(coord_str, str) and "°" in coord_str:
+#         return dms_to_dd(coord_str)
+#     return float(coord_str)
+
 def calculate_distance(coord1, coord2):
     return math.sqrt(((coord1[0] - coord2[0])**2) + ((coord1[1] - coord2[1])**2))
 
-def parse_coord(coord_str):
-    if isinstance(coord_str, str) and "°" in coord_str:
-        return dms_to_dd(coord_str)
-    return float(coord_str)
+
+def parse_coord(coord):
+    """
+    Accepts a float, numeric string, DMS string, or tuple/list of two values.
+    Returns decimal degrees (float or tuple).
+    """
+    if isinstance(coord, (float, int)):
+        return float(coord)
+    if isinstance(coord, (tuple, list)) and len(coord) == 2:
+        return (parse_coord(coord[0]), parse_coord(coord[1]))
+    if isinstance(coord, str) and "°" in coord:
+        # Try geopy parsing
+        p = Point(coord) if " " not in coord else Point(coord.strip())
+        # Here, coord likely contains both lat/lon if spaced together
+        # If it's only one value, geopy won't work: need a DMS-specific converter
+        return p.latitude if 'N' in coord or 'S' in coord else p.longitude
+    if isinstance(coord, str):
+        return float(coord)
+    raise ValueError(f"Unsupported coordinate type: {coord}")
+
+def dms_to_dd(lat, lon=None):
+    """
+    Converts lat/lon in decimal or DMS formats to decimal degrees using parse_coord.
+    Can accept:
+      - Two separate lat/lon values
+      - A tuple/list (lat, lon)
+      - A geopy-friendly string containing both
+    """
+    if lon is None:
+        # Single tuple or list
+        if isinstance(lat, (tuple, list)) and len(lat) == 2:
+            return (parse_coord(lat[0]), parse_coord(lat[1]))
+        elif isinstance(lat, str) and " " in lat:
+            # Combined string containing lat+lon (e.g. "31°43’19.17”N 97°07’22.09”W")
+            p = Point(lat)
+            return (p.latitude, p.longitude)
+        else:
+            raise ValueError("If only one argument is given, it must be a tuple/list or geopy-friendly string.")
+    else:
+        return (parse_coord(lat), parse_coord(lon))
 
 def ParseShapefile(filename):
 
@@ -43,7 +84,9 @@ def ParseShapefile(filename):
 
     all_nodes, production_pads, completion_pads, network_nodes, disposal_sites, \
     treatment_sites, storage_sites, freshwater_sources, reuse_options, \
-    other_nodes, arcs = [{} for _ in range(11)]
+    other_nodes, arcs, polygons = [{} for _ in range(12)]
+    # all_nodes, arcs, polygons = {}, {}, {}
+
     connections = {"all_connections": {}}
 
     for idx, row in gdf.iterrows():
@@ -55,8 +98,8 @@ def ParseShapefile(filename):
 
         if geometry.geom_type == "Point":
             coords = (geometry.x, geometry.y)
-            props["coordinates"] = coords
-            # classification logic unchanged
+            props["coordinates"] = parse_coord(coords)
+            
             if feature_name.upper().startswith('PP'):
                 props["node_type"] = "ProductionPad"
                 production_pads[feature_name] = props
@@ -91,12 +134,49 @@ def ParseShapefile(filename):
             all_nodes[feature_name] = props
 
         elif geometry.geom_type in ("LineString", "MultiLineString"):
-            coords_list = list(geometry.coords) if geometry.geom_type == "LineString" else [
-                tuple(pt for line in geometry for pt in line.coords)
-            ]
+            if geometry.geom_type == "LineString":
+                coords_list = [
+                    (parse_coord(x), parse_coord(y)) for x, y in geometry.coords
+                ]
+            else:  # MultiLineString
+                coords_list = []
+                for line in geometry:
+                    coords_list.extend([
+                        (parse_coord(x), parse_coord(y)) for x, y in line.coords
+                    ])
             props["coordinates"] = coords_list
             props["node_type"] = "path"
             arcs[feature_name] = props
+
+        elif geometry.geom_type in ("Polygon", "MultiPolygon"):
+            if geometry.geom_type == "Polygon":
+                exterior_coords = [
+                    (parse_coord(x), parse_coord(y)) for x, y in geometry.exterior.coords
+                ]
+                interiors_coords = [
+                    [(parse_coord(x), parse_coord(y)) for x, y in interior.coords]
+                    for interior in geometry.interiors
+                ]
+            else:  # MultiPolygon
+                exterior_coords = []
+                interiors_coords = []
+                for poly in geometry.geoms:
+                    exterior_coords.extend([
+                        (parse_coord(x), parse_coord(y)) for x, y in poly.exterior.coords
+                    ])
+                    interiors_coords.extend([
+                        [(parse_coord(x), parse_coord(y)) for x, y in interior.coords]
+                        for interior in poly.interiors
+                    ])
+
+            props["coordinates"] = {
+                "exterior": exterior_coords,
+                "interiors": interiors_coords
+            }
+            props["node_type"] = "polygon_area"
+            polygons[feature_name] = props
+        else:
+            print(f"other geometry.geom_type: {geometry.geom_type}")
 
     # connection logic unchanged...
     
@@ -104,6 +184,7 @@ def ParseShapefile(filename):
     result = {
         'all_nodes': all_nodes,
         'arcs': arcs,
+        'polygons': polygons,
         # 'ProductionPads': production_pads,
         # 'CompletionsPads': completion_pads,
         # 'NetworkNodes': network_nodes,
@@ -231,13 +312,15 @@ def extract_shp_paths(zip_path):
 
 
 # Example usage
-# zip_path = "mygeodata.zip"
-# shp_paths = extract_shp_paths(zip_path)
+# zip_path = "Downloads/mygeodata.zip"
+zip_path = "Downloads/Parks.zip"
+shp_paths = extract_shp_paths(zip_path)
 
-# all_results = {}
-# for shp_path in shp_paths:
-#     ## TODO: we have to merge all the results
-#     result = ParseShapefile(shp_path)
-#     all_results = merge_parsed_data(all_results, result)
-# all_results = determineArcConnections(all_results)
-# pprint.pprint(all_results, indent=0.5)
+all_results = {}
+for shp_path in shp_paths:
+    ## TODO: we have to merge all the results
+    print(f"parsing: {shp_path}")
+    result = ParseShapefile(shp_path)
+    all_results = merge_parsed_data(all_results, result)
+all_results = determineArcConnections(all_results)
+pprint.pprint(all_results, indent=0.5)
