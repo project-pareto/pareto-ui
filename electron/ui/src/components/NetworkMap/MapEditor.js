@@ -113,14 +113,10 @@ export default function MapEditor() {
         <Typography variant="h6">
             Map Editor
         </Typography>
-        <Stack direction='column' spacing={1}>
-            <Button variant="contained" onClick={addNode}>Add Node</Button>
-            <Button variant="contained" onClick={addPipeline}>Add Pipeline</Button>
-        </Stack>
         
         
 
-        {nodeData && (
+        {nodeData ? (
             <Box>
 
             {nodeType === 'node' ? (
@@ -279,7 +275,13 @@ export default function MapEditor() {
                 <Button variant="contained" onClick={() => saveNodeChanges(nodeData)}>Save</Button>
             </Stack>
         </Box>
-        )}
+        ) : 
+        
+            <Stack direction='column' spacing={1}>
+                <Button variant="contained" onClick={addNode}>Add Node</Button>
+                <Button variant="contained" onClick={addPipeline}>Add Pipeline</Button>
+            </Stack>
+        }
         </Box>
     );
 }
