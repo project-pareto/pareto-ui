@@ -458,3 +458,100 @@ export const useKeyDown = (
     };
   }, [onKeyDown]);
 };
+
+export const convertMapDataToBackendFormat = (nodeData, lineData) => {
+ /*
+  Input: map data in leaflet format
+  Output: map data in db format
+ */
+  const all_nodes = {};
+  const arcs = {};
+  nodeData?.forEach((node) => {
+    const { name, coordinates, nodeType } = node;
+    const stringCoordinates = coordinates.map((c) => `${c}`);
+    all_nodes[name] = {
+      ...node,
+      name,
+      node_type: nodeType,
+      coordinates: stringCoordinates,
+    }
+  })
+  lineData?.forEach((line) => {
+    const { name } = line;
+    arcs[name] = {
+      ...line,
+      name,
+      node_type: "path",
+    }
+  })
+  return {
+    all_nodes,
+    arcs,
+  }
+}
+
+export const convertMapDataToFrontendFormat = (map_data) => {
+  /* 
+    Input: map data in db format
+    Output: nodeData, lineData, and mapCenter for leaflet map
+  */
+  const points = map_data?.all_nodes;
+  const lines = map_data?.arcs;
+
+  const lineData = []
+  const nodeData = []
+  
+  let amt = 0
+  let totalCoords = [0, 0]
+  for (let key of Object.keys(points)) {
+    let node_object = points[key]
+    let dataObject = {name: key}
+    let coords = node_object.coordinates
+    let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
+    let nodeType = node_object.node_type;
+    if (nodeType && Object.keys(NetworkNodeTypes).includes(nodeType)) {
+        nodeType = node_object.node_type;
+    } else {
+        nodeType = "NetworkNode"
+    }
+    dataObject.nodeType = nodeType
+    dataObject.coordinates = coordinates
+    nodeData.push(dataObject)
+
+    amt+=1
+    totalCoords[0] += parseFloat(coords[0])
+    totalCoords[1] += parseFloat(coords[1])
+  }
+  for (let key of Object.keys(lines)) {
+      let line_object = lines[key]
+      let newLineObject = {
+          name: key,
+          node_list: line_object.node_list,
+          nodes: line_object.nodes,
+      }
+      lineData.push(newLineObject)
+  }
+  let mapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
+  return [nodeData, lineData, mapCenter]
+}
+
+export const generateNewName = (nodeList, nodeType = "Node") => {
+  let i = 1;
+  const newName = `New ${nodeType}`
+  nodeList.forEach((node) => {
+    const { name } = node;
+    if (name === `New ${nodeType}_${i}`) i+=1;
+  })
+  return `New ${nodeType}_${i}`;
+
+}
+
+export const checkIfNameIsUnique = (nodeList, new_name, node_idx) => {
+  let isUnique = true;
+  nodeList.forEach((node, idx) => {
+    const { name } = node;
+    if (name === new_name && idx !== node_idx) isUnique = false;
+  })
+  return isUnique;
+
+}
