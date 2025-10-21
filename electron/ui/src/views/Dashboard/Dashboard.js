@@ -35,26 +35,26 @@ export default function Dashboard(props) {
   const { port } = useApp()
 
   // These are for editing the network map
-  // const [showNetworkNodePopup, setShowNetworkNodePopup] = useState(false);
-  // const [showNetworkPipelinePopup, setShowNetworkPipelinePopup] = useState(false);
+  // const [showNetworkNode, setShowNetworkNode] = useState(false);
+  // const [showNetworkPipeline, setShowNetworkPipeline] = useState(false);
   // const [selectedNode, setSelectedNode] = useState(null);
 
   // const handleClickNode = (node, idx) => {
   //       setSelectedNode({node: node, idx: idx});
-  //       setShowNetworkNodePopup(true);
+  //       setShowNetworkNode(true);
   //   }
 
   // const handleClickPipeline = (node, idx) => {
   //     // console.log(node)
   //     setSelectedNode({node: node, idx: idx});
-  //     setShowNetworkPipelinePopup(true);
+  //     setShowNetworkPipeline(true);
   // }
 
   // const saveNodeChanges = (updatedNode) => {
   //     const idx = selectedNode?.idx;
   //     // console.log(selectedNode);
   //     if (selectedNode) {
-  //         if (showNetworkNodePopup) {
+  //         if (showNetworkNode) {
   //             // TODO: update on backend, which will return response to automatically update here.
   //             // setNodeData(data => {
   //             //     const updatedNodeList = [...data].map((n, i) =>
@@ -63,7 +63,7 @@ export default function Dashboard(props) {
   //             //     return updatedNodeList;
   //             // })
   //         }
-  //         else if (showNetworkPipelinePopup) {
+  //         else if (showNetworkPipeline) {
   //             // setLineData(data => {
   //             //     const updatedNodeList = [...data].map((n, i) =>
   //             //         i === idx ? updatedNode : n
@@ -72,18 +72,18 @@ export default function Dashboard(props) {
   //             // })
   //         }
   //         setSelectedNode(null);
-  //         setShowNetworkNodePopup(false);
-  //         setShowNetworkPipelinePopup(false);
+  //         setShowNetworkNode(false);
+  //         setShowNetworkPipeline(false);
   //     } else {
   //         console.error("No node selected, cannot save changes")
   //     }
   // }
 
   // const networkMapProps = {
-  //   showNetworkNodePopup,
-  //   setShowNetworkNodePopup,
-  //   showNetworkPipelinePopup,
-  //   setShowNetworkPipelinePopup,
+  //   showNetworkNode,
+  //   setShowNetworkNode,
+  //   showNetworkPipeline,
+  //   setShowNetworkPipeline,
   //   selectedNode,
   //   setSelectedNode,
   //   networkMapData,

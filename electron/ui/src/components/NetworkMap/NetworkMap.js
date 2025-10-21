@@ -33,23 +33,63 @@ export default function NetworkMap(props) {
         clickNode: handleClickNode,
         clickPipeline: handleClickPipeline,
         handleMapClick,
-        // saveNodeChanges,
-        // showNetworkNodePopup,
-        // showNetworkPipelinePopup,
-        // setShowNetworkNodePopup,
-        // setShowNetworkPipelinePopup,
-        // selectedNode,
-        // setSelectedNode
+        creatingNewNode,
+        selectedNode,
     } = useMapValues();
     const [ googleMapType, setGoogleMapType ] = useState('y')
     const [ mapCenter, setMapCenter ] = useState([38, -98])
     const [ mapZoom, setMapZoom ] = useState(5)
     const [ showMap, setShowMap ] = useState(false)
+    const [mapCursor, setMapCursor] = useState('default');
     const [ mapBounds, setMapBounds ] = useState(
         [// southwest, northeast
             [25.6866,-127.4969],
             [50.7207, -66.0633]
         ])
+
+    // useEffect(() => {
+    //     let cursor = "default"
+    //     if (!creatingNewNode) setMapCursor('default');
+    //     else {
+    //         console.log("setting map cursor")
+    //         console.log(selectedNode?.node?.nodeType)
+    //     }
+    //     const container = map.getContainer();
+    //     container.style.cursor = cursor;
+    //     // container.style.cursor = `url('/custom-cursor.png') 8 8, auto`;
+
+    //     // Optional: restore on cleanup
+    //     return () => {
+    //     container.style.cursor = "";
+    //     };
+
+    // }, [creatingNewNode, map])
+
+    function CustomCursorControl() {
+        const map = useMap();
+
+        useEffect(() => {
+            let cursor = ""
+            if (!creatingNewNode) setMapCursor('default');
+            else {
+                const node_type = selectedNode?.node?.nodeType;
+                const img_url = NetworkNodeTypes?.[node_type]?.iconUrl;
+                // TODO: need to get updated node type from map editor to make this work
+                // cursor = `url('${img_url}') 8 8, auto`;
+
+            }
+            const container = map.getContainer();
+            container.style.cursor = cursor;
+
+            // Optional: restore on cleanup
+            return () => {
+            container.style.cursor = "";
+            };
+        }, [map, creatingNewNode, selectedNode]);
+
+        return null; // This is just a behavior component
+    }
+
 
     const markerRefs = useRef({});
 
@@ -187,6 +227,7 @@ export default function NetworkMap(props) {
                         // trackResize={props.interactive}
                         touchZoom={props.interactive}
                     >
+                        <CustomCursorControl/>
                     <TileLayer
                         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         url={`https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`}

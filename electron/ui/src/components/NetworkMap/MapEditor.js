@@ -16,24 +16,28 @@ function isEmptyObject(obj) {
 export default function MapEditor() {
     const {
         saveNodeChanges,
-        setShowNetworkNodePopup,
-        setShowNetworkPipelinePopup,
+        setShowNetworkNode,
+        setShowNetworkPipeline,
         selectedNode: _selectedNode,
         setSelectedNode: _setSelectedNode,
         addNode,
         addPipeline,
-        availableNodes
+        availableNodes,
+        creatingNewNode,
     } = useMapValues();
 
     const [nodeData, setNodeData] = useState();
-    const [editingName, setEditingName] = useState(false);
+    const [editingName, setEditingName] = useState(creatingNewNode);
     useEffect(() =>{
         if (_selectedNode && !isEmptyObject(_selectedNode)) {
-            console.log("setting node data")
-            console.log(_selectedNode?.node)
+            // console.log(_selectedNode?.node)
             setNodeData({..._selectedNode?.node})
         } else setNodeData(null);
     }, [_selectedNode])
+
+    useEffect(() => {
+        setEditingName(creatingNewNode);
+    }, [creatingNewNode])
     
     const nodeTypes = Object.keys(NetworkNodeTypes);
     const isNode = nodeTypes.includes(nodeData?.nodeType);
@@ -68,8 +72,8 @@ export default function MapEditor() {
     }
     const handleClose = () => {
         _setSelectedNode(null);
-        setShowNetworkNodePopup(false);
-        setShowNetworkPipelinePopup(false);
+        setShowNetworkNode(false);
+        setShowNetworkPipeline(false);
     }
 
     const getCoordinates = (n) => {
@@ -79,6 +83,7 @@ export default function MapEditor() {
         return reverseCoords;
     }
 
+    // TODO: might have to move all of this updating to map context
     const handleUpdateConnection = (name, idx) => {
         const node = availableNodes.find((node) => node.name === name);
         setNodeData(prev => {
@@ -116,6 +121,7 @@ export default function MapEditor() {
             };
         });
     }
+
     const nameFieldProps = {
         editingName,
         _selectedNode,
@@ -126,14 +132,23 @@ export default function MapEditor() {
         styles
     }
 
+    const disableSave = (n) => {
+        if (!nodeData?.name) return true;
+        if (isNode) {
+            if (!n?.coordinates?.length === 2) return true;
+            const [long, lat] = [...n.coordinates];
+            if (isNaN(lat) || isNaN(long)) return true;
+            if (lat > 90 || lat < -90 || long > 180 || long < -180) return true;
+        }
+
+        return false;
+    }
+
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
         <Typography variant="h6">
             Map Editor
         </Typography>
-        
-        
-
         {nodeData ? (
             <Box>
                 <NameField {...nameFieldProps}/>
@@ -263,7 +278,13 @@ export default function MapEditor() {
                     Close
                 </Button>
 
-                <Button variant="contained" onClick={() => saveNodeChanges(nodeData)}>Save</Button>
+                <Button
+                    variant="contained"
+                    onClick={() => saveNodeChanges(nodeData)}
+                    disabled={disableSave(nodeData)}
+                >
+                    Save
+                </Button>
             </Stack>
         </Box>
         ) : 

@@ -11,16 +11,28 @@ export const MapProvider = ({ children, scenario }) => {
     const [ nodeData, setNodeData ] = useState([])
     const [networkMapData, setNetworkMapData] = useState([]);
     const [selectedNode, setSelectedNode] = useState(null);
-    const [showNetworkNodePopup, setShowNetworkNodePopup] = useState(false);
-    const [showNetworkPipelinePopup, setShowNetworkPipelinePopup] = useState(false);
+    const [showNetworkNode, setShowNetworkNode] = useState(false);
+    const [showNetworkPipeline, setShowNetworkPipeline] = useState(false);
+    const [creatingNewNode, setCreatingNewNode] = useState(false);
 
     const deselectActiveNode = () => {
         setSelectedNode(null);
-        setShowNetworkNodePopup(false);
-        setShowNetworkPipelinePopup(false);
+        setShowNetworkNode(false);
+        setShowNetworkPipeline(false);
     }
 
     const addNode = (node) => {
+        const newNode = {
+            node: {
+                "name": "",
+                "nodeType": networkMapData?.defaultNode || "NetworkNode",
+                "coordinates": []
+            },
+            idx: nodeData?.length,
+        }
+        setSelectedNode(newNode);
+        setShowNetworkNode(true);
+        setCreatingNewNode(true);
         // setNetworkMapData((prev) => [...prev, { ...node, type: "node" }]);
     };
 
@@ -29,51 +41,89 @@ export const MapProvider = ({ children, scenario }) => {
     };
 
     const handleMapClick = (coords) => {
-        console.log("clicked coords")
-        console.log(coords)
-        const stringCoordinates = reverseMapCoordinates(coords);
-        deselectActiveNode();
+        if (creatingNewNode) {
+            const nodeCoordinates = reverseMapCoordinates(coords);
+            console.log("clicked coords");
+            console.log(nodeCoordinates);
+            // update selected node's coordinates
+            if (showNetworkNode) { // if type node
+                setSelectedNode(prev => {
+                    const newNode = {
+                        ...prev,
+                        node: {
+                            ...prev.node,
+                            coordinates: nodeCoordinates,
+                        },
+                    }
+                    console.log("making new coordinates for node")
+                    console.log(newNode)
+                    return newNode;
+                    
+                })
+            } else if (showNetworkPipeline) { // if type pipeline
+
+            }
+        } else {
+            deselectActiveNode();
+        }
     }
 
     const clickNode = (node, idx) => {
+        // console.log(node)
+        setCreatingNewNode(false);
         setSelectedNode({node: node, idx: idx});
-        setShowNetworkNodePopup(true);
-        setShowNetworkPipelinePopup(false);
+        setShowNetworkNode(true);
+        setShowNetworkPipeline(false);
     }
 
     const clickPipeline = (node, idx) => {
-        console.log(node)
+        // console.log(node)
+        setCreatingNewNode(false);
         setSelectedNode({node: node, idx: idx});
-        setShowNetworkPipelinePopup(true);
-        setShowNetworkNodePopup(false);
+        setShowNetworkPipeline(true);
+        setShowNetworkNode(false);
     }
 
     const saveNodeChanges = (updatedNode) => {
         const idx = selectedNode?.idx;
+        let updateFunc;
+        let nodeList;
+        if (showNetworkNode) {
+            updateFunc = setNodeData;
+            nodeList = {...nodeData};
+        }
+        else if (showNetworkPipeline) {
+            updateFunc = setLineData;
+            nodeList = {...lineData};
+        }
+        if (creatingNewNode) {
+            updateFunc(data => ([
+                ...data,
+                updatedNode,
+            ]))
+        }
         // TODO:make backend api call to update this
-        if (selectedNode) {
-            if (showNetworkNodePopup) {
-                setNodeData(data => {
-                    const updatedNodeList = [...data].map((n, i) =>
-                        i === idx ? updatedNode : n
-                    );
-                    return updatedNodeList;
-                })
-            }
-            else if (showNetworkPipelinePopup) {
-                setLineData(data => {
-                    const updatedNodeList = [...data].map((n, i) =>
-                        i === idx ? updatedNode : n
-                    );
-                    return updatedNodeList;
-                })
-            }
-            setSelectedNode(null);
-            setShowNetworkNodePopup(false);
-            setShowNetworkPipelinePopup(false);
+        else if (selectedNode) {
+            updateFunc(data => {
+                const updatedNodeList = [...data].map((n, i) =>
+                    i === idx ? updatedNode : n
+                );
+                return updatedNodeList;
+            })
         } else {
             console.error("No node selected, cannot save changes")
         }
+        setCreatingNewNode(false);
+        setSelectedNode(null);
+        setShowNetworkNode(false);
+        setShowNetworkPipeline(false);
+    }
+
+    const propagateChanges = (newSelectedNode) => {
+        setSelectedNode(prev => ({
+            ...prev,
+            node: newSelectedNode,
+        }))
     }
 
     const value = {
@@ -81,10 +131,10 @@ export const MapProvider = ({ children, scenario }) => {
         setNetworkMapData,
         selectedNode,
         setSelectedNode,
-        showNetworkNodePopup,
-        setShowNetworkNodePopup,
-        showNetworkPipelinePopup,
-        setShowNetworkPipelinePopup,
+        showNetworkNode,
+        setShowNetworkNode,
+        showNetworkPipeline,
+        setShowNetworkPipeline,
         addNode,
         addPipeline,
         clickNode,
@@ -96,7 +146,9 @@ export const MapProvider = ({ children, scenario }) => {
         setLineData,
         handleMapClick,
         availableNodes: nodeData,
-        nodeType: showNetworkNodePopup ? "node" : showNetworkPipelinePopup ? "pipeline" : null,
+        creatingNewNode,
+        propagateChanges,
+        nodeType: showNetworkNode ? "node" : showNetworkPipeline ? "pipeline" : null,
     };
 
     return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
