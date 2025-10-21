@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import { 
   blueIcon, 
   disposalIcon, 
@@ -423,3 +425,36 @@ export const CategoryNames = {
   "e_capacity_check_dict": "Capacity Check",
   "e_demand_check_dict": "Demand Check"
 }
+
+export const useKeyDown = (
+  key,
+  singleKeyCallback,
+  shiftKeyCallback,
+  controlKeyCallback,
+  shiftAndControlKeyCallback,
+  keepDefaultBehavior
+) => {
+  const onKeyDown = (event) => {
+    const wasKeyPressed = event.key === key;
+    if (wasKeyPressed) {
+      if (!keepDefaultBehavior) event.preventDefault();
+
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && shiftAndControlKeyCallback) {
+        shiftAndControlKeyCallback();
+      } else if ((event.metaKey || event.ctrlKey) && controlKeyCallback) {
+        controlKeyCallback();
+      } else if (event.shiftKey && shiftKeyCallback) {
+        shiftKeyCallback();
+      } else if (singleKeyCallback) {
+        singleKeyCallback();
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [onKeyDown]);
+};

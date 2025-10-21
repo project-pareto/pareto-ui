@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import { NetworkNodeTypes } from '../../assets/utils';
 import CloseIcon from '@mui/icons-material/Close';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import Divider from '@mui/material/Divider';
+import { useKeyDown } from '../../assets/utils';
 
 function isEmptyObject(obj) {
   return obj && typeof obj === 'object' && !Array.isArray(obj)
     && Object.keys(obj).length === 0;
 }
-
 
 export default function MapEditor() {
     const {
@@ -20,11 +22,11 @@ export default function MapEditor() {
         setSelectedNode: _setSelectedNode,
         addNode,
         addPipeline,
-        nodeType,
         availableNodes
     } = useMapValues();
 
-    const [nodeData, setNodeData] = useState(_selectedNode && !isEmptyObject(_selectedNode) ? {..._selectedNode?.node} : null)
+    const [nodeData, setNodeData] = useState();
+    const [editingName, setEditingName] = useState(false);
     useEffect(() =>{
         if (_selectedNode && !isEmptyObject(_selectedNode)) {
             console.log("setting node data")
@@ -32,6 +34,9 @@ export default function MapEditor() {
             setNodeData({..._selectedNode?.node})
         } else setNodeData(null);
     }, [_selectedNode])
+    
+    const nodeTypes = Object.keys(NetworkNodeTypes);
+    const isNode = nodeTypes.includes(nodeData?.nodeType);
 
     const styles = {
         buttonStyle: {
@@ -46,6 +51,10 @@ export default function MapEditor() {
             paddingBottom: 16,
             fontWeight: "bold",
             fontSize: 20,
+        },
+        divider: {
+            marginTop: 1,
+            marginBottom: 2
         }
     }
 
@@ -107,6 +116,15 @@ export default function MapEditor() {
             };
         });
     }
+    const nameFieldProps = {
+        editingName,
+        _selectedNode,
+        setEditingName,
+        handleChange,
+        nodeData,
+        isNode,
+        styles
+    }
 
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
@@ -118,23 +136,10 @@ export default function MapEditor() {
 
         {nodeData ? (
             <Box>
-
-            {nodeType === 'node' ? (
+                <NameField {...nameFieldProps}/>
+                <Divider sx={styles.divider}/>
+            {isNode ? (
                 <Stack>
-                    <Stack justifyContent="space-between" alignItems="center" direction='row' sx={styles.stack}>
-                        <Typography variant="h6">Node {_selectedNode?.node?.name}</Typography>
-                        <IconButton onClick={handleClose} size="small">
-                        <CloseIcon />
-                        </IconButton>
-                    </Stack>
-                    <TextField
-                        label="Name"
-                        size='small'
-                        fullWidth
-                        sx={{ mt: 1, mb: 1 }}
-                        value={nodeData?.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                    />
                     <TextField
                         label="Node Type"
                         size='small'
@@ -163,22 +168,8 @@ export default function MapEditor() {
                     />
                 </Stack>
                 
-            ) : (
+            ) : ( // This is a pipeline
                 <Stack>
-                    <Stack justifyContent="space-between" alignItems="center" direction='row' sx={styles.stack}>
-                        <Typography variant="h6">Pipeline {_selectedNode?.node?.name}</Typography>
-                        <IconButton onClick={handleClose} size="small">
-                        <CloseIcon />
-                        </IconButton>
-                    </Stack>
-                    <TextField
-                        label="Name"
-                        size='small'
-                        fullWidth
-                        sx={{ mt: 1, mb: 1 }}
-                        value={nodeData?.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                    />
                     <Stack justifyContent={'space-between'} direction={'column'} style={styles.connections}>
                         <span >Connections</span>
                     </Stack>
@@ -284,6 +275,50 @@ export default function MapEditor() {
         }
         </Box>
     );
+}
+
+function NameField(props) {
+    const { 
+        editingName,
+        _selectedNode,
+        setEditingName,
+        handleChange,
+        nodeData,
+        isNode,
+        styles
+    } = props;
+
+    useKeyDown("Enter", () => {
+        if (editingName) {
+            setEditingName(false);
+        }
+    }, undefined, undefined, undefined, true);
+    return (
+        <Stack justifyContent="space-between" alignItems="center" direction='row' sx={styles.stack}>
+            {
+                editingName ? (
+                    <TextField
+                        label="Name"
+                        size='small'
+                        fullWidth
+                        sx={{ mt: 1, mb: 1 }}
+                        value={nodeData?.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
+                    />
+                ) :
+                (
+                    <>
+                        <Typography variant="h6">
+                            {isNode ? "Node" : "Pipeline"} {nodeData?.name}
+                        </Typography>
+                        <IconButton onClick={() => setEditingName(true)} size="small">
+                            <EditIcon />
+                        </IconButton>
+                    </>
+                )
+            }
+        </Stack>
+    )
 }
 
 function CoordinatesInput({ coordinates, onChange }) {
