@@ -19,12 +19,13 @@ export const MapProvider = ({ children, scenario }) => {
         setSelectedNode(null);
         setShowNetworkNode(false);
         setShowNetworkPipeline(false);
+        setCreatingNewNode();
     }
 
     const addNode = () => {
         const newNode = {
             node: {
-                "name": "",
+                "name": "New Node",
                 "nodeType": networkMapData?.defaultNode || "NetworkNode",
                 "coordinates": [],
             },
@@ -38,7 +39,7 @@ export const MapProvider = ({ children, scenario }) => {
     const addPipeline = () => {
         const newPipeline = {
             node: {
-                name: "",
+                name: "New Pipeline",
                 nodes: []
             },
             idx: lineData?.length,
@@ -119,10 +120,18 @@ export const MapProvider = ({ children, scenario }) => {
         } else {
             console.error("No node selected, cannot save changes")
         }
-        setCreatingNewNode(false);
-        setSelectedNode(null);
-        setShowNetworkNode(false);
-        setShowNetworkPipeline(false);
+        deselectActiveNode();
+    }
+
+    const deleteSelectedNode = () => {
+        const updateFunc = showNetworkNode ? setNodeData : setLineData;
+        const idx = selectedNode.idx;
+        updateFunc(data => {
+            const updatedNodeList = [...data]
+            updatedNodeList.splice(idx, 1);
+            return updatedNodeList;
+        })
+        deselectActiveNode();
     }
 
     const value = {
@@ -146,6 +155,7 @@ export const MapProvider = ({ children, scenario }) => {
         handleMapClick,
         availableNodes: nodeData,
         creatingNewNode,
+        deleteSelectedNode,
         nodeType: showNetworkNode ? "node" : showNetworkPipeline ? "pipeline" : null,
     };
 

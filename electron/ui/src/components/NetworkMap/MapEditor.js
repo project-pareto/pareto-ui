@@ -7,6 +7,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import Divider from '@mui/material/Divider';
 import { useKeyDown } from '../../assets/utils';
+import PopupModal from '../PopupModal/PopupModal';
 
 export default function MapEditor() {
     const {
@@ -19,9 +20,11 @@ export default function MapEditor() {
         addPipeline,
         availableNodes,
         creatingNewNode,
+        deleteSelectedNode,
     } = useMapValues();
 
     const [editingName, setEditingName] = useState(creatingNewNode);
+    const [showDeleteWarning, setShowDeleteWarning] = useState(false);
     const { node: nodeData } = selectedNode || {};
 
     useEffect(() => {
@@ -37,7 +40,6 @@ export default function MapEditor() {
         },
         stack: {
             paddingTop: 2,
-            px: 2,
         },
         connections: {
             paddingTop: 8,
@@ -48,7 +50,11 @@ export default function MapEditor() {
         divider: {
             marginTop: 1,
             marginBottom: 2
-        }
+        },
+        name: {
+            paddingTop: 2,
+            px: 2,
+        },
     }
 
     const handleChange = (key, val) => {
@@ -130,6 +136,11 @@ export default function MapEditor() {
                 node,
             }
         });
+    }
+
+    const handleDelete = () => {
+        setShowDeleteWarning(false);
+        deleteSelectedNode();
     }
 
     const nameFieldProps = {
@@ -296,11 +307,13 @@ export default function MapEditor() {
                     </Button>
                 </Stack>
             )}
-            <Stack direction='row' justifyContent='space-around' sx={styles.stack}>
+            <Stack direction='row' justifyContent='space-between' sx={styles.stack} spacing={1}>
                 <Button variant="outlined" onClick={handleClose}>
                     Close
                 </Button>
-
+                <Button variant="outlined" color='error' onClick={() => setShowDeleteWarning(true)}>
+                    Delete
+                </Button>
                 <Button
                     variant="contained"
                     onClick={() => saveNodeChanges(nodeData)}
@@ -317,6 +330,21 @@ export default function MapEditor() {
                 <Button variant="contained" onClick={addPipeline}>Add Pipeline</Button>
             </Stack>
         }
+        <PopupModal
+            hasTwoButtons
+            open={showDeleteWarning}
+            handleClose={() => setShowDeleteWarning(false)}
+            handleSave={handleDelete}
+            handleButtonTwoClick={() => setShowDeleteWarning(false)}
+            text={`Are you sure you want to delete this ${isNode ? "node" : "pipeline"}?`}
+            buttonText='Delete'
+            buttonColor='error'
+            buttonVariant='contained'
+            buttonTwoText='Cancel'
+            buttonTwoColor='primary'
+            buttonTwoVariant='outlined'
+            width={400}
+            />
         </Box>
     );
 }
@@ -337,7 +365,7 @@ function NameField(props) {
         }
     }, undefined, undefined, undefined, true);
     return (
-        <Stack justifyContent="space-between" alignItems="center" direction='row' sx={styles.stack}>
+        <Stack justifyContent="space-between" alignItems="center" direction='row' sx={styles.name}>
             {
                 editingName ? (
                     <TextField
