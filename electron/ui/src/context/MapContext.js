@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState } from "react";
-import { reverseMapCoordinates } from "../assets/utils";
+import { reverseMapCoordinates, convertMapDataToBackendFormat, convertMapDataToFrontendFormat, generateNewName } from "../assets/utils";
+import { useApp } from '../AppContext';
+import { updateScenario } from "../services/app.service";
 
 // Create the context
 const MapContext = createContext();
 
 // Provider component
 export const MapProvider = ({ children, scenario }) => {
-
+    const { port } = useApp()
     const [ lineData, setLineData ] = useState([])
     const [ nodeData, setNodeData ] = useState([])
     const [networkMapData, setNetworkMapData] = useState([]);
@@ -14,7 +16,8 @@ export const MapProvider = ({ children, scenario }) => {
     const [showNetworkNode, setShowNetworkNode] = useState(false);
     const [showNetworkPipeline, setShowNetworkPipeline] = useState(false);
     const [creatingNewNode, setCreatingNewNode] = useState(false);
-
+    const currentlyCreatingPipeline = showNetworkPipeline && selectedNode && creatingNewNode;
+    const currentlyCreatingNode = showNetworkNode && selectedNode && creatingNewNode;
     const deselectActiveNode = () => {
         setSelectedNode(null);
         setShowNetworkNode(false);
@@ -25,7 +28,7 @@ export const MapProvider = ({ children, scenario }) => {
     const addNode = () => {
         const newNode = {
             node: {
-                "name": "New Node",
+                "name": generateNewName(nodeData, "Node"),
                 "nodeType": networkMapData?.defaultNode || "NetworkNode",
                 "coordinates": [],
             },
@@ -39,7 +42,7 @@ export const MapProvider = ({ children, scenario }) => {
     const addPipeline = () => {
         const newPipeline = {
             node: {
-                name: "New Pipeline",
+                name: generateNewName(lineData, "Pipeline"),
                 nodes: []
             },
             idx: lineData?.length,
@@ -52,21 +55,17 @@ export const MapProvider = ({ children, scenario }) => {
     const handleMapClick = (coords) => {
         if (creatingNewNode) {
             const nodeCoordinates = reverseMapCoordinates(coords);
-            console.log("clicked coords");
-            console.log(nodeCoordinates);
             // update selected node's coordinates
             if (showNetworkNode) { // if type node
-                setSelectedNode(prev => {
-                    const newNode = {
-                        ...prev,
-                        node: {
-                            ...prev.node,
-                            coordinates: nodeCoordinates,
-                        },
-                    }
-                    return newNode;
-                    
-                })
+                const newSelectedNode = {
+                    ...selectedNode,
+                    node: {
+                        ...selectedNode.node,
+                        coordinates: nodeCoordinates,
+                    },
+                }
+                setSelectedNode(newSelectedNode);
+                saveNodeChanges(newSelectedNode.node, false)
             } else if (showNetworkPipeline) { // if type pipeline
 
             }
@@ -76,6 +75,7 @@ export const MapProvider = ({ children, scenario }) => {
     }
 
     const clickNode = (node, idx) => {
+        // TODO: if currentlyCreatingPipeline, instead of selecting node, add it to pipeline
         // console.log(node)
         setCreatingNewNode(false);
         setSelectedNode({node: node, idx: idx});
@@ -91,36 +91,65 @@ export const MapProvider = ({ children, scenario }) => {
         setShowNetworkNode(false);
     }
 
-    const saveNodeChanges = (updatedNode) => {
+    const saveNodeChanges = (updatedNode, deselectAfterwards=true) => {
         const idx = selectedNode?.idx;
-        let updateFunc;
         let nodeList;
+        let update;
+        let updateKey;
         if (showNetworkNode) {
-            updateFunc = setNodeData;
-            nodeList = {...nodeData};
+            nodeList = [...nodeData];
+            updateKey = "all_nodes";
         }
         else if (showNetworkPipeline) {
-            updateFunc = setLineData;
-            nodeList = {...lineData};
+            nodeList = [...lineData];
+            updateKey = "arcs";
         }
         if (creatingNewNode) {
-            updateFunc(data => ([
-                ...data,
-                updatedNode,
-            ]))
+            update = [
+                ...nodeList,
+                updatedNode
+            ]
         }
-        // TODO:make backend api call to update this
         else if (selectedNode) {
-            updateFunc(data => {
-                const updatedNodeList = [...data].map((n, i) =>
-                    i === idx ? updatedNode : n
-                );
-                return updatedNodeList;
-            })
+            const updatedNodeList = [...nodeList].map((n, i) =>
+                i === idx ? updatedNode : n
+            );
+            update = [
+                ...updatedNodeList,
+            ]
         } else {
             console.error("No node selected, cannot save changes")
+            return;
         }
-        deselectActiveNode();
+        let backendUpdate;
+        if (showNetworkNode) {
+            backendUpdate = convertMapDataToBackendFormat(update);
+        } else {
+            backendUpdate = convertMapDataToBackendFormat(null, update);
+        }
+        const updatedScenario = {
+            ...scenario,
+            data_input: {
+                ...scenario?.data_input,
+                map_data: {
+                    ...scenario?.data_input?.map_data,
+                    [updateKey]: backendUpdate[updateKey],
+                }
+            }
+        }
+        updateScenario(port, {'updatedScenario': {...updatedScenario}})
+        .then(response => response.json())
+        .then((data) => {
+            const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
+            setNodeData(newNodeData);
+            setLineData(newLineData);
+        }).catch(e => {
+            console.error('error on scenario update')
+            console.error(e)
+        })
+        if (deselectAfterwards) {
+            deselectActiveNode();
+        }
     }
 
     const deleteSelectedNode = () => {
@@ -156,6 +185,8 @@ export const MapProvider = ({ children, scenario }) => {
         availableNodes: nodeData,
         creatingNewNode,
         deleteSelectedNode,
+        currentlyCreatingPipeline,
+        currentlyCreatingNode,
         nodeType: showNetworkNode ? "node" : showNetworkPipeline ? "pipeline" : null,
     };
 

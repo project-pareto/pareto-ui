@@ -5,7 +5,12 @@ import { useMap } from 'react-leaflet/hooks'
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
 import { Box, Grid, Tabs, Tab } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
-import { NetworkNodeTypes, formatCoordinatesFromNodes } from '../../assets/utils';
+import {
+    NetworkNodeTypes,
+    formatCoordinatesFromNodes,
+    convertMapDataToFrontendFormat,
+    convertMapDataToBackendFormat
+} from '../../assets/utils';
 import { useMapValues } from '../../context/MapContext';
 
 // h = roads only
@@ -123,46 +128,11 @@ export default function NetworkMap(props) {
         let bounds = new LatLngBounds(bound1, bound2)
         // console.log(bounds)
 
-        let tempLineDatas = []
-        let tempNodeData = []
-        
-        let amt = 0
-        let totalCoords = [0, 0]
-        for (let key of Object.keys(points)) {
-            let node_object = points[key]
-            let styleUrl = node_object.styleUrl.replace('#','').replace('msn_','')
-            let tempDataObject = {name: key, styleUrl: styleUrl}
-            let coords = node_object.coordinates
-            let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
-            let nodeType = node_object.node_type;
-            if (nodeType && Object.keys(NetworkNodeTypes).includes(nodeType)) {
-                // console.log("setting node_type to "+node_object.node_type)
-                nodeType = node_object.node_type;
-            } else {
-                // console.log("node_type not found. using network node")
-                nodeType = "NetworkNode"
-            }
-            tempDataObject.nodeType = nodeType
-            tempDataObject.coordinates = coordinates
-            tempNodeData.push(tempDataObject)
-
-            amt+=1
-            // console.log('adding to coordinates: ')
-            // console.log(coordinates)
-            totalCoords[0] += parseFloat(coords[0])
-            totalCoords[1] += parseFloat(coords[1])
-        }
-        for (let key of Object.keys(lines)) {
-            let line_object = lines[key]
-            let tempLineObject = {
-                name: key,
-                node_list: line_object.node_list,
-                nodes: line_object.nodes,
-            }
-            tempLineDatas.push(tempLineObject)
-        }
-
-        let tempMapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
+        const [tempNodeData, tempLineDatas, tempMapCenter] = 
+            convertMapDataToFrontendFormat({
+                all_nodes: points,
+                arcs: lines
+            })
         setLineData(tempLineDatas)
         setNodeData(tempNodeData.sort((a,b) => a.name.localeCompare(b.name)))
         setMapCenter(tempMapCenter)

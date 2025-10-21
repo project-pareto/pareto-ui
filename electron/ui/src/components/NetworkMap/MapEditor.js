@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack } from '@mui/material';
+import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
-import { NetworkNodeTypes } from '../../assets/utils';
+import { NetworkNodeTypes, checkIfNameIsUnique } from '../../assets/utils';
 import CloseIcon from '@mui/icons-material/Close';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -21,11 +21,13 @@ export default function MapEditor() {
         availableNodes,
         creatingNewNode,
         deleteSelectedNode,
+        nodeData: nodeList,
+        lineData: lineList,
     } = useMapValues();
 
     const [editingName, setEditingName] = useState(creatingNewNode);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-    const { node: nodeData } = selectedNode || {};
+    const { node: nodeData, idx: nodeIdx } = selectedNode || {};
 
     useEffect(() => {
         setEditingName(creatingNewNode);
@@ -33,6 +35,9 @@ export default function MapEditor() {
     
     const nodeTypes = Object.keys(NetworkNodeTypes);
     const isNode = nodeTypes.includes(nodeData?.nodeType);
+    const nameIsNotUnique = isNode ? 
+        !checkIfNameIsUnique(nodeList, nodeData?.name, nodeIdx) : 
+        !checkIfNameIsUnique(lineList, nodeData?.name, nodeIdx)
 
     const styles = {
         buttonStyle: {
@@ -149,13 +154,14 @@ export default function MapEditor() {
         handleChange,
         nodeData,
         isNode,
-        styles
+        styles,
+        nameIsNotUnique
     }
 
     const disableSave = (n) => {
         // Return true for conditions where we want to disable the ability to save
         let disable = false;
-        if (!n?.name) return true;
+        if (!n?.name || nameIsNotUnique) return true;
         if (isNode) {
             // Ensure we have valid coordinates
             if (!n?.coordinates?.length === 2) return true;
@@ -356,7 +362,8 @@ function NameField(props) {
         handleChange,
         nodeData,
         isNode,
-        styles
+        styles,
+        nameIsNotUnique
     } = props;
 
     useKeyDown("Enter", () => {
@@ -368,14 +375,18 @@ function NameField(props) {
         <Stack justifyContent="space-between" alignItems="center" direction='row' sx={styles.name}>
             {
                 editingName ? (
-                    <TextField
-                        label="Name"
-                        size='small'
-                        fullWidth
-                        sx={{ mt: 1, mb: 1 }}
-                        value={nodeData?.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                    />
+                    <Tooltip title={nameIsNotUnique ? "Name must be unique" : ""}>
+                        
+                        <TextField
+                            label="Name"
+                            size='small'
+                            fullWidth
+                            sx={{ mt: 1, mb: 1 }}
+                            value={nodeData?.name}
+                            error={nameIsNotUnique}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                        />
+                    </Tooltip>
                 ) :
                 (
                     <>
