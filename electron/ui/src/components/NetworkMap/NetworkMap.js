@@ -74,8 +74,7 @@ export default function NetworkMap(props) {
             else {
                 const node_type = selectedNode?.node?.nodeType;
                 const img_url = NetworkNodeTypes?.[node_type]?.iconUrl;
-                // TODO: need to get updated node type from map editor to make this work
-                // cursor = `url('${img_url}') 8 8, auto`;
+                cursor = `url('${img_url}') 8 8, auto`;
 
             }
             const container = map.getContainer();

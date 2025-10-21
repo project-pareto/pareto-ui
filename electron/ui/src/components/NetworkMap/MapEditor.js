@@ -8,32 +8,21 @@ import EditIcon from '@mui/icons-material/Edit';
 import Divider from '@mui/material/Divider';
 import { useKeyDown } from '../../assets/utils';
 
-function isEmptyObject(obj) {
-  return obj && typeof obj === 'object' && !Array.isArray(obj)
-    && Object.keys(obj).length === 0;
-}
-
 export default function MapEditor() {
     const {
         saveNodeChanges,
         setShowNetworkNode,
         setShowNetworkPipeline,
-        selectedNode: _selectedNode,
-        setSelectedNode: _setSelectedNode,
+        selectedNode,
+        setSelectedNode,
         addNode,
         addPipeline,
         availableNodes,
         creatingNewNode,
     } = useMapValues();
 
-    const [nodeData, setNodeData] = useState();
     const [editingName, setEditingName] = useState(creatingNewNode);
-    useEffect(() =>{
-        if (_selectedNode && !isEmptyObject(_selectedNode)) {
-            // console.log(_selectedNode?.node)
-            setNodeData({..._selectedNode?.node})
-        } else setNodeData(null);
-    }, [_selectedNode])
+    const { node: nodeData } = selectedNode || {};
 
     useEffect(() => {
         setEditingName(creatingNewNode);
@@ -63,15 +52,21 @@ export default function MapEditor() {
     }
 
     const handleChange = (key, val) => {
-        setNodeData(prev => 
-            ({
+        setSelectedNode(data => {
+            const prev = {...data.node};
+            const node = {
                 ...prev,
                 [key]: val
-            })
+            }
+            return {
+                ...data,
+                node,
+            }
+        }
         )
     }
     const handleClose = () => {
-        _setSelectedNode(null);
+        setSelectedNode(null);
         setShowNetworkNode(false);
         setShowNetworkPipeline(false);
     }
@@ -86,45 +81,59 @@ export default function MapEditor() {
     // TODO: might have to move all of this updating to map context
     const handleUpdateConnection = (name, idx) => {
         const node = availableNodes.find((node) => node.name === name);
-        setNodeData(prev => {
+        setSelectedNode(data => {
+            const prev = {...data.node};
             const updatedNodeList = idx === undefined
                 ? [...prev.nodes, {name: name, incoming: true, outgoing: true}]
                 : prev.nodes.map((n, i) =>
                     i === idx ? {...n, name: name, coordinates: node.coordinates} : n
                 );
-            return {
+            const node = {
                 ...prev,
-                nodes: updatedNodeList
+                nodes: updatedNodeList,
+            }
+            return {
+                ...data,
+                node,
             };
         });
     }
 
     const handleUpdatePipelineDirection = (direction, value, idx) => {
-        setNodeData(prev => {
-            const updatedNodeList = prev.nodes.map((n, i) =>
+        setSelectedNode(data => {
+            const prevNode = {...data.node};
+            const updatedNodeList = prevNode.nodes.map((n, i) =>
                     i === idx ? {...n, [direction]: value} : n
                 );
-            return {
-                ...prev,
+            const node = {
+                ...prevNode,
                 nodes: updatedNodeList
             };
+            return {
+                ...data,
+                node,
+            }
         });
 
     }
 
     const handleRemoveConnection = (idx) => {
-        setNodeData(prev => {
-            const updatedNodeList = prev.nodes.filter((_, i) => i !== idx);
-            return {
-                ...prev,
+        setSelectedNode(data => {
+            const prevNode = {...data.node};
+            const updatedNodeList = prevNode.nodes.filter((_, i) => i !== idx);
+            const node = {
+                ...prevNode,
                 nodes: updatedNodeList
             };
+            return {
+                ...data,
+                node,
+            }
         });
     }
 
     const nameFieldProps = {
         editingName,
-        _selectedNode,
         setEditingName,
         handleChange,
         nodeData,
@@ -133,7 +142,7 @@ export default function MapEditor() {
     }
 
     const disableSave = (n) => {
-        if (!nodeData?.name) return true;
+        if (!n?.name) return true;
         if (isNode) {
             if (!n?.coordinates?.length === 2) return true;
             const [long, lat] = [...n.coordinates];
@@ -301,7 +310,6 @@ export default function MapEditor() {
 function NameField(props) {
     const { 
         editingName,
-        _selectedNode,
         setEditingName,
         handleChange,
         nodeData,
@@ -330,7 +338,7 @@ function NameField(props) {
                 (
                     <>
                         <Typography variant="h6">
-                            {isNode ? "Node" : "Pipeline"} {nodeData?.name}
+                            {nodeData?.name}
                         </Typography>
                         <IconButton onClick={() => setEditingName(true)} size="small">
                             <EditIcon />

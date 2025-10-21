@@ -26,7 +26,8 @@ export const MapProvider = ({ children, scenario }) => {
             node: {
                 "name": "",
                 "nodeType": networkMapData?.defaultNode || "NetworkNode",
-                "coordinates": []
+                "coordinates": [],
+                "draft": true,
             },
             idx: nodeData?.length,
         }
@@ -55,8 +56,8 @@ export const MapProvider = ({ children, scenario }) => {
                             coordinates: nodeCoordinates,
                         },
                     }
-                    console.log("making new coordinates for node")
-                    console.log(newNode)
+                    // console.log("making new coordinates for node")
+                    // console.log(newNode)
                     return newNode;
                     
                 })
