@@ -21,6 +21,7 @@ import { useMapValues } from '../../context/MapContext';
 // https://openmaptiles.org/styles/
 
 const iconUrl = "http://maps.google.com/mapfiles/kml/"
+const PIPELINE_COLOR = "#A03232"
 
 
 export default function NetworkMap(props) {
@@ -47,35 +48,18 @@ export default function NetworkMap(props) {
             [50.7207, -66.0633]
         ])
 
-    // useEffect(() => {
-    //     let cursor = "default"
-    //     if (!creatingNewNode) setMapCursor('default');
-    //     else {
-    //         console.log("setting map cursor")
-    //         console.log(selectedNode?.node?.nodeType)
-    //     }
-    //     const container = map.getContainer();
-    //     container.style.cursor = cursor;
-    //     // container.style.cursor = `url('/custom-cursor.png') 8 8, auto`;
-
-    //     // Optional: restore on cleanup
-    //     return () => {
-    //     container.style.cursor = "";
-    //     };
-
-    // }, [creatingNewNode, map])
 
     function CustomCursorControl() {
         const map = useMap();
 
         useEffect(() => {
             let cursor = ""
-            if (!creatingNewNode) setMapCursor('default');
-            else {
+            if (creatingNewNode) {
                 const node_type = selectedNode?.node?.nodeType;
                 const img_url = NetworkNodeTypes?.[node_type]?.iconUrl;
-                cursor = `url('${img_url}') 8 8, auto`;
-
+                if (img_url) {
+                    cursor = `url('${img_url}') 8 8, auto`;
+                }
             }
             const container = map.getContainer();
             container.style.cursor = cursor;
@@ -132,7 +116,6 @@ export default function NetworkMap(props) {
 
     // NOTEWORTHY: MY COORDINATES ARE REVERSED FROM HOW LEAFLET WANTS THEM
     useEffect(() => {
-        //line color: #A03232
 
         //try setting map bounds
         let bound1 = new LatLng(25.6866,-127.4969)
@@ -173,7 +156,6 @@ export default function NetworkMap(props) {
             let line_object = lines[key]
             let tempLineObject = {
                 name: key,
-                color: "#A03232",
                 node_list: line_object.node_list,
                 nodes: line_object.nodes,
             }
@@ -268,7 +250,7 @@ export default function NetworkMap(props) {
                             <Polyline
                                 key={index}
                                 pathOptions={{ 
-                                    color: value.color,
+                                    color: PIPELINE_COLOR,
                                     bubblingMouseEvents: false 
                                 }}
                                 positions={formatCoordinatesFromNodes(value.nodes)}

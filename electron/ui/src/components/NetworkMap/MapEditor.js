@@ -80,13 +80,13 @@ export default function MapEditor() {
 
     // TODO: might have to move all of this updating to map context
     const handleUpdateConnection = (name, idx) => {
-        const node = availableNodes.find((node) => node.name === name);
+        const connectionNode = availableNodes.find((node) => node.name === name);
         setSelectedNode(data => {
             const prev = {...data.node};
             const updatedNodeList = idx === undefined
                 ? [...prev.nodes, {name: name, incoming: true, outgoing: true}]
                 : prev.nodes.map((n, i) =>
-                    i === idx ? {...n, name: name, coordinates: node.coordinates} : n
+                    i === idx ? {...n, name: name, coordinates: connectionNode.coordinates} : n
                 );
             const node = {
                 ...prev,
@@ -142,15 +142,29 @@ export default function MapEditor() {
     }
 
     const disableSave = (n) => {
+        // Return true for conditions where we want to disable the ability to save
+        let disable = false;
         if (!n?.name) return true;
         if (isNode) {
+            // Ensure we have valid coordinates
             if (!n?.coordinates?.length === 2) return true;
             const [long, lat] = [...n.coordinates];
             if (isNaN(lat) || isNaN(long)) return true;
             if (lat > 90 || lat < -90 || long > 180 || long < -180) return true;
+        } else {
+            const connectionsAmt = n.nodes?.length || 0;
+            // Ensure we have at least 2 connecting nodes
+            if (connectionsAmt < 2) return true;
+
+            // Ensure each connection has a node
+            n.nodes.forEach((connectingNode) => {
+                if (!connectingNode?.name) {
+                    disable = true;
+                }
+            })
         }
 
-        return false;
+        return disable;
     }
 
     return (

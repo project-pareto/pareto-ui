@@ -21,24 +21,31 @@ export const MapProvider = ({ children, scenario }) => {
         setShowNetworkPipeline(false);
     }
 
-    const addNode = (node) => {
+    const addNode = () => {
         const newNode = {
             node: {
                 "name": "",
                 "nodeType": networkMapData?.defaultNode || "NetworkNode",
                 "coordinates": [],
-                "draft": true,
             },
             idx: nodeData?.length,
         }
         setSelectedNode(newNode);
         setShowNetworkNode(true);
         setCreatingNewNode(true);
-        // setNetworkMapData((prev) => [...prev, { ...node, type: "node" }]);
     };
 
-    const addPipeline = (pipeline) => {
-        // setNetworkMapData((prev) => [...prev, { ...pipeline, type: "pipeline" }]);
+    const addPipeline = () => {
+        const newPipeline = {
+            node: {
+                name: "",
+                nodes: []
+            },
+            idx: lineData?.length,
+        }
+        setSelectedNode(newPipeline);
+        setShowNetworkPipeline(true);
+        setCreatingNewNode(true);
     };
 
     const handleMapClick = (coords) => {
@@ -56,8 +63,6 @@ export const MapProvider = ({ children, scenario }) => {
                             coordinates: nodeCoordinates,
                         },
                     }
-                    // console.log("making new coordinates for node")
-                    // console.log(newNode)
                     return newNode;
                     
                 })
@@ -120,13 +125,6 @@ export const MapProvider = ({ children, scenario }) => {
         setShowNetworkPipeline(false);
     }
 
-    const propagateChanges = (newSelectedNode) => {
-        setSelectedNode(prev => ({
-            ...prev,
-            node: newSelectedNode,
-        }))
-    }
-
     const value = {
         networkMapData,
         setNetworkMapData,
@@ -148,7 +146,6 @@ export const MapProvider = ({ children, scenario }) => {
         handleMapClick,
         availableNodes: nodeData,
         creatingNewNode,
-        propagateChanges,
         nodeType: showNetworkNode ? "node" : showNetworkPipeline ? "pipeline" : null,
     };
 
