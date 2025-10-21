@@ -1,7 +1,7 @@
 import React , {Fragment} from 'react';
 import { Grid, Button, Modal, TextField } from '@mui/material';
 
-export default function Dashboard(props) {
+export default function PopupModal(props) {
 
     const styles = {
         modalStyle: {
