@@ -140,6 +140,7 @@ export const MapProvider = ({ children, scenario }) => {
         updateScenario(port, {'updatedScenario': {...updatedScenario}})
         .then(response => response.json())
         .then((data) => {
+            // TODO: a better way to do this would be to update the scenario throughout the app...
             const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
             setNodeData(newNodeData);
             setLineData(newLineData);

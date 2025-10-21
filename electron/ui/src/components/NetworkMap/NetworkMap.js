@@ -46,7 +46,6 @@ export default function NetworkMap(props) {
     const [ mapCenter, setMapCenter ] = useState([38, -98])
     const [ mapZoom, setMapZoom ] = useState(5)
     const [ showMap, setShowMap ] = useState(false)
-    const [mapCursor, setMapCursor] = useState('default');
     const [ mapBounds, setMapBounds ] = useState(
         [// southwest, northeast
             [25.6866,-127.4969],
@@ -63,7 +62,14 @@ export default function NetworkMap(props) {
                 const node_type = selectedNode?.node?.nodeType;
                 const img_url = NetworkNodeTypes?.[node_type]?.iconUrl;
                 if (img_url) {
-                    cursor = `url('${img_url}') 8 8, auto`;
+                    const img = new Image();
+                        img.onload = () => {
+                        const iconWidth = img.width;
+                        const iconHeight = img.height;
+                        cursor = `url('${img_url}') ${iconWidth/2} ${iconHeight/2}, auto`;
+                        container.style.cursor = cursor;
+                    };
+                    img.src = img_url;
                 }
             }
             const container = map.getContainer();
