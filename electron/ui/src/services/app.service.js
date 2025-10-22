@@ -97,8 +97,10 @@ export const copyScenario = (backend_port, id, newScenarioName) => {
     });
 };
 
-export const uploadExcelSheet = (backend_port, data, name) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/upload/'+name, {
+export const uploadExcelSheet = (backend_port, data, name, defaultNodeType) => {
+    let endpoint = BACKEND_URL+':'+backend_port+'/upload/'+name
+    if (defaultNodeType) endpoint += `?defaultNodeType=${defaultNodeType}`
+    return fetch(endpoint, {
         method: 'POST', 
         mode: 'cors',
         body: data
