@@ -73,7 +73,7 @@ async def update(request: Request):
     return {"data": updated_scenario}
 
 @router.post("/upload/{scenario_name}")
-async def upload(scenario_name: str, file: UploadFile = File(...)):
+async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = File(...)):
     """Upload an excel sheet or KMZ map file and create corresponding scenario.
 
     Args:
@@ -97,11 +97,13 @@ async def upload(scenario_name: str, file: UploadFile = File(...)):
             # template_location = f'{os.path.dirname(os.path.abspath(__file__))}/../internal/assets/pareto_input_template.xlsx'
             WriteDataToExcel(kmz_data, excel_path)
             _log.info('finished writing data to excel')
+            kmz_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, kmz_data=kmz_data)
         except Exception as e:
             _log.error(f"error on file upload: {str(e)}")
             raise HTTPException(400, detail=f"File upload failed: {e}")
-        
+    elif file_extension == "zip":
+        _log.info("we got a zip")
     elif file_extension == 'xlsx':
         output_path = f"{scenario_handler.excelsheets_path}/{new_id}.xlsx"
         try: # get file contents
