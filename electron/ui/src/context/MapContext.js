@@ -154,13 +154,47 @@ export const MapProvider = ({ children, scenario }) => {
     }
 
     const deleteSelectedNode = () => {
-        const updateFunc = showNetworkNode ? setNodeData : setLineData;
-        const idx = selectedNode.idx;
-        updateFunc(data => {
-            const updatedNodeList = [...data]
-            updatedNodeList.splice(idx, 1);
-            return updatedNodeList;
+        const idx = selectedNode?.idx;
+        let updateKey;
+        let backendUpdate;
+        if (showNetworkNode) {
+            const updatedList = [...nodeData]
+            updatedList.splice(idx, 1);
+            const formattedUpdate = convertMapDataToBackendFormat(updatedList);
+            updateKey = "all_nodes";
+            backendUpdate = formattedUpdate[updateKey];
+        }
+        else if (showNetworkPipeline) {
+            const updatedList = [...nodeData]
+            updatedList.splice(idx, 1);
+            const formattedUpdate = convertMapDataToBackendFormat(null, updatedList);
+            updateKey = "arcs";
+            backendUpdate = formattedUpdate[updateKey];
+        }
+        
+        const updatedScenario = {
+            ...scenario,
+            data_input: {
+                ...scenario?.data_input,
+                map_data: {
+                    ...scenario?.data_input?.map_data,
+                    [updateKey]: backendUpdate,
+                }
+            }
+        }
+
+        updateScenario(port, {'updatedScenario': {...updatedScenario}})
+        .then(response => response.json())
+        .then((data) => {
+            // TODO: a better way to do this would be to update the scenario throughout the app...
+            const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
+            setNodeData(newNodeData);
+            setLineData(newLineData);
+        }).catch(e => {
+            console.error('error on scenario update')
+            console.error(e)
         })
+
         deselectActiveNode();
     }
 
