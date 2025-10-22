@@ -185,16 +185,16 @@ def ParseShapefile(filename):
         'all_nodes': all_nodes,
         'arcs': arcs,
         'polygons': polygons,
-        # 'ProductionPads': production_pads,
-        # 'CompletionsPads': completion_pads,
-        # 'NetworkNodes': network_nodes,
-        # 'SWDSites': disposal_sites,
-        # 'TreatmentSites': treatment_sites,
-        # 'StorageSites': storage_sites,
-        # 'FreshwaterSources': freshwater_sources,
-        # 'ReuseOptions': reuse_options,
-        # 'other_nodes': other_nodes,
-        # 'connections': connections
+        'ProductionPads': production_pads,
+        'CompletionsPads': completion_pads,
+        'NetworkNodes': network_nodes,
+        'SWDSites': disposal_sites,
+        'TreatmentSites': treatment_sites,
+        'StorageSites': storage_sites,
+        'FreshwaterSources': freshwater_sources,
+        'ReuseOptions': reuse_options,
+        'other_nodes': other_nodes,
+        'connections': connections
     }
 
     return result
@@ -310,17 +310,26 @@ def extract_shp_paths(zip_path):
                 shp_files.append(os.path.join(root, f))
     return shp_files
 
+def parseShapefiles(shp_paths):
+    map_data = {}
+    for shp_path in shp_paths:
+        print(f"parsing: {shp_path}")
+        result = ParseShapefile(shp_path)
+        map_data = merge_parsed_data(map_data, result)
+    print(f'got shape data: {len(map_data)}')
+    map_data = determineArcConnections(map_data)
+    return map_data
 
 # Example usage
 # zip_path = "Downloads/mygeodata.zip"
-zip_path = "Downloads/Parks.zip"
-shp_paths = extract_shp_paths(zip_path)
+# zip_path = "Downloads/Parks.zip"
+# shp_paths = extract_shp_paths(zip_path)
 
-all_results = {}
-for shp_path in shp_paths:
-    ## TODO: we have to merge all the results
-    print(f"parsing: {shp_path}")
-    result = ParseShapefile(shp_path)
-    all_results = merge_parsed_data(all_results, result)
-all_results = determineArcConnections(all_results)
-pprint.pprint(all_results, indent=0.5)
+# all_results = {}
+# for shp_path in shp_paths:
+#     ## TODO: we have to merge all the results
+#     print(f"parsing: {shp_path}")
+#     result = ParseShapefile(shp_path)
+#     all_results = merge_parsed_data(all_results, result)
+# all_results = determineArcConnections(all_results)
+# pprint.pprint(all_results, indent=0.5)

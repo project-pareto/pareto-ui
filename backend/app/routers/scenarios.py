@@ -14,16 +14,18 @@ import io
 import os
 import aiofiles
 from fastapi import Body, Request, APIRouter, HTTPException, File, UploadFile, BackgroundTasks
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import FileResponse
 
 import logging
 import idaes.logger as idaeslog
 
-from app.internal.pareto_stategic_model import run_strategic_model, handle_run_strategic_model
+from app.internal.pareto_stategic_model import handle_run_strategic_model
 from app.internal.scenario_handler import (
     scenario_handler,
 )
-from app.internal.KMZParser import ParseKMZ, WriteDataToExcel
+from app.internal.KMZParser import ParseKMZ
+from app.internal.ExcelApi import WriteDataToExcel
+from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -98,12 +100,34 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
             WriteDataToExcel(kmz_data, excel_path)
             _log.info('finished writing data to excel')
             kmz_data["defaultNode"] = defaultNodeType
-            return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, kmz_data=kmz_data)
+            return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=kmz_data)
         except Exception as e:
             _log.error(f"error on file upload: {str(e)}")
             raise HTTPException(400, detail=f"File upload failed: {e}")
     elif file_extension == "zip":
         _log.info("we got a zip")
+        zip_path = f"{scenario_handler.excelsheets_path}/{new_id}.{file_extension}"
+        excel_path = f"{scenario_handler.excelsheets_path}/{new_id}"
+        try: # get file contents
+            async with aiofiles.open(zip_path, 'wb') as out_file:
+                content = await file.read()  # async read
+                await out_file.write(content)
+            shp_paths = extract_shp_paths(zip_path)
+            # shp_data = ParseShapefile(shp_paths)
+            map_data = parseShapefiles(shp_paths)
+            # for shp_path in shp_paths:
+            #     _log.info(f"parsing: {shp_path}")
+            #     result = ParseShapefile(shp_path)
+            #     map_data = merge_parsed_data(map_data, result)
+            # _log.info(f'got shape data: {len(map_data)}')
+            
+            WriteDataToExcel(map_data, excel_path)
+            _log.info('finished writing data to excel')
+            map_data["defaultNode"] = defaultNodeType
+            return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=map_data)
+        except Exception as e:
+            _log.error(f"error on file upload: {str(e)}")
+            raise HTTPException(400, detail=f"File upload failed: {e}")
     elif file_extension == 'xlsx':
         output_path = f"{scenario_handler.excelsheets_path}/{new_id}.xlsx"
         try: # get file contents

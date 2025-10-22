@@ -209,7 +209,7 @@ class ScenarioHandler:
 
         return updatedScenario
     
-    def upload_excelsheet(self, output_path, scenarioName, filename, kmz_data=None):
+    def upload_excelsheet(self, output_path, scenarioName, filename, map_data=None):
         _log.info(f"Uploading excel sheet: {scenarioName}")
 
         [set_list, parameter_list] = get_input_lists()
@@ -246,7 +246,7 @@ class ScenarioHandler:
         # create scenario object
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
-        if kmz_data is not None:
+        if map_data is not None:
             status = "Incomplete"
         else:
             status = "Draft"
@@ -254,7 +254,7 @@ class ScenarioHandler:
             "name": scenarioName, 
             "id": self.next_id, 
             "date": date,
-            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units, "map_data": kmz_data}, 
+            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units, "map_data": map_data}, 
             "optimization": 
                 {
                     "objective":"cost", 
