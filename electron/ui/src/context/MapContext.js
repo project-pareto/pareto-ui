@@ -7,7 +7,7 @@ import { updateScenario } from "../services/app.service";
 const MapContext = createContext();
 
 // Provider component
-export const MapProvider = ({ children, scenario }) => {
+export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
     const { port } = useApp()
     const [ lineData, setLineData ] = useState([])
     const [ nodeData, setNodeData ] = useState([])
@@ -137,20 +137,26 @@ export const MapProvider = ({ children, scenario }) => {
                 }
             }
         }
-        updateScenario(port, {'updatedScenario': {...updatedScenario}})
-        .then(response => response.json())
-        .then((data) => {
-            // TODO: a better way to do this would be to update the scenario throughout the app...
-            const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
-            setNodeData(newNodeData);
-            setLineData(newLineData);
-        }).catch(e => {
-            console.error('error on scenario update')
-            console.error(e)
-        })
-        if (deselectAfterwards) {
+
+        handleUpdateScenario(updatedScenario)
+        // updateScenario(port, {'updatedScenario': {...updatedScenario}})
+        // .then(response => response.json())
+        // .then((data) => {
+        //     // TODO: a better way to do this would be to update the scenario throughout the app...
+        //     const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
+        //     if (showNetworkNode) {
+        //         setNodeData(newNodeData);
+        //     }
+        //     if (showNetworkPipeline) {
+        //         setLineData(newLineData);
+        //     }
+        // }).catch(e => {
+        //     console.error('error on scenario update')
+        //     console.error(e)
+        // })
+        // if (deselectAfterwards) {
             deselectActiveNode();
-        }
+        // }
     }
 
     const deleteSelectedNode = () => {
@@ -165,7 +171,7 @@ export const MapProvider = ({ children, scenario }) => {
             backendUpdate = formattedUpdate[updateKey];
         }
         else if (showNetworkPipeline) {
-            const updatedList = [...nodeData]
+            const updatedList = [...lineData]
             updatedList.splice(idx, 1);
             const formattedUpdate = convertMapDataToBackendFormat(null, updatedList);
             updateKey = "arcs";
@@ -183,17 +189,23 @@ export const MapProvider = ({ children, scenario }) => {
             }
         }
 
-        updateScenario(port, {'updatedScenario': {...updatedScenario}})
-        .then(response => response.json())
-        .then((data) => {
-            // TODO: a better way to do this would be to update the scenario throughout the app...
-            const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
-            setNodeData(newNodeData);
-            setLineData(newLineData);
-        }).catch(e => {
-            console.error('error on scenario update')
-            console.error(e)
-        })
+        handleUpdateScenario(updatedScenario)
+
+        // updateScenario(port, {'updatedScenario': {...updatedScenario}})
+        // .then(response => response.json())
+        // .then((data) => {
+        //     // TODO: a better way to do this would be to update the scenario throughout the app...
+        //     const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
+        //     if (showNetworkNode) {
+        //         setNodeData(newNodeData);
+        //     }
+        //     if (showNetworkPipeline) {
+        //         setLineData(newLineData);
+        //     }
+        // }).catch(e => {
+        //     console.error('error on scenario update')
+        //     console.error(e)
+        // })
 
         deselectActiveNode();
     }

@@ -155,7 +155,7 @@ export default function NetworkMap(props) {
         setShowMap(true)
         setNetworkMapData(map_data);
 
-    }, [])
+    }, [map_data])
 
     return (
         <Box sx={{ px: 4, pb: 5, pt: 3 }}>

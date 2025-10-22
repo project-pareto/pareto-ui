@@ -150,7 +150,7 @@ export default function Dashboard(props) {
   }
   
   return (
-    <MapProvider scenario={scenario}>
+    <MapProvider scenario={scenario} handleUpdateScenario={updateScenario}>
       <ProcessToolbar 
         handleSelection={handleSetSection} 
         selected={section} 
