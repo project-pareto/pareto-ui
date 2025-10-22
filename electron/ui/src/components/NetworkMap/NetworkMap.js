@@ -112,6 +112,9 @@ export default function NetworkMap(props) {
             height: ${props.height}vh;
             z-index: 0;
         }
+        .leaflet-interactive:focus {
+            outline: none;
+        }
     `
 
     function MapClickHandler({ onClick }) {
