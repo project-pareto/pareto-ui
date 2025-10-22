@@ -37,7 +37,16 @@ export default function MapEditor() {
     const isNode = nodeTypes.includes(nodeData?.nodeType);
     const nameIsNotUnique = isNode ? 
         !checkIfNameIsUnique(nodeList, nodeData?.name, nodeIdx) : 
-        !checkIfNameIsUnique(lineList, nodeData?.name, nodeIdx)
+        !checkIfNameIsUnique(lineList, nodeData?.name, nodeIdx);
+        
+    // check if any pipeline nodes no longer exist (in the case they've been deleted)
+    const pipelineConnectionIssues = isNode ? null : nodeData?.nodes?.map((c) => {
+        const connectionNode = availableNodes.find((node) => node?.name === c?.name);
+        if (!connectionNode) {
+            return c.name;
+        }
+        return null;
+    }).filter(Boolean);
 
     const styles = {
         buttonStyle: {
@@ -89,7 +98,6 @@ export default function MapEditor() {
         return reverseCoords;
     }
 
-    // TODO: might have to move all of this updating to map context
     const handleUpdateConnection = (name, idx) => {
         const connectionNode = availableNodes.find((node) => node.name === name);
         setSelectedNode(data => {
@@ -172,6 +180,7 @@ export default function MapEditor() {
             const connectionsAmt = n.nodes?.length || 0;
             // Ensure we have at least 2 connecting nodes
             if (connectionsAmt < 2) return true;
+            if (pipelineConnectionIssues?.length) return true;
 
             // Ensure each connection has a node
             n.nodes.forEach((connectingNode) => {
@@ -236,29 +245,32 @@ export default function MapEditor() {
                             return (
                                 <Stack direction="column" key={idx} spacing={1} sx={{marginBottom: 2}}>
                                     <Stack direction={'row'} spacing={1}>
-                                        <TextField
-                                            size='small'
-                                            label="Node"
-                                            fullWidth
-                                            select
-                                            value={name}
-                                            onChange={(e) => handleUpdateConnection(e.target.value, idx)}
-                                            SelectProps={{
-                                                MenuProps: {
-                                                    PaperProps: {
-                                                        style: {
-                                                            maxHeight: 200
+                                        <Tooltip title={pipelineConnectionIssues.includes(name) ? 'Please select a valid node.' : ''}>
+                                            <TextField
+                                                size='small'
+                                                label="Node"
+                                                fullWidth
+                                                select
+                                                value={pipelineConnectionIssues.includes(name) ? '' : name}
+                                                error={pipelineConnectionIssues.includes(name)}
+                                                onChange={(e) => handleUpdateConnection(e.target.value, idx)}
+                                                SelectProps={{
+                                                    MenuProps: {
+                                                        PaperProps: {
+                                                            style: {
+                                                                maxHeight: 200
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            }}
-                                        >
-                                        {availableNodes?.map((node) => (
-                                            <MenuItem key={node.name} value={node.name}>
-                                                {node.name}
-                                            </MenuItem>
-                                        ))}
-                                        </TextField>
+                                                }}
+                                            >
+                                            {availableNodes?.map((node) => (
+                                                <MenuItem key={node.name} value={node.name}>
+                                                    {node.name}
+                                                </MenuItem>
+                                            ))}
+                                            </TextField>
+                                        </Tooltip>
                                     <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
                                         <CloseIcon />
                                     </IconButton>
