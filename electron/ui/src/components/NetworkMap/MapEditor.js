@@ -8,6 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import Divider from '@mui/material/Divider';
 import { useKeyDown } from '../../assets/utils';
 import PopupModal from '../PopupModal/PopupModal';
+import { NodeIcon } from './NodeIcon';
 
 export default function MapEditor() {
     const {
@@ -452,19 +453,19 @@ function CoordinatesInput({ coordinates, onChange }) {
   );
 }
 
-const NodeIcon = ({ src, alt, size = 24 }) => {
-  return (
-    <Typography
-      component="img"
-      src={src}
-      alt={alt}
-      sx={{
-        width: size,
-        height: size,
-        objectFit: 'contain',
-        ml: 1
-      }}
-    />
-  );
-};
+// const NodeIcon = ({ src, alt, size = 24 }) => {
+//   return (
+//     <Typography
+//       component="img"
+//       src={src}
+//       alt={alt}
+//       sx={{
+//         width: size,
+//         height: size,
+//         objectFit: 'contain',
+//         ml: 1
+//       }}
+//     />
+//   );
+// };
 
