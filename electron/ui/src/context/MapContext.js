@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
-import { reverseMapCoordinates, convertMapDataToBackendFormat, convertMapDataToFrontendFormat, generateNewName } from "../assets/utils";
+import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName } from "../assets/utils";
 import { useApp } from '../AppContext';
-import { updateScenario } from "../services/app.service";
 
 // Create the context
 const MapContext = createContext();
@@ -139,24 +138,7 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
         }
 
         handleUpdateScenario(updatedScenario)
-        // updateScenario(port, {'updatedScenario': {...updatedScenario}})
-        // .then(response => response.json())
-        // .then((data) => {
-        //     // TODO: a better way to do this would be to update the scenario throughout the app...
-        //     const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
-        //     if (showNetworkNode) {
-        //         setNodeData(newNodeData);
-        //     }
-        //     if (showNetworkPipeline) {
-        //         setLineData(newLineData);
-        //     }
-        // }).catch(e => {
-        //     console.error('error on scenario update')
-        //     console.error(e)
-        // })
-        // if (deselectAfterwards) {
-            deselectActiveNode();
-        // }
+        deselectActiveNode();
     }
 
     const deleteSelectedNode = () => {
@@ -190,23 +172,6 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
         }
 
         handleUpdateScenario(updatedScenario)
-
-        // updateScenario(port, {'updatedScenario': {...updatedScenario}})
-        // .then(response => response.json())
-        // .then((data) => {
-        //     // TODO: a better way to do this would be to update the scenario throughout the app...
-        //     const [newNodeData, newLineData, _] = convertMapDataToFrontendFormat(data?.data?.data_input?.map_data);
-        //     if (showNetworkNode) {
-        //         setNodeData(newNodeData);
-        //     }
-        //     if (showNetworkPipeline) {
-        //         setLineData(newLineData);
-        //     }
-        // }).catch(e => {
-        //     console.error('error on scenario update')
-        //     console.error(e)
-        // })
-
         deselectActiveNode();
     }
 
