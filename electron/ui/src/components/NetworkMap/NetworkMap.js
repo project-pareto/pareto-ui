@@ -30,7 +30,11 @@ const PIPELINE_COLOR = "#A03232"
 
 
 export default function NetworkMap(props) {
-    const { points, lines } = props;
+    const { map_data } = props;
+    const {
+        all_nodes: points,
+        arcs: lines,
+    } = map_data || {};
     const { 
         lineData,
         setLineData,
@@ -41,6 +45,7 @@ export default function NetworkMap(props) {
         handleMapClick,
         creatingNewNode,
         selectedNode,
+        setNetworkMapData,
     } = useMapValues();
     const [ googleMapType, setGoogleMapType ] = useState('y')
     const [ mapCenter, setMapCenter ] = useState([38, -98])
@@ -148,6 +153,7 @@ export default function NetworkMap(props) {
         setMapZoom(11)
         setMapBounds(bounds)
         setShowMap(true)
+        setNetworkMapData(map_data);
 
     }, [])
 

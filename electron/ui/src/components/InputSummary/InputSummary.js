@@ -342,9 +342,8 @@ export default function InputSummary(props) {
             <Grid item xs={1}></Grid>
             <Grid item xs={6}>
                 <Box>
-                <NetworkMap 
-                    points={props.scenario.data_input.map_data.all_nodes} 
-                    lines={props.scenario.data_input.map_data.arcs}
+                <NetworkMap
+                    map_data={props.scenario.data_input.map_data}
                     showMapTypeToggle={false}
                     interactive={false}
                     width={100}  //%

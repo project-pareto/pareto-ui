@@ -108,11 +108,11 @@ export default function ScenarioList(props) {
         setId(null)
     }
 
-    const handleFileUpload = (file, name) => {
+    const handleFileUpload = (file, name, defaultNodeType) => {
         const formData = new FormData();
         formData.append('file', file, file.name);
 
-        uploadExcelSheet(port, formData, name)
+        uploadExcelSheet(port, formData, name, defaultNodeType)
         .then(response => {
         if (response.status === 200) {
             response.json()
