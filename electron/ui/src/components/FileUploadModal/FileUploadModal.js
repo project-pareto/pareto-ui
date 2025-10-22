@@ -107,7 +107,7 @@ export default function FileUploadModal(props) {
             setShowWarning(false)
           }, 5000)
     }else {
-        props.handleFileUpload(file, scenarioName)
+        props.handleFileUpload(file, scenarioName, defaultNodeType)
         setShowWarning(false)
         props.setShowFileModal(false)
     }
