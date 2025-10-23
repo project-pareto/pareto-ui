@@ -2,7 +2,6 @@ import shutil
 import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from .util import calculate_distance
 
 def WriteDataToExcel(data, output_file_name, template_location = None):
     ## TODO: update this function to use all_nodes, arcs only. all the data necessary should be in those.
@@ -559,38 +558,11 @@ def determineConnectionsFromArcs(data):
     for arc_key in arcs:
         arc = arcs[arc_key]
         nodes = arc.get("nodes")
-        incoming = False
-        outgoing = False
-        origin_node_name = None
-        ## TODO: use node.outgoing_nodes
         for connecting_node in nodes:
-            ## this is the destination node for the previous node in the list
-            destination_node_name = connecting_node.get("name")
-            # print(f"checking {destination_node_name} for connection")
-            incoming = connecting_node.get("incoming")
-            # print(f"incoming: {incoming}, outgoing: {outgoing}, origin_node: {origin_node_name}")
-            if outgoing and incoming and origin_node_name:
-                origin_node_connections_list = connections["all_connections"].get(origin_node_name, [])
-                origin_node_connections_list.append(destination_node_name)
-                connections["all_connections"][origin_node_name] = origin_node_connections_list
-            ## this is origin node for the next node in the list
-            outgoing = connecting_node.get("outgoing")
-            origin_node_name = connecting_node.get("name")
+            connecting_node_name = connecting_node["name"]
+            outgoing_nodes = connecting_node.get("outgoing_nodes", [])
+            connections["all_connections"][connecting_node_name] = outgoing_nodes
 
-        incoming = False
-        outgoing = False
-        origin_node_name = None
-        for connecting_node in nodes[::-1]: ## do the reverse list
-            ## this is the destination node for the previous node in the list
-            destination_node_name = connecting_node.get("name")
-            incoming = connecting_node.get("incoming")
-            if outgoing and incoming and origin_node_name:
-                origin_node_connections_list = connections["all_connections"].get(origin_node_name, [])
-                origin_node_connections_list.append(destination_node_name)
-                connections["all_connections"][origin_node_name] = origin_node_connections_list
-            ## this is origin node for the next node in the list
-            outgoing = connecting_node.get("outgoing")
-            origin_node_name = connecting_node.get("name")
 
     return data
 
@@ -633,7 +605,11 @@ def PreprocessMapData(map_data):
             continue
         excel_data[excel_key][node] = node_data
     
-    # print(f"finished adding nodes to excel data")
+    print(f"finished adding nodes to excel data")
+
+    data = determineConnectionsFromArcs(data)
+
+    return data
 
 
 
@@ -652,20 +628,17 @@ def PreprocessMapData(map_data):
 #         "nodes": [
 #             {
 #                 "name": "N01",
-#                 "incoming": True,
-#                 "outgoing": True,
+#                 "outgoing_nodes": ["K01"],
 #                 "coordinates": ["-103.8539378936199", "34.53213547776518", "0"],
 #             },
 #             {
 #                 "name": "K01",
-#                 "incoming": True,
-#                 "outgoing": True,
+#                 "outgoing_nodes": ["K02", "N01"],
 #                 "coordinates": ["-103.8473422508395", "34.49228306568203", "0"],
 #             },
 #             {
 #                 "name": "K02",
-#                 "incoming": True,
-#                 "outgoing": True,
+#                 "outgoing_nodes": ["K01"],
 #                 "coordinates": ["-103.8223048221497", "34.49098515301236", "0"],
 #             },
 #         ],
