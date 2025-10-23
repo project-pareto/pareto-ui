@@ -607,7 +607,7 @@ def PreprocessMapData(map_data):
     
     print(f"finished adding nodes to excel data")
 
-    data = determineConnectionsFromArcs(data)
+    data = determineConnectionsFromArcs(excel_data)
 
     return data
 

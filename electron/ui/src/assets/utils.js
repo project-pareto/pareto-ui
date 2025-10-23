@@ -4,7 +4,7 @@ import {
   blueIcon, 
   disposalIcon, 
   treatmentIcon, 
-  completionPadIcon, 
+  completionsPadIcon, 
   productionPadIcon, 
   networkNodeIcon, 
   storageSiteIcon, 
@@ -26,11 +26,11 @@ export const NetworkNodeTypes = {
     icon: productionPadIcon,
 	  iconUrl: 'img/donut-green.png',
   },
-  CompletionPad: {
+  CompletionsPad: {
     key: 'CP',
-    name: 'CompletionPad',
+    name: 'CompletionsPad',
     displayName: 'Completion Pad',
-    icon: completionPadIcon,
+    icon: completionsPadIcon,
 	  iconUrl: 'img/forbidden-green.png',
   },
   DisposalSite: {

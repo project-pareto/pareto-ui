@@ -120,7 +120,7 @@ def ParseKMZ(filename):
                 result_object[key]["node_type"] = "ProductionPad"
                 production_pads[key] = result_object[key]
             elif key[0:2].upper() == 'CP':
-                result_object[key]["node_type"] = "CompletionPad"
+                result_object[key]["node_type"] = "CompletionsPad"
                 completion_pads[key] = result_object[key]
             elif key[0].upper() == 'N':
                 result_object[key]["node_type"] = "NetworkNode"

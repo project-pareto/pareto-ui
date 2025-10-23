@@ -81,7 +81,7 @@ def ParseShapefile(filename):
                 props["node_type"] = "ProductionPad"
                 production_pads[feature_name] = props
             elif feature_name.upper().startswith('CP'):
-                props["node_type"] = "CompletionPad"
+                props["node_type"] = "CompletionsPad"
                 completion_pads[feature_name] = props
             elif feature_name.upper().startswith('N'):
                 props["node_type"] = "NetworkNode"

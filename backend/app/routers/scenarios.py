@@ -24,7 +24,7 @@ from app.internal.scenario_handler import (
     scenario_handler,
 )
 from app.internal.KMZParser import ParseKMZ
-from app.internal.ExcelApi import WriteDataToExcel
+from app.internal.ExcelApi import WriteDataToExcel, PreprocessMapData
 from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
 
 # _log = idaeslog.getLogger(__name__)
@@ -52,10 +52,12 @@ async def get_scenario_list():
     return {'data' : scenarios}
 
 @router.get("/get_scenario/{scenario_id}")
-async def get_scenario_list(scenario_id: str):
+async def get_scenario(scenario_id: str):
     """
     Get basic information about all saved scenarios.
     """
+    print(f"get scenario")
+    print(f"id is: {scenario_id}, {type(scenario_id)}")
     return scenario_handler.retrieve_scenario(scenario_id)
 
 @router.post("/update")
@@ -366,8 +368,33 @@ async def get_excel_file(filename: str):
     return FileResponse(excel_path)
 
 
+
+@router.get("/generate_excel_from_map/{id}")
+async def generate_excel_from_map(id: int):
+    """Generate excel spreadsheet from map data
+
+    Args:
+        id: scenario id
+
+    Returns:
+        Excel file
+    """
+    scenario = scenario_handler.get_scenario(id)
+    excel_path = scenario_handler.get_excelsheet_path(id)
+    # path = scenario_handler.get_excel_output_path(id)
+    data_input = scenario.get("data_input", {})
+    map_data = data_input.get("map_data", None)
+    if map_data is not None:
+        preprocessed_map_data = PreprocessMapData(map_data)
+        WriteDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
+        return FileResponse(excel_path)
+    else:
+        _log.error(f"tried to generate excel, but map data is none")
+        raise HTTPException(400, detail=f"This scenario does not contain a map")
+
+
 @router.get("/generate_report/{id}")
-async def delete_diagram(id: str):
+async def generate_report(id: str):
     """Generate output report
 
     Args:
