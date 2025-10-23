@@ -21,7 +21,15 @@ export default function Sidebar(props) {
     syncScenarioData,
   } = props;
 
-  const isIncomplete = scenario?.results?.status === "Incomplete";
+  const {
+    optimized_override_values,
+    data_input,
+    id,
+    optimization,
+    results
+  } = scenario || {};
+
+  const isIncomplete = results?.status === "Incomplete";
   const [ openSaveModal, setOpenSaveModal ] = useState(false)
   const [ key, setKey ] =  useState(null)
   const [ openDynamic, setOpenDynamic ] = useState(true)
@@ -31,9 +39,9 @@ export default function Sidebar(props) {
 
   useEffect(() => {
     let tempOverrideList = []
-    if (scenario.optimized_override_values !== undefined)  {
-        for(let key of Object.keys(scenario.optimized_override_values)) {
-            if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+    if (optimized_override_values !== undefined)  {
+        for(let key of Object.keys(optimized_override_values)) {
+            if(Object.keys(optimized_override_values[key]).length > 0) {
               tempOverrideList.push(key)
             }
         }
@@ -93,7 +101,7 @@ export default function Sidebar(props) {
   }
 
   const handleSaveModal = () => {
-    handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
+    handleUpdateExcel(id, category, data_input.df_parameters[category])
     handleCloseSaveModal()
     setInputDataEdited(false)
     handleSetCategory(key)
@@ -146,7 +154,7 @@ export default function Sidebar(props) {
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
             <p style={styles.topLevelCategory}>
-              {key === "Input Summary" && scenario.results.status === "Incomplete" ? "PARETO Input File" : key}
+              {key === "Input Summary" && results.status === "Incomplete" ? "PARETO Input File" : key}
             </p>
         </div>
       ))
@@ -267,7 +275,7 @@ export default function Sidebar(props) {
               </p>
           </div>
         )}
-        {Object.entries(scenario.results.data).map( ([key, value]) => ( 
+        {Object.entries(results.data).map( ([key, value]) => ( 
           <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
               <p style={styles.subcategory}>
                 {CategoryNames[key] ? CategoryNames[key] :
@@ -290,7 +298,7 @@ export default function Sidebar(props) {
   }
 
   const checkForResiduals = () => {
-    if (scenario.optimization.deactivate_slacks === false) {
+    if (optimization.deactivate_slacks === false) {
       return true
     } else return false
   }
@@ -329,8 +337,10 @@ export default function Sidebar(props) {
               )
             }
             {
-              scenario && isIncomplete && category === "Network Diagram" && (
-                <MapEditor/>
+              scenario && isIncomplete && (
+                 category === "Network Diagram" ?
+                <MapEditor/> :
+                renderTopLevelCategories()
               )
             }
         </Box>

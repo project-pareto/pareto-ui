@@ -113,3 +113,10 @@ export const generateReport = (backend_port, id) => {
         mode: 'cors'
     });
 }
+
+export const generateExcelFromMap = (backend_port, id) => {
+    return fetch(BACKEND_URL+':'+backend_port+'/generate_excel_from_map/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}

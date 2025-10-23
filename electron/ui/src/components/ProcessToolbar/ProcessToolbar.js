@@ -73,7 +73,7 @@ export default function ProcessToolbar(props) {
         <p style={selected === 0 ? styles.textSelected : styles.textUnselected}>Data Input</p>
       </Grid>
       <Grid item xs={1.8}>
-        <IconButton aria-label="optimization" sx={{marginTop:'5px'}} disabled={scenario ? false : true} style={selected === 1 ? styles.iconSelected : null} onClick={() => handleClick(1)}>
+        <IconButton aria-label="optimization" sx={{marginTop:'5px'}} disabled={scenario?.results?.status === "Incomplete"} style={selected === 1 ? styles.iconSelected : null} onClick={() => handleClick(1)}>
             <SettingsIcon fontSize="large"></SettingsIcon>
         </IconButton>
         <p style={selected === 1 ? styles.textSelected : styles.textUnselected}>Optimization Setup</p>

@@ -259,6 +259,7 @@ export default function Dashboard(props) {
       disableOptimize={disableOptimize}
       setDisableOptimize={setDisableOptimize}
       copyAndRunOptimization={copyAndRunOptimization}
+      port={port}
       />
     </MapProvider>
   );
