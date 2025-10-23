@@ -148,7 +148,6 @@ export default function Bottombar(props) {
       }
 
       const handleClickGenerateSpreadsheet = () => {
-        console.log("generating excel spreadsheet for "+id)
         // generateExcelFromMap(port, id)
         generateExcelFromMap(port, id).then(response => {
           if (response.status === 200) {
@@ -158,6 +157,7 @@ export default function Bottombar(props) {
                   tempLink.href = excelURL;
                   tempLink.setAttribute('download', name+'.xlsx');
                   tempLink.click();
+                  syncScenarioData();
               }).catch((err)=>{
                   console.error("error generating excel: ",err)
               })
