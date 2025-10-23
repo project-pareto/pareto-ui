@@ -551,7 +551,6 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
 
 def determineConnectionsFromArcs(data):
     ## This is a work in progress
-    ## TODO: we need to use a list of incoming and outgoing nodes to determine this
     arcs = data.get("arcs", {})
     connections = {
         "all_connections": {}
@@ -563,6 +562,7 @@ def determineConnectionsFromArcs(data):
         incoming = False
         outgoing = False
         origin_node_name = None
+        ## TODO: use node.outgoing_nodes
         for connecting_node in nodes:
             ## this is the destination node for the previous node in the list
             destination_node_name = connecting_node.get("name")

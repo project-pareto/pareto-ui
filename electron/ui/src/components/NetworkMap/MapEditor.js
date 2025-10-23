@@ -120,6 +120,9 @@ export default function MapEditor() {
     }
 
     const handleUpdatePipelineDirection = (direction, value, idx) => {
+        console.log("handleUpdatePipelineDirection")
+        console.log(value)
+        console.log(idx)
         setSelectedNode(data => {
             const prevNode = {...data.node};
             const updatedNodeList = prevNode.nodes.map((n, i) =>
@@ -134,7 +137,6 @@ export default function MapEditor() {
                 node,
             }
         });
-
     }
 
     const handleRemoveConnection = (idx) => {
@@ -192,6 +194,36 @@ export default function MapEditor() {
         }
 
         return disable;
+    }
+
+    const handleUpdateOutgoingNodes = (value, idx) => {
+        // TODO: Two directions we can go with this
+        // Either, 
+        // 1) a user can add any node to this nodes outgoing nodes, in which case we should add that additional node
+        // as a connection if it is not already one, OR
+        // 2) a user can only add other connection nodes as outgoing nodes.
+        // FOR NOW: it seems that this should work. users just have to be smart about it and not create an impossible connection.
+        setSelectedNode(data => {
+            const prevNode = {...data.node};
+            const updatedNodeList = prevNode.nodes.map((n, i) => {
+                if (i === idx) {
+                    return {
+                        ...n,
+                        outgoing_nodes: value
+                    };
+                }
+                return n;
+            });
+
+            const node = {
+                ...prevNode,
+                nodes: updatedNodeList
+            };
+            return {
+                ...data,
+                node,
+            }
+        });
     }
 
     return (
@@ -272,12 +304,42 @@ export default function MapEditor() {
                                             ))}
                                             </TextField>
                                         </Tooltip>
-                                    <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
-                                        <CloseIcon />
-                                    </IconButton>
+                                    <Tooltip title="remove node from pipeline" placement="right">
+                                        <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    </Stack>
+
+                                    <Stack direction="row" spacing={1} >
+                                        <TextField
+                                            size="small"
+                                            label="Transfers water to"
+                                            fullWidth
+                                            select
+                                            value={connectionNode?.outgoing_nodes || []} // now an array of strings
+                                            // error={pipelineConnectionIssues.some(issue => selectedNodes.includes(issue))}
+                                            onChange={(e) => handleUpdateOutgoingNodes(e.target.value, idx)}
+                                            SelectProps={{
+                                                multiple: true,
+                                                MenuProps: {
+                                                PaperProps: {
+                                                    style: {
+                                                    maxHeight: 200
+                                                    }
+                                                }
+                                                }
+                                            }}
+                                            >
+                                            {availableNodes?.map((node) => (
+                                                <MenuItem key={node.name} value={node.name}>
+                                                {node.name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Stack>
                                     
-                                    <Stack direction="row" spacing={1} >
+                                    {/* <Stack direction="row" spacing={1} >
                                         <TextField
                                             label="Incoming"
                                             size='small'
@@ -308,7 +370,7 @@ export default function MapEditor() {
                                                 false
                                             </MenuItem>
                                         </TextField>
-                                    </Stack>
+                                    </Stack> */}
                                     
                                 </Stack>
                                 
