@@ -2,8 +2,9 @@ import shutil
 import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from .util import calculate_distance
 
-def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = None):
+def WriteDataToExcel(data, output_file_name, template_location = None):
     ## TODO: update this function to use all_nodes, arcs only. all the data necessary should be in those.
     if template_location is None:
         template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
@@ -195,7 +196,7 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
             try:
                 ws[valueCellLocation] = float(altitude)
             except:
-                print('unable to convert elevation to float. adding it as is')
+                print(f'unable to convert elevation to float. adding it as is: {altitude}')
                 ws[valueCellLocation] = altitude
             row+=1
 
@@ -547,3 +548,130 @@ def WriteDataToExcel(data, output_file_name="kmz_scenario", template_location = 
     ## final step: Save and close
     wb.save(excel_path)
     wb.close()
+
+def determineConnectionsFromArcs(data):
+    ## This is a work in progress
+    ## TODO: we need to use a list of incoming and outgoing nodes to determine this
+    arcs = data.get("arcs", {})
+    connections = {
+        "all_connections": {}
+    }
+    data["connections"] = connections
+    for arc_key in arcs:
+        arc = arcs[arc_key]
+        nodes = arc.get("nodes")
+        incoming = False
+        outgoing = False
+        origin_node_name = None
+        for connecting_node in nodes:
+            ## this is the destination node for the previous node in the list
+            destination_node_name = connecting_node.get("name")
+            # print(f"checking {destination_node_name} for connection")
+            incoming = connecting_node.get("incoming")
+            # print(f"incoming: {incoming}, outgoing: {outgoing}, origin_node: {origin_node_name}")
+            if outgoing and incoming and origin_node_name:
+                origin_node_connections_list = connections["all_connections"].get(origin_node_name, [])
+                origin_node_connections_list.append(destination_node_name)
+                connections["all_connections"][origin_node_name] = origin_node_connections_list
+            ## this is origin node for the next node in the list
+            outgoing = connecting_node.get("outgoing")
+            origin_node_name = connecting_node.get("name")
+
+        incoming = False
+        outgoing = False
+        origin_node_name = None
+        for connecting_node in nodes[::-1]: ## do the reverse list
+            ## this is the destination node for the previous node in the list
+            destination_node_name = connecting_node.get("name")
+            incoming = connecting_node.get("incoming")
+            if outgoing and incoming and origin_node_name:
+                origin_node_connections_list = connections["all_connections"].get(origin_node_name, [])
+                origin_node_connections_list.append(destination_node_name)
+                connections["all_connections"][origin_node_name] = origin_node_connections_list
+            ## this is origin node for the next node in the list
+            outgoing = connecting_node.get("outgoing")
+            origin_node_name = connecting_node.get("name")
+
+    return data
+
+def PreprocessMapData(map_data):
+    all_nodes = map_data.get("all_nodes", {})
+    default_node_type = map_data.get("defaultNode", "NetworkNode") ## default to network node if we don't have a default node type
+
+    excel_data = {
+        'all_nodes': all_nodes,
+        'arcs': map_data["arcs"],
+        'polygons': map_data["polygons"],
+        'ProductionPads': {},
+        'CompletionsPads': {},
+        'NetworkNodes': {},
+        'SWDSites': {},
+        'TreatmentSites': {},
+        'StorageSites': {},
+        'FreshwaterSources': {},
+        'ReuseOptions': {},
+        'connections': {}
+    }
+
+    node_types = {
+        'ProductionPad': 'ProductionPads',
+        'CompletionsPad': 'CompletionsPads',
+        'NetworkNode': 'NetworkNodes',
+        'DisposalSite': 'SWDSites',
+        'TreatmentSite': 'TreatmentSites',
+        'StorageSite': 'StorageSites',
+        'FreshwaterSource': 'FreshwaterSources',
+        'ReuseOption': 'ReuseOptions'
+    }
+
+    for node in all_nodes:
+        node_data = all_nodes[node]
+        node_type = node_data.get("node_type", default_node_type)
+        excel_key = node_types.get(node_type, None)
+        if excel_key is None:
+            print(f"found faulty node type: {node_type}")
+            continue
+        excel_data[excel_key][node] = node_data
+    
+    # print(f"finished adding nodes to excel data")
+
+
+
+# sample_arcs = {
+#     "p2": {
+#         "styleUrl": "#m_ylw-pushpin",
+#         "tessellate": "1",
+#         "coordinates": [
+#             ["-103.8539378936199", "34.53213547776518", "0"],
+#             ["-103.8473422508395", "34.49228306568203", "0"],
+#             ["-103.8223048221497", "34.49098515301236", "0"],
+#         ],
+#         "LineString": "",
+#         "node_type": "path",
+#         "node_list": ["N01", "K01", "K01"],
+#         "nodes": [
+#             {
+#                 "name": "N01",
+#                 "incoming": True,
+#                 "outgoing": True,
+#                 "coordinates": ["-103.8539378936199", "34.53213547776518", "0"],
+#             },
+#             {
+#                 "name": "K01",
+#                 "incoming": True,
+#                 "outgoing": True,
+#                 "coordinates": ["-103.8473422508395", "34.49228306568203", "0"],
+#             },
+#             {
+#                 "name": "K02",
+#                 "incoming": True,
+#                 "outgoing": True,
+#                 "coordinates": ["-103.8223048221497", "34.49098515301236", "0"],
+#             },
+#         ],
+#     },
+
+# }
+
+# data_with_connections = determineConnectionsFromArcs({"arcs": sample_arcs})
+# print(data_with_connections)

@@ -11,23 +11,15 @@
 # publicly and display publicly, and to permit others to do so.
 #####################################################################################################
 from zipfile import ZipFile
-import pprint
 import xml.sax, xml.sax.handler
-import shutil
-import math
-import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from .util import determineArcsAndConnections
 
 # pandas: geoparse
 def ParseKMZ(filename):
     global NODE_NAMES
     NODE_NAMES = set()
-
-    def calculate_distance(coord1, coord2):
-        # print(f'calculating distance from {coord1} to {coord2}')
-        distance = math.sqrt(((float(coord1[0]) - float(coord2[0]))**2) + ((float(coord1[1]) - float(coord2[1]))**2))
-        return distance
 
     ## check if kmz or kml
     if filename[-3:] == 'kmz':
@@ -105,7 +97,6 @@ def ParseKMZ(filename):
     connections = {
         "all_connections": {},
     }
-
     for key in result_object:
         # data[key] = {}
         coordinates_string = result_object[key]["coordinates"]
@@ -158,68 +149,6 @@ def ParseKMZ(filename):
                 other_nodes[key] = result_object[key]
             all_nodes[key] = result_object[key]
 
-    ## possible connection types:
-    # P - N, C, K
-    # C - N, C, K, S
-    # N - N, C, K, R, S, O
-    # S - N, O, C
-    # R - C, S, N, O
-    # F - C
-    # K - 
-    ## cannot determine if trucking or piped; ASSUME ALL ARE PIPED for now
-
-
-    ## for each arc endpoint, determine the nearest node
-    for arc_key in arcs:
-        arc = arcs[arc_key]
-        nodes = []
-        node_list = []
-        for arc_coordinates in arc["coordinates"]:
-            min_distance = 100000.0
-            closest_node = ""
-            # check each node
-            for node_key in all_nodes:
-                node = all_nodes[node_key]
-                node_coordinates = node["coordinates"]
-                distance = calculate_distance(arc_coordinates, node_coordinates)
-                if distance < min_distance:
-                    closest_node = node_key
-                    min_distance = distance
-                    # print(f'closest node is {node_key}')
-            if len(node_list) > 0:
-                ## add connection
-                origin_node = node_list[-1]
-                connection = [origin_node, closest_node]
-                # origin_node_data = all_nodes[origin_node]
-                # destination_node_data = all_nodes[closest_node]
-
-                # connections["all_connections_list"].append(connection)
-
-                ## ASSUME connections are bidirectional
-                if origin_node in connections["all_connections"]:
-                    connections["all_connections"][origin_node].append(closest_node)
-                else:
-                    connections["all_connections"][origin_node] = [closest_node]
-                if closest_node in connections["all_connections"]:
-                    connections["all_connections"][closest_node].append(origin_node)
-                else:
-                    connections["all_connections"][closest_node] = [origin_node]
-                # try:
-                #     connections[origin_node[0]][closest_node[0]].append(connection)
-                # except:
-                #     print(f'unable to add connection: {connection}')
-
-
-            nodes.append({
-                "name": closest_node,
-                "incoming": True,
-                "outgoing": True,
-                "coordinates": arc_coordinates,
-            })
-            node_list.append(closest_node)
-        arc['node_list'] = node_list
-        arc['nodes'] = nodes
-
     data['all_nodes'] = all_nodes
     data['ProductionPads'] = production_pads
     data['CompletionsPads'] = completion_pads
@@ -232,5 +161,8 @@ def ParseKMZ(filename):
     data['other_nodes'] = other_nodes
     data['connections'] = connections
     data['arcs'] = arcs
+
+
+    data = determineArcsAndConnections(data)
 
     return data 

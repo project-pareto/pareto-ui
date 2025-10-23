@@ -113,13 +113,7 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
                 content = await file.read()  # async read
                 await out_file.write(content)
             shp_paths = extract_shp_paths(zip_path)
-            # shp_data = ParseShapefile(shp_paths)
             map_data = parseShapefiles(shp_paths)
-            # for shp_path in shp_paths:
-            #     _log.info(f"parsing: {shp_path}")
-            #     result = ParseShapefile(shp_path)
-            #     map_data = merge_parsed_data(map_data, result)
-            # _log.info(f'got shape data: {len(map_data)}')
             
             WriteDataToExcel(map_data, excel_path)
             _log.info('finished writing data to excel')
