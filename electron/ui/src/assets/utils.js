@@ -505,7 +505,9 @@ export const convertMapDataToFrontendFormat = (map_data) => {
   let totalCoords = [0, 0]
   for (let key of Object.keys(points)) {
     let node_object = points[key]
-    let dataObject = {name: key}
+    let dataObject = {
+      ...node_object,
+    }
     let coords = node_object.coordinates
     let coordinates = [parseFloat(coords[0]), parseFloat(coords[1])]
     let nodeType = node_object.node_type;
@@ -525,9 +527,7 @@ export const convertMapDataToFrontendFormat = (map_data) => {
   for (let key of Object.keys(lines)) {
       let line_object = lines[key]
       let newLineObject = {
-          name: key,
-          node_list: line_object.node_list,
-          nodes: line_object.nodes,
+          ...line_object,
       }
       lineData.push(newLineObject)
   }

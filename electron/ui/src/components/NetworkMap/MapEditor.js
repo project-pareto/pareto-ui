@@ -56,8 +56,7 @@ export default function MapEditor() {
         stack: {
             paddingTop: 2,
         },
-        connections: {
-            paddingTop: 8,
+        pipelineTopStack: {
             paddingBottom: 16,
             fontWeight: "bold",
             fontSize: 20,
@@ -196,6 +195,21 @@ export default function MapEditor() {
         return disable;
     }
 
+    const handleChangePipelineLength = (event) => {
+        const value = event.target.value;
+        setSelectedNode(data => {
+            const prevNode = {...data.node};
+            const node = {
+                ...prevNode,
+                length: value
+            };
+            return {
+                ...data,
+                node,
+            }
+        });
+    }
+
     const handleUpdateOutgoingNodes = (value, idx) => {
         // TODO: Two directions we can go with this
         // Either, 
@@ -267,14 +281,22 @@ export default function MapEditor() {
                 
             ) : ( // This is a pipeline
                 <Stack>
-                    <Stack justifyContent={'space-between'} direction={'column'} style={styles.connections}>
+                    <Stack justifyContent={'space-between'} direction={'column'} style={styles.pipelineTopStack}>
+                        <TextField
+                            label="Pipeline Length"
+                            size='small'
+                            value={nodeData?.length || ''}
+                            onChange={handleChangePipelineLength}
+                            type="number"
+                            variant="outlined"
+                            fullWidth
+                            sx={{marginBottom: 2}}
+                        />
                         <span >Connections</span>
                     </Stack>
                     {
                         nodeData?.nodes?.map((connectionNode, idx) => {
                             const name = connectionNode.name;
-                            const incomingValue = connectionNode.incoming;
-                            const outgoingValue = connectionNode.outgoing;
                             return (
                                 <Stack direction="column" key={idx} spacing={1} sx={{marginBottom: 2}}>
                                     <Stack direction={'row'} spacing={1}>
@@ -311,14 +333,13 @@ export default function MapEditor() {
                                     </Tooltip>
                                     </Stack>
 
-                                    <Stack direction="row" spacing={1} >
+                                    <Stack direction="row" spacing={1}>
                                         <TextField
                                             size="small"
                                             label="Transfers water to"
                                             fullWidth
                                             select
                                             value={connectionNode?.outgoing_nodes || []} // now an array of strings
-                                            // error={pipelineConnectionIssues.some(issue => selectedNodes.includes(issue))}
                                             onChange={(e) => handleUpdateOutgoingNodes(e.target.value, idx)}
                                             SelectProps={{
                                                 multiple: true,
@@ -330,6 +351,7 @@ export default function MapEditor() {
                                                 }
                                                 }
                                             }}
+                                            sx={{marginBottom: 1}}
                                             >
                                             {availableNodes?.map((node) => (
                                                 <MenuItem key={node.name} value={node.name}>
@@ -338,39 +360,6 @@ export default function MapEditor() {
                                             ))}
                                         </TextField>
                                     </Stack>
-                                    
-                                    {/* <Stack direction="row" spacing={1} >
-                                        <TextField
-                                            label="Incoming"
-                                            size='small'
-                                            fullWidth
-                                            select
-                                            value={incomingValue}
-                                            onChange={(e) => handleUpdatePipelineDirection("incoming", e.target.value, idx)}
-                                        >
-                                            <MenuItem value={true}>
-                                                true
-                                            </MenuItem>
-                                            <MenuItem value={false}>
-                                                false
-                                            </MenuItem>
-                                        </TextField>
-                                        <TextField
-                                            label="Outgoing"
-                                            fullWidth
-                                            size='small'
-                                            select
-                                            value={outgoingValue}
-                                            onChange={(e) => handleUpdatePipelineDirection("outgoing", e.target.value, idx)}
-                                        >
-                                            <MenuItem value={true}>
-                                                true
-                                            </MenuItem>
-                                            <MenuItem value={false}>
-                                                false
-                                            </MenuItem>
-                                        </TextField>
-                                    </Stack> */}
                                     
                                 </Stack>
                                 

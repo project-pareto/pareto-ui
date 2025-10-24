@@ -136,6 +136,7 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
                 }
             }
         }
+        console.log(updatedScenario)
 
         handleUpdateScenario(updatedScenario)
         deselectActiveNode();
