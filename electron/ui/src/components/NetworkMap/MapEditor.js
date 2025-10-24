@@ -118,26 +118,6 @@ export default function MapEditor() {
         });
     }
 
-    const handleUpdatePipelineDirection = (direction, value, idx) => {
-        console.log("handleUpdatePipelineDirection")
-        console.log(value)
-        console.log(idx)
-        setSelectedNode(data => {
-            const prevNode = {...data.node};
-            const updatedNodeList = prevNode.nodes.map((n, i) =>
-                    i === idx ? {...n, [direction]: value} : n
-                );
-            const node = {
-                ...prevNode,
-                nodes: updatedNodeList
-            };
-            return {
-                ...data,
-                node,
-            }
-        });
-    }
-
     const handleRemoveConnection = (idx) => {
         setSelectedNode(data => {
             const prevNode = {...data.node};
@@ -195,19 +175,22 @@ export default function MapEditor() {
         return disable;
     }
 
-    const handleChangePipelineLength = (event) => {
+    const handleUpdatePipelineLength = (event) => {
         const value = event.target.value;
-        setSelectedNode(data => {
-            const prevNode = {...data.node};
-            const node = {
-                ...prevNode,
-                length: value
-            };
-            return {
-                ...data,
-                node,
-            }
-        });
+        if (!isNaN(value)) {
+            setSelectedNode(data => {
+                const prevNode = {...data.node};
+                const node = {
+                    ...prevNode,
+                    length: Number(value)
+                };
+                return {
+                    ...data,
+                    node,
+                }
+            });
+        }
+        
     }
 
     const handleUpdateOutgoingNodes = (value, idx) => {
@@ -286,7 +269,7 @@ export default function MapEditor() {
                             label="Pipeline Length"
                             size='small'
                             value={nodeData?.length || ''}
-                            onChange={handleChangePipelineLength}
+                            onChange={handleUpdatePipelineLength}
                             type="number"
                             variant="outlined"
                             fullWidth
