@@ -60,9 +60,9 @@ function createWindow() {
     width: bounds[0],
     height: bounds[1],
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
       enableRemoteModule: true,
-      webSecurity: false,
+      webSecurity: true,
     }
   })
   if (isDev) {
