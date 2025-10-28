@@ -99,7 +99,7 @@ export let disposalIcon = new Icon({
 	shadowSize: [41, 41]
 });
 
-export let completionPadIcon = new Icon({
+export let completionsPadIcon = new Icon({
 	iconUrl: 'img/forbidden-green.png',
 	shadowUrl: 'img/marker-shadow.png',
 	iconSize: [41, 41],

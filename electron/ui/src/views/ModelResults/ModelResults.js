@@ -4,7 +4,7 @@ import { Box, Grid, LinearProgress, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SankeyPlot from './SankeyPlot';
 import KPIDashboard from './KPIDashboard';
-import TerminationConditions from '../../assets/TerminationConditions.json'
+import { TerminationConditions } from '../../assets/utils';
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';

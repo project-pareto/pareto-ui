@@ -2,10 +2,9 @@ import React, {useState, useEffect} from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import ParetoDictionary from '../../assets/ParetoDictionary.json'
-import CategoryNames from '../../assets/CategoryNames.json'
-import Subcategories from '../../assets/Subcategories.json'
+import { CategoryNames, ParetoDictionary, Subcategories } from "../../assets/utils";
 import PopupModal from '../../components/PopupModal/PopupModal'
+import MapEditor from '../NetworkMap/MapEditor';
 
 
 const drawerWidth = 240;
@@ -20,7 +19,17 @@ export default function Sidebar(props) {
     handleUpdateExcel,
     setInputDataEdited,
     syncScenarioData,
-  } = props
+  } = props;
+
+  const {
+    optimized_override_values,
+    data_input,
+    id,
+    optimization,
+    results
+  } = scenario || {};
+
+  const isIncomplete = results?.status === "Incomplete";
   const [ openSaveModal, setOpenSaveModal ] = useState(false)
   const [ key, setKey ] =  useState(null)
   const [ openDynamic, setOpenDynamic ] = useState(true)
@@ -30,9 +39,9 @@ export default function Sidebar(props) {
 
   useEffect(() => {
     let tempOverrideList = []
-    if (scenario.optimized_override_values !== undefined)  {
-        for(let key of Object.keys(scenario.optimized_override_values)) {
-            if(Object.keys(scenario.optimized_override_values[key]).length > 0) {
+    if (optimized_override_values !== undefined)  {
+        for(let key of Object.keys(optimized_override_values)) {
+            if(Object.keys(optimized_override_values[key]).length > 0) {
               tempOverrideList.push(key)
             }
         }
@@ -92,7 +101,7 @@ export default function Sidebar(props) {
   }
 
   const handleSaveModal = () => {
-    handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
+    handleUpdateExcel(id, category, data_input.df_parameters[category])
     handleCloseSaveModal()
     setInputDataEdited(false)
     handleSetCategory(key)
@@ -126,12 +135,27 @@ export default function Sidebar(props) {
     }
   }
 
+  const renderMapOptions = () => {
+    let categories = {"Input Summary" :null, "Network Diagram": null}
+    return (
+      Object.entries(categories).map( ([key, value]) => ( 
+        <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
+            <p style={styles.topLevelCategory}>
+              {key === "Input Summary" ? "PARETO Input File" : key}
+            </p>
+        </div>
+      ))
+    )
+  }
+
   const renderAdditionalCategories = () => {
     let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([key, value]) => ( 
         <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
-            <p style={styles.topLevelCategory}>{key === "Input Summary" && scenario.results.status === "Incomplete" ? "PARETO Input File" : key}</p>
+            <p style={styles.topLevelCategory}>
+              {key === "Input Summary" && results.status === "Incomplete" ? "PARETO Input File" : key}
+            </p>
         </div>
       ))
     )
@@ -251,7 +275,7 @@ export default function Sidebar(props) {
               </p>
           </div>
         )}
-        {Object.entries(scenario.results.data).map( ([key, value]) => ( 
+        {Object.entries(results.data).map( ([key, value]) => ( 
           <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
               <p style={styles.subcategory}>
                 {CategoryNames[key] ? CategoryNames[key] :
@@ -274,7 +298,7 @@ export default function Sidebar(props) {
   }
 
   const checkForResiduals = () => {
-    if (scenario.optimization.deactivate_slacks === false) {
+    if (optimization.deactivate_slacks === false) {
       return true
     } else return false
   }
@@ -301,11 +325,23 @@ export default function Sidebar(props) {
         open={true}
       >
         <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
-            {scenario &&
+            {scenario && !isIncomplete &&
               renderAdditionalCategories()
             }
-            {scenario &&
+            {scenario && !isIncomplete &&
               renderTopLevelCategories()
+            }
+            {
+              scenario && isIncomplete && (
+                renderMapOptions()
+              )
+            }
+            {
+              scenario && isIncomplete && (
+                 category === "Network Diagram" ?
+                <MapEditor/> :
+                renderTopLevelCategories()
+              )
             }
         </Box>
       </Drawer>

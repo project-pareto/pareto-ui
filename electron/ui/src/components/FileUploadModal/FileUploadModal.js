@@ -1,25 +1,23 @@
 import React from 'react';
-import {useState, useEffect} from 'react';   
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
+import {useState, useEffect} from 'react';
 import Modal from '@mui/material/Modal';
-import TextField from '@mui/material/TextField';
-import IconButton from '@mui/material/IconButton';
+import { Grid, MenuItem, Box, TextField, IconButton, Button, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import Button from '@mui/material/Button';
 import { FileUploader } from "react-drag-drop-files";
 import { fetchExcelFile } from '../../services/app.service';
 import { useApp } from '../../AppContext';
-
-
+import { NetworkNodeTypes } from '../../assets/utils';
+import { NodeIcon } from '../NetworkMap/NodeIcon';
 
 export default function FileUploadModal(props) {
     const [ scenarioName, setScenarioName ] = useState("")
     const [ showWarning, setShowWarning ] = useState(false)
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
-    const fileTypes = ["xlsx", "kmz", "kml"];
+    const [defaultNodeType, setDefaultNodeType] = useState("NetworkNode");
+    const fileTypes = ["xlsx", "kmz", "kml", "zip"];
     const PARETO_VERSION = "main"
+    const isMapFile = file?.name.includes('zip') || file?.name.includes('kmz') || file?.name.includes('kml');
 
     const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/strategic_permian_demo.xlsx"
     const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/workshop_baseline_all_data.xlsx"
@@ -109,7 +107,7 @@ export default function FileUploadModal(props) {
             setShowWarning(false)
           }, 5000)
     }else {
-        props.handleFileUpload(file, scenarioName)
+        props.handleFileUpload(file, scenarioName, defaultNodeType)
         setShowWarning(false)
         props.setShowFileModal(false)
     }
@@ -155,6 +153,10 @@ export default function FileUploadModal(props) {
         onTypeError={fileTypeError}
       />
     );
+  }
+
+  const handleChangeDefaultNode = (e) => {
+    setDefaultNodeType(e.target.value);
   }
 
 
@@ -203,6 +205,32 @@ export default function FileUploadModal(props) {
         </Grid>
         <Grid item xs={6}>
             {showWarning && <p style={{color:'red', }}>{warningMessage}</p>}
+        </Grid>
+        <Grid item xs={12}>
+            {isMapFile && (
+                <TextField
+                    label="Default Node Type For This Map"
+                    size='small'
+                    fullWidth
+                    sx={{ mt: 1, mb: 1 }}
+                    select
+                    value={defaultNodeType}
+                    onChange={handleChangeDefaultNode}
+                    >
+                    {Object.entries(NetworkNodeTypes).map(([key, v]) => {
+                        return (
+                            <MenuItem key={key} value={v.name}>
+                                <Stack direction='row' justifyContent='space-between'>
+                                    <span>{v.displayName} </span>
+                                    <NodeIcon src={v.iconUrl} alt={v.displayName} size={20}/>
+                                </Stack>
+                            </MenuItem>
+                        )
+                    }
+                        
+                    )}
+                </TextField>
+            )}
         </Grid>
         {/* <Grid item xs={6}>
             <p ><a data-cy="excel-download" style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>

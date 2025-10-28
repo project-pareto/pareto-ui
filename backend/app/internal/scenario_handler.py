@@ -85,13 +85,6 @@ class ScenarioHandler:
         _log.info(f"making directory: {self.output_diagrams_path}")
         self.output_diagrams_path.mkdir(parents=True, exist_ok=True)
 
-        # if not has_data:
-        #     _log.info('importing default data')
-        #     try:
-        #         self.import_default_data()
-        #     except Exception as e:
-        #         _log.error(f'unable to import default data: {e}')
-
         # Connect to DB
         path = self.scenarios_path
         self._db = tinydb.TinyDB(path)
@@ -138,7 +131,16 @@ class ScenarioHandler:
 
 
         self.LOCKED = False
-        
+
+    def retrieve_scenario(self, id):
+        _log.info(f"retrieving scenario: {id}")
+        query = tinydb.Query()
+        res = self._db.search((query.id_ == id) & (query.version == self.VERSION))
+        if len(res) > 0:
+            return res[0]
+        _log.info(f"no scenario found for id: {id}")
+        return None
+    
     def update_scenario(self, updatedScenario):
         _log.info(f"Updating scenario list")
 
@@ -187,9 +189,10 @@ class ScenarioHandler:
             time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
+        db_update = {"scenario": updatedScenario, 'id_': updatedScenario['id'], 'version': self.VERSION}
         query = tinydb.Query()
         self._db.upsert(
-            {"scenario": updatedScenario, 'id_': updatedScenario['id'], 'version': self.VERSION},
+            db_update,
             ((query.id_ == updatedScenario['id']) & (query.version == self.VERSION)),
         )
 
@@ -199,7 +202,9 @@ class ScenarioHandler:
 
         return updatedScenario
     
-    def upload_excelsheet(self, output_path, scenarioName, filename, kmz_data=None):
+    def upload_excelsheet(self, output_path, scenarioName, filename, map_data=None, scenario_id=None):
+        if scenario_id is None:
+            _id = self.next_id
         _log.info(f"Uploading excel sheet: {scenarioName}")
 
         [set_list, parameter_list] = get_input_lists()
@@ -236,7 +241,7 @@ class ScenarioHandler:
         # create scenario object
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
-        if kmz_data is not None:
+        if map_data is not None:
             status = "Incomplete"
         else:
             status = "Draft"
@@ -244,7 +249,7 @@ class ScenarioHandler:
             "name": scenarioName, 
             "id": self.next_id, 
             "date": date,
-            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units, "map_data": kmz_data}, 
+            "data_input": {"df_sets": df_sets, "df_parameters": frontend_parameters, 'display_units': display_units, "map_data": map_data}, 
             "optimization": 
                 {
                     "objective":"cost", 
@@ -288,6 +293,75 @@ class ScenarioHandler:
         self.retrieve_scenarios()
         
         return return_object
+    
+    def update_scenario_from_excel(self, scenario, excel_path, map_data):
+        """
+        Updates a scenario with UPDATED excel, not new excel.
+        Accepts: scenario, excel_path, map_data
+        Returns
+        - dict updated with connections data
+        """
+        scenario_id = scenario.get("id", None)
+        _log.info(f"update_scenario_from_excel for id: {scenario_id}")
+        if scenario_id is None:
+            return
+
+        [set_list, parameter_list] = get_input_lists()
+
+        # read in data from uploaded excel sheet
+        [df_sets, df_parameters, frontend_parameters] = get_data(excel_path, set_list, parameter_list)
+        
+        try:
+            display_units = get_display_units(parameter_list, df_parameters["Units"])
+        except Exception as e:
+            _log.error(f'unable to get units: {e}')
+            display_units = {}
+
+        del frontend_parameters['Units']
+
+        # convert tuple keys into dictionary values - necessary for javascript interpretation
+        for key in df_parameters:
+            original_value = df_parameters[key]
+            new_value=[]
+            for k, v in original_value.items():
+                try:
+                    if math.isnan(v):
+                        new_value.append({'key':k, 'value': ''})
+                    else:
+                        new_value.append({'key':k, 'value': v})
+                except:
+                    new_value.append({'key':k, 'value': v})
+            df_parameters[key] = new_value
+
+        # convert pandas series into lists
+        for key in df_sets:
+            df_sets[key] = df_sets[key].values.tolist()
+
+        scenario["data_input"]= {
+            "df_sets": df_sets,
+            "df_parameters": frontend_parameters,
+            'display_units': display_units,
+            "map_data": map_data
+        }
+            
+        # check if db is in use. if so, wait til its done being used
+        db_update = {"scenario": scenario, 'id_': scenario_id, 'version': self.VERSION}
+        locked = self.LOCKED
+        while(locked):
+            time.sleep(0.5)
+            locked = self.LOCKED
+        self.LOCKED = True
+        query = tinydb.Query()
+
+        self._db.update(
+            db_update,
+            ((query.id_ == scenario_id) & (query.version == self.VERSION))
+        )
+        self.LOCKED = False
+
+        self.retrieve_scenarios()
+        
+        return scenario
     
     def replace_excelsheet(self, output_path, id):
         _log.info(f"replacing excel sheet for id: {id}")

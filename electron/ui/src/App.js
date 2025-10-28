@@ -82,8 +82,6 @@ function App() {
       fetchScenarios(port)
       .then(response => response.json())
       .then((data)=>{
-        // console.log('loaded landing page on try #'+loadLandingPage)
-        // console.log('setscenarios: ',data.data)
         /* 
         check for any scenarios that were running when the app was previously quit
         reset the status of these scenarios so that they can be treated as drafts again
@@ -223,7 +221,6 @@ useEffect(()=> {
     fetchScenarios(port)
     .then(response => response.json())
     .then((data)=>{
-      console.log('setscenarios: ',data.data)
       setScenarios(data.data)
     });
     navigate('/scenarios', {replace: true})
@@ -249,18 +246,13 @@ useEffect(()=> {
   }
 
   const handleScenarioUpdate = (updatedScenario, keepOptimized) => {
-    // console.log('inside handle scenario update')
     if (updatedScenario.results.status==='Optimized' && !keepOptimized) {
-      // console.log('changing status to not optimized')
       updatedScenario.results.status = "Not Optimized"
     }
     const temp = {...scenarios}
     temp[scenarioIndex] = {...updatedScenario}
-    console.log('updating scenario: ',updatedScenario)
     setScenarios(temp)
     setScenarioData({...updatedScenario})
-    // console.log('new scenario: ')
-    // console.log({...updatedScenario})
     updateScenario(port, {'updatedScenario': {...updatedScenario}})
     .then(response => response.json())
     .then((data) => {
@@ -366,17 +358,18 @@ useEffect(()=> {
     if (action.action === 'select') {
       let tempSection
       let tempCategory
+      const status = scenarios[index].results.status;
       if (appState) {
-        if (INITIAL_STATES.includes(scenarios[index].results.status) && appState.section === 2) {
+        if (INITIAL_STATES.includes(status) && appState.section === 2) {
           tempSection = 0
           tempCategory = appState.category
         } else {
           tempSection = appState.section
-          tempCategory = appState.category
+          tempCategory = status === "Draft" ? appState.category : {0: "Input Summary", 1: null, 2: "Dashboard"}
         }
       } else {
         // console.log('in else')
-        if(COMPLETED_STATES.includes(scenarios[index].results.status) || RUNNING_STATES.includes(scenarios[index].results.status)) {
+        if(COMPLETED_STATES.includes(status) || RUNNING_STATES.includes(status)) {
           tempSection = 2
         } else {
           tempSection = 0

@@ -97,8 +97,10 @@ export const copyScenario = (backend_port, id, newScenarioName) => {
     });
 };
 
-export const uploadExcelSheet = (backend_port, data, name) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/upload/'+name, {
+export const uploadExcelSheet = (backend_port, data, name, defaultNodeType) => {
+    let endpoint = BACKEND_URL+':'+backend_port+'/upload/'+name
+    if (defaultNodeType) endpoint += `?defaultNodeType=${defaultNodeType}`
+    return fetch(endpoint, {
         method: 'POST', 
         mode: 'cors',
         body: data
@@ -107,6 +109,13 @@ export const uploadExcelSheet = (backend_port, data, name) => {
 
 export const generateReport = (backend_port, id) => {
     return fetch(BACKEND_URL+':'+backend_port+'/generate_report/'+id, {
+        method: 'GET', 
+        mode: 'cors'
+    });
+}
+
+export const generateExcelFromMap = (backend_port, id) => {
+    return fetch(BACKEND_URL+':'+backend_port+'/generate_excel_from_map/'+id, {
         method: 'GET', 
         mode: 'cors'
     });

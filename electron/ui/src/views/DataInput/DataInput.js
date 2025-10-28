@@ -10,6 +10,15 @@ import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 
 export default function DataInput(props) {
+  const { 
+    updateScenario,
+    category,
+    handleSetCategory,
+    syncScenarioData,
+    handleUpdateExcel,
+    handleEditInput,
+    edited
+  } = props;
   const [ scenario, setScenario] = useState({...props.scenario})
   const [ editDict, setEditDict ] = useState({})
   const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) // the column mapping; set once and remains the same
@@ -25,10 +34,10 @@ export default function DataInput(props) {
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const plotCategoryDictionary  = {
-                                "CompletionsDemand": "CompletionsPads",
-                                "PadRates": "ProductionPads",
-                                "FlowbackRates": "CompletionsPads"
-                                  }
+    "CompletionsDemand": "CompletionsPads",
+    "PadRates": "ProductionPads",
+    "FlowbackRates": "CompletionsPads"
+  }
   var keyIndexMapping = {}
 
   useEffect(()=>{
@@ -36,7 +45,7 @@ export default function DataInput(props) {
       when category is changed, reset the nodes for filtering (columns and rows of current table)
     */
     try {
-      if (props.category !== "Plots" && props.category !== "Network Diagram" && props.category !== "Input Summary") {
+      if (category !== "Plots" && category !== "Network Diagram" && category !== "Input Summary") {
         let tempEditDict = {}
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
@@ -48,11 +57,11 @@ export default function DataInput(props) {
 
         // determine unique row and column keys for row and column filter sets
         let grabbedRowList = false
-        for(let colKey of Object.keys(scenario.data_input.df_parameters[props.category])) {
+        for(let colKey of Object.keys(scenario.data_input.df_parameters[category])) {
 
           // first key:value pair contains all the row names
           if (!grabbedRowList) {
-            let tempRowList = scenario.data_input.df_parameters[props.category][colKey]
+            let tempRowList = scenario.data_input.df_parameters[category][colKey]
             for (let rowKey of tempRowList) {
               if(Object.keys(tempRowFilterSet).includes(rowKey)) tempRowFilterSet[rowKey].amt = tempRowFilterSet[rowKey].amt + 1
               else tempRowFilterSet[rowKey] = {amt: 1, checked: true}
@@ -64,7 +73,7 @@ export default function DataInput(props) {
         }
         
         // determing mappings between index/values and rows+columns
-        Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
+        Object.entries(scenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
           if (ind === 0) {
             // tempRowNodesMapping = value
             value.map ((v,i) => {
@@ -76,7 +85,7 @@ export default function DataInput(props) {
             tempColumnNodesMapping.push(ind+"::"+key)
             tempColumnNodes[ind+"::"+key] = true
           }
-          scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
+          scenario.data_input.df_parameters[category][key].map( (value, index) => {
             tempEditDict[""+ind+":"+index] = false
             return 1
           })
@@ -99,7 +108,7 @@ export default function DataInput(props) {
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
     
-  }, [props.category, props.scenario, scenario.data_input.df_parameters]);
+  }, [category, props.scenario, scenario.data_input.df_parameters]);
 
   
    const handlePlotCategoryChange = (event) => {
@@ -108,11 +117,11 @@ export default function DataInput(props) {
 
   const handleSaveChanges = () => {
     //api call to save changes on backend
-    props.handleEditInput(false)
-    props.handleUpdateExcel(scenario.id, props.category, scenario.data_input.df_parameters[props.category])
+    handleEditInput(false)
+    handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category])
     let tempEditDict = {}
-    Object.entries(scenario.data_input.df_parameters[props.category]).map( ([key, value], ind) => {
-      scenario.data_input.df_parameters[props.category][key].map( (value, index) => {
+    Object.entries(scenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
+      scenario.data_input.df_parameters[category][key].map( (value, index) => {
         tempEditDict[""+ind+":"+index] = false
         return 1
       })
@@ -244,7 +253,7 @@ const handleRowFilter = (row) => {
       /*
         if category is plots, return input plots
       */
-      if(props.category === "Plots") {
+      if(category === "Plots") {
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
               <Box display="flex" justifyContent="center" sx={{marginBottom:"20px"}}>
@@ -279,17 +288,22 @@ const handleRowFilter = (row) => {
       /*
         if category is network diagram, return demo image
       */
-        else if(props.category === "Network Diagram"){
+        else if(category === "Network Diagram"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
-              <NetworkDiagram scenario={props.scenario} type={"input"} syncScenarioData={props.syncScenarioData}></NetworkDiagram>
+              <NetworkDiagram 
+                scenario={props.scenario}
+                type={"input"}
+                syncScenarioData={syncScenarioData}
+                {...props}
+              />
             </Box>
           )
         }
       /*
         if category is input summary, return input summary tables
       */
-        else if(props.category === "Input Summary"){
+        else if(category === "Input Summary"){
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
               <InputSummary 
@@ -299,8 +313,8 @@ const handleRowFilter = (row) => {
                 initialDisposalCapacity={scenario.data_input.df_parameters['InitialDisposalCapacity']}
                 initialTreatmentCapacity={scenario.data_input.df_parameters['InitialTreatmentCapacity']}
                 scenario={scenario}
-                handleSetCategory={props.handleSetCategory} 
-                updateScenario={props.updateScenario}
+                handleSetCategory={handleSetCategory} 
+                updateScenario={updateScenario}
               />
             </Box>
           )
@@ -314,7 +328,7 @@ const handleRowFilter = (row) => {
         <Grid container>
           <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'10px'}}>
-              {props.edited && <h3><Button style={{color:"#0884b4"}} onClick={handleSaveChanges}><Typography noWrap>Save Changes</Typography></Button></h3> }
+              {edited && <h3><Button style={{color:"#0884b4"}} onClick={handleSaveChanges}><Typography noWrap>Save Changes</Typography></Button></h3> }
             </Box>
           </Grid>
           <Grid item xs={11}>
@@ -331,8 +345,8 @@ const handleRowFilter = (row) => {
               rowNodes={rowNodes}
               filteredRowNodes={filteredRowNodes}
               setShowError={setShowError}
-              category={props.category}
-              handleEditInput={props.handleEditInput}
+              category={category}
+              handleEditInput={handleEditInput}
               data={props.scenario.data_input.df_parameters}
             />
           </Grid>

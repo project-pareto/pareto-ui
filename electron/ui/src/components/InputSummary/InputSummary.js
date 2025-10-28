@@ -327,24 +327,23 @@ export default function InputSummary(props) {
                 </Box>
                 <Box sx={styles.inputFileTextBox}>
                     <p>
-                        A PARETO input file has been generated based on the schematic file uploaded. 
+                        A PARETO input file can be generated based on the schematic file uploaded. 
                         Fill out this input file and upload it here to begin your optimization
                     </p>
                 </Box>
-                <Box sx={styles.inputFileTextBox}>
+                {/* <Box sx={styles.inputFileTextBox}>
                     <p style={styles.downloadInput} onClick={handleDownloadExcel}>
                         Download PARETO input file
                     </p>
                     
-                </Box>
+                </Box> */}
                 {DragDrop()}
             </Grid>
             <Grid item xs={1}></Grid>
             <Grid item xs={6}>
                 <Box>
-                <NetworkMap 
-                    points={props.scenario.data_input.map_data.all_nodes} 
-                    lines={props.scenario.data_input.map_data.arcs}
+                <NetworkMap
+                    map_data={props.scenario.data_input.map_data}
                     showMapTypeToggle={false}
                     interactive={false}
                     width={100}  //%

@@ -8,6 +8,9 @@ import NetworkMap from '../NetworkMap/NetworkMap';
 import { useApp } from '../../AppContext';
 
 export default function NetworkDiagram(props) {
+    const {
+        scenario, type, syncScenarioData
+    } = props;
     const [ file, setFile ] = useState(null)
     const [ hasMap, setHasMap ] = useState(false)
     const fileTypes = ["png","jpg","jpeg"];
@@ -24,15 +27,13 @@ export default function NetworkDiagram(props) {
         }
       }
     useEffect(()=>{
-        if (props.scenario.data_input.map_data) {
-            console.log('we got ourselves a map')
+        if (scenario?.data_input?.map_data) {
             setHasMap(true)
-            
         } else {
             fetchNetworkDiagram()
         }
         
-    }, [props.scenario]);
+    }, [scenario]);
 
     const fileTypeError = () => {
         setWarningMessage("Please choose a valid image file (png, jpg, jpeg)")
@@ -43,7 +44,7 @@ export default function NetworkDiagram(props) {
    }
 
     const handleDelete = () => {
-        deleteDiagram(port, props.type, props.scenario.id)
+        deleteDiagram(port, type, scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
@@ -63,7 +64,7 @@ export default function NetworkDiagram(props) {
     }
 
     const fetchNetworkDiagram = () => {
-    fetchDiagram(port, props.type, props.scenario.id)
+    fetchDiagram(port, type, scenario.id)
     .then(response => {
     if (response.status === 200) {
         response.json()
@@ -90,13 +91,13 @@ export default function NetworkDiagram(props) {
         formData.append('file', file, name);
 
 
-        uploadDiagram(port, formData, props.type, props.scenario.id)
+        uploadDiagram(port, formData, type, scenario.id)
         .then(response => {
         if (response.status === 200) {
             response.json()
             .then((data)=>{
                 console.log('diagram upload successful: ',data)
-                props.syncScenarioData()
+                syncScenarioData()
             }).catch((err)=>{
                 console.error("error on diagram upload: ",err)
             })
@@ -162,13 +163,13 @@ export default function NetworkDiagram(props) {
         
         : 
         hasMap ? 
-        <NetworkMap 
-            points={props.scenario.data_input.map_data.all_nodes} 
-            lines={props.scenario.data_input.map_data.arcs}
+        <NetworkMap
+            map_data={scenario.data_input.map_data}
             showMapTypeToggle
             interactive
             width={100}
             height={75}
+            {...props}
         />
         :
         <>
