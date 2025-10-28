@@ -302,9 +302,15 @@ class ScenarioHandler:
         
         return return_object
     
-    def update_scenario_with_excel(self, scenario, excel_path, map_data):
+    def update_scenario_from_excel(self, scenario, excel_path, map_data):
+        """
+        Updates a scenario with UPDATED excel, not new excel.
+        Accepts: scenario, excel_path, map_data
+        Returns
+        - dict updated with connections data
+        """
         scenario_id = scenario.get("id", None)
-        _log.info(f"update_scenario_with_excel for id: {scenario_id}")
+        _log.info(f"update_scenario_from_excel for id: {scenario_id}")
         if scenario_id is None:
             return
 

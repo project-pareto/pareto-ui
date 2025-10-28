@@ -9,7 +9,10 @@ def _print(output):
         print(output)
 
 def WriteDataToExcel(data, output_file_name, template_location = None):
-    ## TODO: update this function to use all_nodes, arcs only. all the data necessary should be in those.
+    """
+    Write map_data to excel
+    Accepts: map_data, output file name, template location (optional)
+    """
     if template_location is None:
         template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
 
@@ -555,7 +558,12 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
     return "success"
 
 def determineConnectionsFromArcs(data):
-    ## This is a work in progress
+    """
+    Derives connections from 'arcs' data.
+    Accepts: map_data output from parsed .kmz, .shp
+    Returns
+      - dict updated with connections data
+    """
     arcs = data.get("arcs", {})
     connections = {
         "all_connections": {}
@@ -568,11 +576,19 @@ def determineConnectionsFromArcs(data):
             connecting_node_name = connecting_node["name"]
             outgoing_nodes = connecting_node.get("outgoing_nodes", [])
             connections["all_connections"][connecting_node_name] = outgoing_nodes
-
-
     return data
 
 def PreprocessMapData(map_data):
+    """
+    Preprocess map_data. 
+        - On the frontend, we only update 'all_nodes' and 'arcs'
+        - For WriteToExcel, we want nodes separated into different keys.
+        - This function takes the nodes and splits them into their categories.
+        - It also updates the 'connections' from the 'arcs'.
+    Accepts: map_data dict
+    Returns
+      - dict updated with updated ProductionPads, CompletionsPads..., connections
+    """
     all_nodes = map_data.get("all_nodes", {})
     default_node_type = map_data.get("defaultNode", "NetworkNode") ## default to network node if we don't have a default node type
 
@@ -653,4 +669,4 @@ def PreprocessMapData(map_data):
 # }
 
 # data_with_connections = determineConnectionsFromArcs({"arcs": sample_arcs})
-# _print(data_with_connections)
+# print(data_with_connections)

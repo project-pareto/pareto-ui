@@ -387,7 +387,7 @@ async def generate_excel_from_map(id: int):
     if map_data is not None:
         preprocessed_map_data = PreprocessMapData(map_data)
         WriteDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
-        scenario_handler.update_scenario_with_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
+        scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
         return FileResponse(excel_path)
     else:
         _log.error(f"tried to generate excel, but map data is none")

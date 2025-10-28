@@ -37,7 +37,6 @@ def dms_to_dd(lat, lon=None):
       - A geopy-friendly string containing both
     """
     if lon is None:
-        # Single tuple or list
         if isinstance(lat, (tuple, list)) and len(lat) == 2:
             return (parse_coord(lat[0]), parse_coord(lat[1]))
         elif isinstance(lat, str) and " " in lat:
@@ -50,10 +49,17 @@ def dms_to_dd(lat, lon=None):
         return (parse_coord(lat), parse_coord(lon))
 
 def ParseShapefile(filename):
+    """
+    Parses a single .shp file
+    Can accept:
+      - .shp file
+    Returns:
+      - dict object containing all_nodes, connections, polygons, ...
+    """
 
     gdf = gpd.read_file(filename)
 
-    # ✅ Reproject geometries to WGS84 (EPSG:4326)
+    # reproject geometries to WGS84 (EPSG:4326)
     try:
         gdf = gdf.to_crs(epsg=4326)
     except:
@@ -115,7 +121,7 @@ def ParseShapefile(filename):
                 coords_list = [
                     (parse_coord(x), parse_coord(y)) for x, y in geometry.coords
                 ]
-            else:  # MultiLineString
+            else:
                 coords_list = []
                 for line in geometry:
                     coords_list.extend([
@@ -134,7 +140,7 @@ def ParseShapefile(filename):
                     [(parse_coord(x), parse_coord(y)) for x, y in interior.coords]
                     for interior in geometry.interiors
                 ]
-            else:  # MultiPolygon
+            else:
                 exterior_coords = []
                 interiors_coords = []
                 for poly in geometry.geoms:
@@ -175,22 +181,26 @@ def ParseShapefile(filename):
 
 def merge_parsed_data(data1, data2):
     """
-    Recursively merges two parsed shapefile outputs.
+    Recursively merges two parsed shapefile (or kml map?) outputs.
     Any dict keys from both will be combined.
     - Dict values are merged key-by-key
     - List values are merged with duplicates removed
     - Other values: prefer data2's value when conflicting
+    Returns: dict file containing combined data
+    TODO: 
+        - Move this to agnostic file?
+        - This should work for kml data, and we might want
+        -  to be able to combine different outputs later on.
     """
     result = {}
 
-    # Union of all top-level keys
     all_keys = set(data1.keys()) | set(data2.keys())
 
     for key in all_keys:
         val1 = data1.get(key)
         val2 = data2.get(key)
 
-        # If both values are dicts -> merge recursively
+        # If both values are dicts, merge recursively
         if isinstance(val1, Mapping) and isinstance(val2, Mapping):
             merged_dict = {**val1}  # copy val1
             for subk, subv in val2.items():
@@ -207,7 +217,7 @@ def merge_parsed_data(data1, data2):
                     merged_dict[subk] = subv
             result[key] = merged_dict
 
-        # If both values are lists -> merge without duplicates
+        # If both values are lists, merge without duplicates
         elif isinstance(val1, list) and isinstance(val2, list):
             result[key] = list(set(val1) | set(val2))
 
@@ -217,13 +227,20 @@ def merge_parsed_data(data1, data2):
         elif val2 is None:
             result[key] = val1
 
-        # If both exist but are not dict/list → prefer val2
+        # If both exist but are not dict/list, choose val2
         else:
             result[key] = val2
 
     return result
 
 def extract_shp_paths(zip_path):
+    """
+    Extracts .shp file paths from a .zip.
+    Can accept:
+      - .zip file
+    Returns:
+      - list of .shp file paths
+    """
     tmpdir = tempfile.mkdtemp()
     with zipfile.ZipFile(zip_path, 'r') as z:
         z.extractall(tmpdir)
@@ -235,6 +252,13 @@ def extract_shp_paths(zip_path):
     return shp_files
 
 def parseShapefiles(shp_paths):
+    """
+    Parses and a list of .shp files and merges data into single object.
+    Can accept:
+      - list of .shp files
+    Returns
+      - dict containing map data parsed from all files
+    """
     map_data = {}
     for shp_path in shp_paths:
         print(f"parsing: {shp_path}")
