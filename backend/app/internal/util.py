@@ -8,6 +8,12 @@ def calculate_distance(coord1, coord2):
 
 
 def determineArcsAndConnections(data):
+    """
+    Derives connections AND arcs from data.
+    Accepts: map_data output from parsed .kmz, .shp
+    Returns
+      - dict updated with connections, arcs data
+    """
     ## possible connection types:
     # P - N, C, K
     # C - N, C, K, S

@@ -85,14 +85,6 @@ class ScenarioHandler:
         _log.info(f"making directory: {self.output_diagrams_path}")
         self.output_diagrams_path.mkdir(parents=True, exist_ok=True)
 
-        # if not has_data:
-        #     _log.info('importing default data')
-        #     try:
-        #         self.import_default_data()
-        #     except Exception as e:
-        #         _log.error(f'unable to import default data: {e}')
-
-        print(f"tindydb path: {self.scenarios_path}")
         # Connect to DB
         path = self.scenarios_path
         self._db = tinydb.TinyDB(path)

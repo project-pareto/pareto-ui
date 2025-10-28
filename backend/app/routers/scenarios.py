@@ -90,35 +90,32 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
     file_extension = file.filename.split('.')[-1].lower()
     # check if file is excel or KMZ
     if file_extension == 'kmz' or file_extension == 'kml':
+        _log.info("Creating scenario from kmz/kml")
         kmz_path = f"{scenario_handler.excelsheets_path}/{new_id}.{file_extension}"
         excel_path = f"{scenario_handler.excelsheets_path}/{new_id}"
-        try: # get file contents
+        try:
             async with aiofiles.open(kmz_path, 'wb') as out_file:
-                content = await file.read()  # async read
+                content = await file.read()
                 await out_file.write(content) 
             kmz_data = ParseKMZ(kmz_path)
-            _log.info(f'got kmz_data')
-            # template_location = f'{os.path.dirname(os.path.abspath(__file__))}/../internal/assets/pareto_input_template.xlsx'
             WriteDataToExcel(kmz_data, excel_path)
-            _log.info('finished writing data to excel')
             kmz_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=kmz_data)
         except Exception as e:
             _log.error(f"error on file upload: {str(e)}")
             raise HTTPException(400, detail=f"File upload failed: {e}")
     elif file_extension == "zip":
-        _log.info("we got a zip")
+        _log.info("Creating scenario from zip")
         zip_path = f"{scenario_handler.excelsheets_path}/{new_id}.{file_extension}"
         excel_path = f"{scenario_handler.excelsheets_path}/{new_id}"
-        try: # get file contents
+        try:
             async with aiofiles.open(zip_path, 'wb') as out_file:
-                content = await file.read()  # async read
+                content = await file.read()
                 await out_file.write(content)
             shp_paths = extract_shp_paths(zip_path)
             map_data = parseShapefiles(shp_paths)
             
             WriteDataToExcel(map_data, excel_path)
-            _log.info('finished writing data to excel')
             map_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=map_data)
         except Exception as e:
@@ -126,9 +123,9 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
             raise HTTPException(400, detail=f"File upload failed: {e}")
     elif file_extension == 'xlsx':
         output_path = f"{scenario_handler.excelsheets_path}/{new_id}.xlsx"
-        try: # get file contents
+        try:
             async with aiofiles.open(output_path, 'wb') as out_file:
-                content = await file.read()  # async read
+                content = await file.read()
                 await out_file.write(content) 
             return scenario_handler.upload_excelsheet(output_path=output_path, scenarioName=scenario_name, filename=file.filename)
 
@@ -150,7 +147,7 @@ async def replace_excel(scenario_id: int, file: UploadFile = File(...)):
     output_path = f"{scenario_handler.excelsheets_path}/{scenario_id}.xlsx"
     try: # get file contents
         async with aiofiles.open(output_path, 'wb') as out_file:
-            content = await file.read()  # async read
+            content = await file.read()
             await out_file.write(content) 
         return scenario_handler.replace_excelsheet(output_path=output_path, id=scenario_id)
 
@@ -330,9 +327,8 @@ async def upload_diagram(diagram_type: str, id: int, file: UploadFile = File(...
     elif diagram_type == "output":
         output_path = f"{scenario_handler.output_diagrams_path}/{id}.{diagram_extension}"
     try:
-    # get file contents
         async with aiofiles.open(output_path, 'wb') as out_file:
-            content = await file.read()  # async read
+            content = await file.read()
             await out_file.write(content) 
         return scenario_handler.upload_diagram(output_path=output_path, id=id, diagram_type=diagram_type)
 

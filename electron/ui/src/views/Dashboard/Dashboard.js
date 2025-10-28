@@ -1,5 +1,4 @@
 import './Dashboard.css';
-import React from 'react';
 import {useEffect, useState} from 'react';   
 import {  } from "react-router-dom";
 import { Grid, IconButton } from '@mui/material'
@@ -22,10 +21,9 @@ export default function Dashboard(props) {
     handleSetCategory, appState, backgroundTasks, syncScenarioData,
     copyAndRunOptimization, handleUpdateExcel,
   } = props;
-  const networkMapData = scenario?.data_input?.map_data;
+  // const networkMapData = scenario?.data_input?.map_data;
   const [ name, setName ] = useState('')
   const [ openEditName, setOpenEditName ] = useState(false)
-  // const [ openSaveChanges, setOpenSaveChanges ] = useState(false)
   const [ inputDataEdited, setInputDataEdited ] = useState(false) 
   const [ disableOptimize, setDisableOptimize ] = useState(false)
   const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
@@ -33,64 +31,6 @@ export default function Dashboard(props) {
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
   const { port } = useApp()
-
-  // These are for editing the network map
-  // const [showNetworkNode, setShowNetworkNode] = useState(false);
-  // const [showNetworkPipeline, setShowNetworkPipeline] = useState(false);
-  // const [selectedNode, setSelectedNode] = useState(null);
-
-  // const handleClickNode = (node, idx) => {
-  //       setSelectedNode({node: node, idx: idx});
-  //       setShowNetworkNode(true);
-  //   }
-
-  // const handleClickPipeline = (node, idx) => {
-  //     // console.log(node)
-  //     setSelectedNode({node: node, idx: idx});
-  //     setShowNetworkPipeline(true);
-  // }
-
-  // const saveNodeChanges = (updatedNode) => {
-  //     const idx = selectedNode?.idx;
-  //     // console.log(selectedNode);
-  //     if (selectedNode) {
-  //         if (showNetworkNode) {
-  //             // TODO: update on backend, which will return response to automatically update here.
-  //             // setNodeData(data => {
-  //             //     const updatedNodeList = [...data].map((n, i) =>
-  //             //         i === idx ? updatedNode : n
-  //             //     );
-  //             //     return updatedNodeList;
-  //             // })
-  //         }
-  //         else if (showNetworkPipeline) {
-  //             // setLineData(data => {
-  //             //     const updatedNodeList = [...data].map((n, i) =>
-  //             //         i === idx ? updatedNode : n
-  //             //     );
-  //             //     return updatedNodeList;
-  //             // })
-  //         }
-  //         setSelectedNode(null);
-  //         setShowNetworkNode(false);
-  //         setShowNetworkPipeline(false);
-  //     } else {
-  //         console.error("No node selected, cannot save changes")
-  //     }
-  // }
-
-  // const networkMapProps = {
-  //   showNetworkNode,
-  //   setShowNetworkNode,
-  //   showNetworkPipeline,
-  //   setShowNetworkPipeline,
-  //   selectedNode,
-  //   setSelectedNode,
-  //   networkMapData,
-  //   handleClickNode,
-  //   handleClickPipeline,
-  //   saveNodeChanges
-  // }
 
   useEffect(()=>{
     try {
@@ -217,7 +157,6 @@ export default function Dashboard(props) {
           syncScenarioData={syncScenarioData}
           handleSetCategory={handleSetCategory} 
           updateScenario={updateScenario}
-          // {...networkMapProps}
         />
       }
       {(scenario && section===1) && 
