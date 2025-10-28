@@ -114,8 +114,6 @@ export default function Bottombar(props) {
     
       const handleClick = (key) => {
         setKey(key)
-        console.log('handle click from bottom bar')
-        console.log(inputDataEdited)
         if (inputDataEdited) {
           handleOpenSaveModal()
         }

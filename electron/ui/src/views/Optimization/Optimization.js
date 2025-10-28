@@ -157,8 +157,8 @@ export default function Optimization(props) {
               onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={0} value={"cbc"}>CBC (Free)</MenuItem>
-              <MenuItem key={1} value={"gurobi_direct"}>Gurobi (Commercial)</MenuItem>
+              <MenuItem value={"cbc"}>CBC (Free)</MenuItem>
+              <MenuItem value={"gurobi_direct"}>Gurobi (Commercial)</MenuItem>
             </Select>
             </FormControl>
           </Grid>
@@ -224,9 +224,9 @@ export default function Optimization(props) {
               onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={0} value={"false"}>False</MenuItem>
-              <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
-              <MenuItem key={2} value={"discrete"}>Discrete</MenuItem>
+              <MenuItem value={"false"}>False</MenuItem>
+              <MenuItem value={"post_process"}>Post Process</MenuItem>
+              <MenuItem value={"discrete"}>Discrete</MenuItem>
             </Select>
             </FormControl>
           </Grid>
@@ -246,10 +246,10 @@ export default function Optimization(props) {
               onChange={handleChange}
               sx={{color:'#0b89b9', fontWeight: "bold"}}
             >
-              <MenuItem key={0} value={"false"}>False</MenuItem>
-              <MenuItem key={1} value={"post_process"}>Post Process</MenuItem>
-              <MenuItem key={2} value={"co_optimize"}>Co-Optimize</MenuItem>
-              <MenuItem key={2} value={"co_optimize_linearized"}>Co-Optimize Linearized</MenuItem>
+              <MenuItem value={"false"}>False</MenuItem>
+              <MenuItem value={"post_process"}>Post Process</MenuItem>
+              <MenuItem value={"co_optimize"}>Co-Optimize</MenuItem>
+              <MenuItem value={"co_optimize_linearized"}>Co-Optimize Linearized</MenuItem>
             </Select>
             </FormControl>
           </Grid>

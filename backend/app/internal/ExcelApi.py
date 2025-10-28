@@ -578,8 +578,8 @@ def PreprocessMapData(map_data):
 
     excel_data = {
         'all_nodes': all_nodes,
-        'arcs': map_data["arcs"],
-        'polygons': map_data["polygons"],
+        'arcs': map_data.get("arcs", {}),
+        'polygons': map_data.get("polygons", {}),
         'ProductionPads': {},
         'CompletionsPads': {},
         'NetworkNodes': {},
