@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip } from '@mui/material';
+import { InputAdornment } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import { NetworkNodeTypes, checkIfNameIsUnique } from '../../assets/utils';
 import CloseIcon from '@mui/icons-material/Close';
@@ -24,7 +25,9 @@ export default function MapEditor() {
         deleteSelectedNode,
         nodeData: nodeList,
         lineData: lineList,
+        networkMapData,
     } = useMapValues();
+    const { units } = networkMapData || {};
 
     const [editingName, setEditingName] = useState(creatingNewNode);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
@@ -292,6 +295,9 @@ export default function MapEditor() {
                             variant="outlined"
                             fullWidth
                             sx={{marginBottom: 2}}
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">{units?.diameter || 'mi'}</InputAdornment>,
+                            }}
                         />
                         <TextField
                             label="Pipeline Diameter"
@@ -302,6 +308,9 @@ export default function MapEditor() {
                             variant="outlined"
                             fullWidth
                             sx={{marginBottom: 2}}
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">{units?.diameter || 'in'}</InputAdornment>,
+                            }}
                         />
                         <span >Connections</span>
                     </Stack>
