@@ -193,6 +193,24 @@ export default function MapEditor() {
         
     }
 
+    const handleUpdatePipelineDiameter = (event) => {
+        const value = event.target.value;
+        if (!isNaN(value)) {
+            setSelectedNode(data => {
+                const prevNode = {...data.node};
+                const node = {
+                    ...prevNode,
+                    diameter: Number(value)
+                };
+                return {
+                    ...data,
+                    node,
+                }
+            });
+        }
+        
+    }
+
     const handleUpdateOutgoingNodes = (value, idx) => {
         // TODO: Two directions we can go with this
         // Either, 
@@ -270,6 +288,16 @@ export default function MapEditor() {
                             size='small'
                             value={nodeData?.length || ''}
                             onChange={handleUpdatePipelineLength}
+                            type="number"
+                            variant="outlined"
+                            fullWidth
+                            sx={{marginBottom: 2}}
+                        />
+                        <TextField
+                            label="Pipeline Diameter"
+                            size='small'
+                            value={nodeData?.diameter || ''}
+                            onChange={handleUpdatePipelineDiameter}
                             type="number"
                             variant="outlined"
                             fullWidth
