@@ -165,6 +165,8 @@ def _read_data(_fname, _set_list, _parameter_list, _model_type="strategic", rais
                 x in _df_parameters[i].values.astype(str) for x in keyword_strings
             )
             if proprietary_data is False:
+                if not isinstance(_df_parameters[i], pd.DataFrame):
+                    _df_parameters[i] = pd.DataFrame(_df_parameters[i])
                 proprietary_data = any(
                     x in _df_parameters[i].columns for x in keyword_strings
                 )
