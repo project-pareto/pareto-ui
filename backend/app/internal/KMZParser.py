@@ -14,10 +14,10 @@ from zipfile import ZipFile
 import xml.sax, xml.sax.handler
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from .util import determineArcsAndConnections
+from .util import determineArcsAndConnections, classifyNode, DEFAULT_UNITS
 
 # pandas: geoparse
-def ParseKMZ(filename):
+def ParseKMZ(filename, default_node = None):
     global NODE_NAMES
     NODE_NAMES = set()
 
@@ -113,40 +113,8 @@ def ParseKMZ(filename):
             arcs[key] = result_object[key]
 
         else:
-            # result_object[key]["node_type"] = "point"
             result_object[key]["coordinates"] = result_object[key]["coordinates"][0]
-            ## determine what kind of node it is:
-            if key[0:2].upper() == 'PP':
-                result_object[key]["node_type"] = "ProductionPad"
-                production_pads[key] = result_object[key]
-            elif key[0:2].upper() == 'CP':
-                result_object[key]["node_type"] = "CompletionsPad"
-                completion_pads[key] = result_object[key]
-            elif key[0].upper() == 'N':
-                result_object[key]["node_type"] = "NetworkNode"
-                network_nodes[key] = result_object[key]
-            elif key[0].upper() == 'K':
-                result_object[key]["node_type"] = "DisposalSite"
-                disposal_sites[key] = result_object[key]
-            elif key[0].upper() == 'R':
-                result_object[key]["node_type"] = "TreatmentSite"
-                treatment_sites[key] = result_object[key]
-                storage_site_key = key.replace('R','S').replace('r','S')
-                storage_sites[storage_site_key] = result_object[key]
-                connections["all_connections"][key] = [storage_site_key]
-                connections["all_connections"][storage_site_key] = [key]
-            elif key[0].upper() == 'S' and len(key) < 4:
-                result_object[key]["node_type"] = "StorageSite"
-                storage_sites[key] = result_object[key]
-            elif key[0].upper() == 'F':
-                result_object[key]["node_type"] = "NetworkNode"
-                freshwater_sources[key] = result_object[key]
-            elif key[0].upper() == 'O' and len(key) < 4:
-                result_object[key]["node_type"] = "ReuseOption"
-                reuse_options[key] = result_object[key]
-            else:
-                result_object[key]["node_type"] = "NetworkNode"
-                other_nodes[key] = result_object[key]
+            classifyNode(result_object[key], default_node)
             all_nodes[key] = result_object[key]
 
     data['all_nodes'] = all_nodes
@@ -161,6 +129,7 @@ def ParseKMZ(filename):
     data['other_nodes'] = other_nodes
     data['connections'] = connections
     data['arcs'] = arcs
+    data['units'] = DEFAULT_UNITS
 
 
     data = determineArcsAndConnections(data)

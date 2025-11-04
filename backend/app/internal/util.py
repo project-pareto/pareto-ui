@@ -1,10 +1,46 @@
 import math
 
+DEFAULT_UNITS = {
+    "volume": "bbl",
+    "distance":	"mile",
+    "diameter":	"inch",
+    "concentration": "mg/liter",
+    "currency":	"USD",
+    "time":	"day",
+    "pressure":	"psi",
+    "elevation": "foot",
+    "decision_period": "week",
+    "mass": "g"
+}
 
 def calculate_distance(coord1, coord2):
         # print(f'calculating distance from {coord1} to {coord2}')
         distance = math.sqrt(((float(coord1[0]) - float(coord2[0]))**2) + ((float(coord1[1]) - float(coord2[1]))**2))
         return distance
+
+def classifyNode(data, default_node):
+    if default_node == "ProductionPad":
+        data["node_type"] = "ProductionPad"
+    elif default_node == "CompletionsPad":
+        data["node_type"] = "CompletionsPad"
+    elif default_node == "NetworkNode":
+        data["node_type"] = "NetworkNode"
+    elif default_node == "DisposalSite":
+        data["node_type"] = "DisposalSite"
+    elif default_node == "TreatmentSite":
+        data["node_type"] = "TreatmentSite"
+        # storage_site_key = key.replace('R','S').replace('r','S')
+        # storage_sites[storage_site_key] = data
+        # connections["all_connections"][key] = [storage_site_key]
+        # connections["all_connections"][storage_site_key] = [key]
+    elif default_node == "StorageSite":
+        data["node_type"] = "StorageSite"
+    elif default_node == "NetworkNode":
+        data["node_type"] = "NetworkNode"
+    elif default_node == "ReuseOption":
+        data["node_type"] = "ReuseOption"
+    else:
+        data["node_type"] = "NetworkNode"
 
 
 def determineArcsAndConnections(data):

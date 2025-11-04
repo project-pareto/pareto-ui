@@ -97,7 +97,7 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
             async with aiofiles.open(kmz_path, 'wb') as out_file:
                 content = await file.read()
                 await out_file.write(content) 
-            kmz_data = ParseKMZ(kmz_path)
+            kmz_data = ParseKMZ(kmz_path, defaultNodeType)
             WriteDataToExcel(kmz_data, excel_path)
             kmz_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=kmz_data)
@@ -113,13 +113,13 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
                 content = await file.read()
                 await out_file.write(content)
             shp_paths = extract_shp_paths(zip_path)
-            map_data = parseShapefiles(shp_paths)
-            
+            map_data = parseShapefiles(shp_paths, defaultNodeType)
+            map_data = PreprocessMapData(map_data)
             WriteDataToExcel(map_data, excel_path)
             map_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=map_data)
         except Exception as e:
-            _log.error(f"error on file upload: {str(e)}")
+            _log.exception(f"Error on file upload")
             raise HTTPException(400, detail=f"File upload failed: {e}")
     elif file_extension == 'xlsx':
         output_path = f"{scenario_handler.excelsheets_path}/{new_id}.xlsx"
