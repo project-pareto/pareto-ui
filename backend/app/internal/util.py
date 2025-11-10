@@ -90,14 +90,15 @@ def determineArcsAndConnections(data):
                 origin_node = node_list[-1]
 
                 ## ASSUME connections are bidirectional
-                if origin_node in connections["all_connections"]:
-                    connections["all_connections"][origin_node].append(closest_node)
-                else:
-                    connections["all_connections"][origin_node] = [closest_node]
-                if closest_node in connections["all_connections"]:
-                    connections["all_connections"][closest_node].append(origin_node)
-                else:
-                    connections["all_connections"][closest_node] = [origin_node]
+                if closest_node:
+                    if origin_node in connections["all_connections"]:
+                        connections["all_connections"][origin_node].append(closest_node)
+                    else:
+                        connections["all_connections"][origin_node] = [closest_node]
+                    if closest_node in connections["all_connections"]:
+                        connections["all_connections"][closest_node].append(origin_node)
+                    else:
+                        connections["all_connections"][closest_node] = [origin_node]
 
             new_node = {
                 "name": closest_node,
