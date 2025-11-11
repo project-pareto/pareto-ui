@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
 import CompareIcon from '@mui/icons-material/Compare';
-import { uploadExcelSheet, copyScenario } from '../../services/app.service'
+import { uploadScenario, copyScenario } from '../../services/app.service'
 import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
 import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'
@@ -108,11 +108,11 @@ export default function ScenarioList(props) {
         setId(null)
     }
 
-    const handleFileUpload = (file, name, defaultNodeType) => {
+    const handleFileUpload = (file, defaultNodeType, name) => {
         const formData = new FormData();
         formData.append('file', file, file.name);
 
-        uploadExcelSheet(port, formData, name, defaultNodeType)
+        uploadScenario(port, formData, name, defaultNodeType)
         .then(response => {
         if (response.status === 200) {
             response.json()

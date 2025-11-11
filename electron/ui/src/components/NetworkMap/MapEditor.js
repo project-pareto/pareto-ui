@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip } from '@mui/material';
+import { InputAdornment } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import { NetworkNodeTypes, checkIfNameIsUnique } from '../../assets/utils';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,6 +10,7 @@ import Divider from '@mui/material/Divider';
 import { useKeyDown } from '../../assets/utils';
 import PopupModal from '../PopupModal/PopupModal';
 import { NodeIcon } from './NodeIcon';
+import FileUploadModal from '../FileUploadModal/FileUploadModal';
 
 export default function MapEditor() {
     const {
@@ -24,10 +26,14 @@ export default function MapEditor() {
         deleteSelectedNode,
         nodeData: nodeList,
         lineData: lineList,
+        networkMapData,
+        handleFileUpload,
     } = useMapValues();
+    const { units } = networkMapData || {};
 
     const [editingName, setEditingName] = useState(creatingNewNode);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+    const [showFileUpload, setShowFileUpload] = useState(false);
     const { node: nodeData, idx: nodeIdx } = selectedNode || {};
 
     useEffect(() => {
@@ -193,6 +199,24 @@ export default function MapEditor() {
         
     }
 
+    const handleUpdatePipelineDiameter = (event) => {
+        const value = event.target.value;
+        if (!isNaN(value)) {
+            setSelectedNode(data => {
+                const prevNode = {...data.node};
+                const node = {
+                    ...prevNode,
+                    diameter: Number(value)
+                };
+                return {
+                    ...data,
+                    node,
+                }
+            });
+        }
+        
+    }
+
     const handleUpdateOutgoingNodes = (value, idx) => {
         // TODO: Two directions we can go with this
         // Either, 
@@ -221,6 +245,10 @@ export default function MapEditor() {
                 node,
             }
         });
+    }
+
+    const handleClickUploadAnotherMap = () => {
+        setShowFileUpload(true);
     }
 
     return (
@@ -274,6 +302,22 @@ export default function MapEditor() {
                             variant="outlined"
                             fullWidth
                             sx={{marginBottom: 2}}
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">{units?.diameter || 'mi'}</InputAdornment>,
+                            }}
+                        />
+                        <TextField
+                            label="Pipeline Diameter"
+                            size='small'
+                            value={nodeData?.diameter || ''}
+                            onChange={handleUpdatePipelineDiameter}
+                            type="number"
+                            variant="outlined"
+                            fullWidth
+                            sx={{marginBottom: 2}}
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">{units?.diameter || 'in'}</InputAdornment>,
+                            }}
                         />
                         <span >Connections</span>
                     </Stack>
@@ -379,6 +423,7 @@ export default function MapEditor() {
         ) : 
         
             <Stack direction='column' spacing={1}>
+                <Button variant="contained" onClick={handleClickUploadAnotherMap}>Upload Another Map</Button>
                 <Button variant="contained" onClick={addNode}>Add Node</Button>
                 <Button variant="contained" onClick={addPipeline}>Add Pipeline</Button>
             </Stack>
@@ -397,7 +442,20 @@ export default function MapEditor() {
             buttonTwoColor='primary'
             buttonTwoVariant='outlined'
             width={400}
-            />
+        />
+        {
+            showFileUpload && (
+                <FileUploadModal
+                    title="Upload Map"
+                    setShowFileModal={setShowFileUpload}
+                    handleFileUpload={handleFileUpload}
+                    fileTypes={["kmz", "kml", "zip"]}
+                    showNameInput={false}
+                    showSampleFiles={false}
+                    buttonText="Upload"
+                />
+            )
+        }
         </Box>
     );
 }

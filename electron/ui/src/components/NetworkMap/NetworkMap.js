@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents } from 'react-leaflet';
 import { useMap } from 'react-leaflet/hooks'
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
-import { Box, Grid, Tabs, Tab } from '@mui/material';
+import { Box, Grid, Tabs, Tab, Button } from '@mui/material';
 import { Tooltip } from 'react-leaflet/Tooltip'
 import {
     NetworkNodeTypes,
@@ -30,7 +30,7 @@ const PIPELINE_COLOR = "#A03232"
 
 
 export default function NetworkMap(props) {
-    const { map_data } = props;
+    const { map_data, interactive, showMapTypeToggle, width, height } = props;
     const {
         all_nodes: points,
         arcs: lines,
@@ -113,8 +113,8 @@ export default function NetworkMap(props) {
 
     const css = `
         .leaflet-container {
-            width: ${props.width}%;
-            height: ${props.height}vh;
+            width: ${width}%;
+            height: ${height}vh;
             z-index: 0;
         }
         .leaflet-interactive:focus {
@@ -162,15 +162,20 @@ export default function NetworkMap(props) {
             <style>{css}</style>
             <Grid container>
                 <Grid item xs={6}>
-                {props.showMapTypeToggle &&
+                {showMapTypeToggle &&
                     <Box sx={{ p:1 }}>
                         <MapTypeToggle updateMapType={setGoogleMapType} style={styles.mapTypeToggle}/>
                     </Box>
                 }
                 
                 </Grid>
-                <Grid item xs={4}></Grid>
-                <Grid item xs={2}>
+                <Grid item xs={2}></Grid>
+                <Grid item xs={4}>
+                    {interactive &&
+                        <Button>
+                        Upload Additional Map
+                    </Button>
+                    }
                     
                 </Grid>
             </Grid>
@@ -183,15 +188,15 @@ export default function NetworkMap(props) {
                         zoom={mapZoom} 
                         maxBounds={mapBounds} 
                         minZoom={5}
-                        scrollWheelZoom={props.interactive}
-                        doubleClickZoom={props.interactive}
-                        closePopupOnClick={props.interactive}
-                        dragging={props.interactive}
-                        zoomSnap={props.interactive}
-                        zoomDelta={props.interactive}
-                        zoomControl={props.interactive}
-                        // trackResize={props.interactive}
-                        touchZoom={props.interactive}
+                        scrollWheelZoom={interactive}
+                        doubleClickZoom={interactive}
+                        closePopupOnClick={interactive}
+                        dragging={interactive}
+                        zoomSnap={interactive}
+                        zoomDelta={interactive}
+                        zoomControl={interactive}
+                        // trackResize={interactive}
+                        touchZoom={interactive}
                     >
                         <CustomCursorControl/>
                     <TileLayer

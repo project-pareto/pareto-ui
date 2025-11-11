@@ -6,7 +6,7 @@ from geopy.point import Point
 import zipfile, tempfile, os
 import pprint
 from collections.abc import Mapping
-from .util import determineArcsAndConnections
+from .util import determineArcsAndConnections, classifyNode, DEFAULT_UNITS
 
 
 def parse_coord(coord):
@@ -48,7 +48,7 @@ def dms_to_dd(lat, lon=None):
     else:
         return (parse_coord(lat), parse_coord(lon))
 
-def ParseShapefile(filename):
+def ParseShapefile(filename, default_node = None):
     """
     Parses a single .shp file
     Can accept:
@@ -82,38 +82,7 @@ def ParseShapefile(filename):
         if geometry.geom_type == "Point":
             coords = (geometry.x, geometry.y)
             props["coordinates"] = parse_coord(coords)
-            
-            if feature_name.upper().startswith('PP'):
-                props["node_type"] = "ProductionPad"
-                production_pads[feature_name] = props
-            elif feature_name.upper().startswith('CP'):
-                props["node_type"] = "CompletionsPad"
-                completion_pads[feature_name] = props
-            elif feature_name.upper().startswith('N'):
-                props["node_type"] = "NetworkNode"
-                network_nodes[feature_name] = props
-            elif feature_name.upper().startswith('K'):
-                props["node_type"] = "DisposalSite"
-                disposal_sites[feature_name] = props
-            elif feature_name.upper().startswith('R'):
-                props["node_type"] = "TreatmentSite"
-                treatment_sites[feature_name] = props
-                storage_site_key = feature_name.replace('R','S').replace('r','S')
-                storage_sites[storage_site_key] = props
-                connections["all_connections"][feature_name] = [storage_site_key]
-                connections["all_connections"][storage_site_key] = [feature_name]
-            elif feature_name.upper().startswith('S') and len(feature_name) < 4:
-                props["node_type"] = "StorageSite"
-                storage_sites[feature_name] = props
-            elif feature_name.upper().startswith('F'):
-                props["node_type"] = "NetworkNode"
-                freshwater_sources[feature_name] = props
-            elif feature_name.upper().startswith('O') and len(feature_name) < 4:
-                props["node_type"] = "ReuseOption"
-                reuse_options[feature_name] = props
-            else:
-                props["node_type"] = "NetworkNode"
-                other_nodes[feature_name] = props
+            classifyNode(props, default_node)
             all_nodes[feature_name] = props
 
         elif geometry.geom_type in ("LineString", "MultiLineString"):
@@ -174,7 +143,8 @@ def ParseShapefile(filename):
         'FreshwaterSources': freshwater_sources,
         'ReuseOptions': reuse_options,
         'other_nodes': other_nodes,
-        'connections': connections
+        'connections': connections,
+        'units': DEFAULT_UNITS,
     }
 
     return result
@@ -251,7 +221,7 @@ def extract_shp_paths(zip_path):
                 shp_files.append(os.path.join(root, f))
     return shp_files
 
-def parseShapefiles(shp_paths):
+def parseShapefiles(shp_paths, defaultNodeType, initial_map_data=None):
     """
     Parses and a list of .shp files and merges data into single object.
     Can accept:
@@ -259,10 +229,13 @@ def parseShapefiles(shp_paths):
     Returns
       - dict containing map data parsed from all files
     """
-    map_data = {}
+    if initial_map_data is not None:
+        map_data = initial_map_data
+    else:
+        map_data = {}
     for shp_path in shp_paths:
         print(f"parsing: {shp_path}")
-        result = ParseShapefile(shp_path)
+        result = ParseShapefile(shp_path, default_node=defaultNodeType)
         map_data = merge_parsed_data(map_data, result)
     print(f'got shape data: {len(map_data)}')
     map_data = determineArcsAndConnections(map_data)

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName } from "../assets/utils";
 import { useApp } from '../AppContext';
+import { uploadAdditionalMap } from "../services/app.service";
 
 // Create the context
 const MapContext = createContext();
@@ -175,6 +176,39 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
         deselectActiveNode();
     }
 
+    const handleFileUpload = (file, defaultNodeType) => {
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+
+        uploadAdditionalMap(port, formData, scenario?.id, defaultNodeType)
+        .then(response => {
+        if (response.status === 200) {
+            response.json()
+            .then((data)=>{
+                handleUpdateScenario(data)
+            }).catch((err)=>{
+                console.error(String(err))
+                // setShowError(true)
+            })
+        }
+        /*
+            in the case of bad file type
+        */
+        else if (response.status === 400) {
+            response.json()
+            .then((data)=>{
+                console.error("error on file upload: ",data.detail)
+                // setErrorMessage(data.detail)
+                // setShowError(true)
+            }).catch((err)=>{
+                console.error("error on file upload: ",err)
+                // setErrorMessage(response.statusText)
+                // setShowError(true)
+            })
+        }
+        })
+    }
+
     const value = {
         networkMapData,
         setNetworkMapData,
@@ -199,6 +233,7 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
         deleteSelectedNode,
         currentlyCreatingPipeline,
         currentlyCreatingNode,
+        handleFileUpload,
         nodeType: showNetworkNode ? "node" : showNetworkPipeline ? "pipeline" : null,
     };
 

@@ -10,12 +10,20 @@ import { NetworkNodeTypes } from '../../assets/utils';
 import { NodeIcon } from '../NetworkMap/NodeIcon';
 
 export default function FileUploadModal(props) {
+    const { 
+        setShowFileModal,
+        handleFileUpload,
+        fileTypes = ["xlsx", "kmz", "kml", "zip"],
+        showNameInput = true,
+        showSampleFiles = true,
+        title = "Create a New Scenario",
+        buttonText = "Create Scenario"
+    } = props;
     const [ scenarioName, setScenarioName ] = useState("")
     const [ showWarning, setShowWarning ] = useState(false)
     const [ warningMessage, setWarningMessage ] = useState("")
     const [ file, setFile ] = useState(null)
     const [defaultNodeType, setDefaultNodeType] = useState("NetworkNode");
-    const fileTypes = ["xlsx", "kmz", "kml", "zip"];
     const PARETO_VERSION = "main"
     const isMapFile = file?.name.includes('zip') || file?.name.includes('kmz') || file?.name.includes('kml');
 
@@ -71,7 +79,7 @@ export default function FileUploadModal(props) {
    }
 
    const handleClose = () => {
-    props.setShowFileModal(false)
+    setShowFileModal(false)
    }
 
    const handleDownloadWorkshopFile = () => {
@@ -93,28 +101,28 @@ export default function FileUploadModal(props) {
         })
    }
 
-   const handleCreateScenario = () => {
+   const handleClickUpload = () => {
     if (file === null) {
         setWarningMessage("Please upload a valid file")
         setShowWarning(true)
         setTimeout(function() {
             setShowWarning(false)
           }, 5000)
-    } else if (scenarioName === "") {
+    } else if (scenarioName === "" && showNameInput) {
         setWarningMessage("Please provide a name for new scenario")
         setShowWarning(true)
         setTimeout(function() {
             setShowWarning(false)
           }, 5000)
     }else {
-        props.handleFileUpload(file, scenarioName, defaultNodeType)
+        handleFileUpload(file, defaultNodeType, scenarioName)
         setShowWarning(false)
-        props.setShowFileModal(false)
+        setShowFileModal(false)
     }
    }
 
    const fileTypeError = () => {
-        setWarningMessage("Please choose a valid excel file")
+        setWarningMessage("Please choose a valid file from accepted file types")
         setShowWarning(true)
         setTimeout(function() {
             setShowWarning(false)
@@ -171,7 +179,7 @@ export default function FileUploadModal(props) {
         <Grid container sx={styles.modalStyle} spacing={1}>
                     
         <Grid item xs={9}>
-            <h2 style={styles.header}>Create a New Scenario</h2>
+            <h2 style={styles.header}>{title}</h2>
         </Grid>
         <Grid item xs={3}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
@@ -179,18 +187,22 @@ export default function FileUploadModal(props) {
             </Box>
         </Grid>
 
-        {/* <Divider key={"divider_guy"}></Divider> */}
-        <Grid item xs={12}>
-            <TextField
-                required
-                variant="outlined"
-                id=""
-                label={"Scenario Name"}
-                value={scenarioName}
-                onChange={handleEditScenarioName}
-                fullWidth
-            />
-        </Grid>
+        {
+            showNameInput && (
+                <Grid item xs={12}>
+                    <TextField
+                        required
+                        variant="outlined"
+                        id=""
+                        label={"Scenario Name"}
+                        value={scenarioName}
+                        onChange={handleEditScenarioName}
+                        fullWidth
+                    />
+                </Grid>
+            )
+        }
+        
 
         <Grid item xs={12}>
             <p style={{color:"#666666"}}>Input file</p>
@@ -199,9 +211,15 @@ export default function FileUploadModal(props) {
             {DragDrop()}
         </Grid>
         <Grid item xs={6}>
-            <p><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
-            <p><a style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
-            {/* <p style={styles.sampleFile} onClick={handleDownloadWorkshopFile} download>Download Workshop Input File</p> */}
+            {
+                showSampleFiles && (
+                    <>
+                        <p><a data-cy="excel-download" style={styles.sampleFile} href={sampleFileUrl} download>Download an Example Input File</a></p>
+                        <p><a style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
+                    </>
+                )
+            }
+            
         </Grid>
         <Grid item xs={6}>
             {showWarning && <p style={{color:'red', }}>{warningMessage}</p>}
@@ -232,12 +250,8 @@ export default function FileUploadModal(props) {
                 </TextField>
             )}
         </Grid>
-        {/* <Grid item xs={6}>
-            <p ><a data-cy="excel-download" style={styles.sampleFile} href={workshopFileUrl} download>Download Workshop Input File</a></p>
-        </Grid>
-        <Grid item xs={6}></Grid> */}
         <Grid item xs={12}>
-            <Button id="create-scenario-button" style={styles.button} onClick={handleCreateScenario}>Create Scenario</Button>
+            <Button id="create-scenario-button" style={styles.button} onClick={handleClickUpload}>{buttonText}</Button>
         </Grid>
         </Grid>
     </Modal>

@@ -531,9 +531,18 @@ export const convertMapDataToFrontendFormat = (map_data) => {
           ...line_object,
           name: key,
       }
+    for (let coords of line_object.coordinates) {
+      amt+=1
+      totalCoords[0] += parseFloat(coords[0])
+      totalCoords[1] += parseFloat(coords[1])
+
+    }
       lineData.push(newLineObject)
   }
-  let mapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
+  let mapCenter;
+  if (totalCoords[1] && totalCoords[0])
+    mapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
+  else mapCenter = undefined
   return [nodeData, lineData, mapCenter]
 }
 
