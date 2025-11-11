@@ -10,6 +10,7 @@ import Divider from '@mui/material/Divider';
 import { useKeyDown } from '../../assets/utils';
 import PopupModal from '../PopupModal/PopupModal';
 import { NodeIcon } from './NodeIcon';
+import FileUploadModal from '../FileUploadModal/FileUploadModal';
 
 export default function MapEditor() {
     const {
@@ -26,11 +27,13 @@ export default function MapEditor() {
         nodeData: nodeList,
         lineData: lineList,
         networkMapData,
+        handleFileUpload,
     } = useMapValues();
     const { units } = networkMapData || {};
 
     const [editingName, setEditingName] = useState(creatingNewNode);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+    const [showFileUpload, setShowFileUpload] = useState(false);
     const { node: nodeData, idx: nodeIdx } = selectedNode || {};
 
     useEffect(() => {
@@ -244,6 +247,10 @@ export default function MapEditor() {
         });
     }
 
+    const handleClickUploadAnotherMap = () => {
+        setShowFileUpload(true);
+    }
+
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
         <Typography variant="h6">
@@ -416,6 +423,7 @@ export default function MapEditor() {
         ) : 
         
             <Stack direction='column' spacing={1}>
+                <Button variant="contained" onClick={handleClickUploadAnotherMap}>Upload Another Map</Button>
                 <Button variant="contained" onClick={addNode}>Add Node</Button>
                 <Button variant="contained" onClick={addPipeline}>Add Pipeline</Button>
             </Stack>
@@ -434,7 +442,20 @@ export default function MapEditor() {
             buttonTwoColor='primary'
             buttonTwoVariant='outlined'
             width={400}
-            />
+        />
+        {
+            showFileUpload && (
+                <FileUploadModal
+                    title="Upload Map"
+                    setShowFileModal={setShowFileUpload}
+                    handleFileUpload={handleFileUpload}
+                    fileTypes={["kmz", "kml", "zip"]}
+                    showNameInput={false}
+                    showSampleFiles={false}
+                    buttonText="Upload"
+                />
+            )
+        }
         </Box>
     );
 }
