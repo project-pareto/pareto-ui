@@ -177,7 +177,6 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
     }
 
     const handleFileUpload = (file, defaultNodeType) => {
-        console.log("uploading file")
         const formData = new FormData();
         formData.append('file', file, file.name);
 
@@ -186,8 +185,6 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
         if (response.status === 200) {
             response.json()
             .then((data)=>{
-                console.log("updating scenario")
-                console.log(data)
                 handleUpdateScenario(data)
             }).catch((err)=>{
                 console.error(String(err))

@@ -221,7 +221,7 @@ def extract_shp_paths(zip_path):
                 shp_files.append(os.path.join(root, f))
     return shp_files
 
-def parseShapefiles(shp_paths, defaultNodeType):
+def parseShapefiles(shp_paths, defaultNodeType, initial_map_data=None):
     """
     Parses and a list of .shp files and merges data into single object.
     Can accept:
@@ -229,7 +229,10 @@ def parseShapefiles(shp_paths, defaultNodeType):
     Returns
       - dict containing map data parsed from all files
     """
-    map_data = {}
+    if initial_map_data is not None:
+        map_data = initial_map_data
+    else:
+        map_data = {}
     for shp_path in shp_paths:
         print(f"parsing: {shp_path}")
         result = ParseShapefile(shp_path, default_node=defaultNodeType)

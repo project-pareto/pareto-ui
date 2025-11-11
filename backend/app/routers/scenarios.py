@@ -133,6 +133,55 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
             _log.error(f"error on file upload: {str(e)}")
             raise HTTPException(400, detail=f"File upload failed: {e}")
         
+
+@router.post("/upload_additional_map/{scenario_id}")
+async def upload_additional_map(scenario_id: int, defaultNodeType: str = "NetworkNode", file: UploadFile = File(...)):
+    """Upload an excel sheet or KMZ map file and create corresponding scenario.
+
+    Args:
+        file: excel sheet to be uploaded
+
+    Returns:
+        New scenario data
+    """
+    file_extension = file.filename.split('.')[-1].lower()
+    scenario = scenario_handler.get_scenario(scenario_id)
+    excel_path = scenario_handler.get_excelsheet_path(scenario_id)
+    initial_map_data = scenario.get("data_input", {}).get("map_data", None)
+
+    # check if file is excel or KMZ
+    if file_extension == 'kmz' or file_extension == 'kml':
+        _log.info("upload_additional_map from kmz/kml")
+        kmz_path = f"{scenario_handler.excelsheets_path}/{scenario_id}.{file_extension}"
+        try:
+            async with aiofiles.open(kmz_path, 'wb') as out_file:
+                content = await file.read()
+                await out_file.write(content) 
+            map_data = ParseKMZ(kmz_path, defaultNodeType, initial_map_data=initial_map_data)
+            WriteDataToExcel(map_data, excel_path)
+            return scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
+        except Exception as e:
+            _log.error(f"error on file upload: {str(e)}")
+            raise HTTPException(400, detail=f"File upload failed: {e}")
+    elif file_extension == "zip":
+        _log.info("upload_additional_map from zip")
+        zip_path = f"{scenario_handler.excelsheets_path}/{scenario}.{file_extension}"
+        try:
+            async with aiofiles.open(zip_path, 'wb') as out_file:
+                content = await file.read()
+                await out_file.write(content)
+            shp_paths = extract_shp_paths(zip_path)
+            map_data = parseShapefiles(shp_paths, defaultNodeType, initial_map_data)
+            map_data = PreprocessMapData(map_data)
+            WriteDataToExcel(map_data, excel_path)
+            return scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
+        except Exception as e:
+            _log.exception(f"Error on file upload")
+            raise HTTPException(400, detail=f"File upload failed: {e}")
+    else:
+        raise HTTPException(400, detail=f"Cannot process map for file type: {file_extension}")
+
+        
 @router.post("/replace/{scenario_id}")
 async def replace_excel(scenario_id: int, file: UploadFile = File(...)):
     """Upload an excel sheet or KMZ map file and create corresponding scenario.

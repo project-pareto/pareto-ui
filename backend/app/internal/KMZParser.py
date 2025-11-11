@@ -17,7 +17,7 @@ from openpyxl.utils import get_column_letter
 from .util import determineArcsAndConnections, classifyNode, DEFAULT_UNITS
 
 # pandas: geoparse
-def ParseKMZ(filename, default_node = None):
+def ParseKMZ(filename, default_node = None, initial_map_data = None):
     global NODE_NAMES
     NODE_NAMES = set()
 
@@ -81,22 +81,38 @@ def ParseKMZ(filename, default_node = None):
 
     # this is the object that contains all the data for each point on the map
     result_object = handler.mapping
-
-    data = {}
-    all_nodes = {}
-    production_pads = {}
-    completion_pads = {}
-    network_nodes = {}
-    disposal_sites = {}
-    treatment_sites = {}
-    storage_sites = {}
-    freshwater_sources = {}
-    reuse_options = {}
-    other_nodes = {}
-    arcs = {}
-    connections = {
-        "all_connections": {},
-    }
+    if initial_map_data is not None:
+        data = initial_map_data.get("data", {})
+        all_nodes = initial_map_data.get("all_nodes", {})
+        production_pads = initial_map_data.get("production_pads", {})
+        completion_pads = initial_map_data.get("completion_pads", {})
+        network_nodes = initial_map_data.get("network_nodes", {})
+        disposal_sites = initial_map_data.get("disposal_sites", {})
+        treatment_sites = initial_map_data.get("treatment_sites", {})
+        storage_sites = initial_map_data.get("storage_sites", {})
+        freshwater_sources = initial_map_data.get("freshwater_sources", {})
+        reuse_options = initial_map_data.get("reuse_options", {})
+        other_nodes = initial_map_data.get("other_nodes", {})
+        arcs = initial_map_data.get("arcs", {})
+        connections = initial_map_data.get("connections", {
+            "all_connections": {},
+        })
+    else:
+        data = {}
+        all_nodes = {}
+        production_pads = {}
+        completion_pads = {}
+        network_nodes = {}
+        disposal_sites = {}
+        treatment_sites = {}
+        storage_sites = {}
+        freshwater_sources = {}
+        reuse_options = {}
+        other_nodes = {}
+        arcs = {}
+        connections = {
+            "all_connections": {},
+        }
     for key in result_object:
         # data[key] = {}
         coordinates_string = result_object[key]["coordinates"]
