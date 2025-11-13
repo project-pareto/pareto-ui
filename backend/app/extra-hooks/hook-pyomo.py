@@ -64,3 +64,6 @@ for package in ["pyomo"]:
 hiddenimports = list(imports)
 hiddenimports.append("ipaddress")
 hiddenimports.append("pyimod02_importers")
+hiddenimports.append("shapely._geos")
+hiddenimports.append("shapely._buildcfg")
+hiddenimports.append("shapely._vectorized")
