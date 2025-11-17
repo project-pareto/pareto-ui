@@ -165,7 +165,7 @@ async def upload_additional_map(scenario_id: int, defaultNodeType: str = "Networ
             raise HTTPException(400, detail=f"File upload failed: {e}")
     elif file_extension == "zip":
         _log.info("upload_additional_map from zip")
-        zip_path = f"{scenario_handler.excelsheets_path}/{scenario}.{file_extension}"
+        zip_path = f"{scenario_handler.excelsheets_path}/{scenario_id}.{file_extension}"
         try:
             async with aiofiles.open(zip_path, 'wb') as out_file:
                 content = await file.read()
