@@ -18,6 +18,9 @@ export const NetworkNodeTypes = {
     displayName: 'Treatment Site',
     icon: treatmentIcon,
 	  iconUrl: 'img/target-green.png',
+    additionalFields: [
+
+    ]
   },
   ProductionPad: {
     key: 'PP',
@@ -39,13 +42,89 @@ export const NetworkNodeTypes = {
     displayName: 'Disposal Site',
     icon: disposalIcon,
 	  iconUrl: 'img/triangle-green.png',
+    additionalFields: [
+      {
+        key: "InitialDisposalCapacity",
+        displayName: "Capacity",
+        type: "number",
+        defaultValue: 0,
+        units: "bbl",
+      },
+      {
+        key: "SWDDeep",
+        displayName: "Depth",
+        type: "boolean_number",
+        defaultValue: 0,
+        tip: "shallow (0) or deep (1)"
+      },
+      {
+        key: "SWDAveragePressure",
+        displayName: "Average Pressure",
+        type: "number",
+        defaultValue: 0,
+        units: "psi/ft",
+      },
+      {
+        key: "SWDProxPAWell",
+        displayName: "Proximity to P&A'd well",
+        type: "number",
+        defaultValue: 0,
+        units: "miles",
+      },
+      {
+        key: "SWDProxInactiveWell",
+        displayName: "Proximity to inactive well",
+        type: "number",
+        defaultValue: 0,
+        units: "miles",
+      },
+      {
+        key: "SWDProxEQ",
+        displayName: "Proximity to earthquakes",
+        type: "number",
+        defaultValue: 0,
+        tip: "earthquakes >= 3.0 magnitude",
+        units: "miles",
+      },
+      {
+        key: "SWDProxFault",
+        displayName: "Proximity to fault",
+        type: "number",
+        defaultValue: 0,
+        units: "miles",
+      },
+      {
+        key: "SWDProxHpOrLpWell",
+        displayName: "Proximity to injection well",
+        type: "number",
+        defaultValue: 0,
+        units: "miles",
+        tip: "proximity to high pressure or low pressure injection well",
+      },
+    ]
   },
   StorageSite: {
     key: 'S',
     name: 'StorageSite',
     displayName: 'Storage Site',
     icon: storageSiteIcon,
-	  iconUrl: 'img/polygon-green.png',
+	  iconUrl: 'img/polygon-green.png', 
+    additionalFields: [
+      {
+        key: "InitialStorageCapacity",
+        displayName: "Capacity",
+        type: "number",
+        defaultValue: 0,
+        units: "bbl",
+      },
+      {
+        key: "StorageInitialWaterQuality",
+        displayName: "Water Quality",
+        type: "number",
+        defaultValue: 0,
+        units: "mg/liter",
+      },
+    ]
   },
   NetworkNode: {
     key: 'N',
