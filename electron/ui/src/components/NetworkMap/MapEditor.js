@@ -40,8 +40,13 @@ export default function MapEditor() {
         setEditingName(creatingNewNode);
     }, [creatingNewNode])
     
+    const { 
+        nodeType
+    } = nodeData || {};
     const nodeTypes = Object.keys(NetworkNodeTypes);
-    const isNode = nodeTypes.includes(nodeData?.nodeType);
+    const nodeTypeMetaData = NetworkNodeTypes[nodeType];
+    const additionalFields = nodeTypeMetaData?.additionalFields;
+    const isNode = nodeTypes.includes(nodeType);
     const nameIsNotUnique = isNode ? 
         !checkIfNameIsUnique(nodeList, nodeData?.name, nodeIdx) : 
         !checkIfNameIsUnique(lineList, nodeData?.name, nodeIdx);
@@ -196,7 +201,6 @@ export default function MapEditor() {
                 }
             });
         }
-        
     }
 
     const handleUpdatePipelineDiameter = (event) => {
@@ -214,7 +218,23 @@ export default function MapEditor() {
                 }
             });
         }
-        
+    }
+
+    const handleUpdateAdditionalField = (event, fieldKey) => {
+        const value = event.target.value;
+        if (!isNaN(value)) {
+            setSelectedNode(data => {
+                const prevNode = {...data.node};
+                const node = {
+                    ...prevNode,
+                    [fieldKey]: Number(value)
+                };
+                return {
+                    ...data,
+                    node,
+                }
+            });
+        }
     }
 
     const handleUpdateOutgoingNodes = (value, idx) => {
@@ -268,7 +288,7 @@ export default function MapEditor() {
                         fullWidth
                         sx={{ mt: 1, mb: 1 }}
                         select
-                        value={nodeData?.nodeType}
+                        value={nodeType}
                         onChange={(e) => handleChange('nodeType', e.target.value)}
                         >
                         {Object.entries(NetworkNodeTypes).map(([key, v]) => {
@@ -288,6 +308,27 @@ export default function MapEditor() {
                         coordinates={getCoordinates(nodeData)}
                         onChange={handleChange}
                     />
+                    {
+                        additionalFields?.map((additionalField) => (
+                            additionalField.type === "number" && (
+                                <TextField
+                                    key={additionalField.key}
+                                    label={additionalField?.displayName}
+                                    size='small'
+                                    value={nodeData[additionalField.key] || ''}
+                                    onChange={(e) => handleUpdateAdditionalField(e, additionalField.key)}
+                                    type="number"
+                                    variant="outlined"
+                                    fullWidth
+                                    sx={{marginBottom: 2}}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">{additionalField.units || ""}</InputAdornment>,
+                                    }}
+                                />
+                            ) // TODO: add functionality for other field types
+
+                        ))
+                    }
                 </Stack>
                 
             ) : ( // This is a pipeline
@@ -522,7 +563,7 @@ function CoordinatesInput({ coordinates, onChange }) {
   };
 
   return (
-    <Stack spacing={2} sx={{pt: 1}}>
+    <Stack spacing={2} sx={{pt: 1, pb: 2}}>
       <TextField
         label="Latitude"
         size='small'
