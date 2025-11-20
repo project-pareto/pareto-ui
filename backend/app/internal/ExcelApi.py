@@ -558,6 +558,32 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
                 ws[destinationCellLocation] = destination
                 row+=1
 
+    disposal_tabs = {
+        "SWDDeep": "SWDSites",
+        "SWDAveragePressure": "SWDSites",
+        "SWDProxPAWell": "SWDSites",
+        "SWDProxInactiveWell": "SWDSites",
+        "SWDProxEQ": "SWDSites",
+        "SWDProxFault": "SWDSites",
+        "SWDProxHpOrLpWell": "SWDSites",
+    }
+
+    column = 1
+    for disposal_tab in disposal_tabs:
+        ws = wb[disposal_tab]
+        node_key = disposal_tabs[disposal_tab]
+        row = 3
+        _print(f'disposal_tab {disposal_tab}: adding {node_key}')
+        nodes = data.get(node_key, {})
+        for node in nodes:
+            nodevalues = nodes.get(node, {})
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            value = nodevalues.get(disposal_tab, None)
+            cellValueLocation = f'{get_column_letter(column+1)}{row}'
+            ws[cellValueLocation] = value
+            row+=1
+
     ## final step: Save and close
     wb.save(excel_path)
     wb.close()
