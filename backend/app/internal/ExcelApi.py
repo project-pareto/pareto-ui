@@ -311,7 +311,6 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
         "BeneficialReuseCredit": ["ReuseOptions"],
         "CompletionsPadOutsideSystem": ["CompletionsPads"],
-
     }
 
     column = 1
@@ -319,10 +318,15 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         ws = wb[single_value_tab]
         row = 3
         for node_key in single_value_tabs[single_value_tab]:
-            _print(f'{single_value_tab}: adding {node_key}')
+            _print(f'single_value_tab {single_value_tab}: adding {node_key}')
+            nodes = data.get(node_key, {})
             for node in data.get(node_key, {}):
+                nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                value = nodevalues.get(single_value_tab, None)
+                cellValueLocation = f'{get_column_letter(column+1)}{row}'
+                ws[cellValueLocation] = value
                 row+=1
 
     water_quality_tabs = { ## AUTOFILL all these to ~150,000.00?
@@ -337,9 +341,16 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         row = 3
         for node_key in water_quality_tabs[water_quality_tab]:
             _print(f'water_quality_tab {water_quality_tab}: adding {node_key}')
+            nodes = data.get(node_key, {})
             for node in data.get(node_key, {}):
+                nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                # _print(f"writing to {water_quality_tab} cellLocation {cellLocation}: {node}")
+                value = nodevalues.get(water_quality_tab, None)
+                cellValueLocation = f'{get_column_letter(column+1)}{row}'
+                ws[cellValueLocation] = value
+                # _print(f"writing to {water_quality_tab} cellLocation {cellValueLocation}: {value}")
                 row+=1
 
 

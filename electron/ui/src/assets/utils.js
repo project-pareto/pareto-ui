@@ -438,7 +438,7 @@ export const ParetoDictionary = {
   "SWDRiskFactors": "Disposal Risk Factors",
   "AirEmissionCoefficients": "Air Emissions Coeficcients",
   "TreatmentEmissionCoefficients": "Treatment Emission Coefficients",
-  "DesalinationSurrogate": "Desalination Surrogate"
+  // "DesalinationSurrogate": "Desalination Surrogate"
 }
 
 export const CategoryNames = {
@@ -498,7 +498,7 @@ export const CategoryNames = {
   "SWDRiskFactors": "Disposal Risk Factors",
   "AirEmissionCoefficients": "Air Emissions Coeficcients",
   "TreatmentEmissionCoefficients": "Treatment Emission Coefficients",
-  "DesalinationSurrogate": "Desalination Surrogate",
+  // "DesalinationSurrogate": "Desalination Surrogate",
   "PNA":"PNA",
   "CNA":"CNA",
   "CCA":"CCA",
