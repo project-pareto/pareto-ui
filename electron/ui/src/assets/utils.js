@@ -19,7 +19,13 @@ export const NetworkNodeTypes = {
     icon: treatmentIcon,
 	  iconUrl: 'img/target-green.png',
     additionalFields: [
-
+      {
+        key: "DesalinationSites",
+        displayName: "Desalination Technology",
+        type: "boolean_number",
+        defaultValue: 0,
+        tip: "non-desalination (0) or desalination technology (1)"
+      },
     ]
   },
   ProductionPad: {
@@ -28,6 +34,15 @@ export const NetworkNodeTypes = {
     displayName: 'Production Pad',
     icon: productionPadIcon,
 	  iconUrl: 'img/donut-green.png',
+    additionalFields: [
+      {
+        key: "PadWaterQuality",
+        displayName: "Water Quality",
+        type: "number",
+        defaultValue: 0,
+        unit: "TDS"
+      },
+    ]
   },
   CompletionsPad: {
     key: 'CP',
@@ -35,6 +50,43 @@ export const NetworkNodeTypes = {
     displayName: 'Completion Pad',
     icon: completionsPadIcon,
 	  iconUrl: 'img/forbidden-green.png',
+    additionalFields: [
+      {
+        key: "CompletionsPadStorage",
+        displayName: "Storage Capacity",
+        type: "number",
+        defaultValue: 0,
+        units: "bbl/day",
+      },
+      {
+        key: "PadOffloadingCapacity",
+        displayName: "Offloading Capacity",
+        type: "number",
+        defaultValue: 0,
+        units: "bbl/day",
+      },
+      {
+        key: "PadStorageInitialWaterQuality",
+        displayName: "Initial Water Quality",
+        type: "number",
+        defaultValue: 0,
+        unit: "TDS"
+      },
+      {
+        key: "PadWaterQuality",
+        displayName: "Water Quality",
+        type: "number",
+        defaultValue: 0,
+        unit: "TDS"
+      },
+      {
+        key: "CompletionsPadOutsideSystem",
+        displayName: "Outside System",
+        type: "boolean_number",
+        defaultValue: 0,
+        tip: "outside system (1) or not (0)"
+      },
+    ]
   },
   DisposalSite: {
     key: 'K',
@@ -49,6 +101,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: 0,
         units: "bbl",
+      },
+      {
+        key: "DisposalOperationalCost",
+        displayName: "Operational Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl",
       },
       {
         key: "SWDDeep",
@@ -66,21 +125,21 @@ export const NetworkNodeTypes = {
       },
       {
         key: "SWDProxPAWell",
-        displayName: "Proximity to P&A'd well",
+        displayName: "Prox. to P&A'd well",
         type: "number",
         defaultValue: 0,
         units: "miles",
       },
       {
         key: "SWDProxInactiveWell",
-        displayName: "Proximity to inactive well",
+        displayName: "Prox. to inactive well",
         type: "number",
         defaultValue: 0,
         units: "miles",
       },
       {
         key: "SWDProxEQ",
-        displayName: "Proximity to earthquakes",
+        displayName: "Prox. to earthquakes",
         type: "number",
         defaultValue: 0,
         tip: "earthquakes >= 3.0 magnitude",
@@ -88,14 +147,14 @@ export const NetworkNodeTypes = {
       },
       {
         key: "SWDProxFault",
-        displayName: "Proximity to fault",
+        displayName: "Prox. to fault",
         type: "number",
         defaultValue: 0,
         units: "miles",
       },
       {
         key: "SWDProxHpOrLpWell",
-        displayName: "Proximity to injection well",
+        displayName: "Prox. to injection well",
         type: "number",
         defaultValue: 0,
         units: "miles",
@@ -132,6 +191,15 @@ export const NetworkNodeTypes = {
     displayName: 'Network Node',
     icon: networkNodeIcon,
 	  iconUrl: 'img/placemark_circle.png',
+    additionalFields: [
+      {
+        key: "NodeCapacities",
+        displayName: "Capacity",
+        type: "number",
+        defaultValue: null,
+        units: "bbl/day",
+      },
+    ]
   },
   ReuseOption: {
     key: 'O',
@@ -139,6 +207,29 @@ export const NetworkNodeTypes = {
     displayName: 'Reuse Option',
     icon: reuseOptionIcon,
     iconUrl: 'img/open-diamond-green.png',
+    additionalFields: [
+      {
+        key: "ReuseOperationalCost",
+        displayName: "Operational Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl",
+      },
+      {
+        key: "BeneficialReuseCost",
+        displayName: "Beneficial Reuse Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl",
+      },
+      {
+        key: "BeneficialReuseCredit",
+        displayName: "Beneficial Reuse Credit",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl",
+      },
+    ]
   }
 };
 

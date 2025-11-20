@@ -321,6 +321,9 @@ export default function MapEditor() {
                                     variant="outlined"
                                     fullWidth
                                     sx={{marginBottom: 2}}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">{additionalField.units || ""}</InputAdornment>,
                                     }}
