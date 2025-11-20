@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip } from '@mui/material';
-import { InputAdornment } from '@mui/material';
+import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import { NetworkNodeTypes, checkIfNameIsUnique } from '../../assets/utils';
 import CloseIcon from '@mui/icons-material/Close';
@@ -310,7 +310,7 @@ export default function MapEditor() {
                     />
                     {
                         additionalFields?.map((additionalField) => (
-                            additionalField.type === "number" && (
+                            additionalField.type === "number" ? (
                                 <TextField
                                     key={additionalField.key}
                                     label={additionalField?.displayName}
@@ -328,7 +328,26 @@ export default function MapEditor() {
                                         endAdornment: <InputAdornment position="end">{additionalField.units || ""}</InputAdornment>,
                                     }}
                                 />
-                            ) // TODO: add functionality for other field types
+                            ) : additionalField.type === "boolean_number" && (
+                                <Tooltip title={additionalField.tip || ""} key={additionalField.key} placement="right">
+                                    <FormControl
+                                        size="small"
+                                        sx={{marginBottom: 2}}
+                                    >
+                                        <InputLabel>{additionalField?.displayName}</InputLabel>
+                                        <Select
+                                            label={additionalField?.displayName}
+                                            name={additionalField.key}
+                                            value={nodeData[additionalField.key] || 0}
+                                            onChange={(e) => handleUpdateAdditionalField(e, additionalField.key)}
+                                        >
+                                            <MenuItem value={0}>{additionalField.booleanValues?.["false"] || "false"}</MenuItem>
+                                            <MenuItem value={1}>{additionalField.booleanValues?.["true"] || "true"}</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Tooltip>
+                            )
+                            // TODO: add functionality for other field types
 
                         ))
                     }
