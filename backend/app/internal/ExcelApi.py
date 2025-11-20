@@ -306,9 +306,10 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
         "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
-        "FreshSourcingCost": ["FreshwaterSources"],
+        "FreshSourcingCost": ["FreshwaterSofurces"],
         "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "FreshwaterSources"],
         "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
+        "BeneficialReuseCost": ["ReuseOptions"],
         "BeneficialReuseCredit": ["ReuseOptions"],
         "CompletionsPadOutsideSystem": ["CompletionsPads"],
     }

@@ -271,7 +271,8 @@ export const Subcategories = {
       "ReuseCapacity", "ReuseMinimum", "BeneficialReuseCost", "BeneficialReuseCredit", "TreatmentExpansionLeadTime", "DisposalExpansionLeadTime", 
       "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac", "ExternalWaterQuality", "SWDDeep",
       "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors",
-      "AirEmissionCoefficients", "TreatmentEmissionCoefficients", "DesalinationSurrogate"
+      "AirEmissionCoefficients", "TreatmentEmissionCoefficients", 
+      // "DesalinationSurrogate"
   ],
   "Static": [
       "PNA", "CNA", "CCA", "NNA", "NCA", "NKA", "NRA", "NSA", "FCA", "RCA", "RNA", "RSA",
