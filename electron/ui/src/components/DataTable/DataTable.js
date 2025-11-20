@@ -187,7 +187,7 @@ const handleKeyDown = (e) => {
 
   const renderInputRows = () => {
       const rows = []
-      let len = props.data[props.category][Object.keys(props.data[props.category])[0]].length
+      let len = props.data[props.category][Object.keys(props.data[props.category])[0]]?.length
       for (let i = 0; i < len; i++) {
         rows.push(renderInputRow(i))
       }
@@ -195,7 +195,7 @@ const handleKeyDown = (e) => {
          /*
           props.rowNodes[props.rowNodesMapping[index]] must equal true
         */
-       if (props.rowNodes[props.rowNodesMapping[index]] || Object.keys(props.rowNodes).length === 0) {
+       if (props.rowNodes[props.rowNodesMapping[index]] || !Object.keys(props.rowNodes)?.length) {
         return <TableRow key={"row_"+index}>{value}</TableRow>
        } else return null
         
