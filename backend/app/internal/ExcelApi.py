@@ -3,7 +3,7 @@ import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-print_output = False
+print_output = True
 def _print(output):
     if print_output:
         print(output)
@@ -83,7 +83,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         row = 2
         ws = wb[node_key]
         for node in data.get(node_key, {}):
-            _print(f'{node_key}: adding {node}')
+            _print(f'node_key {node_key}: adding {node}')
             cellLocation = f'{get_column_letter(column)}{row}'
             ws[cellLocation] = node
             row+=1
@@ -117,7 +117,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         row = 3
         row_nodes = []
         if len(data.get(piped_arc_node1, [])) > 0 and len(data.get(piped_arc_node2, [])) > 0:
-            _print(f'{piped_arc}: adding {piped_arc_node1}')
+            _print(f'piped_arc {piped_arc}: adding {piped_arc_node1}')
             for node in data[piped_arc_node1]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -125,7 +125,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
                 row+=1
             column = 2
             row = 2
-            _print(f'{piped_arc}: adding {piped_arc_node2}')
+            _print(f'piped_arc {piped_arc}: adding {piped_arc_node2}')
             for node in data[piped_arc_node2]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -165,14 +165,14 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         column = 1
         row = 3
         if len(data.get(trucked_arc_node1,[])) > 0 and len(data.get(trucked_arc_node2,[])) > 0:
-            _print(f'{trucked_arc}: adding {trucked_arc_node1}')
+            _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node1}')
             for node in data[trucked_arc_node1]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
                 row+=1
             column = 2
             row = 2
-            _print(f'{trucked_arc}: adding {trucked_arc_node2}')
+            _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node2}')
             for node in data[trucked_arc_node2]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -194,7 +194,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
     ws = wb["Elevation"]
     for node_key in elevation_nodes:
         for node in data.get(node_key, {}):
-            _print(f'{node_key}: adding {node} elevation')
+            _print(f'node_key {node_key}: adding {node} elevation')
             nodeCellLocation = f'{get_column_letter(column)}{row}'
             valueCellLocation = f'{get_column_letter(column+1)}{row}'
             ws[nodeCellLocation] = node
@@ -224,7 +224,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         ws = wb[forecast_tab_key]
         row = 3
         for node_key in forecast_tabs[forecast_tab_key]:
-            _print(f'{forecast_tab_key}: adding {node_key}')
+            _print(f'forecast_tab_key {forecast_tab_key}: adding {node_key}')
             for node in data.get(node_key, {}):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -262,7 +262,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         row = 3
         node_keys = initial_pipeline_tabs[initial_pipeline_tab][0]
         for node_key in node_keys:
-            _print(f'{initial_pipeline_tab}: adding {node_key}')
+            _print(f'initial_pipeline_tab {initial_pipeline_tab}: adding {node_key}')
             for node in data.get(node_key, {}):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -273,7 +273,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         column = 2
         row = 2
         for node_key in node_keys:
-            _print(f'{initial_pipeline_tab}: adding {node_key}')
+            _print(f'initial_pipeline_tab {initial_pipeline_tab}: adding {node_key}')
             for node in data.get(node_key, {}):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -287,25 +287,31 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         "NodeCapacities": "NetworkNodes",
     }
     column = 1
+    ## TODO: For other tabs, add the values like we did here:
     for initial_capacity_tab in initial_capacity_tabs:
         ws = wb[initial_capacity_tab]
         node_key = initial_capacity_tabs[initial_capacity_tab]
         row = 3
-        _print(f'{initial_capacity_tab}: adding {node_key}')
-        for node in data.get(node_key, {}):
+        _print(f'initial_capacity_tab {initial_capacity_tab}: adding {node_key}')
+        nodes = data.get(node_key, {})
+        for node in nodes:
+            nodevalues = nodes.get(node, {})
             cellLocation = f'{get_column_letter(column)}{row}'
             ws[cellLocation] = node
+            value = nodevalues.get(initial_capacity_tab, None)
+            cellValueLocation = f'{get_column_letter(column+1)}{row}'
+            ws[cellValueLocation] = value
             row+=1
 
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
         "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
-        "FreshSourcingCost": ["FreshwaterSources"],
+        "FreshSourcingCost": ["FreshwaterSofurces"],
         "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "FreshwaterSources"],
         "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
+        "BeneficialReuseCost": ["ReuseOptions"],
         "BeneficialReuseCredit": ["ReuseOptions"],
         "CompletionsPadOutsideSystem": ["CompletionsPads"],
-
     }
 
     column = 1
@@ -313,10 +319,15 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         ws = wb[single_value_tab]
         row = 3
         for node_key in single_value_tabs[single_value_tab]:
-            _print(f'{single_value_tab}: adding {node_key}')
+            _print(f'single_value_tab {single_value_tab}: adding {node_key}')
+            nodes = data.get(node_key, {})
             for node in data.get(node_key, {}):
+                nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                value = nodevalues.get(single_value_tab, None)
+                cellValueLocation = f'{get_column_letter(column+1)}{row}'
+                ws[cellValueLocation] = value
                 row+=1
 
     water_quality_tabs = { ## AUTOFILL all these to ~150,000.00?
@@ -330,10 +341,17 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         ws = wb[water_quality_tab]
         row = 3
         for node_key in water_quality_tabs[water_quality_tab]:
-            _print(f'{water_quality_tab}: adding {node_key}')
+            _print(f'water_quality_tab {water_quality_tab}: adding {node_key}')
+            nodes = data.get(node_key, {})
             for node in data.get(node_key, {}):
+                nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                # _print(f"writing to {water_quality_tab} cellLocation {cellLocation}: {node}")
+                value = nodevalues.get(water_quality_tab, None)
+                cellValueLocation = f'{get_column_letter(column+1)}{row}'
+                ws[cellValueLocation] = value
+                # _print(f"writing to {water_quality_tab} cellLocation {cellValueLocation}: {value}")
                 row+=1
 
 
@@ -375,7 +393,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         row = 3
         try:
             for each in default_values:
-                _print(f'{capacity_increments_tab}: adding {each}')
+                _print(f'capacity_increments_tab {capacity_increments_tab}: adding {each}')
                 keyCellLocation = f'{get_column_letter(1)}{row}'
                 valueCellLocation = f'{get_column_letter(2)}{row}'
                 ws[keyCellLocation] = each
@@ -438,7 +456,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
             ws[columnHeaderCellLocation] = tech
             column+=1
         row = 3
-        _print(f'{tab}: adding {node_key}')
+        _print(f'tab {tab}: adding {node_key}')
         for node in data.get(node_key, {}):
             cellLocation = f'{get_column_letter(1)}{row}'
             ws[cellLocation] = node
@@ -456,7 +474,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         row = 3
         for technology in treatment_technologies:
             value = treatment_technologies[technology][tab]
-            _print(f'{tab}: adding {technology}')
+            _print(f'tab {tab}: adding {technology}')
             for node in data.get(node_key, {}):
                 treatmentCellLocation = f'{get_column_letter(column-1)}{row}'
                 technologyCellLocation = f'{get_column_letter(column)}{row}'
@@ -481,7 +499,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
             ws[columnHeaderCellLocation] = cap
             column+=1
         for technology in treatment_technologies:
-            _print(f'{tab}: adding {technology}')
+            _print(f'tab {tab}: adding {technology}')
             for node in data.get(node_key, {}):
                 treatmentCellLocation = f'{get_column_letter(1)}{row}'
                 technologyCellLocation = f'{get_column_letter(2)}{row}'
@@ -512,7 +530,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         
         for default in defaults[tabs[tab]["default"]]:
             default_values = defaults[tabs[tab]["default"]][default]
-            _print(f'{tab}: adding {default}')
+            _print(f'tab {tab}: adding {default}')
             for node in data.get(node_key, {}):
                 treatmentCellLocation = f'{get_column_letter(1)}{row}'
                 technologyCellLocation = f'{get_column_letter(2)}{row}'
@@ -551,6 +569,32 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
                 ws[locationCellLocation] = location
                 ws[destinationCellLocation] = destination
                 row+=1
+
+    disposal_tabs = {
+        "SWDDeep": "SWDSites",
+        "SWDAveragePressure": "SWDSites",
+        "SWDProxPAWell": "SWDSites",
+        "SWDProxInactiveWell": "SWDSites",
+        "SWDProxEQ": "SWDSites",
+        "SWDProxFault": "SWDSites",
+        "SWDProxHpOrLpWell": "SWDSites",
+    }
+
+    column = 1
+    for disposal_tab in disposal_tabs:
+        ws = wb[disposal_tab]
+        node_key = disposal_tabs[disposal_tab]
+        row = 3
+        _print(f'disposal_tab {disposal_tab}: adding {node_key}')
+        nodes = data.get(node_key, {})
+        for node in nodes:
+            nodevalues = nodes.get(node, {})
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            value = nodevalues.get(disposal_tab, None)
+            cellValueLocation = f'{get_column_letter(column+1)}{row}'
+            ws[cellValueLocation] = value
+            row+=1
 
     ## final step: Save and close
     wb.save(excel_path)
