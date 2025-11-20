@@ -22,7 +22,7 @@ export const NetworkNodeTypes = {
       {
         key: "DesalinationSites",
         displayName: "Desalination Technology",
-        type: "boolean_number",
+        type: "boolean",
         defaultValue: 0,
         tip: "non-desalination (false) or desalination technology (true)"
       },
@@ -82,7 +82,7 @@ export const NetworkNodeTypes = {
       {
         key: "CompletionsPadOutsideSystem",
         displayName: "Outside System",
-        type: "boolean_number",
+        type: "boolean",
         defaultValue: 0,
         tip: "outside system (true) or not (false)"
       },
@@ -112,7 +112,7 @@ export const NetworkNodeTypes = {
       {
         key: "SWDDeep",
         displayName: "Depth",
-        type: "boolean_number",
+        type: "boolean",
         booleanValues: {"true": "deep", "false": "shallow"},
       },
       {

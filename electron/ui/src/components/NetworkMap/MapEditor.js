@@ -328,7 +328,7 @@ export default function MapEditor() {
                                         endAdornment: <InputAdornment position="end">{additionalField.units || ""}</InputAdornment>,
                                     }}
                                 />
-                            ) : additionalField.type === "boolean_number" && (
+                            ) : additionalField.type === "boolean" && (
                                 <Tooltip title={additionalField.tip || ""} key={additionalField.key} placement="right">
                                     <FormControl
                                         size="small"
