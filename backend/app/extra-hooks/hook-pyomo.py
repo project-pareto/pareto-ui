@@ -67,3 +67,17 @@ hiddenimports.append("pyimod02_importers")
 hiddenimports.append("shapely._geos")
 hiddenimports.append("shapely._buildcfg")
 hiddenimports.append("shapely._vectorized")
+hiddenimports += [
+    "pyogrio",
+    "pyogrio._geometry",
+    "pyogrio._io",
+    # "fiona",
+    # "fiona.ogrext",
+    # "fiona._shim",
+    # "fiona.schema",
+    # "fiona.collection",
+    # "osgeo",
+    # "osgeo._gdal",
+    # "osgeo._ogr",
+    # "osgeo._osr"
+]
