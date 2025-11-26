@@ -138,7 +138,7 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
             }
         }
 
-        handleUpdateScenario(updatedScenario)
+        handleUpdateScenario(updatedScenario, false, true)
         deselectActiveNode();
     }
 
@@ -172,7 +172,7 @@ export const MapProvider = ({ children, scenario, handleUpdateScenario }) => {
             }
         }
 
-        handleUpdateScenario(updatedScenario)
+        handleUpdateScenario(updatedScenario, false, true)
         deselectActiveNode();
     }
 

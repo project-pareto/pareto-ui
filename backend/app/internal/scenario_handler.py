@@ -28,6 +28,8 @@ from pareto.utilities.get_data import get_display_units
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
+from app.internal.ExcelApi import PreprocessMapData, WriteDataToExcel
+from app.internal.util import time_it
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -708,7 +710,7 @@ class ScenarioHandler:
         # for column in scenario["data_input"]["df_parameters"][table_key]:
 
         # update excel sheet
-        _log.info(f'updating table: {updatedTable}')
+        # _log.info(f'updating table: {updatedTable}')
         for column in updatedTable:
             y = 3
             for cellValue in updatedTable[column]:
@@ -786,6 +788,16 @@ class ScenarioHandler:
     
     def get_assets_dir(self):
         return Path(f'{os.path.dirname(os.path.abspath(__file__))}/assets/')
+    
+    @time_it
+    def propagate_scenario_changes(self, scenario):
+        data_input = scenario.get("data_input", {})
+        map_data = data_input.get("map_data", None)
+        excel_path = self.get_excelsheet_path(scenario.get("id"))
+        if map_data is not None:
+            preprocessed_map_data = PreprocessMapData(map_data)
+            WriteDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
+            self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
 
 
 scenario_handler = ScenarioHandler()
