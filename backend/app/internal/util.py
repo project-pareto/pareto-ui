@@ -1,4 +1,9 @@
 import math
+import time
+import functools
+
+import logging
+_log = logging.getLogger(__name__)
 
 DEFAULT_UNITS = {
     "volume": "bbl",
@@ -12,6 +17,18 @@ DEFAULT_UNITS = {
     "decision_period": "week",
     "mass": "g"
 }
+
+def time_it(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        _log.info(f"Function '{func.__name__}' executed in {elapsed_time:.2f} seconds")
+        return result
+
+    return wrapper
 
 def calculate_distance(coord1, coord2):
         # print(f'calculating distance from {coord1} to {coord2}')

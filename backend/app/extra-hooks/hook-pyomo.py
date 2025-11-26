@@ -67,3 +67,8 @@ hiddenimports.append("pyimod02_importers")
 hiddenimports.append("shapely._geos")
 hiddenimports.append("shapely._buildcfg")
 hiddenimports.append("shapely._vectorized")
+hiddenimports += [
+    "pyogrio",
+    "pyogrio._geometry",
+    "pyogrio._io",
+]

@@ -26,6 +26,7 @@ from app.internal.scenario_handler import (
 from app.internal.KMZParser import ParseKMZ
 from app.internal.ExcelApi import WriteDataToExcel, PreprocessMapData
 from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
+from app.internal.util import time_it
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -72,7 +73,14 @@ async def update(request: Request):
     """
     data = await request.json()
     updated_scenario = data['updatedScenario']
+    propagate_changes = data.get("propagateChanges")
     scenario_handler.update_scenario(updated_scenario)
+    scenario_id = updated_scenario.get("id")
+    if propagate_changes and scenario_id:
+        _log.info(f"propagating changes to excel")
+        scenario_handler.propagate_scenario_changes(updated_scenario)
+        scenario = scenario_handler.get_scenario(scenario_id)
+        return {"data": scenario}
 
     return {"data": updated_scenario}
 
@@ -426,17 +434,8 @@ async def generate_excel_from_map(id: int):
     """
     scenario = scenario_handler.get_scenario(id)
     excel_path = scenario_handler.get_excelsheet_path(id)
-    # path = scenario_handler.get_excel_output_path(id)
-    data_input = scenario.get("data_input", {})
-    map_data = data_input.get("map_data", None)
-    if map_data is not None:
-        preprocessed_map_data = PreprocessMapData(map_data)
-        WriteDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
-        scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
-        return FileResponse(excel_path)
-    else:
-        _log.error(f"tried to generate excel, but map data is none")
-        raise HTTPException(400, detail=f"This scenario does not contain a map")
+    scenario_handler.propagate_scenario_changes(scenario=scenario)
+    return FileResponse(excel_path)
 
 
 @router.get("/generate_report/{id}")

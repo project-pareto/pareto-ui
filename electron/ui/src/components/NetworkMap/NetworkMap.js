@@ -171,11 +171,6 @@ export default function NetworkMap(props) {
                 </Grid>
                 <Grid item xs={2}></Grid>
                 <Grid item xs={4}>
-                    {interactive &&
-                        <Button>
-                        Upload Additional Map
-                    </Button>
-                    }
                     
                 </Grid>
             </Grid>

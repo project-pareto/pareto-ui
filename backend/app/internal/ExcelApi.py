@@ -3,7 +3,7 @@ import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-print_output = True
+print_output = False
 def _print(output):
     if print_output:
         print(output)

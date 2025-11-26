@@ -245,7 +245,7 @@ useEffect(()=> {
     navigate('/scenario', {replace: true})   
   }
 
-  const handleScenarioUpdate = (updatedScenario, keepOptimized) => {
+  const handleScenarioUpdate = (updatedScenario, keepOptimized, propagateChanges) => {
     if (updatedScenario.results.status==='Optimized' && !keepOptimized) {
       updatedScenario.results.status = "Not Optimized"
     }
@@ -253,10 +253,13 @@ useEffect(()=> {
     temp[scenarioIndex] = {...updatedScenario}
     setScenarios(temp)
     setScenarioData({...updatedScenario})
-    updateScenario(port, {'updatedScenario': {...updatedScenario}})
+    updateScenario(port, {'updatedScenario': {...updatedScenario}, propagateChanges: propagateChanges || false})
     .then(response => response.json())
     .then((data) => {
       // console.log('updated scenarios on backend')
+      if (propagateChanges) {
+        setScenarioData({...data.data})
+      }
     }).catch(e => {
       console.error('error on scenario update')
       console.error(e)
