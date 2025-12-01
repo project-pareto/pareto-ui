@@ -13,6 +13,32 @@
 import importlib
 from pathlib import Path
 import re
+import sys
+from PyInstaller.utils.hooks import collect_dynamic_libs
+
+
+def getPyogrioDLLs():
+    # Collect DLLs shipped inside pyogrio
+    binaries = []
+    binaries += collect_dynamic_libs("pyogrio")
+    if len(binaries) == 0:
+        # Fallback to using conda's Library/bin for DLLs
+        print(f"checking conda directories for dlls: ")
+        dll_dirs = [
+            Path(sys.prefix) / "Library" / "bin",
+            Path(sys.prefix) / "bin",
+        ]
+
+        print(f"{dll_dirs}")
+
+        patterns = ["gdal*.dll", "ogr*.dll", "osr*.dll", "proj*.dll", "geos*.dll"]
+
+        for d in dll_dirs:
+            if d.exists():
+                for pattern in patterns:
+                    for dll in d.glob(pattern):
+                        binaries.append((str(dll), "."))
+    return binaries
 
 imports = set()
 
@@ -72,3 +98,7 @@ hiddenimports += [
     "pyogrio._geometry",
     "pyogrio._io",
 ]
+
+binaries = getPyogrioDLLs()
+
+print(f"pyogrio binaries: {binaries}")
