@@ -14,30 +14,50 @@ import importlib
 from pathlib import Path
 import re
 import sys
-from PyInstaller.utils.hooks import collect_dynamic_libs
+from PyInstaller.utils.hooks import get_module_file_attribute
 
 
 def getPyogrioDLLs():
-    # Collect DLLs shipped inside pyogrio
+    # Collect DLLs shipped inside pyogrio (for windows)
+    # binaries = []
+    # binaries += collect_dynamic_libs("pyogrio")
+    # print(f"collect_dynamic_libs(pyogrio): {collect_dynamic_libs('pyogrio')}")
+    # if len(binaries) == 0:
+    #     # Fallback to using conda's Library/bin for DLLs
+    #     print(f"checking conda directories for dlls: ")
+    #     dll_dirs = [
+    #         Path(sys.prefix) / "Library" / "bin",
+    #         Path(sys.prefix) / "bin",
+    #     ]
+
+    #     print(f"{dll_dirs}")
+
+    #     patterns = ["gdal*.dll", "ogr*.dll", "osr*.dll", "proj*.dll", "geos*.dll"]
+
+    #     for d in dll_dirs:
+    #         if d.exists():
+    #             for pattern in patterns:
+    #                 for dll in d.glob(pattern):
+    #                     binaries.append((str(dll), "."))
+
+
+    # Locate pyogrio installation directory
+    pyogrio_path = Path(get_module_file_attribute("pyogrio")).parent
+
+    # pyogrio.libs folder where all DLLs live on Windows
+    libs_dir = pyogrio_path / "pyogrio.libs"
+
+    print(f"libs_dir: {libs_dir}")
+
     binaries = []
-    binaries += collect_dynamic_libs("pyogrio")
-    if len(binaries) == 0:
-        # Fallback to using conda's Library/bin for DLLs
-        print(f"checking conda directories for dlls: ")
-        dll_dirs = [
-            Path(sys.prefix) / "Library" / "bin",
-            Path(sys.prefix) / "bin",
-        ]
 
-        print(f"{dll_dirs}")
-
-        patterns = ["gdal*.dll", "ogr*.dll", "osr*.dll", "proj*.dll", "geos*.dll"]
-
-        for d in dll_dirs:
-            if d.exists():
-                for pattern in patterns:
-                    for dll in d.glob(pattern):
-                        binaries.append((str(dll), "."))
+    if libs_dir.exists():
+        for dll in libs_dir.glob("*"):
+            if dll.suffix.lower() in [".dll", ".pyd"]:
+                binaries.append(
+                    (str(dll), "pyogrio.libs")
+                )
+    print(f"binaries: {binaries}")
     return binaries
 
 imports = set()
