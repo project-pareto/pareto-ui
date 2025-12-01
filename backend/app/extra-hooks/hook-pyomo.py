@@ -13,6 +13,27 @@
 import importlib
 from pathlib import Path
 import re
+import sys
+from PyInstaller.utils.hooks import get_module_file_attribute
+
+
+def getPyogrioDLLs():
+    # Collect DLLs shipped inside pyogrio (for windows)
+    
+    # This should provide us us site_packages
+    pyogrio_path = Path(get_module_file_attribute("pyogrio")).parent.parent
+    # pyogrio.libs folder is where all DLLs live on Windows
+    libs_dir = pyogrio_path / "pyogrio.libs"
+    binaries = []
+    print(f"checking for pyogrio dlls in {libs_dir}")
+    if libs_dir.exists():
+        for dll in libs_dir.glob("*"):
+            if dll.suffix.lower() in [".dll", ".pyd"]:
+                binaries.append(
+                    (str(dll), "pyogrio")
+                )
+    print(f"pyogrio binaries: {binaries}")
+    return binaries
 
 imports = set()
 
@@ -72,3 +93,5 @@ hiddenimports += [
     "pyogrio._geometry",
     "pyogrio._io",
 ]
+
+binaries = getPyogrioDLLs()
