@@ -30,7 +30,7 @@ def getPyogrioDLLs():
         for dll in libs_dir.glob("*"):
             if dll.suffix.lower() in [".dll", ".pyd"]:
                 binaries.append(
-                    (str(dll), "pyogrio.libs")
+                    (str(dll), "pyogrio")
                 )
     print(f"pyogrio binaries: {binaries}")
     return binaries
