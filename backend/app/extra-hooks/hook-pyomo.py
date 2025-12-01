@@ -42,7 +42,7 @@ def getPyogrioDLLs():
 
 
     # Locate pyogrio installation directory
-    pyogrio_path = Path(get_module_file_attribute("pyogrio")).parent
+    pyogrio_path = Path(get_module_file_attribute("pyogrio")).parent.parent
 
     # pyogrio.libs folder where all DLLs live on Windows
     libs_dir = pyogrio_path / "pyogrio.libs"
