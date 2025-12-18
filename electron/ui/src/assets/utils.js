@@ -701,12 +701,14 @@ export const convertMapDataToFrontendFormat = (map_data) => {
           ...line_object,
           name: key,
       }
-    for (let coords of line_object.coordinates) {
-      amt+=1
-      totalCoords[0] += parseFloat(coords[0])
-      totalCoords[1] += parseFloat(coords[1])
-
-    }
+      for (let n of line_object.nodes) {
+        let coords = n.coordinates;
+        if (coords && coords.length > 1) {
+          amt+=1;
+          totalCoords[0]+=parseFloat(coords[0]);
+          totalCoords[1]+=parseFloat(coords[1]);
+        }
+      }
       lineData.push(newLineObject)
   }
   let mapCenter;
