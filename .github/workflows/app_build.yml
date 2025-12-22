@@ -63,7 +63,7 @@ jobs:
         with:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
-          miniforge-version: latest
+          miniforge-version: 25.3.1-0
       
         ## install Azure signtool for windows builds
       - name: Install Azure Signtool
