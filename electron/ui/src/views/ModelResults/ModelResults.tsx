@@ -24,7 +24,7 @@ const OVERRIDE_CATEGORIES = [
   "v_L_PadStorage_dict",
 ]
 
-export default function ModelResults(props: ModelResultsProps) {
+export default function ModelResults(props: ModelResultsProps): JSX.Element {
   const { port } = useApp()
   const [ scenario, setScenario] = useState<Scenario>({...props.scenario})
   const [ terminationCondition, setTerminationCondition ] = useState<'good' | 'unsure' | 'bad' | null>(null)
@@ -39,7 +39,7 @@ export default function ModelResults(props: ModelResultsProps) {
   const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState<boolean>(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
-  const styles ={
+  const styles: any ={
     resultsBox: {
       backgroundColor:'white', 
       m:3, 
@@ -140,7 +140,7 @@ export default function ModelResults(props: ModelResultsProps) {
     
   }, [props.category, props.scenario, props.scenario.results.status, props.scenario.data_input.df_parameters, props.scenario.results.data]);
 
-  const handleColumnFilter = (col) => {
+  const handleColumnFilter = (col: string) => {
     var tempCols
     let tempColumnNodes = {...columnNodes}
     let tempColumnFilterSet = {...columnFilterSet}
@@ -198,7 +198,7 @@ export default function ModelResults(props: ModelResultsProps) {
     }
 }
 
-const handleRowFilter = (row) => {
+const handleRowFilter = (row: string) => {
   let tempRows
   let tempRowNodes = {...rowNodes}
   let tempRowFilterSet = {...rowFilterSet}
