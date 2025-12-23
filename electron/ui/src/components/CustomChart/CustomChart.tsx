@@ -1,71 +1,67 @@
-// @ts-nocheck
 import React from 'react';
 import {useEffect, useState} from 'react';
 import Plot from 'react-plotly.js';
+import type { CustomChartProps } from '../../types';
 
-
-export default function AreaChart(props) {
-    const [ areaChartData, setAreaChartData ] = useState(null)
+export default function AreaChart(props: CustomChartProps): JSX.Element {
+    const [ areaChartData, setAreaChartData ] = useState<any[] | null>(null)
 
     useEffect(()=>{
         if(props.input) {
-            let tempData = {}
-            let tempKeys = []
-            for (var key in props.data[props.category]) {
-                tempData[props.data[props.category][key]] = {x:[], y: []}
-                tempKeys.push(props.data[props.category][key])
+            const tempData: Record<string, {x: number[]; y: number[]}> = {}
+            const tempKeys: string[] = []
+            const category = props.category ?? ''
+            const catArr: any[] = (props.data && props.data[category]) || []
+            for (let key in catArr) {
+                const k = catArr[key]
+                tempData[k] = {x:[], y: []}
+                tempKeys.push(k)
             }
 
-            Object.entries(props.data).map(([time, item], index ) => {
+            Object.entries(props.data || {}).forEach(([time, item], index ) => {
                 if(index > 0) {
-                    for (var ind in item){
-                        var value = item[ind]
+                    for (let ind in (item as any)){
+                        let value = (item as any)[ind]
                         if(value === "") value = 0
-                        var key = tempKeys[ind]
-                        if (value) {
-                            tempData[key].x.push(parseInt(time.substring(1)))
-                            tempData[key].y.push(value)
-                        }else if (value === 0){
-                            tempData[key].x.push(parseInt(time.substring(1)))
-                            tempData[key].y.push(value)
+                        const key = tempKeys[ind]
+                        if (value || value === 0) {
+                            tempData[key].x.push(Number(String(time).substring(1)))
+                            tempData[key].y.push(Number(value))
                         }
                     }
                 }
-                return 1
             })
-            let tempAreaChartData = []
+            const tempAreaChartData: any[] = []
 
-            let keys = Object.keys(tempData).sort().reverse()
-            keys.map((key, ind) => {
-                let value = tempData[key]
+            const keys = Object.keys(tempData).sort().reverse()
+            keys.forEach((key) => {
+                const value = tempData[key]
                 tempAreaChartData.push({x: value.x, y: value.y, stackgroup: 'one', name: key, line: { width: 0 }})
-                return 1
             })
             setAreaChartData(tempAreaChartData)
         } else {
-            let tempData = {}
+            const tempData: Record<string, {x: number[]; y: number[]}> = {}
             // organize area chart data
-            for (var index = 1; index < props.data.length; index++) {
-                let item = props.data[index]
-                let key = item[props.labelIndex]
-                key = key.replace('PostTreatmentTreatedWaterNode',"PTTWN").replace("PostTreatmentResidualNode","PTRN").replace('intermediate','I')
-                let x = item[props.xindex]
-                x = parseInt(x.substring(1))
-                let y = item[props.yindex]
+            for (let idx = 1; idx < (props.data as any[]).length; idx++) {
+                const item = (props.data as any[])[idx]
+                let key = String(item[props.labelIndex ?? 0] ?? '')
+                key = key.replace('PostTreatmentTreatedWaterNode','PTTWN').replace('PostTreatmentResidualNode','PTRN').replace('intermediate','I')
+                let xraw = String(item[props.xindex ?? 0] ?? '')
+                const x = Number(xraw.substring(1))
+                const y = Number(item[props.yindex ?? 0] ?? 0)
                 if (key in tempData){
                     tempData[key].x.push(x)
                     tempData[key].y.push(y)
-                }else {
+                } else {
                     tempData[key] = {x: [x], y: [y]}
                 }
             }
-            let tempAreaChartData = []
+            const tempAreaChartData: any[] = []
 
-            let keys = Object.keys(tempData).sort()
-            keys.map((key, ind) => {
-                let value = tempData[key]
+            const keys = Object.keys(tempData).sort()
+            keys.forEach((key) => {
+                const value = tempData[key]
                 tempAreaChartData.push({x: value.x, y: value.y, stackgroup: props.stackgroup, name: key, mode: "lines"})
-                return 1
             })
             setAreaChartData(tempAreaChartData)
         }

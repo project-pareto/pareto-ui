@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, {useState, useEffect} from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -6,11 +5,12 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import { CategoryNames, ParetoDictionary, Subcategories } from "../../assets/utils";
 import PopupModal from '../../components/PopupModal/PopupModal'
 import MapEditor from '../NetworkMap/MapEditor';
+import type { SidebarProps } from '../../types';
 
 
 const drawerWidth = 240;
 
-export default function Sidebar(props) {
+export default function Sidebar(props: SidebarProps) {
   const {
     handleSetCategory,
     scenario,
@@ -22,39 +22,37 @@ export default function Sidebar(props) {
     syncScenarioData,
   } = props;
 
-  const {
-    optimized_override_values,
-    data_input,
-    id,
-    optimization,
-    results
-  } = scenario || {};
+  const optimized_override_values = (scenario as any)?.optimized_override_values;
+  const data_input = (scenario as any)?.data_input;
+  const id = (scenario as any)?.id;
+  const optimization = (scenario as any)?.optimization || {};
+  const results = (scenario as any)?.results || {};
 
   const isIncomplete = results?.status === "Incomplete";
-  const [ openSaveModal, setOpenSaveModal ] = useState(false)
-  const [ key, setKey ] =  useState(null)
-  const [ openDynamic, setOpenDynamic ] = useState(true)
-  const [ openStatic, setOpenStatic ] = useState(false)
-  const [ openResultsTables, setOpenResultsTables ] = useState(false)
-  const [ overrideList, setOverrideList ] = useState([])
+  const [ openSaveModal, setOpenSaveModal ] = useState<boolean>(false)
+  const [ key, setKey ] =  useState<string | null>(null)
+  const [ openDynamic, setOpenDynamic ] = useState<boolean>(true)
+  const [ openStatic, setOpenStatic ] = useState<boolean>(false)
+  const [ openResultsTables, setOpenResultsTables ] = useState<boolean>(false)
+  const [ overrideList, setOverrideList ] = useState<string[]>([])
 
   useEffect(() => {
-    let tempOverrideList = []
+    const tempOverrideList: string[] = []
     if (optimized_override_values !== undefined)  {
-        for(let key of Object.keys(optimized_override_values)) {
-            if(Object.keys(optimized_override_values[key]).length > 0) {
-              tempOverrideList.push(key)
+        for(const k of Object.keys(optimized_override_values)) {
+            if(Object.keys(optimized_override_values[k] || {}).length > 0) {
+              tempOverrideList.push(k)
             }
         }
     }
     if (tempOverrideList.length > 0) tempOverrideList.push("Results Tables")
     setOverrideList(tempOverrideList)
-},[scenario])
+  },[scenario])
 
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
 
-  const styles = {
+  const styles: any = {
     topLevelCategory: {
       paddingLeft: "0px",
       fontWeight: "500",
@@ -102,33 +100,33 @@ export default function Sidebar(props) {
   }
 
   const handleSaveModal = () => {
-    handleUpdateExcel(id, category, data_input.df_parameters[category])
+    handleUpdateExcel(id as string | number, String(category || ''), (data_input?.df_parameters || {})[category || ''])
     handleCloseSaveModal()
-    setInputDataEdited(false)
-    handleSetCategory(key)
+    setInputDataEdited?.(false)
+    handleSetCategory(String(key || ''))
   }
 
   const handleDiscardChanges = () => {
     handleCloseSaveModal()
-    setInputDataEdited(false)
-    handleSetCategory(key)
-    syncScenarioData()
+    setInputDataEdited?.(false)
+    handleSetCategory(String(key || ''))
+    syncScenarioData?.()
   }
 
-  const handleClick = (key) => {
-    setKey(key)
+  const handleClick = (k: string) => {
+    setKey(k)
     if (inputDataEdited) {
       handleOpenSaveModal()
     }
     else {
-      handleSetCategory(key)
+      handleSetCategory(k)
     }
   }
 
-  const getStyle = (key) => {
+  const getStyle = (k: string) => {
     try {
-      if(category === key) return styles.selected
-      else if (overrideList.includes(key)) return styles.override
+      if(String(category) === k) return styles.selected
+      else if (overrideList.includes(k)) return styles.override
       else return styles.unselected
     }
     catch(e) {
@@ -137,12 +135,12 @@ export default function Sidebar(props) {
   }
 
   const renderMapOptions = () => {
-    let categories = {"Input Summary" :null, "Network Diagram": null}
+    const categories = {"Input Summary" :null, "Network Diagram": null}
     return (
-      Object.entries(categories).map( ([key, value]) => ( 
-        <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
+      Object.entries(categories).map( ([k, value]) => ( 
+        <div style={String(category)===k ? styles.selected : styles.unselected} onClick={() => handleClick(k)} key={String(value)+""+k}> 
             <p style={styles.topLevelCategory}>
-              {key === "Input Summary" ? "PARETO Input File" : key}
+              {k === "Input Summary" ? "PARETO Input File" : k}
             </p>
         </div>
       ))
@@ -150,12 +148,12 @@ export default function Sidebar(props) {
   }
 
   const renderAdditionalCategories = () => {
-    let additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
+    const additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
-      Object.entries(additionalCategories).map( ([key, value]) => ( 
-        <div style={category===key ? styles.selected : styles.unselected} onClick={() => handleClick(key)} key={value+""+key}> 
+      Object.entries(additionalCategories).map( ([k, value]) => ( 
+        <div style={String(category)===k ? styles.selected : styles.unselected} onClick={() => handleClick(k)} key={String(value)+""+k}> 
             <p style={styles.topLevelCategory}>
-              {key === "Input Summary" && results.status === "Incomplete" ? "PARETO Input File" : key}
+              {k === "Input Summary" && results?.status === "Incomplete" ? "PARETO Input File" : k}
             </p>
         </div>
       ))
@@ -276,7 +274,7 @@ export default function Sidebar(props) {
               </p>
           </div>
         )}
-        {Object.entries(results.data).map( ([key, value]) => ( 
+        {Object.entries(results?.data || {}).map( ([key, value]) => ( 
           <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
               <p style={styles.subcategory}>
                 {CategoryNames[key] ? CategoryNames[key] :

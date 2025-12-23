@@ -1,14 +1,14 @@
-// @ts-nocheck
 import React from 'react';
 import { useState } from 'react';
+import type { FilterDropdownProps } from '../../types';
 import { Grid, Accordion, AccordionSummary, AccordionDetails, ListItemText} from '@mui/material';
 import { Button, MenuItem, Typography, IconButton, Checkbox, ListItemIcon} from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 
-export default function FilterDropdown(props) {
-    const [ filterType, setFilterType ] = useState(props.option1)
+export default function FilterDropdown(props: FilterDropdownProps): JSX.Element {
+    const [ filterType, setFilterType ] = useState<string>(props.option1)
 
     const styles = {
         iconSelected: {
@@ -22,18 +22,19 @@ export default function FilterDropdown(props) {
         }
        }
 
-    const handleFilterTypeChange = (filterType) => {
+    const handleFilterTypeChange = (filterType: string) => {
         setFilterType(filterType)
     }
 
-    const handleKeyDown = (e) => {
-        e.preventDefault();
-        if (e.keyCode === 38) {
-            props.handleArrowSelection('up')
-          } else if (e.keyCode === 40) {
-            props.handleArrowSelection('down')
-          }
-    }
+        const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+                e.preventDefault();
+                const code = (e as any).keyCode || (e as any).which || 0
+                if (code === 38) {
+                        props.handleArrowSelection && props.handleArrowSelection('up')
+                    } else if (code === 40) {
+                        props.handleArrowSelection && props.handleArrowSelection('down')
+                    }
+        }
 
     return (
         <Accordion style={{minWidth:props.width }} sx={{minWidth:props.width, zIndex: 2}}>
@@ -48,7 +49,7 @@ export default function FilterDropdown(props) {
                         </Grid>
                         {filterType === "Time" && 
                         <Grid item xs={12}>
-                            <div tabIndex="0" onKeyDown={handleKeyDown}>
+                            <div tabIndex={0} onKeyDown={handleKeyDown}>
                                 <IconButton onKeyDown={handleKeyDown} onClick={() => props.handleArrowSelection('down')}><KeyboardArrowDownIcon></KeyboardArrowDownIcon></IconButton>
                                 <IconButton onKeyDown={handleKeyDown} onClick={() => props.handleArrowSelection('up')}><KeyboardArrowUpIcon></KeyboardArrowUpIcon></IconButton>
                             </div>

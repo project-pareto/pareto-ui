@@ -1,23 +1,23 @@
-// @ts-nocheck
 import React from 'react';
 import {useEffect, useState} from 'react';
+import type { NewOverrideRowProps } from '../../types';
 import { TableCell, TableRow, Checkbox, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { INFRASTRUCTURE_CAPEX_MAPPING, VARIABLE_INDEXES }  from '../../assets/InfrastructureCapexMapping'
 
 
-export default function NewBinaryVariableRow(props) {  
-    const {
-        category,
-        scenario,
-        handleCheckOverride,
-        handleInputOverrideValue,
-        setNewInfrastructureOverrideRow,
-        addNewRow
-    } = props
+export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.Element {  
+  const {
+    category,
+    scenario,
+    handleCheckOverride,
+    handleInputOverrideValue,
+    setNewInfrastructureOverrideRow,
+    addNewRow
+  } = props
   
-    const styles ={
+    const styles: any ={
         firstCol: {
         backgroundColor: "#f4f4f4", 
         border:"1px solid #ddd",
@@ -35,17 +35,17 @@ export default function NewBinaryVariableRow(props) {
         border:"1px solid #ddd"
         },
     }
-    const [ value, setValue ] = useState([])
-    const [ rowName, setRowName ] = useState("")
-    const [ location, setLocation ] = useState("")
-    const [ destination, setDestination ] = useState("")
-    const [ technology, setTechnology ] = useState("")
-    const [ capacity, setCapacity ] = useState("")
-    const [ capacityNumberValue, setCapacityNumberValue ] = useState(null)
-    const [ uniqueIndex, setUniqueIndex ] = useState('')
-    const [ overrideChecked, setOverrideChecked ] = useState(true)
-    const [ presetValues, setPresetValues ] = useState({})
-    const [ nodeConnections, setNodeConnections ] = useState({})
+    const [ value, setValue ] = useState<any[]>([])
+    const [ rowName, setRowName ] = useState<string>("")
+    const [ location, setLocation ] = useState<string>("")
+    const [ destination, setDestination ] = useState<string>("")
+    const [ technology, setTechnology ] = useState<string>("")
+    const [ capacity, setCapacity ] = useState<string>("")
+    const [ capacityNumberValue, setCapacityNumberValue ] = useState<number | null>(null)
+    const [ uniqueIndex, setUniqueIndex ] = useState<string>('')
+    const [ overrideChecked, setOverrideChecked ] = useState<boolean>(true)
+    const [ presetValues, setPresetValues ] = useState<Record<string, any>>({})
+    const [ nodeConnections, setNodeConnections ] = useState<Record<string, string[]>>({})
     const pipelineTables = ['PNA', 'CNA','CCA','NNA', 'NCA','NKA', 'NRA', 'NSA','FCA','RCA','RNA','RSA','SCA','SNA']
     const pipelineTypes = {'P': 'ProductionPads', 'C': 'CompletionsPads', 'N': "NetworkNodes", 'F': 'FreshwaterSources', 'R': 'TreatmentSites', 'S': 'StorageSites'}
     
@@ -140,7 +140,7 @@ export default function NewBinaryVariableRow(props) {
             return (
               Object.entries(presetValues[technology]).map(([key,value]) => (
                 <MenuItem key={`${key}_${value}`} value={key}>
-                  {value}
+                  {(value as any)}
                 </MenuItem>
               ))
             ) 
@@ -149,7 +149,7 @@ export default function NewBinaryVariableRow(props) {
             return (
               Object.entries(presetValues).map(([key,value]) => (
                 <MenuItem key={`${key}_${value}`} value={key}>
-                  {value}
+                  {(value as any)}
                 </MenuItem>
               )) 
             )

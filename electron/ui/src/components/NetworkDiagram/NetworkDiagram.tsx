@@ -6,17 +6,18 @@ import { FileUploader } from "react-drag-drop-files";
 import { fetchDiagram, uploadDiagram, deleteDiagram } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
 import { useApp } from '../../AppContext';
+import type { NetworkDiagramProps } from '../../types';
 
-export default function NetworkDiagram(props) {
+export default function NetworkDiagram(props: NetworkDiagramProps): JSX.Element {
     const {
         scenario, type, syncScenarioData
     } = props;
-    const [ file, setFile ] = useState(null)
-    const [ hasMap, setHasMap ] = useState(false)
+    const [ file, setFile ] = useState<File | null>(null)
+    const [ hasMap, setHasMap ] = useState<boolean>(false)
     const fileTypes = ["png","jpg","jpeg"];
-    const [ diagramImage, setDiagramImage ] = useState(null)
-    const [ showWarning, setShowWarning ] = useState(false)
-    const [ warningMessage, setWarningMessage ] = useState("")
+    const [ diagramImage, setDiagramImage ] = useState<string | null>(null)
+    const [ showWarning, setShowWarning ] = useState<boolean>(false)
+    const [ warningMessage, setWarningMessage ] = useState<string>("")
     const { port } = useApp()
     const styles = {
         fileUploaderBox: {
@@ -84,7 +85,7 @@ export default function NetworkDiagram(props) {
     })
     }
 
-      const handleDiagramUpload = (file, name) => {
+    const handleDiagramUpload = (file: File, name: string) => {
         console.log('handle diagram upload')
         console.log('uploading diagram with name '+name)
         const formData = new FormData();
@@ -134,9 +135,9 @@ export default function NetworkDiagram(props) {
        }
     
        const  UploadBox = () => {
-        const handleChange = (file) => {
-          setFile(file);
-          handleDiagramUpload(file,file.name);
+          const handleChange = (file: File) => {
+              setFile(file);
+              handleDiagramUpload(file,file.name);
         };
         return (
           <FileUploader 

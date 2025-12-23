@@ -1,10 +1,10 @@
-// @ts-nocheck
 import React from 'react';
 import { Accordion, AccordionSummary, AccordionDetails} from '@mui/material';
 import { ListItemText, ListItemIcon, Checkbox, MenuItem, Typography } from '@mui/material';
+import type { WaterQualityFilterDropdownProps } from '../../types';
 
 
-export default function FilterDropdown(props) {
+export default function FilterDropdown(props: WaterQualityFilterDropdownProps): JSX.Element {
     const styles = {
         iconSelected: {
             backgroundColor:'#6094bc', 

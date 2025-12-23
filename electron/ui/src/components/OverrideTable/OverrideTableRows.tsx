@@ -1,26 +1,26 @@
-// @ts-nocheck
 import React from 'react';
 import {useEffect, useState} from 'react';
+import type { OverrideTableRowsProps, NewOverrideRowProps } from '../../types';
 import { TableBody, TableCell, TableRow, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import NewBinaryVariableRow from './NewOverrideRow';
 import { INFRASTRUCTURE_CAPEX_MAPPING }  from '../../assets/InfrastructureCapexMapping'
 import { CategoryNames } from "../../assets/utils";
 
-export default function OverrideTableRows(props) {  
+export default function OverrideTableRows(props: OverrideTableRowsProps): JSX.Element {  
   const {
-        category, 
-        data, 
-        columnNodes, 
-        columnNodesMapping, 
-        scenario,
-        handleCheckOverride,
-        handleInputOverrideValue,
-        newInfrastructureOverrideRow,
-        setNewInfrastructureOverrideRow,
-        addNewRow
+    category, 
+    data, 
+    columnNodes, 
+    columnNodesMapping, 
+    scenario,
+    handleCheckOverride,
+    handleInputOverrideValue,
+    newInfrastructureOverrideRow,
+    setNewInfrastructureOverrideRow,
+    addNewRow
   } = props
 
-  const styles = {
+  const styles: any = {
       firstCol: {
       backgroundColor: "#f4f4f4", 
       border:"1px solid #ddd",
@@ -39,7 +39,7 @@ export default function OverrideTableRows(props) {
       },
   }
 
-    const getCheckboxValue = (index) => {
+    const getCheckboxValue = (index: string) => {
         if(Object.keys(scenario.override_values[category]).includes(""+index)) {
             return true
         } else return false
@@ -104,7 +104,7 @@ return (
 );
 }
 
-function BinaryVariableRow(props) {  
+function BinaryVariableRow(props: any) {  
   const {
       category, 
       value,
@@ -114,7 +114,7 @@ function BinaryVariableRow(props) {
       handleInputOverrideValue
   } = props
 
-  const styles ={
+  const styles: any ={
       firstCol: {
       backgroundColor: "#f4f4f4", 
       border:"1px solid #ddd",
@@ -132,14 +132,14 @@ function BinaryVariableRow(props) {
       border:"1px solid #ddd"
       },
   }
-  const [ displayValue, setDisplayValue ] = useState()
-  const [ showData, setShowData ] = useState(false)
-  const [ overrideChecked, setOverrideChecked ] = useState(false)
-  const [ rowName, setRowName ] = useState("")
-  const [ presetValues, setPresetValues ] = useState({})
-  const [ technology, setTechnology ] = useState(null)
-  const [ disposalLocation, setDisposalLocation ] = useState(null)
-  const [ uniqueIndex, setUniqueIndex ] = useState('')
+  const [ displayValue, setDisplayValue ] = useState<any[] | null>(null)
+  const [ showData, setShowData ] = useState<boolean>(false)
+  const [ overrideChecked, setOverrideChecked ] = useState<boolean>(false)
+  const [ rowName, setRowName ] = useState<string>("")
+  const [ presetValues, setPresetValues ] = useState<Record<string, any>>({})
+  const [ technology, setTechnology ] = useState<string | null>(null)
+  const [ disposalLocation, setDisposalLocation ] = useState<string | null>(null)
+  const [ uniqueIndex, setUniqueIndex ] = useState<string>('')
 
   useEffect(() => {
     /*
@@ -237,7 +237,7 @@ function BinaryVariableRow(props) {
     } else return ""
   }
 
-  const handleInput = (event) => {
+  const handleInput = (event: any) => {
     let number_value
     if (displayValue[0] === "Treatment Facility") {
       number_value = presetValues[technology][event.target.value]
@@ -249,7 +249,7 @@ function BinaryVariableRow(props) {
     handleInputOverrideValue(event, number_value)
   }
 
-  const generateInfrastructureBuildoutValueOptions = (value, index) => {
+  const generateInfrastructureBuildoutValueOptions = (value: any[], index: any) => {
     if (Object.keys(INFRASTRUCTURE_CAPEX_MAPPING).includes(value[0])) {
       try {
         return (
@@ -273,20 +273,20 @@ function BinaryVariableRow(props) {
                 value[0] === "Treatment Facility" ? 
                 Object.entries(presetValues[technology]).map(([key,value]) => (
                   <MenuItem key={`${key}_${value}`} value={key}>
-                    {value}
+                    {(value as any)}
                   </MenuItem>
                 ))
                 : 
                 value[0] === "Disposal Facility" ? 
                 Object.entries(presetValues[disposalLocation]).map(([key,value]) => (
                   <MenuItem key={`${key}_${value}`} value={key}>
-                    {value}
+                    {(value as any)}
                   </MenuItem>
                 ))
                 : 
                 Object.entries(presetValues).map(([key,value]) => (
                   <MenuItem key={`${key}_${value}`} value={key}>
-                    {value}
+                    {(value as any)}
                   </MenuItem>
                 )) 
               }
@@ -326,7 +326,7 @@ function BinaryVariableRow(props) {
     }
       
   }
-  const handleTechnologySelect = (event) => {
+  const handleTechnologySelect = (event: any) => {
     console.log('selected '+event.target.value)
     let tempDisplayValue = [...displayValue]
     tempDisplayValue[5] = event.target.value
@@ -335,7 +335,7 @@ function BinaryVariableRow(props) {
     handleInputOverrideValue(event)
   }
 
-return (
+  return (
   <>
     {showData && 
       <TableRow>
@@ -380,7 +380,6 @@ return (
               />
           </TableCell>
           <TableCell 
-            disabled
             align="right"
             style={styles.other}>
               {generateInfrastructureBuildoutValueOptions(displayValue, uniqueIndex)}
@@ -404,7 +403,7 @@ function RegularVariableRow(props) {
       columnNodes
   } = props
 
-  const styles ={
+  const styles: any ={
       firstCol: {
       backgroundColor: "#f4f4f4", 
       border:"1px solid #ddd",
@@ -466,7 +465,7 @@ return (
                 onChange={() => handleCheckOverride(uniqueIndex, value)}
             />
         </TableCell>
-        <TableCell disabled align="right" style={styles.other}>
+        <TableCell align="right" style={styles.other}>
             <TextField 
                 name={`${uniqueIndex}::textfield`}
                 size="small" 

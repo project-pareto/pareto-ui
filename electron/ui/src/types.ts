@@ -241,6 +241,43 @@ export interface OptimizationProps {
   category?: string;
 }
 
+export interface NetworkDiagramProps {
+  scenario: Scenario;
+  type?: string;
+  syncScenarioData?: (id?: string | number) => void;
+  showMapTypeToggle?: boolean;
+  interactive?: boolean;
+  width?: number | string;
+  height?: number | string;
+  [key: string]: any;
+}
+
+export interface DataTableProps {
+  section: 'input' | 'output' | 'compare';
+  scenario: Scenario;
+  data: Record<string, any>;
+  category: string;
+  updateScenario?: (updatedScenario: any) => void;
+  setScenario?: (scenario: Scenario) => void;
+  OVERRIDE_CATEGORIES?: string[];
+  overrideValues?: any;
+  setOverrideValues?: (v: any) => void;
+  newInfrastructureOverrideRow?: boolean;
+  setNewInfrastructureOverrideRow?: (b: boolean) => void;
+  rowFilterSet?: Record<string, {checked: boolean; amt: number}>;
+  columnFilterSet?: Record<string, {checked: boolean; amt: number}>;
+  columnNodes: Record<string, boolean>;
+  columnNodesMapping: string[];
+  rowNodes: Record<string, boolean>;
+  rowNodesMapping: string[];
+  editDict?: Record<string, boolean>;
+  setEditDict?: (d: Record<string, boolean>) => void;
+  handleEditInput?: (edited: boolean) => void;
+  setShowError?: (b: boolean) => void;
+  
+  [key: string]: any;
+}
+
 export interface DataInputProps {
   scenario: Scenario;
   updateScenario: (updatedScenario: any) => void;
@@ -250,6 +287,97 @@ export interface DataInputProps {
   handleUpdateExcel: (id: string | number, tableKey: string, updatedTable: any) => void;
   handleEditInput: (edited: boolean) => void;
   edited: boolean;
+}
+
+export interface FilterDropdownProps {
+  option1: string;
+  option2: string;
+  width?: string | number;
+  maxHeight?: string | number;
+  handleFilter1?: (value: string) => void;
+  handleFilter2?: (value: string) => void;
+  filtered1?: string[];
+  filtered2?: string[];
+  total1?: string[];
+  total2?: string[];
+  isAllSelected1?: boolean;
+  isAllSelected2?: boolean;
+  handleArrowSelection?: (direction: 'up' | 'down') => void;
+  columnFilterSet?: Record<string, {checked: boolean; amt: number}>;
+  rowFilterSet?: Record<string, {checked: boolean; amt: number}>;
+}
+
+export interface WaterQualityFilterDropdownProps {
+  width?: string | number;
+  maxHeight?: string | number;
+  isAllSelected?: boolean;
+  filtered?: any[] | Record<string, boolean>;
+  total?: any[];
+  handleFilter?: (value: string) => void;
+  filterSet?: string[];
+}
+
+export interface OverrideTableProps {
+  category: string;
+  data: Record<string, any[]>;
+  columnNodes: Record<string, boolean>;
+  columnNodesMapping: string[];
+  scenario: Scenario;
+  show: boolean;
+  updateScenario?: (updatedScenario: any, setScenarioData?: boolean) => void;
+  newInfrastructureOverrideRow?: boolean;
+  setNewInfrastructureOverrideRow?: (b: boolean) => void;
+  rowFilterSet?: Record<string, {checked: boolean; amt: number}>;
+  columnFilterSet?: Record<string, {checked: boolean; amt: number}>;
+  overrideValues?: any;
+  setOverrideValues?: (v: any) => void;
+}
+
+export interface OverrideTableRowsProps {
+  category: string;
+  data: any[];
+  columnNodes: Record<string, boolean>;
+  columnNodesMapping: string[];
+  scenario: Scenario;
+  handleCheckOverride: (index: string, value: any) => void;
+  handleInputOverrideValue: (event: any, number_value?: any) => void;
+  newInfrastructureOverrideRow?: boolean;
+  setNewInfrastructureOverrideRow?: (b: boolean) => void;
+  addNewRow?: (newOverride: any, newRow: any) => void;
+}
+
+export interface NewOverrideRowProps {
+  category: string;
+  scenario: Scenario;
+  handleCheckOverride: (index: string, value: any) => void;
+  handleInputOverrideValue: (event: any, number_value?: any) => void;
+  setNewInfrastructureOverrideRow: (b: boolean) => void;
+  addNewRow: (newOverride: any, newRow: any) => void;
+}
+
+export interface ComparisonTableProps {
+  scenarios: Record<string, Scenario> | Array<Scenario> | any;
+  scenarioIndex: number | string;
+  secondaryScenarioIndex: number | string;
+}
+
+export interface CustomChartProps {
+  input?: boolean;
+  data: any;
+  category?: string;
+  labelIndex?: number;
+  xindex?: number;
+  yindex?: number;
+  width?: number;
+  height?: number;
+  showlegend?: boolean;
+  title?: string;
+  xaxis?: { titletext?: string };
+  yaxis?: { titletext?: string };
+  stackgroup?: boolean | string;
+  waterQuality?: boolean;
+  filterSet?: string[];
+  chartType?: string;
 }
 
 export interface ScenarioCompareProps {
@@ -263,6 +391,34 @@ export interface SubHeaderProps {
   scenarios: Record<string, Scenario>;
   compareScenarioIndexes: Array<string | number>;
   setCompareScenarioIndexes: (indexes: Array<string | number>) => void;
+}
+
+export interface HeaderProps {
+  showHeader: boolean;
+  scenarios: Record<string, Scenario> | Array<Scenario> | any;
+  index?: string | number | null;
+  handleSelection: (id: string | number) => void;
+  navigateHome?: () => void;
+  [key: string]: any;
+}
+
+export interface SidebarProps {
+  handleSetCategory?: (category: string) => void;
+  scenario?: Scenario | any;
+  section?: number;
+  category?: string | null;
+  inputDataEdited?: boolean;
+  handleUpdateExcel?: (id: string | number, tableKey: string, updatedTable: any) => void;
+  setInputDataEdited?: (b: boolean) => void;
+  syncScenarioData?: (id?: string | number) => void;
+  [key: string]: any;
+}
+
+export interface ModelCompletionBarProps {
+  handleCloseFinishedOptimizationDialog: () => void;
+  goToModelResults?: () => void;
+  open?: boolean;
+  [key: string]: any;
 }
 
 export interface ScenarioCompareInputProps {

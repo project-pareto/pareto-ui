@@ -1,19 +1,18 @@
-// @ts-nocheck
 import React, { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import { CategoryNames } from "../../assets/utils";
+import type { ComparisonTableProps } from '../../types';
 
-export default function ComparisonTable(props) {
+export default function ComparisonTable(props: ComparisonTableProps): JSX.Element {
     const { scenarios, scenarioIndex, secondaryScenarioIndex } = props;
-    const [ indices, setIndices ] = useState([scenarioIndex, secondaryScenarioIndex])
+    const [ indices, setIndices ] = useState<number[]>([Number(scenarioIndex), Number(secondaryScenarioIndex)])
     const category = "v_F_Overview_dict"
-    const styles ={
+    const styles: any ={
         firstCol: {
           backgroundColor: "#f4f4f4", 
           border:"1px solid #ddd",
           position: 'sticky',
           left: 0,
-    
         },
         other: {
           minWidth: 100,
@@ -23,39 +22,41 @@ export default function ComparisonTable(props) {
 
 
     useEffect(() => {
-        setIndices([scenarioIndex, secondaryScenarioIndex])
+      setIndices([Number(scenarioIndex), Number(secondaryScenarioIndex)])
     }, [scenarioIndex, secondaryScenarioIndex])
 
-    const getValue = (index) => {
+    const getValue = (index: number) => {
       try {
-        return scenarios[indices[1]].results.data[category][index+1][3].toLocaleString('en-US', {maximumFractionDigits:0})
+        const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
+        const v = s[indices[1]]?.results?.data?.[category]?.[index+1]?.[3]
+        return v !== undefined && v !== null ? (v).toLocaleString('en-US', {maximumFractionDigits:0}) : ""
       }catch(e) {
         return ""
       }
-      
     }
     
 
-    const getPercentDifference = (index) => {
+    const getPercentDifference = (index: number) => {
       try {
-        let value1 = scenarios[indices[0]].results.data[category][index+1][3] 
-        let value2 = scenarios[indices[1]].results.data[category][index+1][3]
+        const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
+        let value1 = s[indices[0]]?.results?.data?.[category]?.[index+1]?.[3] || 0
+        let value2 = s[indices[1]]?.results?.data?.[category]?.[index+1]?.[3] || 0
 
-        let result = ((value1 - value2) / value2) * 100
+        let result = ((value1 - value2) / (value2 || 1)) * 100
         if (isNaN(result)) return 0
         else if(value1 > value2) return "+" + (Math.round(result * 10) / 10)
         else return Math.round(result * 10) / 10
       } catch(e) {
         return ""
       }
-      
     }
     
-    const getDifferenceStyling = (index) => {
+    const getDifferenceStyling = (index: number) => {
       try {
-        let value1 = scenarios[indices[0]].results.data[category][index+1][3] 
-        let value2 = scenarios[indices[1]].results.data[category][index+1][3]
-        let style = {}
+        const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
+        let value1 = s[indices[0]]?.results?.data?.[category]?.[index+1]?.[3] || 0
+        let value2 = s[indices[1]]?.results?.data?.[category]?.[index+1]?.[3] || 0
+        let style: any = {}
         if (value1 > value2) style.color = "green"
         else if (value2 > value1) style.color = "red"
         return style
@@ -65,8 +66,8 @@ export default function ComparisonTable(props) {
     }
 
     const renderOutputTable = () => {
-
         try {
+            const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
             return (
               <TableContainer>
               <h3>Results Comparison</h3>
@@ -76,25 +77,24 @@ export default function ComparisonTable(props) {
                 <TableRow key={`headrow`}>
                     <TableCell style={{backgroundColor:"#6094bc", color:"white", width:"20%"}}>KPI</TableCell> 
                     <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}}>Units</TableCell> 
-                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[0]].name}</TableCell> 
-                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{scenarios[indices[1]].name}</TableCell>
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{s[indices[0]]?.name}</TableCell> 
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{s[indices[1]]?.name}</TableCell>
                     <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>Percent Difference</TableCell> 
                 </TableRow>
                 </TableHead>
                 <TableBody>
-                {scenarios[indices[0]].results.data[category].slice(1).map((value, index) => {
-                  return (<TableRow key={`row_${value}_${index}`}>
-                  {value.map((cellValue, i)=> {
+                {(s[indices[0]]?.results?.data?.[category] || []).slice(1).map((value: any, index: number) => {
+                  return (<TableRow key={`row_${index}`}>
+                  {value.map((cellValue: any, i: number)=> {
                     return (i !== 1 &&
                        <TableCell 
                         align={(i === (value.length - 1)) ? "right" : "left"} 
                         key={"" + index + i} 
                         style={i === 0 ? styles.firstCol : styles.other}>
                           {(i === (value.length - 1)) ? 
-                          cellValue.toLocaleString('en-US', {maximumFractionDigits:0}) : 
+                          (cellValue).toLocaleString('en-US', {maximumFractionDigits:0}) : 
                           cellValue ? CategoryNames[cellValue] ? CategoryNames[cellValue] :
-                          cellValue.replace('v_F_','').replace('v_C_','Cost ').replace(/([A-Z])/g, ' $1').replace('Cap Ex', 'CapEx').trim()
-                          // cellValue
+                          String(cellValue).replace('v_F_','').replace('v_C_','Cost ').replace(/([A-Z])/g, ' $1').replace('Cap Ex', 'CapEx').trim()
                           : null
                         }
                     </TableCell>
@@ -118,10 +118,8 @@ export default function ComparisonTable(props) {
                       </span>
                     </TableCell>
                   </TableRow>)
-                  
                 })}
                 </TableBody> 
-              
               </Table>
               </TableContainer>
             </TableContainer>
@@ -132,12 +130,8 @@ export default function ComparisonTable(props) {
       }
 
   return (
-        
         <>
-            {  
-                renderOutputTable()
-            }
+            {renderOutputTable()}
         </>
-      
   );
 }

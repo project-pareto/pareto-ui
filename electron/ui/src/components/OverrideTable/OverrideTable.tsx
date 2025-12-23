@@ -1,6 +1,6 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import type { OverrideTableProps } from '../../types';
 import { useTheme } from '@mui/material/styles';
 import { Table, TableCell, TableHead, TableRow, TableFooter, TableContainer, TablePagination, Button, IconButton, Box } from '@mui/material';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
@@ -11,26 +11,26 @@ import { INFRASTRUCTURE_CAPEX_MAPPING, VARIABLE_INDEXES }  from '../../assets/In
 import OverrideTableRows from './OverrideTableRows';
 
 
-export default function OverrideTable(props) {  
+export default function OverrideTable(props: OverrideTableProps): JSX.Element {  
 
-    const {
-        category, 
-        data,
-        columnNodes, 
-        columnNodesMapping, 
-        scenario, 
-        show,
-        updateScenario,
-        newInfrastructureOverrideRow,
-        setNewInfrastructureOverrideRow,
-        rowFilterSet,
-        columnFilterSet
-    } = props
+  const {
+    category, 
+    data,
+    columnNodes, 
+    columnNodesMapping, 
+    scenario, 
+    show,
+    updateScenario,
+    newInfrastructureOverrideRow,
+    setNewInfrastructureOverrideRow,
+    rowFilterSet,
+    columnFilterSet
+  } = props
 
-    const [rows, setRows] = useState([]);
-    const [page, setPage] = useState(0);
-    const [visibleRows, setVisibleRows] = useState([])
-    const [rowsPerPage, setRowsPerPage] = useState(50);
+    const [rows, setRows] = useState<any[]>([]);
+    const [page, setPage] = useState<number>(0);
+    const [visibleRows, setVisibleRows] = useState<any[]>([])
+    const [rowsPerPage, setRowsPerPage] = useState<number>(50);
   
     useEffect(() => {
       setPage(0)
@@ -64,11 +64,11 @@ export default function OverrideTable(props) {
 
     },[page, rowsPerPage, rows])
     
-    const handleChangePage = (event, newPage) => {
+    const handleChangePage = (event: React.MouseEvent | null, newPage: number) => {
       setPage(newPage);
     };
   
-    const handleChangeRowsPerPage = (event) => {
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setRowsPerPage(parseInt(event.target.value, 10));
       setPage(0);
     };
@@ -77,10 +77,10 @@ export default function OverrideTable(props) {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
 
-    const handleCheckOverride = (index, value) => {
+    const handleCheckOverride = (index: string, value: any) => {
       let variable = category
       if(category ==="vb_y_overview_dict") variable = INFRASTRUCTURE_CAPEX_MAPPING[value[0]].variable_name
-      let override_object = {variable: variable, isZero: false}
+      let override_object: any = {variable: variable, isZero: false}
       let indexes = []
       for (let i of VARIABLE_INDEXES[category]) {
         if (!value[i].includes("-")) indexes.push(value[i])
@@ -99,11 +99,11 @@ export default function OverrideTable(props) {
         updateScenario(tempScenario, true)
     } 
 
-    const handleInputOverrideValue = (event, number_value) => {
-        let tempOverrideValues = {...scenario.override_values}
-        let idx = event.target.name.split("::")[0]
-        let inputType = event.target.name.split("::")[1]
-        let val = event.target.value
+    const handleInputOverrideValue = (event: any, number_value?: any) => {
+      let tempOverrideValues = {...scenario.override_values}
+      let idx = (event.target.name as string).split("::")[0]
+      let inputType = (event.target.name as string).split("::")[1]
+      let val = event.target.value
         /*
         ***
           WHEN SETTING VALUE FOR INFRASTRUCTURE BUILDOUT STUFF, WE NEED TO SEND THE NAME, NOT THE VALUE
@@ -148,7 +148,7 @@ export default function OverrideTable(props) {
         }
     }
 
-    const addNewRow = (newOverride, newRow) => {
+    const addNewRow = (newOverride: any, newRow: any) => {
       console.log('override value')
       console.log(newOverride)
       console.log('rowvalue')
