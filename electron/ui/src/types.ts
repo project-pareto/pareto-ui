@@ -111,3 +111,78 @@ export interface AppContextValue {
   port: number;
 }
 
+// Map / Editor related types
+export type CoordinateTuple = [number | string, number | string];
+
+export type MapEditorNode = {
+  name?: string;
+  nodeType?: string;
+  coordinates?: CoordinateTuple;
+  nodes?: Array<{
+    name: string;
+    coordinates?: CoordinateTuple;
+    outgoing_nodes?: string[];
+    [key: string]: any;
+  }>;
+  length?: number;
+  diameter?: number;
+  [key: string]: any;
+};
+
+export type SelectedNodeState = {
+  node: MapEditorNode;
+  idx: number;
+};
+
+export interface MapContextValue {
+  networkMapData: any;
+  setNetworkMapData: React.Dispatch<React.SetStateAction<any>>;
+  selectedNode: SelectedNodeState | null;
+  setSelectedNode: React.Dispatch<React.SetStateAction<SelectedNodeState | null>>;
+  showNetworkNode: boolean;
+  setShowNetworkNode: React.Dispatch<React.SetStateAction<boolean>>;
+  showNetworkPipeline: boolean;
+  setShowNetworkPipeline: React.Dispatch<React.SetStateAction<boolean>>;
+  addNode: () => void;
+  addPipeline: () => void;
+  clickNode: (node: MapEditorNode, idx: number) => void;
+  clickPipeline: (node: MapEditorNode, idx: number) => void;
+  saveNodeChanges: (updatedNode: MapEditorNode, deselectAfterwards?: boolean) => void;
+  nodeData: MapEditorNode[];
+  setNodeData: React.Dispatch<React.SetStateAction<MapEditorNode[]>>;
+  lineData: MapEditorNode[];
+  setLineData: React.Dispatch<React.SetStateAction<MapEditorNode[]>>;
+  handleMapClick: (coords: CoordinateTuple) => void;
+  availableNodes: MapEditorNode[];
+  creatingNewNode: boolean;
+  deleteSelectedNode: () => void;
+  currentlyCreatingPipeline: boolean;
+  currentlyCreatingNode: boolean;
+  handleFileUpload: (file: File, defaultNodeType?: string) => void;
+  nodeType: "node" | "pipeline" | null;
+}
+
+export interface MapProviderProps {
+  children: React.ReactNode;
+  scenario?: Scenario | null;
+  handleUpdateScenario: (updatedScenario: Scenario | null, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
+}
+
+export interface LandingPageProps {
+  navigateToScenarioList?: () => void;
+  handleNewScenario?: (data: any) => void;
+  scenarios?: Record<string, any>;
+}
+
+export interface ScenarioListProps {
+  handleNewScenario: (data: any) => void;
+  handleEditScenarioName: (newName: string, id: string | number, updateScenarioData?: boolean) => void;
+  handleSelection: (id: string) => void;
+  scenarios: Record<string, any>;
+  deleteScenario: (id: string | number) => void;
+  setScenarios: (scenarios: Record<string, any>) => void;
+  setShowHeader: (show: boolean) => void;
+  setCompareScenarioIndexes: (indexes: Array<string | number>) => void;
+  setScenarioIndex: (index: string | number) => void;
+}
+

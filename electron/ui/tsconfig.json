@@ -15,8 +15,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": "src",
-    "types": ["node", "jest", "cypress"]
+    "types": ["node", "jest"]
   },
-  "include": ["src", "cypress", "public"]
+  "include": ["src", "public"]
 }
 

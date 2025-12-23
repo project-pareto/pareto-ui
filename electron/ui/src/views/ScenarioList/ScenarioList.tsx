@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type ChangeEvent } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Paper, Grid, Box, Button, IconButton, Tooltip } from '@mui/material';
@@ -12,8 +11,9 @@ import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
 import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'
 import { useApp } from '../../AppContext';
+import type { ScenarioListProps } from '../../types';
 
-export default function ScenarioList(props) {
+export default function ScenarioList(props: ScenarioListProps) {
     const { 
             handleNewScenario, 
             handleEditScenarioName, 
@@ -25,14 +25,14 @@ export default function ScenarioList(props) {
             setCompareScenarioIndexes,
             setScenarioIndex
         } = props
-    const [ showError, setShowError ] = useState(false)
-    const [ errorMessage, setErrorMessage ] = useState("")
-    const [ openEditName, setOpenEditName ] = useState(false)
-    const [ openDeleteModal, setOpenDeleteModal ] = useState(false)
-    const [ showFileModal, setShowFileModal ] = useState(false)
-    const [ hasOverrideList, setHasOverrideList ] = useState([])
-    const [ name, setName ] = useState('')
-    const [ id, setId ] = useState(null)
+    const [ showError, setShowError ] = useState<boolean>(false)
+    const [ errorMessage, setErrorMessage ] = useState<string>("")
+    const [ openEditName, setOpenEditName ] = useState<boolean>(false)
+    const [ openDeleteModal, setOpenDeleteModal ] = useState<boolean>(false)
+    const [ showFileModal, setShowFileModal ] = useState<boolean>(false)
+    const [ hasOverrideList, setHasOverrideList ] = useState<Array<string | number>>([])
+    const [ name, setName ] = useState<string>('')
+    const [ id, setId ] = useState<string | number | null>(null)
     let navigate = useNavigate();
     const { port } = useApp()
     const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible', 'Incomplete']

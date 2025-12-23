@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip } from '@mui/material';
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
+import type { CoordinateTuple, SelectedNodeState, MapEditorNode } from '../../types';
 import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown } from '../../assets/utils';
 import CloseIcon from '@mui/icons-material/Close';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -10,6 +11,23 @@ import Divider from '@mui/material/Divider';
 import PopupModal from '../PopupModal/PopupModal';
 import { NodeIcon } from './NodeIcon';
 import FileUploadModal from '../FileUploadModal/FileUploadModal';
+
+// Reuse shared types from MapContext: CoordinateTuple, SelectedNodeState, MapEditorNode
+
+interface NameFieldProps {
+    editingName: boolean;
+    setEditingName: (value: boolean) => void;
+    handleChange: (key: string, val: any) => void;
+    nodeData?: MapEditorNode;
+    isNode: boolean;
+    styles: any;
+    nameIsNotUnique: boolean;
+}
+
+interface CoordinatesInputProps {
+    coordinates: CoordinateTuple;
+    onChange: (key: string, val: CoordinateTuple) => void;
+}
 
 export default function MapEditor() {
     const {
@@ -30,10 +48,10 @@ export default function MapEditor() {
     } = useMapValues();
     const { units } = networkMapData || {};
 
-    const [editingName, setEditingName] = useState(creatingNewNode);
-    const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-    const [showFileUpload, setShowFileUpload] = useState(false);
-    const { node: nodeData, idx: nodeIdx } = selectedNode || {};
+    const [editingName, setEditingName] = useState<boolean>(creatingNewNode);
+    const [showDeleteWarning, setShowDeleteWarning] = useState<boolean>(false);
+    const [showFileUpload, setShowFileUpload] = useState<boolean>(false);
+    const { node: nodeData, idx: nodeIdx } = (selectedNode as SelectedNodeState | null) || {};
 
     useEffect(() => {
         setEditingName(creatingNewNode);
@@ -81,69 +99,72 @@ export default function MapEditor() {
         },
     }
 
-    const handleChange = (key, val) => {
-        setSelectedNode(data => {
-            const prev = {...data.node};
+    const handleChange = (key: string, val: any) => {
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prev = { ...data.node } as Record<string, any>;
             const node = {
                 ...prev,
-                [key]: val
-            }
+                [key]: val,
+            } as MapEditorNode;
             return {
                 ...data,
                 node,
-            }
-        }
-        )
-    }
-    const handleClose = () => {
+            } as SelectedNodeState;
+        });
+    };
+    const handleClose = (): void => {
         setSelectedNode(null);
         setShowNetworkNode(false);
         setShowNetworkPipeline(false);
     }
 
-    const getCoordinates = (n) => {
-        if (!n?.coordinates) return[0, 0];
-        const coords = [...n?.coordinates];
-        const reverseCoords = coords?.reverse()
-        return reverseCoords;
-    }
+    const getCoordinates = (n?: MapEditorNode): CoordinateTuple => {
+        if (!n?.coordinates) return [0, 0];
+        const coords = n.coordinates;
+        // Ensure we return a proper tuple [lat, long] for the editor inputs
+        const a = coords[0] as number | string;
+        const b = coords[1] as number | string;
+        return [a, b];
+    };
 
-    const handleUpdateConnection = (name, idx) => {
+    const handleUpdateConnection = (name: string, idx?: number | ""): void => {
         const connectionNode = availableNodes.find((node) => node.name === name);
-        setSelectedNode(data => {
-            const prev = {...data.node};
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prev = { ...data.node } as MapEditorNode;
+            const prevNodes = prev.nodes || [];
             const updatedNodeList = (idx === undefined || idx === "")
-                ? [...prev.nodes, {name: name, incoming: true, outgoing: true}]
-                : prev.nodes.map((n, i) =>
-                    i === idx ? {...n, name: name, coordinates: connectionNode.coordinates} : n
-                );
+                ? [...prevNodes, { name: name, incoming: true, outgoing: true }]
+                : prevNodes.map((n, i) => i === idx ? { ...n, name: name, coordinates: connectionNode?.coordinates } : n);
             const node = {
                 ...prev,
                 nodes: updatedNodeList,
-            }
+            } as MapEditorNode;
             return {
                 ...data,
                 node,
-            };
+            } as SelectedNodeState;
         });
-    }
+    };
 
-    const handleRemoveConnection = (idx) => {
-        setSelectedNode(data => {
-            const prevNode = {...data.node};
-            const updatedNodeList = prevNode.nodes.filter((_, i) => i !== idx);
+    const handleRemoveConnection = (idx: number): void => {
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prevNode = { ...data.node } as MapEditorNode;
+            const updatedNodeList = (prevNode.nodes || []).filter((_, i) => i !== idx);
             const node = {
                 ...prevNode,
-                nodes: updatedNodeList
-            };
+                nodes: updatedNodeList,
+            } as MapEditorNode;
             return {
                 ...data,
                 node,
-            }
+            } as SelectedNodeState;
         });
-    }
+    };
 
-    const handleDelete = () => {
+    const handleDelete = (): void => {
         setShowDeleteWarning(false);
         deleteSelectedNode();
     }
@@ -158,15 +179,17 @@ export default function MapEditor() {
         nameIsNotUnique
     }
 
-    const disableSave = (n) => {
+    const disableSave = (n?: MapEditorNode): boolean => {
         // Return true for conditions where we want to disable the ability to save
         let disable = false;
         if (!n?.name || nameIsNotUnique) return true;
         if (isNode) {
             // Ensure we have valid coordinates
             if (!n?.coordinates || n.coordinates.length !== 2) return true;
-            const [long, lat] = [...n.coordinates];
-            if (isNaN(lat) || isNaN(long)) return true;
+            // coerce to numbers for validation
+            const long = Number(n.coordinates[0]);
+            const lat = Number(n.coordinates[1]);
+            if (Number.isNaN(lat) || Number.isNaN(long)) return true;
             if (lat > 90 || lat < -90 || long > 180 || long < -180) return true;
         } else {
             const connectionsAmt = n.nodes?.length || 0;
@@ -185,9 +208,9 @@ export default function MapEditor() {
         return disable;
     }
 
-    const handleUpdatePipelineLength = (event) => {
+    const handleUpdatePipelineLength = (event: ChangeEvent<HTMLInputElement>): void => {
         const value = event.target.value;
-        if (!isNaN(value)) {
+        if (!Number.isNaN(Number(value))) {
             setSelectedNode(data => {
                 const prevNode = {...data.node};
                 const node = {
@@ -202,9 +225,9 @@ export default function MapEditor() {
         }
     }
 
-    const handleUpdatePipelineDiameter = (event) => {
+    const handleUpdatePipelineDiameter = (event: ChangeEvent<HTMLInputElement>): void => {
         const value = event.target.value;
-        if (!isNaN(value)) {
+        if (!Number.isNaN(Number(value))) {
             setSelectedNode(data => {
                 const prevNode = {...data.node};
                 const node = {
@@ -219,24 +242,28 @@ export default function MapEditor() {
         }
     }
 
-    const handleUpdateAdditionalField = (event, fieldKey) => {
-        const value = event.target.value;
-        if (!isNaN(value)) {
-            setSelectedNode(data => {
-                const prevNode = {...data.node};
+    const handleUpdateAdditionalField = (
+        event: any,
+        fieldKey: string
+    ): void => {
+        const value = event?.target?.value;
+        if (!Number.isNaN(Number(value))) {
+            setSelectedNode((data: SelectedNodeState | null) => {
+                if (!data) return data;
+                const prevNode = { ...data.node } as Record<string, any>;
                 const node = {
                     ...prevNode,
-                    [fieldKey]: Number(value)
-                };
+                    [fieldKey]: Number(value),
+                } as MapEditorNode;
                 return {
                     ...data,
                     node,
-                }
+                } as SelectedNodeState;
             });
         }
-    }
+    };
 
-    const handleUpdateOutgoingNodes = (value, idx) => {
+    const handleUpdateOutgoingNodes = (value: string[], idx: number): void => {
         // TODO: Two directions we can go with this
         // Either, 
         // 1) a user can add any node to this nodes outgoing nodes, in which case we should add that additional node
@@ -244,29 +271,30 @@ export default function MapEditor() {
         // 2) a user can only add other connection nodes as outgoing nodes.
         // FOR NOW: it seems that this should work. users just have to be smart about it and not create an impossible connection.
         setSelectedNode(data => {
-            const prevNode = {...data.node};
-            const updatedNodeList = prevNode.nodes.map((n, i) => {
+            if (!data) return data;
+            const prevNode = { ...data.node } as MapEditorNode;
+            const updatedNodeList = (prevNode.nodes || []).map((n, i) => {
                 if (i === idx) {
                     return {
                         ...n,
-                        outgoing_nodes: value
-                    };
+                        outgoing_nodes: value,
+                    } as any;
                 }
                 return n;
             });
 
             const node = {
                 ...prevNode,
-                nodes: updatedNodeList
-            };
+                nodes: updatedNodeList,
+            } as MapEditorNode;
             return {
                 ...data,
                 node,
-            }
+            } as SelectedNodeState;
         });
     }
 
-    const handleClickUploadAnotherMap = () => {
+    const handleClickUploadAnotherMap = (): void => {
         setShowFileUpload(true);
     }
 
@@ -389,14 +417,14 @@ export default function MapEditor() {
                             return (
                                 <Stack direction="column" key={idx} spacing={1} sx={{marginBottom: 2}}>
                                     <Stack direction={'row'} spacing={1}>
-                                        <Tooltip title={pipelineConnectionIssues.includes(name) ? 'Please select a valid node.' : ''}>
+                                        <Tooltip title={pipelineConnectionIssues?.includes(name) ? 'Please select a valid node.' : ''}>
                                             <TextField
                                                 size='small'
                                                 label="Node"
                                                 fullWidth
                                                 select
-                                                value={pipelineConnectionIssues.includes(name) ? '' : name}
-                                                error={pipelineConnectionIssues.includes(name)}
+                                                value={pipelineConnectionIssues?.includes(name) ? '' : name}
+                                                error={pipelineConnectionIssues?.includes(name)}
                                                 onChange={(e) => handleUpdateConnection(e.target.value, idx)}
                                                 SelectProps={{
                                                     MenuProps: {
@@ -429,7 +457,7 @@ export default function MapEditor() {
                                             fullWidth
                                             select
                                             value={connectionNode?.outgoing_nodes || []} // now an array of strings
-                                            onChange={(e) => handleUpdateOutgoingNodes(e.target.value, idx)}
+                                            onChange={(e) => handleUpdateOutgoingNodes(e.target.value as unknown as string[], idx)}
                                             SelectProps={{
                                                 multiple: true,
                                                 MenuProps: {
@@ -522,7 +550,7 @@ export default function MapEditor() {
     );
 }
 
-function NameField(props) {
+function NameField(props: NameFieldProps) {
     const { 
         editingName,
         setEditingName,
@@ -570,18 +598,18 @@ function NameField(props) {
     )
 }
 
-function CoordinatesInput({ coordinates, onChange }) {
+function CoordinatesInput({ coordinates, onChange }: CoordinatesInputProps) {
   // coordinates: [lat, long]
 
-  const handleLatChange = (event) => {
-    const newLat = event.target.value;
-    onChange("coordinates", [coordinates[1], newLat]);
-  };
+    const handleLatChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const newLat = event.target.value;
+        onChange("coordinates", [coordinates[1], newLat]);
+    };
 
-  const handleLongChange = (event) => {
-    const newLong = event.target.value;
-    onChange("coordinates", [newLong, coordinates[0]]);
-  };
+    const handleLongChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const newLong = event.target.value;
+        onChange("coordinates", [newLong, coordinates[0]]);
+    };
 
   return (
     <Stack spacing={2} sx={{pt: 1, pb: 2}}>

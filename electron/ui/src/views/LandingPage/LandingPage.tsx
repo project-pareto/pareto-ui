@@ -1,22 +1,20 @@
-// @ts-nocheck
 import React from 'react';
+import type { LandingPageProps } from '../../types';
 import Grid from '@mui/material/Grid';  
 import Box from '@mui/material/Box';
 import BackgroundPic from '../../assets/homepage-background.jpg'
 import FullLogo from '../../assets/pareto-full-logo.png'
 
-export function getVersionDate() {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
-    yyyy = yyyy.toString().substring(2)
-    
-    let version = `${yyyy}.${mm}.${dd}`
-    return version
+export function getVersionDate(): string {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    const yy = today.getFullYear().toString().slice(2);
+
+    return `${yy}.${mm}.${dd}`;
 }
 
-export default function LandingPage(props) {
+export default function LandingPage(props: LandingPageProps): JSX.Element {
     const versionNumber = process.env.REACT_APP_BUILD_NUMBER || getVersionDate()
 
     const styles = {
@@ -55,10 +53,10 @@ export default function LandingPage(props) {
 
   return ( 
     <div style={styles.background}>
-        <img alt="PARETO background" src={BackgroundPic} style={styles.bacgkroundImage}>
+        <img alt="PARETO background" src={BackgroundPic} style={styles.bacgkroundImage as React.CSSProperties}>
         
         </img>
-        <Box style={styles.boxStyle}>
+        <Box style={styles.boxStyle as React.CSSProperties}>
             <Grid container>
                 <Grid item xs={2}> </Grid>
                 <Grid item xs={8}> 

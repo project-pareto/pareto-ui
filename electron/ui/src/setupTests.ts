@@ -4,4 +4,4 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 import 'jest-canvas-mock';
-window.URL.createObjectURL = function() {};
+window.URL.createObjectURL = function() { return ''; } as any;
