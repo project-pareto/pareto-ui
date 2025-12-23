@@ -1,9 +1,10 @@
 import React , {Fragment} from 'react';
 import { Grid, Button, Modal, TextField } from '@mui/material';
+import type { PopupModalProps } from '../../types';
 
-export default function PopupModal(props) {
+export default function PopupModal(props: PopupModalProps): JSX.Element {
 
-    const styles = {
+    const styles: any = {
         modalStyle: {
             position: 'absolute',
             top: '50%',
@@ -19,7 +20,7 @@ export default function PopupModal(props) {
 
     return (
         <Modal
-            open={props.open}
+            open={Boolean(props.open)}
             onClose={props.handleClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
@@ -41,7 +42,7 @@ export default function PopupModal(props) {
             </Grid>
             <Grid item xs={8}></Grid>
             <Grid item xs={4}>
-                <Button onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor}>{props.buttonText}</Button>
+                <Button onClick={props.handleSave} variant={props.buttonVariant as any} color={props.buttonColor as any}>{props.buttonText}</Button>
             </Grid>
             </Grid>
 
@@ -55,7 +56,6 @@ export default function PopupModal(props) {
                     <Grid item xs={6}></Grid>
                         <Grid item xs={6}>
                             <TextField
-                                //  required
                                 sx={{marginBottom: "10px"}}
                                 variant="standard"
                                 id="margin-none"
@@ -71,11 +71,11 @@ export default function PopupModal(props) {
             <>
             <Grid item xs={1}></Grid>
             <Grid item xs={4.5}>
-                <Button fullWidth onClick={props.handleButtonTwoClick} variant={props.buttonTwoVariant} color={props.buttonTwoColor} endIcon={props.iconTwo && props.iconTwo}>{props.buttonTwoText}</Button>
+                <Button fullWidth onClick={props.handleButtonTwoClick} variant={props.buttonTwoVariant as any} color={props.buttonTwoColor as any} endIcon={props.iconTwo && props.iconTwo}>{props.buttonTwoText}</Button>
             </Grid>
             <Grid item xs={1}></Grid>
             <Grid item xs={4.5}>
-                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
+                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant as any} color={props.buttonColor as any} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
             </Grid>
             <Grid item xs={1}></Grid>
             </> 
@@ -83,7 +83,7 @@ export default function PopupModal(props) {
             <>
             <Grid item xs={3}></Grid>
             <Grid item xs={6}>
-                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant} color={props.buttonColor} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
+                <Button fullWidth onClick={props.handleSave} variant={props.buttonVariant as any} color={props.buttonColor as any} endIcon={props.iconOne && props.iconOne}>{props.buttonText}</Button>
             </Grid>
             <Grid item xs={3}></Grid>
             </>}

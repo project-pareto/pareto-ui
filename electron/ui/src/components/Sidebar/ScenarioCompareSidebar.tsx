@@ -1,5 +1,5 @@
-// @ts-nocheck
 import React, { Fragment, useState, useEffect } from 'react';
+import type { ScenarioCompareSidebarProps } from '../../types';
 import { Box, Drawer, CssBaseline, Collapse, Button, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -10,15 +10,15 @@ import { OVERRIDE_CATEGORIES }  from '../../assets/InfrastructureCapexMapping'
 const drawerWidth = 240;
 
 
-export default function Sidebar(props) {
-    const { category, setCategory, open, deltaDictionary, overrides, compareScenarioIndexes } = props
-    const [ openOutputs, setOpenOutputs ] = useState(true)
-    const [ openDynamic, setOpenDynamic ] = useState(false)
-    const [ openStatic, setOpenStatic ] = useState(false)
-    const [ openOverrides, setOpenOverrides ] = useState(false)
-    const [ deltaCategories, setDeltaCategories ] = useState([])
-    const [ hasOverrides, setHasOverrides ] = useState(false)
-    const [ overridesList, setOverridesList ] = useState([[],[]])
+export default function Sidebar(props: ScenarioCompareSidebarProps) {
+  const { category, setCategory, open, deltaDictionary, overrides, compareScenarioIndexes } = props
+  const [ openOutputs, setOpenOutputs ] = useState<boolean>(true)
+  const [ openDynamic, setOpenDynamic ] = useState<boolean>(false)
+  const [ openStatic, setOpenStatic ] = useState<boolean>(false)
+  const [ openOverrides, setOpenOverrides ] = useState<boolean>(false)
+  const [ deltaCategories, setDeltaCategories ] = useState<string[]>([])
+  const [ hasOverrides, setHasOverrides ] = useState<boolean>(false)
+  const [ overridesList, setOverridesList ] = useState<string[][]>([[],[]])
 
     useEffect(() => {
       // check if delta dictionary is set yet
@@ -86,11 +86,11 @@ export default function Sidebar(props) {
         tempReferenceOverridesSet.has("vb_y_Disposal_dict") || 
         tempReferenceOverridesSet.has("vb_y_Treatment_dict")
         ) tempReferenceOverridesSet.add("vb_y_overview_dict")
-      setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
+      setOverridesList([Array.from(tempPrimaryOverridesSet) as string[], Array.from(tempReferenceOverridesSet) as string[]])
       
     },[overrides, compareScenarioIndexes])
 
-  const styles = {
+  const styles: Record<string, React.CSSProperties> = {
     topLevelCategory: {
       paddingLeft: "0px",
       fontWeight: "500",

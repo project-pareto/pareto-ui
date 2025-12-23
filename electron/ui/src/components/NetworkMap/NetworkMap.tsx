@@ -1,9 +1,11 @@
-// @ts-nocheck
 import './NetworkMap.css';
 import React, { useState, useEffect, useRef } from "react";
+import type { NetworkMapProps } from '../../types';
+import type { LatLngBoundsExpression as LLBoundsExpr } from 'leaflet';
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
 import { Box, Grid, Tabs, Tab, Button } from '@mui/material';
+import type { CoordinateTuple } from '../../types';
 import { Tooltip } from 'react-leaflet'
 import {
     NetworkNodeTypes,
@@ -29,8 +31,8 @@ const iconUrl = "http://maps.google.com/mapfiles/kml/"
 const PIPELINE_COLOR = "#A03232"
 
 
-export default function NetworkMap(props) {
-    const { map_data, interactive, showMapTypeToggle, width, height } = props;
+export default function NetworkMap(props: NetworkMapProps) {
+    const { map_data, interactive = false, showMapTypeToggle = false, width = 100, height = 50 } = props;
     const {
         all_nodes: points,
         arcs: lines,
@@ -47,11 +49,11 @@ export default function NetworkMap(props) {
         selectedNode,
         setNetworkMapData,
     } = useMapValues();
-    const [ googleMapType, setGoogleMapType ] = useState('y')
-    const [ mapCenter, setMapCenter ] = useState([38, -98])
-    const [ mapZoom, setMapZoom ] = useState(5)
-    const [ showMap, setShowMap ] = useState(false)
-    const [ mapBounds, setMapBounds ] = useState(
+    const [ googleMapType, setGoogleMapType ] = useState<string>('y')
+    const [ mapCenter, setMapCenter ] = useState<[number, number]>([38, -98])
+    const [ mapZoom, setMapZoom ] = useState<number>(5)
+    const [ showMap, setShowMap ] = useState<boolean>(false)
+    const [ mapBounds, setMapBounds ] = useState<LLBoundsExpr>(
         [// southwest, northeast
             [25.6866,-127.4969],
             [50.7207, -66.0633]
@@ -92,7 +94,7 @@ export default function NetworkMap(props) {
 
     const markerRefs = useRef({});
 
-    const styles = {
+    const styles: Record<string, React.CSSProperties> = {
         legendBox: {
             paddingTop: 20, 
             paddingRight: 20, 
@@ -122,11 +124,11 @@ export default function NetworkMap(props) {
         }
     `
 
-    function MapClickHandler({ onClick }) {
+    function MapClickHandler({ onClick }: { onClick: (coords: CoordinateTuple) => void }) {
     useMapEvents({
         click(e) {
         const { lat, lng } = e.latlng; // coordinates
-        onClick({ lat, lng });
+        onClick([lng, lat]);
         },
     });
     return null; // This component doesn't render anything visible
@@ -178,27 +180,26 @@ export default function NetworkMap(props) {
             
             <Box>
                 {showMap && 
-                    <MapContainer 
-                        center={mapCenter} 
-                        zoom={mapZoom} 
-                        maxBounds={mapBounds} 
-                        minZoom={5}
-                        scrollWheelZoom={interactive}
-                        doubleClickZoom={interactive}
-                        closePopupOnClick={interactive}
-                        dragging={interactive}
-                        zoomSnap={interactive}
-                        zoomDelta={interactive}
-                        zoomControl={interactive}
-                        // trackResize={interactive}
-                        touchZoom={interactive}
-                    >
+                    <MapContainer {...({
+                        center: mapCenter,
+                        zoom: mapZoom,
+                        maxBounds: mapBounds,
+                        minZoom: 5,
+                        scrollWheelZoom: interactive,
+                        doubleClickZoom: interactive,
+                        closePopupOnClick: interactive,
+                        dragging: interactive,
+                        zoomSnap: interactive,
+                        zoomDelta: interactive,
+                        zoomControl: interactive,
+                        touchZoom: interactive,
+                    } as any)}>
                         <CustomCursorControl/>
-                    <TileLayer
-                        attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                        url={`https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`}
-                        subdomains={['mt1','mt2','mt3']}
-                    />
+                    <TileLayer {...({
+                        attribution: '&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                        url: `https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`,
+                        subdomains: ['mt1','mt2','mt3']
+                    } as any)} />
                     <MapClickHandler onClick={handleMapClick} />
         
                     {nodeData.map((value, index) => {
@@ -209,7 +210,7 @@ export default function NetworkMap(props) {
                                     value.coordinates[1],
                                     value.coordinates[0]
                                 ]}                        
-                                icon={NetworkNodeTypes[value.nodeType]?.icon}
+                                {...({ icon: NetworkNodeTypes[value.nodeType]?.icon } as any)}
                                 // icon={icons[0]}
                                 eventHandlers={{
                                     click: (e) => {

@@ -421,6 +421,43 @@ export interface ModelCompletionBarProps {
   [key: string]: any;
 }
 
+export interface PopupModalProps {
+  open: boolean;
+  handleClose: () => void;
+  input?: boolean;
+  text?: string | number;
+  textLabel?: string;
+  handleEditText?: (e: any) => void;
+  handleSave?: () => void;
+  buttonVariant?: any;
+  buttonColor?: any;
+  buttonText?: string;
+  hasInput?: boolean;
+  inputText?: string;
+  showError?: boolean;
+  errorText?: string;
+  hasTwoButtons?: boolean;
+  handleButtonTwoClick?: () => void;
+  buttonTwoVariant?: any;
+  buttonTwoColor?: any;
+  buttonTwoText?: string;
+  iconOne?: React.ReactNode;
+  iconTwo?: React.ReactNode;
+  width?: number;
+  [key: string]: any;
+}
+
+export interface FileUploadModalProps {
+  setShowFileModal: (show: boolean) => void;
+  handleFileUpload: (file: File, defaultNodeType?: string, scenarioName?: string) => void;
+  fileTypes?: string[];
+  showNameInput?: boolean;
+  showSampleFiles?: boolean;
+  title?: string;
+  buttonText?: string;
+  [key: string]: any;
+}
+
 export interface ScenarioCompareInputProps {
   primaryScenario: Scenario;
   referenceScenario: Scenario;
@@ -450,5 +487,36 @@ export interface ScenarioCompareOutputProps {
   compareCategory?: string;
   totalCapex?: number[];
   totalOpex?: number[];
+}
+
+export interface NetworkMapProps {
+  map_data: any;
+  interactive?: boolean;
+  showMapTypeToggle?: boolean;
+  width?: number | string;
+  height?: number | string;
+  [key: string]: any;
+}
+
+export interface InputSummaryProps {
+  scenario: Scenario;
+  initialDisposalCapacity: Record<string, number[]>;
+  initialTreatmentCapacity: Record<string, number[]>;
+  completionsDemand: Record<string, number[]>;
+  padRates: Record<string, number[]>;
+  flowbackRates: Record<string, number[]>;
+  updateScenario: (updatedScenario: any) => void;
+  handleSetCategory: (category: string) => void;
+  [key: string]: any;
+}
+
+export interface ScenarioCompareSidebarProps {
+  category: string;
+  setCategory: (category: string) => void;
+  open: boolean;
+  deltaDictionary: Record<string, Record<string, any>>;
+  overrides: Array<Record<string, any>>;
+  compareScenarioIndexes?: Array<string | number>;
+  [key: string]: any;
 }
 

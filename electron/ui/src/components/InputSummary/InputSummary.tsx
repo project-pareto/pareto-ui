@@ -1,6 +1,7 @@
-// @ts-nocheck
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import {useEffect, useState} from 'react';  
+import type { InputSummaryProps } from '../../types';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import { Box, FormControl, MenuItem, Select, Typography, Grid, Button } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
 import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.service';
@@ -9,21 +10,21 @@ import { FileUploader } from "react-drag-drop-files";
 import ErrorBar from '../ErrorBar/ErrorBar'
 import { useApp } from '../../AppContext';
 
-export default function InputSummary(props) {
-    const [ tableType, setTableType ] = useState("Input Summary")
-    const [ updatedExcelFile, setUpdatedExcelFile ] = useState(null)
-    const [ showError, setShowError ] = useState(false)
-    const [ disableUpload, setDisableUpload ] = useState(false)
-    const [ errorMessage, setErrorMessage ] = useState("")
+export default function InputSummary(props: InputSummaryProps) {
+    const [ tableType, setTableType ] = useState<string>("Input Summary")
+    const [ updatedExcelFile, setUpdatedExcelFile ] = useState<File | null>(null)
+    const [ showError, setShowError ] = useState<boolean>(false)
+    const [ disableUpload, setDisableUpload ] = useState<boolean>(false)
+    const [ errorMessage, setErrorMessage ] = useState<string>("")
     const fileTypes = ["xlsx"];
     const { port } = useApp()
-    const [ sumValues, setSumValues ] = useState([
+    const [ sumValues, setSumValues ] = useState<Array<{statistic:string; value:number; units:string}>>([
         {statistic: 'Total Completions Demand', value: 0, units: 'bbl'},
         {statistic: 'Total Produced Water', value: 0, units: 'bbl'},
         {statistic: 'Total Starting Disposal Capacity', value: 0, units: 'bbl'},
         {statistic: 'Total Starting Treatment Capacity', value: 0, units: 'bbl'},
     ]) 
-    const [ timeSumValues, setTimeSumValues ] = useState({
+    const [ timeSumValues, setTimeSumValues ] = useState<Record<string, number[]>>({
         'Completions Demand': [],
         'Produced Water': [],
         'Initial Disposal Capacity': [],
@@ -68,7 +69,7 @@ export default function InputSummary(props) {
 
     useEffect(()=>{
 
-        if (props.scenario.results.status !== 'Incomplete') { //fetch location of excel template{
+        if (props.scenario.results?.status !== 'Incomplete') { //fetch location of excel template{
         /* 
             calculate total completions demand, total produced water, 
             total disposal capacity, and total treatment capacity; 
@@ -164,8 +165,8 @@ export default function InputSummary(props) {
         }
       }, [props, props.scenario]);
 
-    const handleTableTypeChange = (event) => {
-        setTableType(event.target.value)
+    const handleTableTypeChange = (event: SelectChangeEvent<string>) => {
+        setTableType(event.target.value as string)
     }
 
     const handleDownloadExcel = () => {
@@ -187,7 +188,7 @@ export default function InputSummary(props) {
         })
     }
 
-    const handleReplaceExcel = (file) => {
+    const handleReplaceExcel = (file: File) => {
         const formData = new FormData();
         formData.append('file', file, file.name);
         replaceExcelSheet(port, formData, props.scenario.id)
@@ -245,12 +246,12 @@ export default function InputSummary(props) {
         )
     }
 
-    function DragDrop() {
-        const handleChange = (file) => {
-            setUpdatedExcelFile(file);
-            handleReplaceExcel(file)
-            setDisableUpload(true)
-        };
+        function DragDrop() {
+                const handleChange = (file: File) => {
+                        setUpdatedExcelFile(file);
+                        handleReplaceExcel(file)
+                        setDisableUpload(true)
+                };
         return (
           <FileUploader 
             handleChange={handleChange} 
@@ -276,7 +277,7 @@ export default function InputSummary(props) {
                     {sumValues.map((v,i) => {
                         return (
                             <TableRow key={""+v+i}>
-                                <TableCell style={styles.firstCol}><Typography noWrap={true}>{v.statistic}</Typography></TableCell>
+                                <TableCell style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{v.statistic}</Typography></TableCell>
                                 <TableCell align="right">{v.value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                                 <TableCell align="right">{v.units}</TableCell>
                             </TableRow>
@@ -306,7 +307,7 @@ export default function InputSummary(props) {
                             index > 0 ? 
                             <TableCell key={""+value+index} align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                             :
-                            <TableCell key={""+value+index} style={styles.firstCol}><Typography noWrap={true}>{key}</Typography></TableCell>
+                            <TableCell key={""+value+index} style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{key}</Typography></TableCell>
                             )
                         })}
                     </TableRow>

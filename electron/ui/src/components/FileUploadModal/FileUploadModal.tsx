@@ -1,5 +1,4 @@
-import React from 'react';
-import {useState, useEffect} from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import Modal from '@mui/material/Modal';
 import { Grid, MenuItem, Box, TextField, IconButton, Button, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -8,8 +7,9 @@ import { fetchExcelFile } from '../../services/app.service';
 import { useApp } from '../../AppContext';
 import { NetworkNodeTypes } from '../../assets/utils';
 import { NodeIcon } from '../NetworkMap/NodeIcon';
+import type { FileUploadModalProps } from '../../types';
 
-export default function FileUploadModal(props) {
+export default function FileUploadModal(props: FileUploadModalProps) {
     const { 
         setShowFileModal,
         handleFileUpload,
@@ -19,11 +19,11 @@ export default function FileUploadModal(props) {
         title = "Create a New Scenario",
         buttonText = "Create Scenario"
     } = props;
-    const [ scenarioName, setScenarioName ] = useState("")
-    const [ showWarning, setShowWarning ] = useState(false)
-    const [ warningMessage, setWarningMessage ] = useState("")
-    const [ file, setFile ] = useState(null)
-    const [defaultNodeType, setDefaultNodeType] = useState("NetworkNode");
+    const [ scenarioName, setScenarioName ] = useState<string>("")
+    const [ showWarning, setShowWarning ] = useState<boolean>(false)
+    const [ warningMessage, setWarningMessage ] = useState<string>("")
+    const [ file, setFile ] = useState<File | null>(null)
+    const [defaultNodeType, setDefaultNodeType] = useState<string>("NetworkNode");
     const PARETO_VERSION = "main"
     const isMapFile = file?.name.includes('zip') || file?.name.includes('kmz') || file?.name.includes('kml');
 
@@ -74,9 +74,9 @@ export default function FileUploadModal(props) {
     }
    }
 
-   const handleEditScenarioName = (event) => {
-    setScenarioName(event.target.value)
-   }
+    const handleEditScenarioName = (event: ChangeEvent<HTMLInputElement>) => {
+     setScenarioName(event.target.value)
+    }
 
    const handleClose = () => {
     setShowFileModal(false)
@@ -148,10 +148,10 @@ export default function FileUploadModal(props) {
     )
    }
 
-   function DragDrop() {
-    const handleChange = (file) => {
-      setFile(file);
-    };
+    function DragDrop() {
+        const handleChange = (f: File | null) => {
+            setFile(f);
+        };
     return (
       <FileUploader 
         handleChange={handleChange} 
