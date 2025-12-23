@@ -1,15 +1,15 @@
-// @ts-nocheck
 import React from 'react';
 import {useEffect, useState} from 'react';
 import { Grid, Box, Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
+import type { ScenarioCompareOverridesProps } from '../../types';
 import { INFRASTRUCTURE_CAPEX_MAPPING }  from '../../assets/InfrastructureCapexMapping'
 
 const INFRASTRUCTURE_VARIABLES = ["vb_y_Pipeline_dict", "vb_y_Treatment_dict", "vb_y_Storage_dict", "vb_y_Disposal_dict"]
 
-export default function ScenarioCompareOverrides(props) {
+export default function ScenarioCompareOverrides(props: ScenarioCompareOverridesProps) {
     const {primaryScenario, referenceScenario, category, showSidebar, overrides} = props
-    const [ overridesList, setOverridesList ] = useState([[],[]])
-    const styles = {
+    const [ overridesList, setOverridesList ] = useState<[string[], string[]]>([[],[]])
+    const styles: any = {
         boxView: showSidebar ? 
         {
             m:3, 
@@ -40,20 +40,20 @@ export default function ScenarioCompareOverrides(props) {
     }
 
 
-  useEffect(() => {
-    let tempPrimaryOverridesSet = new Set()
-    let tempReferenceOverridesSet = new Set()
-    for (let key of Object.keys(overrides[0])) {
-        let variable = overrides[0][key].variable
-        tempPrimaryOverridesSet.add(variable)
-    }
-    for (let key of Object.keys(overrides[1])) {
-        let variable = overrides[1][key].variable
-        tempReferenceOverridesSet.add(variable)
-    }
-    setOverridesList([Array.from(tempPrimaryOverridesSet), Array.from(tempReferenceOverridesSet)])
+    useEffect(() => {
+        let tempPrimaryOverridesSet = new Set<string>()
+        let tempReferenceOverridesSet = new Set<string>()
+        for (let key of Object.keys(overrides[0] || {})) {
+                const variable = (overrides[0] as any)[key]?.variable
+                if (variable !== undefined) tempPrimaryOverridesSet.add(String(variable))
+        }
+        for (let key of Object.keys(overrides[1] || {})) {
+                const variable = (overrides[1] as any)[key]?.variable
+                if (variable !== undefined) tempReferenceOverridesSet.add(String(variable))
+        }
+        setOverridesList([Array.from(tempPrimaryOverridesSet) as string[], Array.from(tempReferenceOverridesSet) as string[]])
     
-  },[primaryScenario, referenceScenario, overrides])
+    },[primaryScenario, referenceScenario, overrides])
 
   const formatNumber = (value) => {
     if (value === undefined) return value
@@ -79,7 +79,7 @@ export default function ScenarioCompareOverrides(props) {
                     {Object.keys(primaryScenario.optimized_override_values.v_L_PadStorage_dict).length > 0 ? 
                         <TableBody>
                             <TableRow>
-                            <TableCell rowSpan={Object.keys(primaryScenario.optimized_override_values.v_L_PadStorage_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                            <TableCell rowSpan={Object.keys(primaryScenario.optimized_override_values.v_L_PadStorage_dict).length+1} sx={{...styles.firstCol, fontSize: "15px"}}>
                                 <b>{primaryScenario.name}</b>
                             </TableCell>
                             </TableRow>
@@ -87,14 +87,14 @@ export default function ScenarioCompareOverrides(props) {
                                 <TableRow key = {`${key}_${value}`}>
                                     <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                         :
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: "15px"}}>
                                     <b>{primaryScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 
@@ -106,7 +106,7 @@ export default function ScenarioCompareOverrides(props) {
                     {Object.keys(referenceScenario.optimized_override_values.v_L_PadStorage_dict).length > 0 ? 
                         <TableBody>
                             <TableRow>
-                            <TableCell rowSpan={Object.keys(referenceScenario.optimized_override_values.v_L_PadStorage_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                            <TableCell rowSpan={Object.keys(referenceScenario.optimized_override_values.v_L_PadStorage_dict).length+1} sx={{...styles.firstCol, fontSize: "15px"}}>
                                 <b>{referenceScenario.name}</b>
                             </TableCell>
                             </TableRow>
@@ -114,14 +114,14 @@ export default function ScenarioCompareOverrides(props) {
                                 <TableRow key = {`${key}_${value}`}>
                                     <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                         :
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: '15px'}}>
                                     <b>{referenceScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 
@@ -155,7 +155,7 @@ export default function ScenarioCompareOverrides(props) {
                     {Object.keys(primaryScenario.optimized_override_values.v_L_Storage_dict).length > 0 ? 
                         <TableBody>
                             <TableRow>
-                            <TableCell rowSpan={Object.keys(primaryScenario.optimized_override_values.v_L_Storage_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                            <TableCell rowSpan={Object.keys(primaryScenario.optimized_override_values.v_L_Storage_dict).length+1} sx={{...styles.firstCol, fontSize: '15px'}}>
                                 <b>{primaryScenario.name}</b>
                             </TableCell>
                             </TableRow>
@@ -163,14 +163,14 @@ export default function ScenarioCompareOverrides(props) {
                                 <TableRow key = {`${key}_${value}`}>
                                     <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                         :
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: '15px'}}>
                                     <b>{primaryScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 
@@ -190,14 +190,14 @@ export default function ScenarioCompareOverrides(props) {
                                 <TableRow key = {`${key}_${value}`}>
                                     <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                         :
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: '15px'}}>
                                     <b>{referenceScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 
@@ -241,14 +241,14 @@ export default function ScenarioCompareOverrides(props) {
                                     <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
                                     <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                         :
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: '15px'}}>
                                     <b>{primaryScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 
@@ -270,14 +270,14 @@ export default function ScenarioCompareOverrides(props) {
                                     <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
                                     <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                         :
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: '15px'}}>
                                     <b>{referenceScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 
@@ -322,7 +322,7 @@ export default function ScenarioCompareOverrides(props) {
                                     <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                     <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
                                     <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                    <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -348,10 +348,10 @@ export default function ScenarioCompareOverrides(props) {
                             </TableRow>
                             {Object.entries(referenceScenario.optimized_override_values.v_F_Sourced_dict).map(([key,value]) => (
                                 <TableRow key = {`${key}_${value}`}>
-                                    <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
-                                    <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                    <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                    <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
+                                        <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
+                                        <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
+                                        <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -403,7 +403,7 @@ export default function ScenarioCompareOverrides(props) {
                                         <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                         <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
                                         <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                        <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                        <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -432,7 +432,7 @@ export default function ScenarioCompareOverrides(props) {
                                         <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
                                         <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
                                         <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                        <TableCell style={styles.other} align="right">{formatNumber(value.value)}</TableCell>
+                                        <TableCell style={styles.other} align="right">{formatNumber((value as any).value)}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -477,19 +477,19 @@ export default function ScenarioCompareOverrides(props) {
                         {Object.keys(primaryScenario.optimized_override_values.vb_y_overview_dict).length > 0 ? 
                             <TableBody>
                                 <TableRow>
-                                <TableCell rowSpan={Object.keys(primaryScenario.optimized_override_values.vb_y_overview_dict).length+1} style={styles.firstCol} sx={{fontSize:"15px"}}>
-                                    <b>{primaryScenario.name}</b>
-                                </TableCell>
-                                </TableRow>
+                                    <TableCell rowSpan={Object.keys(primaryScenario.optimized_override_values.vb_y_overview_dict).length+1} sx={{...styles.firstCol, fontSize: '15px'}}>
+                                        <b>{primaryScenario.name}</b>
+                                    </TableCell>
+                                    </TableRow>
                                 {Object.entries(primaryScenario.optimized_override_values.vb_y_overview_dict).map(([key,value]) => (
                                     <TableRow key = {`${key}_${value}`}>
-                                        <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
-                                        <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
-                                        <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
-                                        <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
-                                        <TableCell style={styles.other} align="right">{formatNumber(value.number_value)}</TableCell>
-                                        <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
-                                    </TableRow>
+                                                <TableCell style={styles.other}>{key.split(":")[0]}</TableCell> 
+                                                <TableCell style={styles.other}>{key.split(":")[1]}</TableCell>
+                                                <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
+                                                <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
+                                                <TableCell style={styles.other} align="right">{formatNumber((value as any).number_value)}</TableCell>
+                                                <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
+                                            </TableRow>
                                 ))}
                             </TableBody>
                             :
@@ -524,7 +524,7 @@ export default function ScenarioCompareOverrides(props) {
                                         <TableCell style={styles.other}>{key.split(":")[2]}</TableCell>
                                         <TableCell style={styles.other}>{key.split(":")[3]}</TableCell>
                                         {/* <TableCell style={styles.other}>{value.indexes[value.indexes.length-1]}</TableCell> */}
-                                        <TableCell style={styles.other} align="right">{formatNumber(value.number_value)}</TableCell>
+                                        <TableCell style={styles.other} align="right">{formatNumber((value as any).number_value)}</TableCell>
                                         <TableCell style={styles.other}>{INFRASTRUCTURE_CAPEX_MAPPING[key.split(":")[0]].unit}</TableCell>
                                     </TableRow>
                                 ))}

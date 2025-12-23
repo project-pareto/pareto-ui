@@ -1,7 +1,9 @@
 import React from 'react';
-import { useState } from 'react';   
+import { useState } from 'react';
 import { Box, Grid, InputAdornment, Checkbox, FormControlLabel, FormControl, Button } from '@mui/material';
 import { MenuItem, Select, IconButton, Tooltip, Collapse, OutlinedInput, Radio, RadioGroup } from '@mui/material';
+import type { OptimizationProps } from '../../types';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import InfoIcon from '@mui/icons-material/Info';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -10,9 +12,9 @@ import { descriptions } from './Descriptions';
 import { advancedOptions } from './AdvancedOptions';
 
 
-export default function Optimization(props) {
+export default function Optimization(props: OptimizationProps) {
   // const [ disabled, setDisabled ] = useState(false)
-  const [ showAdvancedOptions, setShowAdvancedOptions ] = useState(false) 
+  const [ showAdvancedOptions, setShowAdvancedOptions ] = useState<boolean>(false)
   const columnWidths = [5,7]
   const defaultRuntimes = {"cbc": 900, "gurobi": 180}
   const defaultScaleModel = {"cbc": true, "gurobi": false}
@@ -67,12 +69,12 @@ export default function Optimization(props) {
   }
 
 
-   const handleChange = (event) => {
-     const name = event.target.name
-     const value = event.target.value
-     if ( (name === "runtime" || name === "optimalityGap") && isNaN(value) ) {
+   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<any>) => {
+     const name = (event.target as any).name as string
+     const value = (event.target as any).value
+     if ( (name === "runtime" || name === "optimalityGap") && Number.isNaN(Number(value)) ) {
       console.log('tried entering nonnumerical characters for runtime or optimality gap')
-     } 
+     }
      /*
       update runtime and scalemodel settings when changing solver
      */
@@ -93,15 +95,20 @@ export default function Optimization(props) {
      }
      else {
       const tempScenario = {...props.scenario}
-      tempScenario.optimization[name] = value
+      // coerce numeric fields to numbers
+      if (name === 'runtime' || name === 'optimalityGap') {
+        tempScenario.optimization[name] = Number(value);
+      } else {
+        tempScenario.optimization[name] = value
+      }
       props.updateScenario(tempScenario)
      }
    }
 
-   const handleOptimize = () => {
-    props.setDisabled(true)
-    props.handleRunModel()
-   }
+  const handleOptimize = () => {
+   props.setDisabled(true)
+   props.handleRunModel()
+  }
 
   return ( 
     <Grid container spacing={2} style={styles.gridContainer}>

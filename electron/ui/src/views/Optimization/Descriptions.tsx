@@ -1,5 +1,7 @@
+import React from 'react';
 import Link from '@mui/material/Link';
-export const descriptions = {
+
+export const descriptions: Record<string, React.ReactNode> = {
     objective: <div>Select what you would like to minimize or maximize.</div>,
     runtime:  <div> 
                   This setting limits the runtime for the solver to find a solution. 

@@ -1,6 +1,5 @@
-// @ts-nocheck
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import {useEffect, useState, type ChangeEvent} from 'react';   
 import { Box, Grid, LinearProgress, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SankeyPlot from './SankeyPlot';
@@ -11,6 +10,7 @@ import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
 import { generateReport } from '../../services/app.service';
 import { useApp } from '../../AppContext';
+import type { ModelResultsProps, Scenario } from '../../types';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WaterResiduals from '../../components/WaterResiduals/WaterResiduals';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -24,19 +24,19 @@ const OVERRIDE_CATEGORIES = [
   "v_L_PadStorage_dict",
 ]
 
-export default function ModelResults(props) {
+export default function ModelResults(props: ModelResultsProps) {
   const { port } = useApp()
-  const [ scenario, setScenario] = useState({...props.scenario})
-  const [ terminationCondition, setTerminationCondition ] = useState(null)
-  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) // the column mapping; set once and remains the same
-  const [ columnNodes, setColumnNodes ] = useState([]) // dictionary with true false values for each column
-  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([]) // list of active columns
-  const [ columnFilterSet, setColumnFilterSet ] = useState({}) // dictionary containing all unique columns and the amount of each column
-  const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
-  const [ rowNodes, setRowNodes ] = useState([])
-  const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
-  const [ rowFilterSet, setRowFilterSet ] = useState({})
-  const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState(false)
+  const [ scenario, setScenario] = useState<Scenario>({...props.scenario})
+  const [ terminationCondition, setTerminationCondition ] = useState<'good' | 'unsure' | 'bad' | null>(null)
+  const [ columnNodesMapping, setColumnNodesMapping ] = useState<string[]>([]) // the column mapping; set once and remains the same
+  const [ columnNodes, setColumnNodes ] = useState<Record<string, boolean>>({}) // dictionary with true false values for each column
+  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState<string[]>([]) // list of active columns
+  const [ columnFilterSet, setColumnFilterSet ] = useState<Record<string, {checked: boolean; amt: number}>>({}) // dictionary containing all unique columns and the amount of each column
+  const [ rowNodesMapping, setRowNodesMapping ] = useState<string[]>([]) 
+  const [ rowNodes, setRowNodes ] = useState<Record<string, boolean>>({})
+  const [ filteredRowNodes, setFilteredRowNodes ] = useState<string[]>([])
+  const [ rowFilterSet, setRowFilterSet ] = useState<Record<string, {checked: boolean; amt:number}>>({})
+  const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState<boolean>(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const styles ={
@@ -119,7 +119,7 @@ export default function ModelResults(props) {
     } catch (e) {
       console.error('unable to set filtering data: ',e)
     }
-    let tempScenario = {}
+    let tempScenario: Scenario = {} as Scenario;
     Object.assign(tempScenario, props.scenario);
     setScenario(tempScenario)
     if (typeof(tempScenario.results.terminationCondition) === 'undefined') {

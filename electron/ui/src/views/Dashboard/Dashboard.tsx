@@ -1,5 +1,5 @@
 import './Dashboard.css';
-import {useEffect, useState} from 'react';   
+import {useEffect, useState, type ChangeEvent} from 'react';   
 import {  } from "react-router-dom";
 import { Grid, IconButton } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit';
@@ -14,7 +14,9 @@ import { runModel } from '../../services/app.service'
 import { useApp } from '../../AppContext';
 import { MapProvider } from '../../context/MapContext';
 
-export default function Dashboard(props) {
+import type { DashboardProps } from '../../types';
+
+export default function Dashboard(props: DashboardProps) {
   const { 
     scenarios, scenario, navigateHome, updateScenario, updateAppState,
     addTask, handleEditScenarioName, section, category, handleSetSection,
@@ -22,10 +24,10 @@ export default function Dashboard(props) {
     copyAndRunOptimization, handleUpdateExcel,
   } = props;
   // const networkMapData = scenario?.data_input?.map_data;
-  const [ name, setName ] = useState('')
-  const [ openEditName, setOpenEditName ] = useState(false)
-  const [ inputDataEdited, setInputDataEdited ] = useState(false) 
-  const [ disableOptimize, setDisableOptimize ] = useState(false)
+  const [ name, setName ] = useState<string>('')
+  const [ openEditName, setOpenEditName ] = useState<boolean>(false)
+  const [ inputDataEdited, setInputDataEdited ] = useState<boolean>(false)
+  const [ disableOptimize, setDisableOptimize ] = useState<boolean>(false)
   const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible']
 
   const handleOpenEditName = () => setOpenEditName(true);
@@ -80,9 +82,9 @@ export default function Dashboard(props) {
       })
    }
 
-   const handleEditName = (event) => {
-    setName(event.target.value)
-   }
+  const handleEditName = (event: ChangeEvent<HTMLInputElement>) => {
+   setName(event.target.value)
+  }
 
    const handleSaveName = () => {
     handleEditScenarioName(name, scenario.id, true)

@@ -1,4 +1,10 @@
-export const advancedOptions = {
+export type AdvancedOptionItem = {
+    displayName: string;
+    defaultValue: any;
+    options: Record<string, any>;
+};
+
+export const advancedOptions: Record<string, AdvancedOptionItem> = {
     scale_model: {
         displayName: "Scale Model",
         defaultValue: true,

@@ -1,11 +1,11 @@
-// @ts-nocheck
 import React from 'react';
 import { Grid, Box, IconButton, Divider } from '@mui/material';
 import { MenuItem, FormControl, Select, Tooltip, InputLabel } from '@mui/material'
+import type { SubHeaderProps } from '../../types';
 import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
 
 
-export default function SubHeader(props) {
+export default function SubHeader(props: SubHeaderProps) {
     const { scenarios, compareScenarioIndexes, setCompareScenarioIndexes } = props
 
     const styles = {

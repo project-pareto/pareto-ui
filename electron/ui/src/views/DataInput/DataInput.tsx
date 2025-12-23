@@ -1,7 +1,8 @@
-// @ts-nocheck
 import './DataInput.css';
 import React from 'react';
 import {useEffect, useState} from 'react';
+import type { DataInputProps, Scenario } from '../../types';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import { Grid, Box, FormControl, MenuItem, Select, Button, Typography } from '@mui/material';
 import CustomChart from '../../components/CustomChart/CustomChart'
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
@@ -10,7 +11,7 @@ import InputSummary from '../../components/InputSummary/InputSummary'
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 
-export default function DataInput(props) {
+export default function DataInput(props: DataInputProps) {
   const { 
     updateScenario,
     category,
@@ -18,20 +19,21 @@ export default function DataInput(props) {
     syncScenarioData,
     handleUpdateExcel,
     handleEditInput,
-    edited
+    edited,
+    scenario: incomingScenario,
   } = props;
-  const [ scenario, setScenario] = useState({...props.scenario})
-  const [ editDict, setEditDict ] = useState({})
-  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) // the column mapping; set once and remains the same
-  const [ columnNodes, setColumnNodes ] = useState([]) // dictionary with true false values for each column
-  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([]) // list of active columns
-  const [ columnFilterSet, setColumnFilterSet ] = useState({}) // dictionary containing all unique columns and the corresponding amount of each column
-  const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
-  const [ rowNodes, setRowNodes ] = useState([])
-  const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
-  const [ rowFilterSet, setRowFilterSet ] = useState({})
-  const [ plotCategory, setPlotCategory ] = useState("CompletionsDemand")
-  const [ showError, setShowError ] = useState(false)
+  const [ scenario, setScenario] = useState<Scenario>({...incomingScenario})
+  const [ editDict, setEditDict ] = useState<Record<string, boolean>>({})
+  const [ columnNodesMapping, setColumnNodesMapping ] = useState<string[]>([]) // the column mapping; set once and remains the same
+  const [ columnNodes, setColumnNodes ] = useState<Record<string, boolean>>({}) // dictionary with true false values for each column
+  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState<string[]>([]) // list of active columns
+  const [ columnFilterSet, setColumnFilterSet ] = useState<Record<string, {amt:number,checked:boolean}>>({}) // dictionary containing all unique columns and the corresponding amount of each column
+  const [ rowNodesMapping, setRowNodesMapping ] = useState<string[]>([]) 
+  const [ rowNodes, setRowNodes ] = useState<Record<string, boolean>>({})
+  const [ filteredRowNodes, setFilteredRowNodes ] = useState<string[]>([])
+  const [ rowFilterSet, setRowFilterSet ] = useState<Record<string, {amt:number,checked:boolean}>>({})
+  const [ plotCategory, setPlotCategory ] = useState<string>("CompletionsDemand")
+  const [ showError, setShowError ] = useState<boolean>(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const plotCategoryDictionary  = {
@@ -105,16 +107,14 @@ export default function DataInput(props) {
     } catch (e) {
       console.error('unable to set edit dictionary: ',e)
     }
-    let tempScenario = {}
-    Object.assign(tempScenario, props.scenario);
-    setScenario(tempScenario)
+    setScenario({...incomingScenario})
     
   }, [category, props.scenario, scenario.data_input.df_parameters]);
 
   
-   const handlePlotCategoryChange = (event) => {
-    setPlotCategory(event.target.value)
-   }
+  const handlePlotCategoryChange = (event: SelectChangeEvent<string>) =>{
+   setPlotCategory(event.target.value as string)
+  }
 
   const handleSaveChanges = () => {
     //api call to save changes on backend

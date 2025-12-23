@@ -1,6 +1,6 @@
-// @ts-nocheck
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
+import type { ScenarioCompareOutputProps } from '../../types';
 import {  } from "react-router-dom";
 import { Box, Grid, IconButton, Typography, FormControlLabel, Switch, FormGroup } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer,  } from '@mui/material';
@@ -14,26 +14,26 @@ import Plot from 'react-plotly.js';
 
 
 
-export default function ScenarioCompareOutput(props) {
-  const {
-        scenarios, 
-        primaryScenarioIndex, 
-        referenceScenarioIndex, 
-        kpiDataPrimary, 
-        kpiDataReference, 
-        capexBarChartData, 
-        opexBarChartData, 
-        showSidebar, 
-        compareCategory,
-        totalCapex,
-        totalOpex
-    } = props
+export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps) {
+    const {
+                scenarios, 
+                primaryScenarioIndex, 
+                referenceScenarioIndex, 
+                kpiDataPrimary, 
+                kpiDataReference, 
+                capexBarChartData, 
+                opexBarChartData, 
+                showSidebar, 
+                compareCategory,
+                totalCapex,
+                totalOpex
+        } = props
 
-    const [ hoverRow, setHoverRow] = useState('')
-    const [ hoverTable, setHoverTable ] = useState('')
-    const [ hoverValue, setHoverValue ] = useState('')
-    const [ showBuildoutOverlappingRows, setShowBuildoutOverlappingRows ] = useState(false)
-    const [ buildoutOverlappingRows, setBuildoutOverlappingRows ] = useState([])
+        const [ hoverRow, setHoverRow] = useState<string>('')
+        const [ hoverTable, setHoverTable ] = useState<string>('')
+        const [ hoverValue, setHoverValue ] = useState<string | number>('')
+        const [ showBuildoutOverlappingRows, setShowBuildoutOverlappingRows ] = useState<boolean>(false)
+        const [ buildoutOverlappingRows, setBuildoutOverlappingRows ] = useState<string[]>([])
 
     useEffect(() => {
         let primaryScenario = scenarios[primaryScenarioIndex]
@@ -264,7 +264,7 @@ export default function ScenarioCompareOutput(props) {
                     {Object.keys(primaryScenario.results.data.vb_y_overview_dict).length > 0 ? 
                         <TableBody>
                             <TableRow>
-                            <TableCell rowSpan={Object.keys(primaryScenario.results.data.vb_y_overview_dict).length} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                            <TableCell rowSpan={Object.keys(primaryScenario.results.data.vb_y_overview_dict).length} sx={{...styles.firstCol, fontSize: "15px"}}>
                                 <b>{primaryScenario.name}</b>
                             </TableCell>
                             </TableRow>
@@ -291,7 +291,7 @@ export default function ScenarioCompareOutput(props) {
                         // show empty row if this scenario doesnt have any overrides
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: "15px"}}>
                                     <b>{primaryScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 
@@ -307,7 +307,7 @@ export default function ScenarioCompareOutput(props) {
                     {Object.keys(referenceScenario.results.data.vb_y_overview_dict).length > 0 ?
                         <TableBody>
                             <TableRow>
-                            <TableCell rowSpan={Object.keys(referenceScenario.results.data.vb_y_overview_dict).length} style={styles.firstCol} sx={{fontSize:"15px"}}>
+                            <TableCell rowSpan={Object.keys(referenceScenario.results.data.vb_y_overview_dict).length} sx={{...styles.firstCol, fontSize: "15px"}}>
                                 <b>{referenceScenario.name}</b>
                             </TableCell>
                             </TableRow>
@@ -333,7 +333,7 @@ export default function ScenarioCompareOutput(props) {
                         // show empty row if this scenario doesnt have any overrides
                         <TableBody>
                             <TableRow>
-                                <TableCell style={styles.firstCol} sx={{fontSize:"15px"}}>
+                                <TableCell sx={{...styles.firstCol, fontSize: "15px"}}>
                                     <b>{referenceScenario.name}</b>
                                 </TableCell>
                                 <TableCell style={styles.other}>--</TableCell> 

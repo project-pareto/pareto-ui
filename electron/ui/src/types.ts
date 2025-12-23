@@ -186,3 +186,113 @@ export interface ScenarioListProps {
   setScenarioIndex: (index: string | number) => void;
 }
 
+export interface DashboardProps {
+  scenarios: Record<string, any>;
+  scenario: Scenario | null;
+  navigateHome: () => void;
+  updateScenario: (updatedScenario: any, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
+  updateAppState: (update: any, id?: string | number) => void;
+  addTask: (id: string | number) => void;
+  handleEditScenarioName: (newName: string, id: string | number, updateScenarioData?: boolean) => void;
+  section: number;
+  category: string;
+  handleSetSection: (section: number) => void;
+  handleSetCategory: (category: string) => void;
+  appState: any;
+  backgroundTasks: any[];
+  syncScenarioData: (id?: string | number) => void;
+  copyAndRunOptimization: (id: string | number) => void;
+  handleUpdateExcel: (id: string | number, tableKey: string, updatedTable: any) => void;
+}
+
+export interface ModelResultsProps {
+  category: string;
+  scenario: Scenario;
+  handleSetSection: (section: number) => void;
+  handleEditInput?: (edited: boolean) => void;
+  updateScenario: (updatedScenario: any) => void;
+  appState?: any;
+  syncScenarioData?: (id?: string | number) => void;
+  scenarios?: Record<string, any>;
+  handleSetCategory?: (category: string) => void;
+}
+
+export interface SankeyPlotProps {
+  data: Record<string, any[]>;
+  scenarioId: string | number;
+  appState?: any;
+}
+
+export interface KPIDashboardProps {
+  overviewData: any[];
+  truckedData: any[];
+  pipedData: any[];
+  waterQualityData: any[];
+  hydraulicsData?: any[];
+}
+
+export interface OptimizationProps {
+  scenario: Scenario;
+  updateScenario: (updatedScenario: any, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
+  disabled: boolean;
+  setDisabled: (disabled: boolean) => void;
+  handleRunModel: () => void;
+  backgroundTasks: any[];
+  category?: string;
+}
+
+export interface DataInputProps {
+  scenario: Scenario;
+  updateScenario: (updatedScenario: any) => void;
+  category: string;
+  handleSetCategory: (category: string) => void;
+  syncScenarioData: (id?: string | number) => void;
+  handleUpdateExcel: (id: string | number, tableKey: string, updatedTable: any) => void;
+  handleEditInput: (edited: boolean) => void;
+  edited: boolean;
+}
+
+export interface ScenarioCompareProps {
+  scenarios: Record<string, Scenario>;
+  compareScenarioIndexes: Array<string | number>;
+  setCompareScenarioIndexes: (indexes: Array<string | number>) => void;
+  setScenarioIndex: (index: string | number) => void;
+}
+
+export interface SubHeaderProps {
+  scenarios: Record<string, Scenario>;
+  compareScenarioIndexes: Array<string | number>;
+  setCompareScenarioIndexes: (indexes: Array<string | number>) => void;
+}
+
+export interface ScenarioCompareInputProps {
+  primaryScenario: Scenario;
+  referenceScenario: Scenario;
+  category: string;
+  showSidebar: boolean;
+  deltaDictionary: Record<string, string[]>;
+}
+
+export interface ScenarioCompareOverridesProps {
+  primaryScenario: Scenario;
+  referenceScenario: Scenario;
+  category: string;
+  showSidebar: boolean;
+  overrides: Array<Record<string, any>>;
+  deltaDictionary?: Record<string, string[]>;
+}
+
+export interface ScenarioCompareOutputProps {
+  scenarios: Record<string, Scenario>;
+  primaryScenarioIndex: string | number | null;
+  referenceScenarioIndex: string | number | null;
+  kpiDataPrimary?: Record<string, any> | null;
+  kpiDataReference?: Record<string, any> | null;
+  capexBarChartData?: any[] | null;
+  opexBarChartData?: any[] | null;
+  showSidebar?: boolean;
+  compareCategory?: string;
+  totalCapex?: number[];
+  totalOpex?: number[];
+}
+

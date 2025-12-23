@@ -1,18 +1,18 @@
-// @ts-nocheck
 import React from 'react';
 import {useEffect, useState} from 'react';
 import { Grid, Box } from '@mui/material';
+import type { ScenarioCompareInputProps, Scenario } from '../../types';
 import DataTable from '../../components/DataTable/DataTable';
 
-export default function ScenarioCompareInput(props) {
+export default function ScenarioCompareInput(props: ScenarioCompareInputProps) {
     const {primaryScenario, referenceScenario, category, showSidebar, deltaDictionary} = props
 
-  const [ columnNodesMapping, setColumnNodesMapping ] = useState([]) 
-  const [ columnNodes, setColumnNodes ] = useState([])
-  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState([])
-  const [ rowNodesMapping, setRowNodesMapping ] = useState([]) 
-  const [ rowNodes, setRowNodes ] = useState([])
-  const [ filteredRowNodes, setFilteredRowNodes ] = useState([])
+  const [ columnNodesMapping, setColumnNodesMapping ] = useState<string[]>([]) 
+  const [ columnNodes, setColumnNodes ] = useState<Record<string, boolean>>({})
+  const [ filteredColumnNodes, setFilteredColumnNodes ] = useState<string[]>([])
+  const [ rowNodesMapping, setRowNodesMapping ] = useState<string[]>([]) 
+  const [ rowNodes, setRowNodes ] = useState<Record<string, boolean>>({})
+  const [ filteredRowNodes, setFilteredRowNodes ] = useState<string[]>([])
 
   const styles = {
     boxView: showSidebar ? {

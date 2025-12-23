@@ -1,6 +1,5 @@
-// @ts-nocheck
 import React from 'react';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, type ReactElement} from 'react';
 import { Box, Grid, IconButton, Tooltip } from '@mui/material';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -8,13 +7,14 @@ import WaterIcon from '@mui/icons-material/Water';
 import Plot from 'react-plotly.js';
 import CustomChart from '../../components/CustomChart/CustomChart'
 import FilterDropdown from '../../components/FilterDropdown/WaterQualityFilterDropdown';
+import type { KPIDashboardProps } from '../../types';
 
-export default function KPIDashboard(props) {
-    const [ kpiData, setKpiData ] = useState(null)
-    const [ filteredNodes, setFilteredNodes ] = useState({})
-    const [ totalSet, setTotalSet ] = useState([])
-    const [ filterSet, setFilterSet ] = useState([])
-    const [ waterQualityData, setWaterQualityData ] = useState([])
+export default function KPIDashboard(props: KPIDashboardProps): ReactElement {
+    const [ kpiData, setKpiData ] = useState<Record<string, {description: string; unit: string; value: number}> | null>(null)
+    const [ filteredNodes, setFilteredNodes ] = useState<Record<string, boolean>>({})
+    const [ totalSet, setTotalSet ] = useState<string[]>([])
+    const [ filterSet, setFilterSet ] = useState<string[]>([])
+    const [ waterQualityData, setWaterQualityData ] = useState<any[]>([])
     const isAllNodesSelected = totalSet.length > 0 && totalSet.length === filterSet.length;
 
     useEffect(()=>{
@@ -36,18 +36,18 @@ export default function KPIDashboard(props) {
 
     useEffect(()=>{
         try {
-            let tempNodes = new Set()
-            let tempRowFilteredNodes = {}
-            
-            for (var index = 1; index < props.waterQualityData.length; index++) {
-                let item = props.waterQualityData[index]
-                let nodeType = item[1]
-                tempNodes.add(nodeType)
+            const nodeSet = new Set<string>()
+            const tempRowFilteredNodes: Record<string, boolean> = {}
+
+            for (let index = 1; index < props.waterQualityData.length; index++) {
+                const item = props.waterQualityData[index]
+                const nodeType = String(item[1])
+                nodeSet.add(nodeType)
                 tempRowFilteredNodes[nodeType] = true
             }
-            tempNodes = Array.from(tempNodes)
-            setTotalSet(tempNodes)
-            setFilterSet(tempNodes)
+            const nodesArray = Array.from(nodeSet) as string[]
+            setTotalSet(nodesArray)
+            setFilterSet(nodesArray)
             setFilteredNodes(tempRowFilteredNodes)
         } catch(e) {
             console.log("error setting filtered nodes: ")
@@ -125,7 +125,7 @@ export default function KPIDashboard(props) {
           }
       }
 
-      const handleNodesFilter = (key) => {
+            const handleNodesFilter = (key: string) => {
         let tempFilteredNodes = {...filteredNodes}
         let tempFilterSet = [...filterSet]
         if(key === "all") {

@@ -1,5 +1,6 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
+import type { Scenario, ScenarioCompareProps } from '../../types';
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
@@ -8,20 +9,20 @@ import SubHeader from './SubHeader';
 import { Subcategories } from '../../assets/utils';
 
 
-export default function ScenarioCompare(props) {
-  const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes, setScenarioIndex} = props
-  const [ primaryScenarioIndex, setPrimaryScenarioIndex ] = useState(null)
-  const [ referenceScenarioIndex, setReferenceScenarioIndex ] = useState(null)
-  const [ kpiDataPrimary, setKpiDataPrimary ] = useState(null)
-  const [ kpiDataReference, setKpiDataReference ] = useState(null)
-  const [ capexBarChartData, setCapexBarChartData ] = useState(null)
-  const [ opexBarChartData, setOpexBarChartData ] = useState(null)
-  const [ totalCapex, setTotalCapex ] = useState([])
-  const [ totalOpex, setTotalOpex ] = useState([])
-  const [ showSidebar, setShowSidebar ] = useState(true)
-  const [ compareCategory, setCompareCategory ] = useState('output::dashboard')
-  const [ deltaDictionary, setDeltaDictionary ] = useState({})
-  const [ overrides, setOverrides ] = useState([{},{}])
+export default function ScenarioCompare(props: ScenarioCompareProps) {
+    const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes, setScenarioIndex} = props
+    const [ primaryScenarioIndex, setPrimaryScenarioIndex ] = useState<string | number | null>(null)
+    const [ referenceScenarioIndex, setReferenceScenarioIndex ] = useState<string | number | null>(null)
+    const [ kpiDataPrimary, setKpiDataPrimary ] = useState<Record<string, any> | null>(null)
+    const [ kpiDataReference, setKpiDataReference ] = useState<Record<string, any> | null>(null)
+    const [ capexBarChartData, setCapexBarChartData ] = useState<any[] | null>(null)
+    const [ opexBarChartData, setOpexBarChartData ] = useState<any[] | null>(null)
+    const [ totalCapex, setTotalCapex ] = useState<number[]>([])
+    const [ totalOpex, setTotalOpex ] = useState<number[]>([])
+    const [ showSidebar, setShowSidebar ] = useState<boolean>(true)
+    const [ compareCategory, setCompareCategory ] = useState<string>('output::dashboard')
+    const [ deltaDictionary, setDeltaDictionary ] = useState<Record<string, string[]>>({})
+    const [ overrides, setOverrides ] = useState<Array<Record<string, any>>>([{},{}])
 
   useEffect(() => {
     let temp_deltaDictionary = {}

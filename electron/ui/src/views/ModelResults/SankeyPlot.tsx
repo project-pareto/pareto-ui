@@ -1,18 +1,21 @@
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import {useEffect, useState, type ChangeEvent} from 'react';   
 import { Box, Grid, FormControl, MenuItem, Select } from '@mui/material'
 import Plot from 'react-plotly.js';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
+import type { SankeyPlotProps } from '../../types';
 
-export default function SankeyPlot(props) {
-    const [ sankeyCategory, setSankeyCategory ] = useState("v_F_Piped")
-    const [ filteredNodes, setFilteredNodes ] = useState([]) 
-    const [ totalNodes, setTotalNodes ] = useState([])
-    const [ filteredTimes, setFilteredTimes ] = useState([]) 
-    const [ totalTimes, setTotalTimes ] = useState([])
+export default function SankeyPlot(props: SankeyPlotProps) {
+    const [ sankeyCategory, setSankeyCategory ] = useState<string>("v_F_Piped")
+    const [ filteredNodes, setFilteredNodes ] = useState<string[]>([]) 
+    const [ totalNodes, setTotalNodes ] = useState<string[]>([])
+    const [ filteredTimes, setFilteredTimes ] = useState<string[]>([]) 
+    const [ totalTimes, setTotalTimes ] = useState<string[]>([])
     const isAllNodesSelected = totalNodes.length > 0 && filteredNodes.length === totalNodes.length;
     const isAllTimesSelected = totalTimes.length > 0 && filteredTimes.length === totalTimes.length;
-    const [ plotData, setPlotData ] = useState({link: {source: [], target:[], value: [], label: []}, node: {label: []}});
+    const [ plotData, setPlotData ] = useState<{link: {source: number[]; target: number[]; value: number[]; label: string[]}; node: {label: string[]}}>(
+        {link: {source: [], target:[], value: [], label: []}, node: {label: []}}
+    );
 
 
     useEffect(()=>{
@@ -21,7 +24,7 @@ export default function SankeyPlot(props) {
         
     }, [sankeyCategory, props.scenarioId]);
 
-    const handleCategoryChange = (event) => {
+    const handleCategoryChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
         setSankeyCategory(event.target.value)
     }
 
@@ -109,10 +112,10 @@ export default function SankeyPlot(props) {
         let totalTimes = Array.from(timeSet).sort()
         let tempFilteredTimes = unpackAllTimes ? timeSet : timeSet.has('T01') ? ["T01"] : Array.from(timeSet)
         console.log(`filtered times is ${tempFilteredTimes}`)
-        setTotalNodes(Array.from(totalNodes))
-        setTotalTimes(Array.from(totalTimes))
-        setFilteredNodes(Array.from(nodeSet))
-        setFilteredTimes(Array.from(tempFilteredTimes))
+        setTotalNodes(Array.from(totalNodes) as string[])
+        setTotalTimes(Array.from(totalTimes) as string[])
+        setFilteredNodes(Array.from(nodeSet) as string[])
+        setFilteredTimes(Array.from(tempFilteredTimes) as string[])
         
         unpackData(false, totalNodes, tempFilteredTimes)
           
