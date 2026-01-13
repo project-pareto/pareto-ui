@@ -25,7 +25,6 @@ export interface ScenarioNode {
 
 export interface ScenarioArcsEntry {
   name?: string;
-  node_list?: string[];
   nodes?: ScenarioNode[];
   node_type?: string;
   length?: number | string;
