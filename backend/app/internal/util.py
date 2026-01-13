@@ -86,8 +86,8 @@ def determineArcsAndConnections(data):
     ## for each arc endpoint, determine the nearest node
     for arc_key in arcs:
         arc = arcs[arc_key]
-        nodes = []
-        node_list = []
+        nodes = [] # node objects
+        node_list = [] # node names
         prev_node = None
         for arc_coordinates in arc["coordinates"]:
             
@@ -133,6 +133,6 @@ def determineArcsAndConnections(data):
             if prev_node is not None:
                 prev_node["outgoing_nodes"].append(closest_node)
             prev_node = new_node
-        arc['node_list'] = node_list
+        # arc['node_list'] = node_list
         arc['nodes'] = nodes
     return data
