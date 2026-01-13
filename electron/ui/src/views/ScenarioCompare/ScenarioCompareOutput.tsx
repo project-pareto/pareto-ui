@@ -12,24 +12,24 @@ import Plot from 'react-plotly.js';
 
 export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps) {
     const {
-                scenarios, 
-                primaryScenarioIndex, 
-                referenceScenarioIndex, 
-                kpiDataPrimary, 
-                kpiDataReference, 
-                capexBarChartData, 
-                opexBarChartData, 
-                showSidebar, 
-                compareCategory,
-                totalCapex,
-                totalOpex
-        } = props
+        scenarios, 
+        primaryScenarioIndex, 
+        referenceScenarioIndex, 
+        kpiDataPrimary, 
+        kpiDataReference, 
+        capexBarChartData, 
+        opexBarChartData, 
+        showSidebar, 
+        compareCategory,
+        totalCapex,
+        totalOpex
+    } = props
 
-        const [ hoverRow, setHoverRow] = useState<string>('')
-        const [ hoverTable, setHoverTable ] = useState<string>('')
-        const [ hoverValue, setHoverValue ] = useState<string | number>('')
-        const [ showBuildoutOverlappingRows, setShowBuildoutOverlappingRows ] = useState<boolean>(false)
-        const [ buildoutOverlappingRows, setBuildoutOverlappingRows ] = useState<string[]>([])
+    const [ hoverRow, setHoverRow] = useState<string>('')
+    const [ hoverTable, setHoverTable ] = useState<string>('')
+    const [ hoverValue, setHoverValue ] = useState<string | number>('')
+    const [ showBuildoutOverlappingRows, setShowBuildoutOverlappingRows ] = useState<boolean>(false)
+    const [ buildoutOverlappingRows, setBuildoutOverlappingRows ] = useState<string[]>([])
 
     useEffect(() => {
         let primaryScenario = scenarios[primaryScenarioIndex]
@@ -133,7 +133,7 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
     }
    }
 
-   const getStyle = (key) => {
+    const getStyle = (key: string): React.CSSProperties | object => {
     try {
         if (key === "totalCapex") {
             if (totalCapex[0] > totalCapex[1]) return {color:"green"}
@@ -159,7 +159,7 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
     
    }
 
-   const getValue = (key) => {
+    const getValue = (key: string): string | null => {
     try {
         if (key === "totalCapex") {
             let capexDiff = ""
@@ -188,41 +188,41 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
     
    }
 
-   const formatNumber = (value) => {
-    if (value === undefined) return value
-    else return value.toLocaleString('en-US', {maximumFractionDigits:2})
-  }
+     const formatNumber = (value?: number): string | number | undefined => {
+        if (value === undefined) return value
+        else return value.toLocaleString('en-US', {maximumFractionDigits:2})
+    }
 
-  const formatPercentage = (num, scale) => {
-    num *= 100
-    if (scale > 0) {
-        num = num * (10 ** scale)
-        num = Math.round(num)
-        num = num / (10 ** scale)
-        return num
-    }else return Math.round(num)
+    const formatPercentage = (num: number, scale: number): number => {
+        num *= 100
+        if (scale > 0) {
+                num = num * (10 ** scale)
+                num = Math.round(num)
+                num = num / (10 ** scale)
+                return num
+        }else return Math.round(num)
       
-  }
+    }
 
-  const handleHover = (target, table, value) => {
-    setHoverRow(target)
-    setHoverTable(table)
-    setHoverValue(value)
-  }
+    const handleHover = (target: string, table: string, value: string | number): void => {
+        setHoverRow(target)
+        setHoverTable(table)
+        setHoverValue(value)
+    }
 
-  const getHoverStyle = (target, table, value) => {
-    if (target === hoverRow) {
-        if (table === hoverTable) return styles.hover
-        else {
-            if (value === hoverValue) return styles.hoverSameValue
-            else return styles.hoverDifferentValue
+    const getHoverStyle = (target: string, table: string, value: string | number): React.CSSProperties | null => {
+        if (target === hoverRow) {
+                if (table === hoverTable) return styles.hover
+                else {
+                        if (value === hoverValue) return styles.hoverSameValue
+                        else return styles.hoverDifferentValue
             
-        }
-    } 
-    return null
-  }
+                }
+        } 
+        return null
+    }
 
-   const renderInfrastructureTable = () => {
+    const renderInfrastructureTable = (): JSX.Element => {
     let primaryScenario = scenarios[primaryScenarioIndex]
     let referenceScenario = scenarios[referenceScenarioIndex]
     return (
@@ -505,8 +505,8 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
                 <Box style={{backgroundColor:'white'}} sx={styles.comparisonTableBox}>
                     <ComparisonTable
                         scenarios={scenarios}
-                        scenarioIndex={primaryScenarioIndex}
-                        secondaryScenarioIndex={referenceScenarioIndex}
+                        scenarioIndex={Number(primaryScenarioIndex)}
+                        secondaryScenarioIndex={Number(referenceScenarioIndex)}
 
                     />
                 </Box>

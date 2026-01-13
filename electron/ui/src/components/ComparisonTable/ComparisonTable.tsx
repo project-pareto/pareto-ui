@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
 import { CategoryNames } from "../../assets/utils";
 import type { ComparisonTableProps } from '../../types';
 
 export default function ComparisonTable(props: ComparisonTableProps): JSX.Element {
     const { scenarios, scenarioIndex, secondaryScenarioIndex } = props;
-    const [ indices, setIndices ] = useState<number[]>([Number(scenarioIndex), Number(secondaryScenarioIndex)])
+    const primaryScenario = scenarios[scenarioIndex];
+    const referenceScenario = scenarios[secondaryScenarioIndex];
     const category = "v_F_Overview_dict"
     const styles: any ={
         firstCol: {
@@ -20,15 +21,9 @@ export default function ComparisonTable(props: ComparisonTableProps): JSX.Elemen
         }
       }
 
-
-    useEffect(() => {
-      setIndices([Number(scenarioIndex), Number(secondaryScenarioIndex)])
-    }, [scenarioIndex, secondaryScenarioIndex])
-
     const getValue = (index: number) => {
       try {
-        const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
-        const v = s[indices[1]]?.results?.data?.[category]?.[index+1]?.[3]
+        const v = referenceScenario?.results?.data?.[category]?.[index+1]?.[3]
         return v !== undefined && v !== null ? (v).toLocaleString('en-US', {maximumFractionDigits:0}) : ""
       }catch(e) {
         return ""
@@ -38,9 +33,8 @@ export default function ComparisonTable(props: ComparisonTableProps): JSX.Elemen
 
     const getPercentDifference = (index: number) => {
       try {
-        const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
-        let value1 = s[indices[0]]?.results?.data?.[category]?.[index+1]?.[3] || 0
-        let value2 = s[indices[1]]?.results?.data?.[category]?.[index+1]?.[3] || 0
+        let value1 = primaryScenario?.results?.data?.[category]?.[index+1]?.[3] || 0
+        let value2 = referenceScenario?.results?.data?.[category]?.[index+1]?.[3] || 0
 
         let result = ((value1 - value2) / (value2 || 1)) * 100
         if (isNaN(result)) return 0
@@ -53,9 +47,8 @@ export default function ComparisonTable(props: ComparisonTableProps): JSX.Elemen
     
     const getDifferenceStyling = (index: number) => {
       try {
-        const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
-        let value1 = s[indices[0]]?.results?.data?.[category]?.[index+1]?.[3] || 0
-        let value2 = s[indices[1]]?.results?.data?.[category]?.[index+1]?.[3] || 0
+        let value1 = primaryScenario?.results?.data?.[category]?.[index+1]?.[3] || 0
+        let value2 = referenceScenario?.results?.data?.[category]?.[index+1]?.[3] || 0
         let style: any = {}
         if (value1 > value2) style.color = "green"
         else if (value2 > value1) style.color = "red"
@@ -67,7 +60,6 @@ export default function ComparisonTable(props: ComparisonTableProps): JSX.Elemen
 
     const renderOutputTable = () => {
         try {
-            const s = Array.isArray(scenarios) ? scenarios : Object.values(scenarios)
             return (
               <TableContainer>
               <h3>Results Comparison</h3>
@@ -77,13 +69,13 @@ export default function ComparisonTable(props: ComparisonTableProps): JSX.Elemen
                 <TableRow key={`headrow`}>
                     <TableCell style={{backgroundColor:"#6094bc", color:"white", width:"20%"}}>KPI</TableCell> 
                     <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}}>Units</TableCell> 
-                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{s[indices[0]]?.name}</TableCell> 
-                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{s[indices[1]]?.name}</TableCell>
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{primaryScenario?.name}</TableCell> 
+                    <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>{referenceScenario?.name}</TableCell>
                     <TableCell style={{backgroundColor:"#6094bc", color:"white",  width:"20%"}} align='right'>Percent Difference</TableCell> 
                 </TableRow>
                 </TableHead>
                 <TableBody>
-                {(s[indices[0]]?.results?.data?.[category] || []).slice(1).map((value: any, index: number) => {
+                {(primaryScenario?.results?.data?.[category] || []).slice(1).map((value: any, index: number) => {
                   return (<TableRow key={`row_${index}`}>
                   {value.map((cellValue: any, i: number)=> {
                     return (i !== 1 &&
