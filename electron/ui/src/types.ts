@@ -111,6 +111,12 @@ export interface AppContextValue {
   port: number;
 }
 
+export interface AppState {
+  section: number;
+  category: Record<number, string | null>;
+  [key: string]: any;
+}
+
 // Map / Editor related types
 export type CoordinateTuple = [number | string, number | string];
 

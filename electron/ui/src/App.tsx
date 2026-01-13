@@ -1,7 +1,8 @@
  
 import './App.css';
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import {useEffect, useState} from 'react';  
+import type { Scenario, ScenarioMap, AppState } from './types';
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -18,20 +19,20 @@ import { useApp } from './AppContext';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 
-function App() {
-  const [ scenarioData, setScenarioData ] = useState(null);
-  const [ scenarios, setScenarios ] = useState({}); 
-  const [ appState, setAppState ] = useState(null)
-  const [ section, setSection ] = useState(0)
-  const [ category, setCategory ] = useState(null)
-  const [ scenarioIndex, setScenarioIndex ] = useState(null)
-  const [ backgroundTasks, setBackgroundTasks ] = useState([])
-  const [ showHeader, setShowHeader ] = useState(false)
-  const [ loadLandingPage, setLoadLandingPage ] = useState(1)
-  const [ checkModelResults, setCheckModelResults ] = useState(0)
-  const [ showCompletedOptimization, setShowCompletedOptimization ] = useState(false)
-  const [ lastCompletedScenario, setLastCompletedScenario ] = useState(null)
-  const [ compareScenarioIndexes, setCompareScenarioIndexes ] = useState([])
+function App(): React.ReactElement {
+  const [ scenarioData, setScenarioData ] = useState<Scenario | null>(null);
+  const [ scenarios, setScenarios ] = useState<ScenarioMap>({}); 
+  const [ appState, setAppState ] = useState<AppState | null>(null)
+  const [ section, setSection ] = useState<number>(0)
+  const [ category, setCategory ] = useState<string | null>(null)
+  const [ scenarioIndex, setScenarioIndex ] = useState<string | number | null>(null)
+  const [ backgroundTasks, setBackgroundTasks ] = useState<Array<string | number>>([])
+  const [ showHeader, setShowHeader ] = useState<boolean>(false)
+  const [ loadLandingPage, setLoadLandingPage ] = useState<number>(1)
+  const [ checkModelResults, setCheckModelResults ] = useState<number>(0)
+  const [ showCompletedOptimization, setShowCompletedOptimization ] = useState<boolean>(false)
+  const [ lastCompletedScenario, setLastCompletedScenario ] = useState<string | number | null>(null)
+  const [ compareScenarioIndexes, setCompareScenarioIndexes ] = useState<Array<string | number>>([])
   const INITIAL_STATES = ['Draft','Incomplete']
   const RUNNING_STATES = ['Initializing', 'Solving Model','Generating Output']
   const STABLE_STATES = ['Draft','none', 'Optimized','failure', 'Not Optimized', 'complete', 'Infeasible']
@@ -39,7 +40,6 @@ function App() {
   const TIME_BETWEEN_CALLS = 20000
   let navigate = useNavigate();
   const { port } = useApp()
-  console.log(scenarios)
 
   const theme = createTheme({
     palette: {
@@ -175,7 +175,7 @@ useEffect(()=> {
  }
 }, [checkModelResults])
 
-  const handleCompletedOptimization = (newScenarios, id) => {
+  const handleCompletedOptimization = (newScenarios: ScenarioMap, id: string | number): void => {
     setCheckModelResults(0)
     setScenarios(newScenarios)
     checkTasks(port)
@@ -197,7 +197,7 @@ useEffect(()=> {
    }
   }
 
-  const goToModelResults = () => {
+  const goToModelResults = (): void => {
     handleSetSection(2)
     // handleSetCategory("Dashboard")
     setShowCompletedOptimization(false)
@@ -205,12 +205,12 @@ useEffect(()=> {
     setScenarioIndex(lastCompletedScenario)
   }
 
-  const handleCloseFinishedOptimizationDialog = () => {
+  const handleCloseFinishedOptimizationDialog = (): void => {
     // console.log('inside handleCloseFinishedOptimizationDialog')
     setShowCompletedOptimization(false)
   }
 
-  const navigateToScenarioList = () => {
+  const navigateToScenarioList = (): void => {
     /*
       function for returning to scenario list and resetting scenario data
     */   
@@ -227,7 +227,7 @@ useEffect(()=> {
     navigate('/scenarios', {replace: true})
   }
 
-  const handleScenarioSelection = (scenario) => {
+  const handleScenarioSelection = (scenario: string | number): void => {
     navigate('/scenario', {replace: true})
     setScenarioData(scenarios[scenario]);
     setScenarioIndex(scenario)
@@ -235,7 +235,7 @@ useEffect(()=> {
 
   };
 
-  const handleNewScenario = (data) => {
+  const handleNewScenario = (data: Scenario): void => {
     const temp = {...scenarios}
     temp[data.id] = data
     setShowHeader(true)
@@ -246,7 +246,7 @@ useEffect(()=> {
     navigate('/scenario', {replace: true})   
   }
 
-  const handleScenarioUpdate = (updatedScenario, keepOptimized, propagateChanges) => {
+  const handleScenarioUpdate = (updatedScenario: any, keepOptimized?: boolean, propagateChanges?: boolean): void => {
     if (updatedScenario.results.status==='Optimized' && !keepOptimized) {
       updatedScenario.results.status = "Not Optimized"
     }
@@ -270,18 +270,18 @@ useEffect(()=> {
   /*
     set process section (input, optimization, results)
   */
-  const handleSetSection = (section) => {
+  const handleSetSection = (section: number): void => {
     updateAppState({action:'section',section:section},scenarioIndex)
  }
 
  /*
   set sidebar category
  */
- const handleSetCategory = (category) => {
+ const handleSetCategory = (category: string): void => {
   updateAppState({action:'category',category:category},scenarioIndex)
  }
 
-  const handleEditScenarioName = (newName, id, updateScenarioData) => {
+  const handleEditScenarioName = (newName: string, id: string | number, updateScenarioData?: boolean): void => {
     const tempScenarios = {...scenarios}
     const tempScenario = tempScenarios[id]
     tempScenario.name = newName
@@ -300,7 +300,7 @@ useEffect(()=> {
     })
   }
 
-  const handleDeleteScenario = (index) => {
+  const handleDeleteScenario = (index: string | number): void => {
     // console.log('deleting scenario: ',index)
     deleteScenario(port, {'id': index})
     .then(response => response.json())
@@ -316,7 +316,7 @@ useEffect(()=> {
   /*
     function for updating an input table for excel sheet
   */
-  const handleUpdateExcel = (id, tableKey, updatedTable) => {
+  const handleUpdateExcel = (id: string | number, tableKey: string, updatedTable: any): void => {
     updateExcel(port, {"id": id, "tableKey":tableKey, "updatedTable":updatedTable})
     .then(response => response.json())
     .then((data)=>{
@@ -335,7 +335,7 @@ useEffect(()=> {
   /*
     fetch scenarios and update frontend data
   */
-  const syncScenarioData = () => {
+  const syncScenarioData = (): void => {
     fetchScenarios(port)
       .then(response => response.json())
       .then((data)=>{
@@ -347,7 +347,7 @@ useEffect(()=> {
   /*
     add scenario id to background tasks while it's optimizing
   */
-  const addTask = (id) => {
+  const addTask = (id: string | number): void => {
     let tempBackgroudTasks = [...backgroundTasks]
     tempBackgroudTasks.push(id)
     // console.log('adding task!!!')
@@ -358,10 +358,10 @@ useEffect(()=> {
   /*
     update the section or category and cache the values
   */
-  const updateAppState = (action, index) => {
+  const updateAppState = (action: any, index?: string | number): void => {
     if (action.action === 'select') {
-      let tempSection
-      let tempCategory
+      let tempSection: number;
+      let tempCategory: Record<number, string | null>;
       const status = scenarios[index].results.status;
       if (appState) {
         if (INITIAL_STATES.includes(status) && appState.section === 2) {
@@ -408,7 +408,7 @@ useEffect(()=> {
   /*
     create a copy of current scenario and run an optimization
   */
-  const copyAndRunOptimization = (newScenarioName) => {
+  const copyAndRunOptimization = (newScenarioName: string): void => {
     //copy scenario
     copyScenario(port, scenarioIndex, newScenarioName)
     .then(response => response.json())

@@ -136,13 +136,12 @@ export default function Sidebar(props: ScenarioCompareSidebarProps) {
     }
   }
 
-  const handleClick = (key) => {
-    console.log(`clicked on ${key}`)
+  const handleClick = (key: string) => {
     setCategory(key)
 
   }
 
-  const handleCheckForDifference = (key) => {
+  const handleCheckForDifference = (key: string) => {
       if(category === key) return styles.selected
       else if (deltaCategories.includes(key)) return styles.inputDifference
       else return styles.unselected
