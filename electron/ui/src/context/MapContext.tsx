@@ -58,8 +58,8 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
 
     const handleMapClick = (coords: CoordinateTuple): void => {
         if (creatingNewNode) {
+            // If we are creating a new node, use the location on the map that is clicked to set the coordinates.
             const nodeCoordinates = reverseMapCoordinates(coords) as CoordinateTuple;
-            // update selected node's coordinates
             if (showNetworkNode) { // if type node
                 const newSelectedNode: SelectedNodeState = {
                     ...(selectedNode as SelectedNodeState),
@@ -78,7 +78,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         }
     }
 
-    const handleUpdateConnection = (newConnectingNode: MapEditorNode): void => {
+    const addPipelineConnection = (newConnectingNode: MapEditorNode): void => {
         setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
             const prev = { ...data.node } as MapEditorNode;
@@ -99,7 +99,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         // TODO: if currentlyCreatingPipeline, instead of selecting node, add it to pipeline
         // console.log(node)
         if (selectedNode?.node?.node_type === "path") {
-            handleUpdateConnection(node)
+            addPipelineConnection(node)
         } else {
 
             setCreatingNewNode(false);

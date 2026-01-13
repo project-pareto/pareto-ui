@@ -129,6 +129,9 @@ export default function MapEditor() {
     };
 
     const handleUpdateConnection = (name: string, idx?: number | ""): void => {
+        // Update pipeline connection
+        // If no name is provided, this is a new connecting node being added
+        // If idx is provided, we are updating a connection that is already present (prevNodes is the pipelines connecting nodes).
         const connectionNode = availableNodes.find((node) => node.name === name);
         setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
