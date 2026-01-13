@@ -414,8 +414,6 @@ useEffect(()=> {
     .then(response => response.json())
     .then((copy_data) => {
       // update data
-      // console.log('setting scenarios with ')
-      // console.log(copy_data.scenarios)
       setScenarios(copy_data.scenarios)
       setScenarioIndex(copy_data.new_id)
       setScenarioData(copy_data.scenarios[copy_data.new_id])

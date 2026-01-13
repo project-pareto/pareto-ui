@@ -122,7 +122,8 @@ export type CoordinateTuple = [number | string, number | string];
 
 export type MapEditorNode = {
   name?: string;
-  nodeType?: string;
+  node_type?: string; // node or path
+  nodeType?: string; // type of node (NetworkNode, CompletionPad ...)
   coordinates?: CoordinateTuple;
   nodes?: Array<{
     name: string;

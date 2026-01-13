@@ -33,6 +33,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
                 "name": generateNewName(nodeData, "Node"),
                 "nodeType": networkMapData?.defaultNode || "NetworkNode",
                 "coordinates": [0, 0] as CoordinateTuple,
+                node_type: "node",
             },
             idx: nodeData?.length,
         }
@@ -45,7 +46,8 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         const newPipeline: SelectedNodeState = {
             node: {
                 name: generateNewName(lineData, "Pipeline"),
-                nodes: []
+                nodes: [],
+                node_type: "path"
             },
             idx: lineData?.length,
         }
@@ -76,13 +78,35 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         }
     }
 
+    const handleUpdateConnection = (newConnectingNode: MapEditorNode): void => {
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prev = { ...data.node } as MapEditorNode;
+            const prevNodes = prev.nodes || [];
+            const updatedNodeList = [...prevNodes, { name: newConnectingNode.name, incoming: true, outgoing: true, coordinates: newConnectingNode.coordinates }]
+            const node = {
+                ...prev,
+                nodes: updatedNodeList,
+            } as MapEditorNode;
+            return {
+                ...data,
+                node,
+            } as SelectedNodeState;
+        });
+    };
+
     const clickNode = (node: MapEditorNode, idx: number): void => {
         // TODO: if currentlyCreatingPipeline, instead of selecting node, add it to pipeline
         // console.log(node)
-        setCreatingNewNode(false);
-        setSelectedNode({node, idx});
-        setShowNetworkNode(true);
-        setShowNetworkPipeline(false);
+        if (selectedNode?.node?.node_type === "path") {
+            handleUpdateConnection(node)
+        } else {
+
+            setCreatingNewNode(false);
+            setSelectedNode({node, idx});
+            setShowNetworkNode(true);
+            setShowNetworkPipeline(false);
+        }
     }
 
     const clickPipeline = (node: MapEditorNode, idx: number): void => {

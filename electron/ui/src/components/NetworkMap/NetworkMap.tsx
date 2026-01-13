@@ -49,6 +49,7 @@ export default function NetworkMap(props: NetworkMapProps) {
         selectedNode,
         setNetworkMapData,
     } = useMapValues();
+    const isPathSelected = selectedNode?.node?.node_type === "path";
     const [ googleMapType, setGoogleMapType ] = useState<string>('y')
     const [ mapCenter, setMapCenter ] = useState<[number, number]>([38, -98])
     const [ mapZoom, setMapZoom ] = useState<number>(5)
@@ -213,7 +214,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                                 {...({ icon: NetworkNodeTypes[value.nodeType]?.icon } as any)}
                                 // icon={icons[0]}
                                 eventHandlers={{
-                                    click: (e) => {
+                                    click: (e: any) => {
                                         e.originalEvent.stopPropagation();
                                         handleClickNode(value, index);
                                     }
@@ -225,7 +226,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                                     }
                                 }}
                             >
-                                <Tooltip>{value.name}</Tooltip>
+                                <Tooltip>{isPathSelected ? `Add ${value.name} as connection` : value.name}</Tooltip>
                             </Marker>
                         )
                     })}
