@@ -13,7 +13,6 @@ export interface ScenarioParameters {
 
 export interface ScenarioNode {
   name?: string;
-  Name?: string;
   nodeType?: string;
   node_type?: string;
   coordinates?: [number, number] | [string, string];
