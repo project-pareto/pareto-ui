@@ -1,27 +1,18 @@
 import './Header.css';
 import React from 'react';
 import {useEffect, useState} from 'react';   
+import { useLocation } from 'react-router-dom';
 import logo from "../../images/pareto-logo.png";
 import { Button, MenuItem, FormControl, Select } from '@mui/material'
 import type { HeaderProps } from '../../types';
  
 export default function Header(props: HeaderProps): JSX.Element {  
   const {showHeader, scenarios, index, handleSelection, navigateHome } = props
-  const [ location, setLocation ] = useState<string>("")
+  const location = useLocation();
 
     const handleScenarioSelection = (event: any) => {
       handleSelection(event?.target?.value)
     }
-
-    useEffect(() => {
-      try {
-        const tempLocationSplit = window.location.href.split('/')
-        const tempLocation = tempLocationSplit[tempLocationSplit.length-1]
-        setLocation(tempLocation)
-      } catch (e) {
-        setLocation('')
-      }
-    }, [])
 
     return (
       <>
@@ -34,7 +25,7 @@ export default function Header(props: HeaderProps): JSX.Element {
               <img src={logo} alt="PARETO Logo"/>
             </div>
           </div>
-        {location === "scenario" &&
+        {location.pathname === "/scenario" &&
           <>
             <p style={{color:'#565656', fontSize: '20px', marginLeft:'75px'}}>Scenario</p>
             <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
@@ -52,7 +43,7 @@ export default function Header(props: HeaderProps): JSX.Element {
             <Button id='user-name' sx={{color: "#0b89b9"}} onClick={() => navigateHome?.()}>View Scenario List</Button>
           </>
         }
-        {location === "compare" && index !== null && index !== undefined &&
+        {location.pathname.includes("compare") && index !== null && index !== undefined &&
         <>
           <div style={{fontSize:"20px", marginLeft:"20px", color:'#0b89b9', fontWeight: "bold"}}>
             Home / {(scenarios as any)[String(index)]?.name} / Compare Scenarios

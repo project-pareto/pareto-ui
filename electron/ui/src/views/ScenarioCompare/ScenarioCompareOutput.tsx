@@ -10,10 +10,6 @@ import WaterIcon from '@mui/icons-material/Water';
 import ComparisonTable from '../../components/ComparisonTable/ComparisonTable';
 import Plot from 'react-plotly.js';
 
-
-
-
-
 export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps) {
     const {
                 scenarios, 
@@ -198,7 +194,6 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
   }
 
   const formatPercentage = (num, scale) => {
-    console.log("formatting: "+num)
     num *= 100
     if (scale > 0) {
         num = num * (10 ** scale)
