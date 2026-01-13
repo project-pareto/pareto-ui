@@ -30,10 +30,10 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
     const [ hoverValue, setHoverValue ] = useState<string | number>('')
     const [ showBuildoutOverlappingRows, setShowBuildoutOverlappingRows ] = useState<boolean>(false)
     const [ buildoutOverlappingRows, setBuildoutOverlappingRows ] = useState<string[]>([])
+    const primaryScenario = scenarios[primaryScenarioIndex];
+    const referenceScenario = scenarios[referenceScenarioIndex];
 
     useEffect(() => {
-        let primaryScenario = scenarios[primaryScenarioIndex]
-        let referenceScenario = scenarios[referenceScenarioIndex]
         if (primaryScenario && referenceScenario) {
             let primaryScenarioKeys = []
             for (let value of primaryScenario.results.data.vb_y_overview_dict.slice(1)){
@@ -174,7 +174,7 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
         }
         else {
             let diff = kpiDataPrimary[key].value - kpiDataReference[key].value
-            let returnGuy
+            let returnGuy: any;
             // if (key === "e_CompletionsReusedFrac") returnGuy = Math.round(diff)
             if (key === "e_CompletionsReusedFrac") returnGuy = formatPercentage(diff, 0)
             else returnGuy = diff.toLocaleString('en-US', {maximumFractionDigits:0})
@@ -223,8 +223,6 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
     }
 
     const renderInfrastructureTable = (): JSX.Element => {
-    let primaryScenario = scenarios[primaryScenarioIndex]
-    let referenceScenario = scenarios[referenceScenarioIndex]
     return (
         <TableContainer>
             <Grid container>
@@ -363,12 +361,12 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <Typography noWrap style={styles.kpiValue}>{scenarios[primaryScenarioIndex].name}</Typography>
+                        <Typography noWrap style={styles.kpiValue}>{primaryScenario?.name}</Typography>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <Typography noWrap style={styles.kpiReferenceValue}>vs {scenarios[referenceScenarioIndex].name}</Typography>
+                        <Typography noWrap style={styles.kpiReferenceValue}>vs {referenceScenario?.name}</Typography>
                     </Box>
                 </Grid>
                 </Grid>
