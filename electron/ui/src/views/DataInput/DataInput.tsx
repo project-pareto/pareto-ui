@@ -66,7 +66,7 @@ export default function DataInput(props: DataInputProps) {
           if (!grabbedRowList) {
             let tempRowList = scenario.data_input.df_parameters[category][colKey]
             for (let rowKey of tempRowList) {
-              if(Object.keys(tempRowFilterSet).includes(rowKey)) tempRowFilterSet[rowKey].amt = tempRowFilterSet[rowKey].amt + 1
+              if(Object.keys(tempRowFilterSet).includes(`${rowKey}`)) tempRowFilterSet[rowKey].amt = tempRowFilterSet[rowKey].amt + 1
               else tempRowFilterSet[rowKey] = {amt: 1, checked: true}
             }
             grabbedRowList = true

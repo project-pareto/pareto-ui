@@ -1,61 +1,167 @@
-export interface ScenarioSets {
-  [setName: string]: string[];
+/**
+ * Notes:
+ * - Many `df_parameters` / `df_parameters` tables are “dataframe-like” objects where:
+ *   - one or more keys are dimension columns (arrays of strings)
+ *   - the other keys are row labels mapping to arrays of numbers/strings/"" values
+ * - Several tables can be `{}` (empty) (e.g., RKA, RKT).
+ * - Some numeric-looking values are provided as strings (e.g., longitude/latitude in map_data nodes).
+ */
+
+/** Common scalar types seen in tables */
+export type Scalar = string | number | boolean | null;
+
+/** Common cell value in your “table arrays” (often numbers or "" placeholders) */
+export type Cell = string | number | null;
+
+/** A column in a dataframe-like object */
+export type Column<T = Cell> = T[];
+
+/** Generic dataframe-like object: keys map to columns (arrays) */
+export type DataFrameLike = Record<string, Column<any>>;
+
+/**
+ * `df_sets` is a dictionary of set-name -> list of set members.
+ * Example: ProductionPads: ["PP01", "PP02", ...]
+ */
+export type DfSets = Record<string, string[]>;
+
+/**
+ * Many `df_parameters` entries look like:
+ * {
+ *   "ProductionPads": ["PP01", ...],
+ *   "N01": [1, "", "", ""],
+ *   ...
+ * }
+ * i.e. dimension columns (string arrays) + row vectors of Cell[].
+ *
+ * Some parameter tables can be empty objects {}.
+ */
+export type ParameterTable =
+  | Record<string, string[] | Cell[]> // common case
+  | Record<string, never>; // empty object
+
+export type DfParameters = Record<string, ParameterTable>;
+
+/** display_units is a map from variable/table name -> unit string */
+export type DisplayUnits = Record<string, string>;
+
+/** Map units object */
+export interface MapUnits {
+  volume: string;
+  distance: string;
+  diameter: string;
+  concentration: string;
+  currency: string;
+  time: string;
+  pressure: string;
+  elevation: string;
+  decision_period: string;
+  mass: string;
+
+  [k: string]: string;
 }
 
-export interface ScenarioParametersTable {
-  // Extremely wide schema; keep flexible
-  [key: string]: any;
+/** A node inside map_data.all_nodes */
+export interface MapNode {
+  longitude: string;
+  latitude: string;
+  altitude: string;
+
+  heading?: string;
+  tilt?: string;
+  range?: string;
+
+  /** KML-ish fields */
+  "gx:altitudeMode"?: string;
+  LookAt?: string;
+  styleUrl?: string;
+  "gx:drawOrder"?: string;
+
+  /** coordinates are string triplets */
+  coordinates?: [string, string, string] | string[];
+  Point?: string;
+
+  /** domain field */
+  node_type: string;
+
+  /** allow extra KML / app-specific properties */
+  [k: string]: any;
 }
 
-export interface ScenarioParameters {
-  [tableName: string]: ScenarioParametersTable;
-}
+/** A node reference inside an Arc definition */
+export interface ArcNodeRef {
+  name: string;
+  incoming: boolean;
+  outgoing: boolean;
 
-export interface ScenarioNode {
-  name?: string;
-  nodeType?: string;
-  node_type?: string;
-  coordinates?: [number, number] | [string, string];
-  incoming?: boolean;
-  outgoing?: boolean;
+  /** sometimes string triplets, sometimes number pairs TODO: convert strings in python */
+  coordinates: [string, string, string] | [number, number] | any[];
+
   incoming_nodes?: string[];
   outgoing_nodes?: string[];
+
+  [k: string]: any;
 }
 
-export interface ScenarioArcsEntry {
-  name?: string;
-  nodes?: ScenarioNode[];
-  node_type?: string;
-  length?: number | string;
+/** An arc/path object in map_data.arcs */
+export interface MapArc {
+  name: string;
+  node_type: "path" | string;
+
+  styleUrl?: string;
+  tessellate?: string;
+
+  /** list of coordinate triplets (mostly strings in your JSON) */
+  coordinates?: Array<[string, string, string] | any[]>;
+
+  LineString?: string;
+  nodes: ArcNodeRef[];
+
+  [k: string]: any;
 }
 
-export interface ScenarioMapData {
-  ProductionPads?: Record<string, ScenarioNode>;
-  CompletionsPads?: Record<string, ScenarioNode>;
-  SWDSites?: Record<string, ScenarioNode>;
-  StorageSites?: Record<string, ScenarioNode>;
-  TreatmentSites?: Record<string, ScenarioNode>;
-  NetworkNodes?: Record<string, ScenarioNode>;
-  FreshwaterSources?: Record<string, ScenarioNode>;
-  ReuseOptions?: Record<string, ScenarioNode | any>;
-  all_nodes?: Record<string, ScenarioNode>;
-  connections?: any;
-  arcs?: Record<string, ScenarioArcsEntry>;
-  polygons?: Record<string, any>;
-  other_nodes?: Record<string, any>;
-  defaultNode?: string;
-  [key: string]: any;
+/** Connections map: node -> list of connected node names */
+export type ConnectionsMap = Record<string, string[]>;
+
+export interface MapConnections {
+  all_connections: ConnectionsMap;
+
+  [k: string]: any;
+}
+
+export interface MapData {
+  all_nodes: Record<string, MapNode>;
+
+  ProductionPads: Record<string, any>;
+  CompletionsPads: Record<string, any>;
+  NetworkNodes: Record<string, any>;
+  SWDSites: Record<string, any>;
+  TreatmentSites: Record<string, any>;
+  StorageSites: Record<string, any>;
+  FreshwaterSources: Record<string, any>;
+  ReuseOptions: Record<string, any>;
+  other_nodes: Record<string, any>;
+
+  connections: MapConnections;
+  arcs: Record<string, MapArc>;
+
+  units: MapUnits;
+  defaultNode: string;
+
+  [k: string]: any;
 }
 
 export interface ScenarioDataInput {
-  df_sets: ScenarioSets;
-  df_parameters: ScenarioParameters;
-  display_units: Record<string, string>;
-  map_data: ScenarioMapData;
+  df_sets: DfSets;
+  df_parameters: DfParameters;
+  display_units: DisplayUnits;
+  map_data: MapData;
+
+  [k: string]: any;
 }
 
 export interface ScenarioOptimization {
-  objective: string;
+  objective: string; // e.g. "cost"
   runtime: number;
   pipeline_cost: string;
   waterQuality: string | boolean;
@@ -64,44 +170,77 @@ export interface ScenarioOptimization {
   build_units: string;
   optimalityGap: number;
   scale_model: boolean;
-  [key: string]: any;
+
+  [k: string]: any;
+}
+
+/**
+ * Results tables are arrays-of-arrays:
+ * - first row is often headers
+ * - rows mix strings/numbers/null
+ */
+export type ResultsTable = Array<Array<Scalar>>;
+
+/** Results.data is a map: tableName -> ResultsTable */
+export interface ScenarioResultsData {
+  [tableName: string]: ResultsTable;
 }
 
 export interface ScenarioResults {
-  status: string;
-  data: Record<string, any>;
-  terminationCondition?: string;
-  [key: string]: any;
+  data: ScenarioResultsData;
+
+  [k: string]: any;
 }
 
-export interface ScenarioOverrideCategory {
-  [index: string]: any;
+export interface OverrideEntry {
+  /** Which underlying model variable/table this entry targets */
+  variable: string;
+
+  /** Convenience flag some payloads include */
+  isZero: boolean;
+  indexes: string[];
+
+  /** The actual override value (often 0/1 for binaries, but could be numeric) */
+  value: number;
+
+  number_value?: number;
 }
 
-export interface ScenarioOverrideValues {
-  vb_y_overview_dict?: ScenarioOverrideCategory;
-  v_F_Piped_dict?: ScenarioOverrideCategory;
-  v_F_Sourced_dict?: ScenarioOverrideCategory;
-  v_F_Trucked_dict?: ScenarioOverrideCategory;
-  v_L_Storage_dict?: ScenarioOverrideCategory;
-  v_L_PadStorage_dict?: ScenarioOverrideCategory;
-  vb_y_Pipeline_dict?: ScenarioOverrideCategory;
-  vb_y_Disposal_dict?: ScenarioOverrideCategory;
-  vb_y_Storage_dict?: ScenarioOverrideCategory;
-  vb_y_Treatment_dict?: ScenarioOverrideCategory;
-  [key: string]: ScenarioOverrideCategory | undefined;
+/** Map from override-id (like "Pipeline Construction:PP04:N09:--") to entry */
+export type OverrideTable = Record<string, OverrideEntry>;
+
+
+export interface ScenarioOverrides {
+  vb_y_overview_dict: OverrideTable;
+  v_F_Piped_dict: OverrideTable;
+  v_F_Sourced_dict: OverrideTable;
+  v_F_Trucked_dict: OverrideTable;
+  v_L_Storage_dict: OverrideTable;
+  v_L_PadStorage_dict: OverrideTable;
+  vb_y_Pipeline_dict: OverrideTable;
+  vb_y_Disposal_dict: OverrideTable;
+  vb_y_Storage_dict: OverrideTable;
+  vb_y_Treatment_dict: OverrideTable;
 }
+
 
 export interface Scenario {
-  id: string | number;
   name: string;
+  id: number;
+
+  /** e.g. "01/13/2026" */
   date: string;
+
   data_input: ScenarioDataInput;
   optimization: ScenarioOptimization;
   results: ScenarioResults;
-  override_values: ScenarioOverrideValues;
-  [key: string]: any;
+  
+  override_values: ScenarioOverrides;
+  optimized_override_values: ScenarioOverrides;
+
+  [k: string]: any;
 }
+
 
 export type ScenarioMap = Record<string, Scenario>;
 
@@ -505,11 +644,11 @@ export interface NetworkMapProps {
 
 export interface InputSummaryProps {
   scenario: Scenario;
-  initialDisposalCapacity: Record<string, number[]>;
-  initialTreatmentCapacity: Record<string, number[]>;
-  completionsDemand: Record<string, number[]>;
-  padRates: Record<string, number[]>;
-  flowbackRates: Record<string, number[]>;
+  initialDisposalCapacity: ParameterTable;
+  initialTreatmentCapacity: ParameterTable;
+  completionsDemand: ParameterTable;
+  padRates: ParameterTable;
+  flowbackRates: ParameterTable;
   updateScenario: (updatedScenario: any) => void;
   handleSetCategory: (category: string) => void;
   [key: string]: any;

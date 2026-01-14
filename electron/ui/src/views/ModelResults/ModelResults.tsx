@@ -87,10 +87,10 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
           tempColumnNodes[columnNode] = true
 
           let colKey = scenario.results.data[props.category][0][ind]
-          if (Object.keys(newColFilterSet).includes(colKey)) {
-            newColFilterSet[colKey].amt = newColFilterSet[colKey].amt + 1
+          if (Object.keys(newColFilterSet).includes(`${colKey}`)) {
+            newColFilterSet[`${colKey}`].amt = newColFilterSet[`${colKey}`].amt + 1
           } else {
-            newColFilterSet[colKey] = {checked: true, amt: 1}
+            newColFilterSet[`${colKey}`] = {checked: true, amt: 1}
           }
         }
         let i = 0
@@ -101,10 +101,10 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
           i+=1
 
           let rowKey = each[0]
-          if (Object.keys(newRowFilterSet).includes(rowKey)) {
-            newRowFilterSet[rowKey].amt = newRowFilterSet[rowKey].amt + 1
+          if (Object.keys(newRowFilterSet).includes(`${rowKey}`)) {
+            newRowFilterSet[`${rowKey}`].amt = newRowFilterSet[`${rowKey}`].amt + 1
           } else {
-            newRowFilterSet[rowKey] = {checked: true, amt: 1}
+            newRowFilterSet[`${rowKey}`] = {checked: true, amt: 1}
           }
         }
         setColumnNodes(tempColumnNodes)

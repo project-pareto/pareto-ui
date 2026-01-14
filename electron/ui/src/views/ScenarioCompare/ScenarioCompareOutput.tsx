@@ -1,6 +1,6 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
-import type { ScenarioCompareOutputProps } from '../../types';
+import type { Scalar, ScenarioCompareOutputProps } from '../../types';
 import {  } from "react-router-dom";
 import { Box, Grid, IconButton, Typography, FormControlLabel, Switch, FormGroup } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer,  } from '@mui/material';
@@ -188,7 +188,7 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
     
    }
 
-     const formatNumber = (value?: number): string | number | undefined => {
+     const formatNumber = (value?: Scalar): Scalar => {
         if (value === undefined) return value
         else return value.toLocaleString('en-US', {maximumFractionDigits:2})
     }
@@ -268,8 +268,8 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
                                 
                                 <TableRow    
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
-                                    style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', value[3])}
-                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', value[3])}
+                                    style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', `${value[3]}`)}
+                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'primary', `${value[3]}`)}
                                 >
                                     {[0,1,2,5,3,4].map((cellIdx, i) => (
                                         <TableCell key={`${cellIdx}_${i}`} style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>
@@ -310,8 +310,8 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
                                 &&
                                 <TableRow 
                                     key={`${value[0]}:${value[1]}:${value[2]}:${value[5]}`}
-                                    style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', value[3])}
-                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', value[3])}
+                                    style={getHoverStyle(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', `${value[3]}`)}
+                                    onMouseEnter={() => handleHover(`${value[0]}:${value[1]}:${value[2]}:${value[5]}`, 'reference', `${value[3]}`)}
                                 >
                                     {[0,1,2,5,3,4].map((cellIdx, i) => (
                                         <TableCell key={`${cellIdx}_${i}`} style={styles.other} align={cellIdx === 3 ? 'right' : 'left'}>

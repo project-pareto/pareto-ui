@@ -149,7 +149,7 @@ export default function ScenarioCompare(props: ScenarioCompareProps) {
         let description = item[1]
         let unit = item[2]
         let value = item[3]
-        tempData[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[0]].name}
+        tempData[`${key}`] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[0]].name}
     }
     setKpiDataPrimary(tempData)
     let tempData2 = {}
@@ -159,7 +159,7 @@ export default function ScenarioCompare(props: ScenarioCompareProps) {
         let description = item[1]
         let unit = item[2]
         let value = item[3]
-        tempData2[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[1]].name}
+        tempData2[`${key}`] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[1]].name}
     }
     setKpiDataReference(tempData2)
     unpackBarChartData(tempData,tempData2)

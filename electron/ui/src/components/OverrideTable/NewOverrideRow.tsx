@@ -4,7 +4,7 @@ import type { NewOverrideRowProps } from '../../types';
 import { TableCell, TableRow, Checkbox, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { INFRASTRUCTURE_CAPEX_MAPPING, VARIABLE_INDEXES }  from '../../assets/InfrastructureCapexMapping'
+import { INFRASTRUCTURE_CAPEX_MAPPING }  from '../../assets/InfrastructureCapexMapping'
 
 
 export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.Element {  
@@ -35,14 +35,12 @@ export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.El
         border:"1px solid #ddd"
         },
     }
-    const [ value, setValue ] = useState<any[]>([])
     const [ rowName, setRowName ] = useState<string>("")
     const [ location, setLocation ] = useState<string>("")
     const [ destination, setDestination ] = useState<string>("")
     const [ technology, setTechnology ] = useState<string>("")
     const [ capacity, setCapacity ] = useState<string>("")
     const [ capacityNumberValue, setCapacityNumberValue ] = useState<number | null>(null)
-    const [ uniqueIndex, setUniqueIndex ] = useState<string>('')
     const [ overrideChecked, setOverrideChecked ] = useState<boolean>(true)
     const [ presetValues, setPresetValues ] = useState<Record<string, any>>({})
     const [ nodeConnections, setNodeConnections ] = useState<Record<string, string[]>>({})
@@ -70,7 +68,7 @@ export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.El
                 if (element === 1 || element === "1") {
                   connections.push([rowNames[idx], colName])
 
-                  if (Object.keys(connectionsDictionary).includes(rowNames[idx])) {
+                  if (Object.keys(connectionsDictionary).includes(`${rowNames[idx]}`)) {
                     connectionsDictionary[rowNames[idx]].push(colName)
                   } else connectionsDictionary[rowNames[idx]] = [colName]
 
@@ -81,8 +79,6 @@ export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.El
 
                   allNodes.add(rowNames[idx])
                   allNodes.add(colName)
-
-                  
                 }
                 idx+=1
               }

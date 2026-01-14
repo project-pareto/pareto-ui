@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextF
 import OverrideTable from '../OverrideTable/OverrideTable';
 import { CategoryNames, ParetoDictionary } from "../../assets/utils";
 import PopupModal from '../../components/PopupModal/PopupModal'
+import { default_override_values } from '../../assets/utils';
 
 export default function DataTable(props: DataTableProps): JSX.Element {  
   const [showOverrideTables, setShowOverrideTables] = useState<boolean>(false)
@@ -14,8 +15,7 @@ export default function DataTable(props: DataTableProps): JSX.Element {
 
   useEffect(()=>{
     if(props.scenario.override_values === undefined && props.OVERRIDE_CATEGORIES) {
-      console.log('override values were not defined')
-      let tempOverrideValues = {}
+      let tempOverrideValues = default_override_values;
       for (let each of props.OVERRIDE_CATEGORIES || []) {
         if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {}
       }

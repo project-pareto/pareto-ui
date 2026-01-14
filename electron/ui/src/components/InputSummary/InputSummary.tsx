@@ -80,8 +80,9 @@ export default function InputSummary(props: InputSummaryProps) {
             let disposalCapacity = 0
             for (let each in props.initialDisposalCapacity) {
                 for (let value of props.initialDisposalCapacity[each]) {
-                    if (!isNaN(value)) {
-                        disposalCapacity+=Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        disposalCapacity += num;
                     }
                 }
             }
@@ -89,8 +90,9 @@ export default function InputSummary(props: InputSummaryProps) {
             let treatmentCapacity = 0
             for (let each in props.initialTreatmentCapacity) {
                 for (let value of props.initialTreatmentCapacity[each]) {
-                    if (!isNaN(value)) {
-                        treatmentCapacity+=Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        treatmentCapacity += num;
                     }
                 }
             }
@@ -106,9 +108,10 @@ export default function InputSummary(props: InputSummaryProps) {
             for (let each in props.completionsDemand) {
                 let nextTime = 0
                 for (let value of props.completionsDemand[each]) {
-                    if (!isNaN(value)) {
-                        totCompletionsDemand+=Number(value)
-                        nextTime += Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        totCompletionsDemand+=num;
+                        nextTime += num;
                     }
                 }
                 completionsDemandByTime.push(nextTime)
@@ -122,9 +125,10 @@ export default function InputSummary(props: InputSummaryProps) {
             for (let each in props.padRates) {
                 let nextTime = 0
                 for (let value of props.padRates[each]) {
-                    if (!isNaN(value)) {
-                        totProducedWater+=Number(value)
-                        nextTime += Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        totProducedWater+=num;
+                        nextTime += num;
                     }
                 }
                 padRatesByTime.push(nextTime)
@@ -134,9 +138,10 @@ export default function InputSummary(props: InputSummaryProps) {
             for (let each in props.flowbackRates) {
                 let nextTime = 0
                 for (let value of props.flowbackRates[each]) {
-                    if (!isNaN(value)) {
-                        totProducedWater+=Number(value)
-                        nextTime += Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        totProducedWater+=num;
+                        nextTime += num;
                     }
                 }
                 flowbackRatesByTime.push(nextTime)
