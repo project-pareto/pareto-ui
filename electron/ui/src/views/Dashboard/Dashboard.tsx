@@ -13,16 +13,16 @@ import PopupModal from '../../components/PopupModal/PopupModal'
 import { runModel } from '../../services/app.service'
 import { useApp } from '../../AppContext';
 import { MapProvider } from '../../context/MapContext';
+import { useScenario } from "../../context/ScenarioContext";
 
-import type { DashboardProps } from '../../types';
 
-export default function Dashboard(props: DashboardProps) {
+export default function Dashboard() {
   const { 
-    scenarios, scenario, navigateHome, updateScenario, updateAppState,
+    scenarios, scenarioData: scenario, navigateToScenarioList: navigateHome, handleScenarioUpdate: updateScenario, updateAppState,
     addTask, handleEditScenarioName, section, category, handleSetSection,
     handleSetCategory, appState, backgroundTasks, syncScenarioData,
     copyAndRunOptimization, handleUpdateExcel,
-  } = props;
+  } = useScenario();
   
   const [ name, setName ] = useState<string>('')
   const [ openEditName, setOpenEditName ] = useState<boolean>(false)
@@ -50,7 +50,7 @@ export default function Dashboard(props: DashboardProps) {
     catch (e){
       console.error('unable to set scenario name: ',e)
     }
-  }, [props, scenario]);
+  }, [scenario]);
 
    const styles = {
     shiftTextLeft: {

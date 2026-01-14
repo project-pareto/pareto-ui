@@ -11,20 +11,19 @@ import ErrorBar from '../../components/ErrorBar/ErrorBar'
 import PopupModal from '../../components/PopupModal/PopupModal'
 import FileUploadModal from '../../components/FileUploadModal/FileUploadModal'
 import { useApp } from '../../AppContext';
-import type { ScenarioListProps } from '../../types';
+import { useScenario } from 'context/ScenarioContext';
 
-export default function ScenarioList(props: ScenarioListProps) {
+export default function ScenarioList() {
     const { 
             handleNewScenario, 
             handleEditScenarioName, 
-            handleSelection, 
+            handleScenarioSelection: handleSelection, 
             scenarios, 
-            deleteScenario, 
-            setScenarios, 
-            setShowHeader, 
+            handleDeleteScenario: deleteScenario, 
+            setScenarios,
             setCompareScenarioIndexes,
             setScenarioIndex
-        } = props
+        } = useScenario()
     const [ showError, setShowError ] = useState<boolean>(false)
     const [ errorMessage, setErrorMessage ] = useState<string>("")
     const [ openEditName, setOpenEditName ] = useState<boolean>(false)
@@ -36,11 +35,7 @@ export default function ScenarioList(props: ScenarioListProps) {
     let navigate = useNavigate();
     const { port } = useApp()
     const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible', 'Incomplete']
-    const enabledStatusListCompare = ['Optimized']
-
-    useEffect(()=> {
-        setShowHeader(true)
-    }, [props]) 
+    const enabledStatusListCompare = ['Optimized'] 
 
     useEffect(() => {
         let tempHasOverrideList = []

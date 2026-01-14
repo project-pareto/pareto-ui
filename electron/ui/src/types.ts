@@ -312,43 +312,6 @@ export interface MapProviderProps {
   handleUpdateScenario: (updatedScenario: Scenario | null, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
 }
 
-export interface LandingPageProps {
-  navigateToScenarioList?: () => void;
-  handleNewScenario?: (data: any) => void;
-  scenarios?: Record<string, any>;
-}
-
-export interface ScenarioListProps {
-  handleNewScenario: (data: any) => void;
-  handleEditScenarioName: (newName: string, id: string | number, updateScenarioData?: boolean) => void;
-  handleSelection: (id: string) => void;
-  scenarios: Record<string, any>;
-  deleteScenario: (id: string | number) => void;
-  setScenarios: (scenarios: Record<string, any>) => void;
-  setShowHeader: (show: boolean) => void;
-  setCompareScenarioIndexes: (indexes: Array<string | number>) => void;
-  setScenarioIndex: (index: string | number) => void;
-}
-
-export interface DashboardProps {
-  scenarios: Record<string, any>;
-  scenario: Scenario | null;
-  navigateHome: () => void;
-  updateScenario: (updatedScenario: any, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
-  updateAppState: (update: any, id?: string | number) => void;
-  addTask: (id: string | number) => void;
-  handleEditScenarioName: (newName: string, id: string | number, updateScenarioData?: boolean) => void;
-  section: number;
-  category: string;
-  handleSetSection: (section: number) => void;
-  handleSetCategory: (category: string) => void;
-  appState: any;
-  backgroundTasks: any[];
-  syncScenarioData: (id?: string | number) => void;
-  copyAndRunOptimization: (id: string | number) => void;
-  handleUpdateExcel: (id: string | number, tableKey: string, updatedTable: any) => void;
-}
-
 export interface ModelResultsProps {
   category: string;
   scenario: Scenario;
@@ -524,26 +487,10 @@ export interface CustomChartProps {
   chartType?: string;
 }
 
-export interface ScenarioCompareProps {
-  scenarios: Record<string, Scenario>;
-  compareScenarioIndexes: Array<string | number>;
-  setCompareScenarioIndexes: (indexes: Array<string | number>) => void;
-  setScenarioIndex: (index: string | number) => void;
-}
-
 export interface SubHeaderProps {
   scenarios: Record<string, Scenario>;
   compareScenarioIndexes: Array<string | number>;
   setCompareScenarioIndexes: (indexes: Array<string | number>) => void;
-}
-
-export interface HeaderProps {
-  showHeader: boolean;
-  scenarios: Record<string, Scenario> | Array<Scenario> | any;
-  index?: string | number | null;
-  handleSelection: (id: string | number) => void;
-  navigateHome?: () => void;
-  [key: string]: any;
 }
 
 export interface SidebarProps {
@@ -555,13 +502,6 @@ export interface SidebarProps {
   handleUpdateExcel?: (id: string | number, tableKey: string, updatedTable: any) => void;
   setInputDataEdited?: (b: boolean) => void;
   syncScenarioData?: (id?: string | number) => void;
-  [key: string]: any;
-}
-
-export interface ModelCompletionBarProps {
-  handleCloseFinishedOptimizationDialog: () => void;
-  goToModelResults?: () => void;
-  open?: boolean;
   [key: string]: any;
 }
 

@@ -1,14 +1,19 @@
 import './Header.css';
 import React from 'react';
-import {useEffect, useState} from 'react';   
 import { useLocation } from 'react-router-dom';
 import logo from "../../images/pareto-logo.png";
 import { Button, MenuItem, FormControl, Select } from '@mui/material'
-import type { HeaderProps } from '../../types';
+import { useScenario } from 'context/ScenarioContext';
  
-export default function Header(props: HeaderProps): JSX.Element {  
-  const {showHeader, scenarios, index, handleSelection, navigateHome } = props
+export default function Header(): JSX.Element {  
+  const {
+    scenarios,
+    scenarioIndex: index,
+    handleScenarioSelection: handleSelection,
+    navigateToScenarioList: navigateHome 
+  } = useScenario();
   const location = useLocation();
+  const showHeader = location?.pathname !== "/";
 
     const handleScenarioSelection = (event: any) => {
       handleSelection(event?.target?.value)

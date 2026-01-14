@@ -23,20 +23,18 @@ export interface ScenarioContextValue {
   category: string | null;
   scenarioIndex: string | number | null;
   backgroundTasks: Array<string | number>;
-  showHeader: boolean;
   loadLandingPage: number;
   checkModelResults: number;
   showCompletedOptimization: boolean;
   lastCompletedScenario: string | number | null;
   compareScenarioIndexes: Array<string | number>;
 
-  // setters used by existing components
+  // setters
   setScenarios: React.Dispatch<React.SetStateAction<ScenarioMap>>;
-  setShowHeader: React.Dispatch<React.SetStateAction<boolean>>;
   setCompareScenarioIndexes: React.Dispatch<React.SetStateAction<Array<string | number>>>;
   setScenarioIndex: React.Dispatch<React.SetStateAction<string | number | null>>;
 
-  // handlers used by App.tsx + props to children
+  // handlers
   navigateToScenarioList: () => void;
   handleScenarioSelection: (scenario: string | number) => void;
   handleNewScenario: (data: Scenario) => void;
@@ -80,7 +78,6 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
   const [category, setCategory] = useState<string | null>(null);
   const [scenarioIndex, setScenarioIndex] = useState<string | number | null>(null);
   const [backgroundTasks, setBackgroundTasks] = useState<Array<string | number>>([]);
-  const [showHeader, setShowHeader] = useState<boolean>(false);
   const [loadLandingPage, setLoadLandingPage] = useState<number>(1);
   const [checkModelResults, setCheckModelResults] = useState<number>(0);
   const [showCompletedOptimization, setShowCompletedOptimization] = useState<boolean>(false);
@@ -101,7 +98,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     };
   }, []);
 
-  // ---- helper (same logic as your App.tsx) ----
+  // ---- helper function for updating the state of the app (category, section...) ----
   const updateAppState = (action: any, index?: string | number): void => {
     if (action.action === "select") {
       let tempSection: number;
@@ -191,7 +188,6 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
   };
 
   const navigateToScenarioList = (): void => {
-    setShowHeader(true);
     setScenarioData(null);
     setSection(0);
     setCategory(null);
@@ -216,7 +212,6 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
   const handleNewScenario = (data: Scenario): void => {
     const temp = { ...scenarios };
     temp[data.id] = data;
-    setShowHeader(true);
     setScenarios(temp);
     setScenarioIndex(data.id);
     setScenarioData(data);
@@ -342,7 +337,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
       });
   };
 
-  // ---- effect 1: initial load (your original useEffect) ----
+  // ---- effect 1: initial load ----
   useEffect(() => {
     checkTasks(port)
       .then((response) => response.json())
@@ -377,7 +372,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadLandingPage, port]);
 
-  // ---- effect 2: polling (your original useEffect) ----
+  // ---- effect 2: polling for running optimizations ----
   useEffect(() => {
     if (checkModelResults <= 0) return;
 
@@ -432,7 +427,6 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     category,
     scenarioIndex,
     backgroundTasks,
-    showHeader,
     loadLandingPage,
     checkModelResults,
     showCompletedOptimization,
@@ -440,7 +434,6 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     compareScenarioIndexes,
 
     setScenarios,
-    setShowHeader,
     setCompareScenarioIndexes,
     setScenarioIndex,
 

@@ -22,37 +22,7 @@ import { ScenarioProvider, useScenario } from "./context/ScenarioContext";
 function AppInner(): React.ReactElement {
   const {
     // state
-    scenarioData,
-    scenarios,
-    appState,
-    section,
-    category,
-    scenarioIndex,
-    backgroundTasks,
-    showHeader,
     showCompletedOptimization,
-    compareScenarioIndexes,
-
-    // setters used by ScenarioList/Compare props
-    setScenarios,
-    setShowHeader,
-    setCompareScenarioIndexes,
-    setScenarioIndex,
-
-    // handlers
-    navigateToScenarioList,
-    handleScenarioSelection,
-    handleNewScenario,
-    handleScenarioUpdate,
-    handleSetCategory,
-    handleSetSection,
-    handleEditScenarioName,
-    handleDeleteScenario,
-    handleUpdateExcel,
-    syncScenarioData,
-    addTask,
-    updateAppState,
-    copyAndRunOptimization,
 
     // completion bar
     handleCloseFinishedOptimizationDialog,
@@ -62,40 +32,20 @@ function AppInner(): React.ReactElement {
   return (
     <ThemeProvider theme={appTheme}>
       <div className="App">
-        <Header
-          showHeader={showHeader}
-          scenarios={scenarios}
-          index={scenarioIndex}
-          handleSelection={handleScenarioSelection}
-          navigateHome={navigateToScenarioList}
-        />
+        <Header/>
 
         <Routes>
           <Route
             path="/"
             element={
-              <LandingPage
-                navigateToScenarioList={navigateToScenarioList}
-                handleNewScenario={handleNewScenario}
-                scenarios={scenarios}
-              />
+              <LandingPage/>
             }
           />
 
           <Route
             path="/scenarios"
             element={
-              <ScenarioList
-                handleNewScenario={handleNewScenario}
-                handleEditScenarioName={handleEditScenarioName}
-                handleSelection={handleScenarioSelection}
-                scenarios={scenarios}
-                deleteScenario={handleDeleteScenario}
-                setScenarios={setScenarios}
-                setShowHeader={setShowHeader}
-                setCompareScenarioIndexes={setCompareScenarioIndexes}
-                setScenarioIndex={setScenarioIndex}
-              />
+              <ScenarioList/>
             }
           />
 
@@ -105,36 +55,14 @@ function AppInner(): React.ReactElement {
           <Route
             path="/scenario"
             element={
-              <Dashboard
-                handleUpdateExcel={handleUpdateExcel}
-                updateScenario={handleScenarioUpdate}
-                handleEditScenarioName={handleEditScenarioName}
-                scenario={scenarioData}
-                section={section}
-                category={category}
-                handleSetCategory={handleSetCategory}
-                handleSetSection={handleSetSection}
-                backgroundTasks={backgroundTasks}
-                navigateHome={navigateToScenarioList}
-                syncScenarioData={syncScenarioData}
-                addTask={addTask}
-                appState={appState}
-                updateAppState={updateAppState}
-                scenarios={scenarios}
-                copyAndRunOptimization={copyAndRunOptimization}
-              />
+              <Dashboard/>
             }
           />
 
           <Route
             path="/compare"
             element={
-              <ScenarioCompare
-                scenarios={scenarios}
-                compareScenarioIndexes={compareScenarioIndexes}
-                setCompareScenarioIndexes={setCompareScenarioIndexes}
-                setScenarioIndex={setScenarioIndex}
-              />
+              <ScenarioCompare/>
             }
           />
 
@@ -142,10 +70,7 @@ function AppInner(): React.ReactElement {
         </Routes>
 
         {showCompletedOptimization && (
-          <ModelCompletionBar
-            handleCloseFinishedOptimizationDialog={handleCloseFinishedOptimizationDialog}
-            goToModelResults={goToModelResults}
-          />
+          <ModelCompletionBar/>
         )}
       </div>
     </ThemeProvider>

@@ -1,5 +1,4 @@
 import React from 'react';
-import type { LandingPageProps } from '../../types';
 import Grid from '@mui/material/Grid';  
 import Box from '@mui/material/Box';
 import BackgroundPic from '../../assets/homepage-background.jpg'
@@ -14,7 +13,7 @@ export function getVersionDate(): string {
     return `${yy}.${mm}.${dd}`;
 }
 
-export default function LandingPage(props: LandingPageProps): JSX.Element {
+export default function LandingPage(): JSX.Element {
     const versionNumber = process.env.REACT_APP_BUILD_NUMBER || getVersionDate()
 
     const styles = {
