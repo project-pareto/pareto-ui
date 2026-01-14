@@ -99,6 +99,9 @@ function AppInner(): React.ReactElement {
             }
           />
 
+          {/*
+            TODO: Send ID as parameter here.
+          */}
           <Route
             path="/scenario"
             element={

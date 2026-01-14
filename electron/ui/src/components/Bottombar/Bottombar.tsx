@@ -63,7 +63,7 @@ export default function Bottombar(props) {
       // check if override values are present
       try {
         let tempHasOverride = false
-          for (let key of Object.keys(scenario.override_values)) {
+          for (let key of Object.keys(scenario?.override_values)) {
             if(Object.keys(scenario.override_values[key]).length>0) tempHasOverride = true
         }
 
@@ -72,7 +72,7 @@ export default function Bottombar(props) {
         
       }
 
-    },[scenario.override_values])
+    },[scenario?.override_values])
 
     useEffect(() => {
         /*

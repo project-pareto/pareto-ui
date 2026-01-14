@@ -23,7 +23,7 @@ export default function Dashboard(props: DashboardProps) {
     handleSetCategory, appState, backgroundTasks, syncScenarioData,
     copyAndRunOptimization, handleUpdateExcel,
   } = props;
-  // const networkMapData = scenario?.data_input?.map_data;
+  
   const [ name, setName ] = useState<string>('')
   const [ openEditName, setOpenEditName ] = useState<boolean>(false)
   const [ inputDataEdited, setInputDataEdited ] = useState<boolean>(false)
@@ -32,15 +32,20 @@ export default function Dashboard(props: DashboardProps) {
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
-  const { port } = useApp()
+  const { port } = useApp();
+
+  /*
+    TODO: make api call to fetch scenario by ID here.
+  */
 
   useEffect(()=>{
     try {
       if(!scenario) {
         navigateHome()
+      } else {
+        setInputDataEdited(false)
+        setName(scenario.name)
       }
-      setInputDataEdited(false)
-      setName(scenario.name)
     }
     catch (e){
       console.error('unable to set scenario name: ',e)
