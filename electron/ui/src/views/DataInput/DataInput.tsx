@@ -80,13 +80,13 @@ export default function DataInput(props: DataInputProps) {
           if (ind === 0) {
             // tempRowNodesMapping = value
             value.map ((v,i) => {
-              tempRowNodesMapping.push(i+"::"+v)
-              tempRowNodes[i+"::"+v] = true
+              tempRowNodesMapping.push(`${i}::${v}`)
+              tempRowNodes[`${i}::${v}`] = true
               return 1
             })
           } else {
-            tempColumnNodesMapping.push(ind+"::"+key)
-            tempColumnNodes[ind+"::"+key] = true
+            tempColumnNodesMapping.push(`${ind}::${key}`)
+            tempColumnNodes[`${ind}::${key}`] = true
           }
           scenario.data_input.df_parameters[category][key].map( (value, index) => {
             tempEditDict[`${ind}:${index}`] = false
@@ -334,6 +334,7 @@ const handleRowFilter = (row) => {
           </Grid>
           <Grid item xs={11}>
             <DataTable
+              key={category}
               section="input"
               editDict={editDict}
               setEditDict={setEditDict}

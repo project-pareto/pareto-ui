@@ -381,6 +381,7 @@ export interface DataTableProps {
   setEditDict?: (d: Record<string, boolean>) => void;
   handleEditInput?: (edited: boolean) => void;
   setShowError?: (b: boolean) => void;
+  deltaDictionary?: any;
   
   [key: string]: any;
 }

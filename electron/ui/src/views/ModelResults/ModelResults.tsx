@@ -26,6 +26,15 @@ const OVERRIDE_CATEGORIES = [
 
 export default function ModelResults(props: ModelResultsProps): JSX.Element {
   const { port } = useApp()
+  const {
+    category,
+    appState,
+    syncScenarioData,
+    handleEditInput,
+    updateScenario,
+    handleSetSection,
+    handleSetCategory,
+  } = props;
   const [ scenario, setScenario] = useState<Scenario>({...props.scenario})
   const [ terminationCondition, setTerminationCondition ] = useState<'good' | 'unsure' | 'bad' | null>(null)
   const [ columnNodesMapping, setColumnNodesMapping ] = useState<string[]>([]) // the column mapping; set once and remains the same
@@ -72,7 +81,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
       when category is changed, reset the nodes for filtering (columns and rows of current table)
     */
     try {
-      if (props.category !== "Dashboard" && props.category !== "Network Diagram" && props.category !== "Sankey" && props.category !== "Water Residuals" && scenario.results.status==="Optimized") {
+      if (category !== "Dashboard" && category !== "Network Diagram" && category !== "Sankey" && category !== "Water Residuals" && scenario.results.status==="Optimized") {
         let tempColumnNodes = {}
         let tempColumnNodesMapping = []
         let tempRowNodes = {}
@@ -80,13 +89,13 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
 
         let newRowFilterSet = {}
         let newColFilterSet = {}
-        for (let ind in scenario.results.data[props.category][0]) {
+        for (let ind in scenario.results.data[category][0]) {
 
-          let columnNode = `${ind}::${scenario.results.data[props.category][0][ind]}`
+          let columnNode = `${ind}::${scenario.results.data[category][0][ind]}`
           tempColumnNodesMapping.push(columnNode)
           tempColumnNodes[columnNode] = true
 
-          let colKey = scenario.results.data[props.category][0][ind]
+          let colKey = scenario.results.data[category][0][ind]
           if (Object.keys(newColFilterSet).includes(`${colKey}`)) {
             newColFilterSet[`${colKey}`].amt = newColFilterSet[`${colKey}`].amt + 1
           } else {
@@ -94,7 +103,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
           }
         }
         let i = 0
-        for (let each of scenario.results.data[props.category].slice(1)) {
+        for (let each of scenario.results.data[category].slice(1)) {
           let rowNode = `${i}::${each[0]}`
           tempRowNodesMapping.push(rowNode)
           tempRowNodes[rowNode] = true
@@ -138,7 +147,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
     // console.log(props.scenario)
     
     
-  }, [props.category, props.scenario, props.scenario.results.status, props.scenario.data_input.df_parameters, props.scenario.results.data]);
+  }, [category, props.scenario, props.scenario.results.status, props.scenario.data_input.df_parameters, props.scenario.results.data]);
 
   const handleColumnFilter = (col: string) => {
     var tempCols
@@ -262,16 +271,16 @@ const handleNewInfrastructureOverride = () => {
       /*
         if category is sankey, return sankey plot
       */
-      if (props.category === "Sankey") {
+      if (category === "Sankey") {
         let sankeyData = {"v_F_Piped": props.scenario.results.data["v_F_Piped_dict"], "v_F_Trucked": props.scenario.results.data["v_F_Trucked_dict"]}
         return (
-            <SankeyPlot data={sankeyData} appState={props.appState} scenarioId={props.scenario.id}/>
+            <SankeyPlot data={sankeyData} appState={appState} scenarioId={props.scenario.id}/>
         )
       }
       /*
         if category is dashboard, return KPI dashboard
       */
-      else if(props.category === "Dashboard"){
+      else if(category === "Dashboard"){
         return <KPIDashboard 
                   overviewData={props.scenario.results.data['v_F_Overview_dict']}
                   truckedData={props.scenario.results.data['v_F_Trucked_dict']}
@@ -284,15 +293,15 @@ const handleNewInfrastructureOverride = () => {
       /*
         if category is network diagram, return network diagram
       */
-        else if(props.category === "Network Diagram"){
+        else if(category === "Network Diagram"){
           return (
-              <NetworkDiagram scenario={props.scenario} type={"output"} syncScenarioData={props.syncScenarioData}></NetworkDiagram>
+              <NetworkDiagram scenario={props.scenario} type={"output"} syncScenarioData={syncScenarioData}></NetworkDiagram>
           )
         }
       /*
         if category is water residuals, return water residuals component
       */
-        else if(props.category === "Water Residuals"){
+        else if(category === "Water Residuals"){
           return (
               <WaterResiduals scenario={props.scenario} />
           )
@@ -305,6 +314,7 @@ const handleNewInfrastructureOverride = () => {
           <Grid container>
             <Grid item xs={11.5}>
               <DataTable 
+                key={category}
                 section="output"
                 scenario={props.scenario}
                 setScenario={setScenario}
@@ -312,10 +322,10 @@ const handleNewInfrastructureOverride = () => {
                 columnNodes={columnNodes}
                 rowNodesMapping={rowNodesMapping}
                 rowNodes={rowNodes}
-                category={props.category}
-                handleEditInput={props.handleEditInput}
+                category={category}
+                handleEditInput={handleEditInput}
                 data={props.scenario.results.data}
-                updateScenario={props.updateScenario}
+                updateScenario={updateScenario}
                 OVERRIDE_CATEGORIES={OVERRIDE_CATEGORIES}
                 newInfrastructureOverrideRow={newInfrastructureOverrideRow}
                 setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
@@ -327,7 +337,7 @@ const handleNewInfrastructureOverride = () => {
             <Grid item xs={0.5}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginLeft:'10px'}}>
               {
-                props.category === "vb_y_overview_dict" ? 
+                category === "vb_y_overview_dict" ? 
                 
                 <Button style={styles.newOverrideButton} variant="contained" onClick={handleNewInfrastructureOverride}>
                   + Add infrastructure override
@@ -335,7 +345,7 @@ const handleNewInfrastructureOverride = () => {
                 
                 :
                 
-                !["v_F_Overview_dict", "Water Residuals"].includes(props.category) && 
+                !["v_F_Overview_dict", "Water Residuals"].includes(category) && 
 
                 <FilterDropdown
                   width="300px"
@@ -407,8 +417,8 @@ const handleNewInfrastructureOverride = () => {
         "vb_y_Treatment_dict": {}
     }
     tempScenario.results.status="Draft"
-    props.updateScenario(tempScenario)
-    props.handleSetSection(0)
+    updateScenario(tempScenario)
+    handleSetSection(0)
   }
 
   const showResetOverrides = () => {
@@ -460,10 +470,10 @@ const handleNewInfrastructureOverride = () => {
           >
               Generate Excel Report
           </Button>
-          {props.scenario.optimization.deactivate_slacks === false && props.category === 'Dashboard' &&
+          {props.scenario.optimization.deactivate_slacks === false && category === 'Dashboard' &&
             <Button 
             sx={{marginRight: 10}} 
-              onClick={() => props.handleSetCategory('Water Residuals')}
+              onClick={() => handleSetCategory('Water Residuals')}
               endIcon={<OpenInNewIcon/>}
             >
                 Export Water Residuals
@@ -476,7 +486,7 @@ const handleNewInfrastructureOverride = () => {
         </Box>
 
       
-      <Box sx={props.category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
+      <Box sx={category === "Dashboard" ? styles.kpiDashboardBox : styles.resultsBox}>
         {renderOutputCategory()}
       </Box>
     </Box>

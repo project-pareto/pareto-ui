@@ -1,413 +1,536 @@
-import React from 'react';
-import {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import type { DataTableProps } from '../../types';
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Tooltip } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
+  TextField,
+  Tooltip,
+} from '@mui/material';
 import OverrideTable from '../OverrideTable/OverrideTable';
-import { CategoryNames, ParetoDictionary } from "../../assets/utils";
-import PopupModal from '../../components/PopupModal/PopupModal'
+import { CategoryNames, ParetoDictionary } from '../../assets/utils';
+import PopupModal from '../../components/PopupModal/PopupModal';
 import { default_override_values } from '../../assets/utils';
 
-export default function DataTable(props: DataTableProps): JSX.Element {  
-  const [showOverrideTables, setShowOverrideTables] = useState<boolean>(false)
-  const [ rowValue, setRowValue ] = useState<number | string>(0)
-  const [ doubleClickIndex, setDoubleClickIndex ] = useState<number | null>(null)
-  const [ showRowValueInput, setShowRowValueInput ] = useState<boolean>(false)
+export default function DataTable(props: DataTableProps): JSX.Element {
+  const {
+    // commonly used
+    category,
+    data,
+    scenario,
+    section,
 
-  useEffect(()=>{
-    if(props.scenario.override_values === undefined && props.OVERRIDE_CATEGORIES) {
-      let tempOverrideValues = default_override_values;
-      for (let each of props.OVERRIDE_CATEGORIES || []) {
-        if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {}
+    // scenario setters / updaters
+    updateScenario,
+    setScenario,
+
+    // override-related
+    OVERRIDE_CATEGORIES,
+    overrideValues,
+    setOverrideValues,
+    newInfrastructureOverrideRow,
+    setNewInfrastructureOverrideRow,
+
+    // editing / error
+    editDict,
+    setEditDict,
+    handleEditInput,
+    setShowError,
+
+    // row/col filtering
+    rowNodes,
+    rowNodesMapping,
+    columnNodes,
+    columnNodesMapping,
+    rowFilterSet,
+    columnFilterSet,
+
+    // just for compare page
+    deltaDictionary
+  } = props;
+
+  const [showOverrideTables, setShowOverrideTables] = useState<boolean>(false);
+  const [rowValue, setRowValue] = useState<number | string>(0);
+  const [doubleClickIndex, setDoubleClickIndex] = useState<number | null>(null);
+  const [showRowValueInput, setShowRowValueInput] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (scenario.override_values === undefined && OVERRIDE_CATEGORIES) {
+      const tempOverrideValues = default_override_values;
+
+      for (let each of OVERRIDE_CATEGORIES || []) {
+        if (!Object.keys(tempOverrideValues).includes(each)) tempOverrideValues[each] = {};
       }
-      const tempScenario = {...props.scenario}
-      tempScenario.override_values = tempOverrideValues
-      props.updateScenario && props.updateScenario(tempScenario)
-    }
-    setShowOverrideTables(true)
-    
-  }, [props.data]);
 
-  var keyIndexMapping: Record<number, string> = {}
+      const tempScenario = { ...scenario };
+      tempScenario.override_values = tempOverrideValues;
+
+      updateScenario && updateScenario(tempScenario);
+    }
+
+    setShowOverrideTables(true);
+  }, [data]);
+
+  const keyIndexMapping: Record<number, string> = {};
 
   const styles: any = {
     firstCol: {
-      backgroundColor: "#f4f4f4", 
-      border:"1px solid #ddd",
+      backgroundColor: '#f4f4f4',
+      border: '1px solid #ddd',
       position: 'sticky',
       left: 0,
-
     },
     other: {
       minWidth: 100,
-      border:"1px solid #ddd"
+      border: '1px solid #ddd',
     },
     inputDifference: {
-      backgroundColor: "rgb(255,215,0, 0.5)",
+      backgroundColor: 'rgb(255,215,0, 0.5)',
       minWidth: 100,
-      border:"1px solid #ddd"
+      border: '1px solid #ddd',
     },
-  }
+  };
 
-    const roundKPI = (value: any) => {
-      if (isNaN(value)) return value
-      else if (value >= 1000) return value.toLocaleString('en-US', {maximumFractionDigits:0})
-      else if (value >= 100) return value.toLocaleString('en-US', {maximumFractionDigits:1})
-      else if (value >= 10) return value.toLocaleString('en-US', {maximumFractionDigits:2})
-      else return value.toLocaleString('en-US', {maximumFractionDigits:3})
-    }
+  const roundKPI = (value: any) => {
+    if (isNaN(value)) return value;
+    else if (value >= 1000) return value.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    else if (value >= 100) return value.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    else if (value >= 10) return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    else return value.toLocaleString('en-US', { maximumFractionDigits: 3 });
+  };
 
-  const handleChangeValue = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-   const nameAttr = (event.target as HTMLInputElement).name || (event.target as HTMLElement).getAttribute('data-name') || ''
-   let inds = nameAttr.split(":")
-    //ind[0] is the index inside the array
-    //ind[1] corresponds with the key
-    let ind = parseInt(inds[0])
-    let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
-    let tempScenario = {...props.scenario}
-    console.debug('setting value to : ')
-    console.debug(event.target.value)
-    const val = (event.target as HTMLInputElement).value
+  const handleChangeValue = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const nameAttr =
+      (event.target as HTMLInputElement).name ||
+      (event.target as HTMLElement).getAttribute('data-name') ||
+      '';
+
+    const inds = nameAttr.split(':');
+    const ind = parseInt(inds[0]); // row index
+    const colName = keyIndexMapping[parseInt(inds[1])].split('::')[1];
+
+    const tempScenario = { ...scenario };
+    const val = (event.target as HTMLInputElement).value;
+
     if (isNaN(Number(val))) {
-      tempScenario.data_input.df_parameters[props.category][colName][ind] = val
-    } else if(val === "") {
-      tempScenario.data_input.df_parameters[props.category][colName][ind] = val
-    }
-    else {
-      tempScenario.data_input.df_parameters[props.category][colName][ind] = Number(val)
-    }
-    props.setScenario && props.setScenario(tempScenario)
-   }
-
-
-const handleDoubleClick = (ind: number, index: number) => {
-  /*
-    ind: row number, starting at 0, excluding header row
-    index: column number, starting at 0
-  */
-    if (['Optimized','Draft','failure', 'Not Optimized', 'Incomplete'].includes(props.scenario.results.status)) {
-    if(index === 0) { //when double clicking column index, allow user to input value to apply to that entire row
-      setShowRowValueInput(true)
-      setDoubleClickIndex(ind)
+      tempScenario.data_input.df_parameters[category][colName][ind] = val;
+    } else if (val === '') {
+      tempScenario.data_input.df_parameters[category][colName][ind] = val;
     } else {
-      if (props.editDict && props.setEditDict) {
-        if(!props.editDict[`${ind}:${index}`]) {
-          let tempEditDict = {...props.editDict}
-          tempEditDict[`${ind}:${index}`] = true
-          props.setEditDict(tempEditDict)
-          props.handleEditInput && props.handleEditInput(true)
-        }
+      tempScenario.data_input.df_parameters[category][colName][ind] = Number(val);
+    }
+
+    setScenario && setScenario(tempScenario);
+  };
+
+  const handleDoubleClick = (ind: number, index: number) => {
+    /*
+      ind: row number, starting at 0, excluding header row
+      index: column number, starting at 0
+    */
+    if (['Optimized', 'Draft', 'failure', 'Not Optimized', 'Incomplete'].includes(scenario.results.status)) {
+      if (index === 0) {
+        setShowRowValueInput(true);
+        setDoubleClickIndex(ind);
       } else {
-        props.setShowError && props.setShowError(true)
+        if (editDict && setEditDict) {
+          if (!editDict[`${ind}:${index}`]) {
+            const tempEditDict = { ...editDict };
+            tempEditDict[`${ind}:${index}`] = true;
+            setEditDict(tempEditDict);
+            handleEditInput && handleEditInput(true);
+          }
+        } else {
+          setShowError && setShowError(true);
+        }
+      }
+    } else {
+      setShowError && setShowError(true);
+    }
+  };
+
+  const handleEditRowValue = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowValue(event.target.value);
+  };
+
+  const handleUpdateRowValues = () => {
+    const tempScenario = { ...scenario };
+
+    Object.entries(scenario.data_input.df_parameters[category]).map(([key, value], i) => {
+      if (i > 0) {
+        if (isNaN(Number(rowValue))) value[doubleClickIndex!] = rowValue;
+        else value[doubleClickIndex!] = Number(rowValue);
+      }
+    });
+
+    handleEditInput && handleEditInput(true);
+    setScenario && setScenario(tempScenario);
+
+    setShowRowValueInput(false);
+    setRowValue(0);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const targetName = (e.target as any).name;
+
+      if (targetName && editDict?.[targetName]) {
+        const tempEditDict = { ...editDict };
+        tempEditDict[targetName] = false;
+        setEditDict && setEditDict(tempEditDict);
       }
     }
-  } else {
-    props.setShowError && props.setShowError(true)
-  }
- }
+  };
 
- const handleEditRowValue = (event: React.ChangeEvent<HTMLInputElement>) => {
-   setRowValue(event.target.value)
- }
-
- const handleUpdateRowValues = () => {
-  let tempScenario = {...props.scenario}
-  Object.entries(props.scenario.data_input.df_parameters[props.category]).map(([key, value], i) => {
-    if (i > 0) {
-      if (isNaN(Number(rowValue))) value[doubleClickIndex!] = rowValue
-      else value[doubleClickIndex!] = Number(rowValue)
-    }
-  })
-  props.handleEditInput(true)
-  props.setScenario && props.setScenario(tempScenario)
-  setShowRowValueInput(false)
-  setRowValue(0)
- }
-
-const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    const targetName = (e.target as any).name
-    if(targetName && props.editDict[targetName]) {
-      let tempEditDict = {...props.editDict}
-      tempEditDict[targetName] = false
-      props.setEditDict(tempEditDict)
-    }
-  } 
-  
-}
-  
   const renderInputRow = (ind: number) => {
-      var cells = []
+    const cells: any[] = [];
 
-      Object.entries(props.data[props.category]).forEach(function([key, value]) {
-            cells.push(value[ind])
-            return 1
-          });
+    Object.entries(data[category]).forEach(([key, value]) => {
+      cells.push(value[ind]);
+      return 1;
+    });
 
-      
-
-      return (cells.map( (value, index) => {
-        /*
-          props.columnNodes[props.columnNodesMapping[index]] must be true
-          UNLESS it's the first column (index is 0)
-        */
-       if (index === 0 || props.columnNodes[props.columnNodesMapping[index - 1]] || Object.keys(props.columnNodes).length === 0) {
-        if(props.section === "input") {
+    return cells.map((value, index) => {
+      /*
+        columnNodes[columnNodesMapping[index]] must be true
+        UNLESS it's the first column (index is 0)
+      */
+      if (index === 0 || columnNodes[columnNodesMapping[index - 1]] || Object.keys(columnNodes).length === 0) {
+        if (section === 'input') {
           return (
-            <Tooltip key={"tooltip_"+ind+":"+index} title={props.editDict[`${ind}:${index}`] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
-            <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={`${ind}:${index}`} data-name={`${ind}:${index}`} style={index === 0 ? styles.firstCol : styles.other}>
-            {props.editDict && props.editDict[`${ind}:${index}`] ? 
-              index === 0 ? value : 
-              <TextField 
-                autoFocus
-                name={`${ind}:${index}`} 
-                size="small" label={""} 
-                defaultValue={value} 
-                onChange={handleChangeValue} 
-                onFocus={(event) => event.target.select()}
-              />
-              :
-              props.category === 'PadRates' || props.category === 'FlowbackRates' ?
-              value.toLocaleString('en-US', {maximumFractionDigits:0})
-              :
-              value.toLocaleString('en-US', {maximumFractionDigits:2})
-            }
-            </TableCell>
+            <Tooltip
+              key={'tooltip_' + ind + ':' + index}
+              title={editDict?.[`${ind}:${index}`] ? 'Hit enter to lock value in' : index > 0 ? 'Doubleclick to edit value' : ''}
+              arrow
+            >
+              <TableCell
+                onKeyDown={handleKeyDown}
+                onDoubleClick={() => handleDoubleClick(ind, index)}
+                key={`${ind}:${index}`}
+                data-name={`${ind}:${index}`}
+                style={index === 0 ? styles.firstCol : styles.other}
+              >
+                {editDict?.[`${ind}:${index}`] ? (
+                  index === 0 ? (
+                    value
+                  ) : (
+                    <TextField
+                      autoFocus
+                      name={`${ind}:${index}`}
+                      size="small"
+                      label={''}
+                      defaultValue={value}
+                      onChange={handleChangeValue}
+                      onFocus={(event) => event.target.select()}
+                    />
+                  )
+                ) : category === 'PadRates' || category === 'FlowbackRates' ? (
+                  value.toLocaleString('en-US', { maximumFractionDigits: 0 })
+                ) : (
+                  value.toLocaleString('en-US', { maximumFractionDigits: 2 })
+                )}
+              </TableCell>
             </Tooltip>
-          )
-        }
-        else if(props.section === "compare") {
+          );
+        } else if (section === 'compare') {
           return (
-            <TableCell onKeyDown={handleKeyDown} key={`${ind}:${index}`} data-name={`${ind}:${index}`} style={index === 0 ? styles.firstCol : props.deltaDictionary[props.category].includes(index+"::"+ind) ? styles.inputDifference : styles.other}>
-            {
-              value.toLocaleString('en-US', {maximumFractionDigits:2})
-            }
+            <TableCell
+              onKeyDown={handleKeyDown}
+              key={`${ind}:${index}`}
+              data-name={`${ind}:${index}`}
+              style={
+                index === 0
+                  ? styles.firstCol
+                  : deltaDictionary[category].includes(`${index}::${ind}`)
+                    ? styles.inputDifference
+                    : styles.other
+              }
+            >
+              {value.toLocaleString('en-US', { maximumFractionDigits: 2 })}
             </TableCell>
-          )
+          );
         }
-        
-       } else return null
-      }))
-  }
+      } else return null;
+    });
+  };
 
   const renderInputRows = () => {
-      const rows = []
-      let len = props.data[props.category][Object.keys(props.data[props.category])[0]]?.length
-      for (let i = 0; i < len; i++) {
-        rows.push(renderInputRow(i))
-      }
-      return (rows.map( (value, index) => {
-         /*
-          props.rowNodes[props.rowNodesMapping[index]] must equal true
-        */
-         if (props.rowNodes[props.rowNodesMapping[index]] || !Object.keys(props.rowNodes)?.length) {
-        return <TableRow key={"row_"+index}>{value}</TableRow>
-         } else return null
-        
-      }))
-  }
+    const rows: any[] = [];
+    const len = data[category][Object.keys(data[category])[0]]?.length;
+
+    for (let i = 0; i < len; i++) {
+      rows.push(renderInputRow(i));
+    }
+
+    return rows.map((value, index) => {
+      /*
+        rowNodes[rowNodesMapping[index]] must equal true
+      */
+      if (rowNodes[rowNodesMapping[index]] || !Object.keys(rowNodes)?.length) {
+        return <TableRow key={'row_' + index}>{value}</TableRow>;
+      } else return null;
+    });
+  };
 
   const renderInputTable = () => {
     try {
-        return (
-            <TableContainer>
-            <h3>
-              {CategoryNames[props.category] ? CategoryNames[props.category] : ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}
-              {props.scenario.data_input.display_units && props.scenario.data_input.display_units[props.category] && ` (${props.scenario.data_input.display_units[props.category]})`}
-            </h3>
-            <TableContainer sx={{overflowX:'auto'}}>
-            <Table style={{border:"1px solid #ddd"}} size='small'>
-              <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
-              <TableRow key="headRow">
-              {Object.entries(props.data[props.category]).map( ([key, value], index) => {
-                keyIndexMapping[index] = index+"::"+key
-                if (index === 0 || props.columnNodes[index+"::"+key] || Object.keys(props.columnNodes).length === 0) {
-                  return (
-                    index === 0 ? 
-                    <TableCell key={key} style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
-                  : 
-                    <TableCell key={key} style={{color:"white"}}>{key}</TableCell>
-                  )
-                } else return null
-              })}
-              </TableRow>
-              </TableHead>
-              <TableBody>
-              {renderInputRows()}
-              </TableBody>
-            </Table>
-            </TableContainer>
-            </TableContainer>
-        )
-    } catch (e) {
-      console.error("unable to render input category: ",e)
-    }
-}
-
-const renderOutputTable = () => {
-
-  try {
       return (
         <TableContainer>
-        <h3>{ParetoDictionary[props.category] ? ParetoDictionary[props.category] : CategoryNames[props.category] ? CategoryNames[props.category] : props.category}</h3>
-        {props.OVERRIDE_CATEGORIES.includes(props.category) ? 
-        <OverrideTable
-          category={props.category}
-          overrideValues={props.overrideValues}
-          setOverrideValues={props.setOverrideValues}
-          data={props.data}
-          columnNodes={props.columnNodes}
-          columnNodesMapping={props.columnNodesMapping}
-          scenario={props.scenario}
-          show={showOverrideTables}
-          updateScenario={props.updateScenario}
-          newInfrastructureOverrideRow={props.newInfrastructureOverrideRow}
-          setNewInfrastructureOverrideRow={props.setNewInfrastructureOverrideRow}
-          rowFilterSet={props.rowFilterSet}
-          columnFilterSet={props.columnFilterSet}
-        /> 
-        : 
-        <TableContainer sx={{overflowX:'auto', maxHeight: "73vh"}}>
-        <Table style={{border:"1px solid #ddd"}} size='small' stickyHeader>
-          <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
-          <TableRow key={`headrow`}>
-          {props.category === "v_F_Overview_dict" ? 
-          <>
-            <TableCell key="overview0" style={{backgroundColor:"#6094bc", color:"white"}}>KPI</TableCell> 
-            <TableCell key="overview1" style={{backgroundColor:"#6094bc", color:"white"}}>Units</TableCell> 
-            <TableCell key="overview2" style={{backgroundColor:"#6094bc", color:"white"}}>Value</TableCell> 
-          </>
-          :
-          props.data[props.category][0].map((value, index) => {
-            if (Object.keys(props.columnNodes).length === 0 || props.columnNodes[props.columnNodesMapping[index]]){
-              return <TableCell key={`${value}_${index}`} style={{backgroundColor:"#6094bc", color:"white"}}>{value}</TableCell>
-            }
-          })
-          }
-          
-          </TableRow>
-          </TableHead>
-          {props.category === "v_F_Overview_dict" ? 
-          <TableBody>
-          {props.data[props.category].slice(1).map((value, index) => {
-            return (<TableRow key={`row_${value}_${index}`}>
-            {value.map((cellValue, i)=> {
-              return (i !== 1 &&
-                 <TableCell 
-                  align={(i === (value.length - 1)) ? "right" : "left"} 
-                  key={"" + index + i} 
-                  style={i === 0 ? styles.firstCol : styles.other}>
-                    {(i === (value.length - 1)) ? 
-                    roundKPI(cellValue) : 
-                    cellValue ? CategoryNames[cellValue] ? CategoryNames[cellValue] :
-                    cellValue.replace('v_F_','')
-                             .replace('e_','')
-                             .replace('v_Z_','')
-                             .replace('v_R_','')
-                             .replace('v_C_','Cost ')
-                             .replace(/([A-Z])/g, ' $1')
-                             .replace('Cap Ex', 'CapEx')
-                             .trim()
-                    : null
-                  }
-              </TableCell>
-              )
-              
-            })}
-            </TableRow>)
-          })}
-          </TableBody> 
-          :
-          <TableBody>
-          {props.data[props.category].slice(1).map((value, index) => {
-            if (Object.keys(props.rowNodes).length === 0 || props.rowNodes[props.rowNodesMapping[index]]) {
-            return (<TableRow key={`row_${value}_${index}`}>
-            {value.map((cellValue, i)=> {
-              if (Object.keys(props.columnNodes).length === 0 || props.columnNodes[props.columnNodesMapping[i]]) {
-              return <TableCell 
-                      align={(i === (value.length - 1)) ? "right" : "left"} 
-                      key={"" + index + i} 
-                      style={i === 0 ? styles.firstCol : styles.other}>
-                        {cellValue.toLocaleString('en-US', {maximumFractionDigits:0})}
-                      </TableCell>
-              }
-            })}
-            </TableRow>)
-            }
-          })}
-          </TableBody>
-          }
-        
-        </Table>
-        </TableContainer>
-        }
-        
-      </TableContainer>
-      )
-  } catch (e) {
-    console.error("unable to render input category: ",e)
-  }
-}
+          <h3>
+            {CategoryNames[category]
+              ? CategoryNames[category]
+              : ParetoDictionary[category]
+                ? ParetoDictionary[category]
+                : category}
+            {scenario.data_input.display_units &&
+              scenario.data_input.display_units[category] &&
+              ` (${scenario.data_input.display_units[category]})`}
+          </h3>
 
-const renderInputDeltaTable = () => {
-
-  try {
-      return (
-        <TableContainer>
-            <h3>
-              {CategoryNames[props.category] ? CategoryNames[props.category] : ParetoDictionary[props.category] ? ParetoDictionary[props.category] : props.category}
-              {props.scenario.data_input.display_units && props.scenario.data_input.display_units[props.category] && ` (${props.scenario.data_input.display_units[props.category]})`}
-            </h3>
-            <TableContainer sx={{overflowX:'auto'}}>
-            <Table style={{border:"1px solid #ddd"}} size='small'>
-              <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
-              <TableRow key="headRow">
-              {Object.entries(props.data[props.category]).map( ([key, value], index) => {
-                keyIndexMapping[index] = index+"::"+key
-                if (index === 0 || props.columnNodes[index+"::"+key] || Object.keys(props.columnNodes).length === 0) {
-                  return (
-                    index === 0 ? 
-                  <TableCell key={key} style={{color:"white", position: 'sticky', left: 0, backgroundColor:"#6094bc"}}>{key}</TableCell> 
-                  : 
-                  <TableCell key={key} style={{color:"white"}}>{key}</TableCell>
-                  )
-                } else return null
-              })}
-              </TableRow>
+          <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table style={{ border: '1px solid #ddd' }} size="small">
+              <TableHead style={{ backgroundColor: '#6094bc', color: 'white' }}>
+                <TableRow key="headRow">
+                  {Object.entries(data[category]).map(([key, value], index) => {
+                    keyIndexMapping[index] = `${index}::${key}`;
+                    if (index === 0 || columnNodes[`${index}::${key}`] || Object.keys(columnNodes).length === 0) {
+                      return index === 0 ? (
+                        <TableCell
+                          key={key}
+                          style={{ color: 'white', position: 'sticky', left: 0, backgroundColor: '#6094bc' }}
+                        >
+                          {key}
+                        </TableCell>
+                      ) : (
+                        <TableCell key={key} style={{ color: 'white' }}>
+                          {key}
+                        </TableCell>
+                      );
+                    } else return null;
+                  })}
+                </TableRow>
               </TableHead>
-              <TableBody>
-              {renderInputRows()}
-              </TableBody>
+
+              <TableBody>{renderInputRows()}</TableBody>
             </Table>
-            </TableContainer>
           </TableContainer>
-      )
-  } catch (e) {
-    console.error("unable to render input category: ",e)
-  }
-}
+        </TableContainer>
+      );
+    } catch (e) {
+      console.error('unable to render input category: ', e);
+    }
+  };
 
-  return ( 
+  const renderOutputTable = () => {
+    try {
+      return (
+        <TableContainer>
+          <h3>
+            {ParetoDictionary[category]
+              ? ParetoDictionary[category]
+              : CategoryNames[category]
+                ? CategoryNames[category]
+                : category}
+          </h3>
+
+          {OVERRIDE_CATEGORIES.includes(category) ? (
+            <OverrideTable
+              category={category}
+              overrideValues={overrideValues}
+              setOverrideValues={setOverrideValues}
+              data={data}
+              columnNodes={columnNodes}
+              columnNodesMapping={columnNodesMapping}
+              scenario={scenario}
+              show={showOverrideTables}
+              updateScenario={updateScenario}
+              newInfrastructureOverrideRow={newInfrastructureOverrideRow}
+              setNewInfrastructureOverrideRow={setNewInfrastructureOverrideRow}
+              rowFilterSet={rowFilterSet}
+              columnFilterSet={columnFilterSet}
+            />
+          ) : (
+            <TableContainer sx={{ overflowX: 'auto', maxHeight: '73vh' }}>
+              <Table style={{ border: '1px solid #ddd' }} size="small" stickyHeader>
+                <TableHead style={{ backgroundColor: '#6094bc', color: 'white' }}>
+                  <TableRow key={`headrow`}>
+                    {category === 'v_F_Overview_dict' ? (
+                      <>
+                        <TableCell key="overview0" style={{ backgroundColor: '#6094bc', color: 'white' }}>
+                          KPI
+                        </TableCell>
+                        <TableCell key="overview1" style={{ backgroundColor: '#6094bc', color: 'white' }}>
+                          Units
+                        </TableCell>
+                        <TableCell key="overview2" style={{ backgroundColor: '#6094bc', color: 'white' }}>
+                          Value
+                        </TableCell>
+                      </>
+                    ) : (
+                      data[category][0].map((value: any, index: number) => {
+                        if (Object.keys(columnNodes).length === 0 || columnNodes[columnNodesMapping[index]]) {
+                          return (
+                            <TableCell
+                              key={`${value}_${index}`}
+                              style={{ backgroundColor: '#6094bc', color: 'white' }}
+                            >
+                              {value}
+                            </TableCell>
+                          );
+                        }
+                        return null;
+                      })
+                    )}
+                  </TableRow>
+                </TableHead>
+
+                {category === 'v_F_Overview_dict' ? (
+                  <TableBody>
+                    {data[category].slice(1).map((value: any[], index: number) => {
+                      return (
+                        <TableRow key={`row_${value}_${index}`}>
+                          {value.map((cellValue: any, i: number) => {
+                            return (
+                              i !== 1 && (
+                                <TableCell
+                                  align={i === value.length - 1 ? 'right' : 'left'}
+                                  key={'' + index + i}
+                                  style={i === 0 ? styles.firstCol : styles.other}
+                                >
+                                  {i === value.length - 1
+                                    ? roundKPI(cellValue)
+                                    : cellValue
+                                      ? CategoryNames[cellValue]
+                                        ? CategoryNames[cellValue]
+                                        : cellValue
+                                            .replace('v_F_', '')
+                                            .replace('e_', '')
+                                            .replace('v_Z_', '')
+                                            .replace('v_R_', '')
+                                            .replace('v_C_', 'Cost ')
+                                            .replace(/([A-Z])/g, ' $1')
+                                            .replace('Cap Ex', 'CapEx')
+                                            .trim()
+                                      : null}
+                                </TableCell>
+                              )
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                ) : (
+                  <TableBody>
+                    {data[category].slice(1).map((value: any[], index: number) => {
+                      if (Object.keys(rowNodes).length === 0 || rowNodes[rowNodesMapping[index]]) {
+                        return (
+                          <TableRow key={`row_${value}_${index}`}>
+                            {value.map((cellValue: any, i: number) => {
+                              if (Object.keys(columnNodes).length === 0 || columnNodes[columnNodesMapping[i]]) {
+                                return (
+                                  <TableCell
+                                    align={i === value.length - 1 ? 'right' : 'left'}
+                                    key={'' + index + i}
+                                    style={i === 0 ? styles.firstCol : styles.other}
+                                  >
+                                    {cellValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                  </TableCell>
+                                );
+                              }
+                              return null;
+                            })}
+                          </TableRow>
+                        );
+                      }
+                      return null;
+                    })}
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
+          )}
+        </TableContainer>
+      );
+    } catch (e) {
+      console.error('unable to render input category: ', e);
+    }
+  };
+
+  const renderInputDeltaTable = () => {
+    try {
+      return (
+        <TableContainer>
+          <h3>
+            {CategoryNames[category]
+              ? CategoryNames[category]
+              : ParetoDictionary[category]
+                ? ParetoDictionary[category]
+                : category}
+            {scenario.data_input.display_units &&
+              scenario.data_input.display_units[category] &&
+              ` (${scenario.data_input.display_units[category]})`}
+          </h3>
+
+          <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table style={{ border: '1px solid #ddd' }} size="small">
+              <TableHead style={{ backgroundColor: '#6094bc', color: 'white' }}>
+                <TableRow key="headRow">
+                  {Object.entries(data[category]).map(([key, value], index) => {
+                    keyIndexMapping[index] = `${index}::${key}`;
+                    if (index === 0 || columnNodes[`${index}::${key}`] || Object.keys(columnNodes).length === 0) {
+                      return index === 0 ? (
+                        <TableCell
+                          key={key}
+                          style={{ color: 'white', position: 'sticky', left: 0, backgroundColor: '#6094bc' }}
+                        >
+                          {key}
+                        </TableCell>
+                      ) : (
+                        <TableCell key={key} style={{ color: 'white' }}>
+                          {key}
+                        </TableCell>
+                      );
+                    } else return null;
+                  })}
+                </TableRow>
+              </TableHead>
+
+              <TableBody>{renderInputRows()}</TableBody>
+            </Table>
+          </TableContainer>
+        </TableContainer>
+      );
+    } catch (e) {
+      console.error('unable to render input category: ', e);
+    }
+  };
+
+  return (
     <>
-    {props.section === "input" && renderInputTable()}
-    {props.section === "output" && renderOutputTable()}
-    {props.section === "compare" && renderInputDeltaTable()}
-    <PopupModal
+      {section === 'input' && renderInputTable()}
+      {section === 'output' && renderOutputTable()}
+      {section === 'compare' && renderInputDeltaTable()}
+
+      <PopupModal
         input
         open={showRowValueInput}
         handleClose={() => setShowRowValueInput(false)}
         text={rowValue}
-        textLabel='Update all values in this row'
+        textLabel="Update all values in this row"
         handleEditText={handleEditRowValue}
         handleSave={handleUpdateRowValues}
-        buttonText='Update'
-        buttonColor='primary'
-        buttonVariant='contained'
+        buttonText="Update"
+        buttonColor="primary"
+        buttonVariant="contained"
         width={400}
       />
     </>
   );
-
 }
-
-
