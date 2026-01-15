@@ -138,7 +138,7 @@ export default function Sidebar(props: SidebarProps) {
     const categories = {"Input Summary" :null, "Network Diagram": null}
     return (
       Object.entries(categories).map( ([k, value]) => ( 
-        <div style={String(category)===k ? styles.selected : styles.unselected} onClick={() => handleClick(k)} key={String(value)+""+k}> 
+        <div style={String(category)===k ? styles.selected : styles.unselected} onClick={() => handleClick(k)} key={`${value}${k}`}> 
             <p style={styles.topLevelCategory}>
               {k === "Input Summary" ? "PARETO Input File" : k}
             </p>
@@ -151,7 +151,7 @@ export default function Sidebar(props: SidebarProps) {
     const additionalCategories = section === 0 ? {"Input Summary" :null, "Network Diagram": null, "Plots": null} : section === 1 ? {} : {"Dashboard": null, "Sankey": null, "Network Diagram": null}
     return (
       Object.entries(additionalCategories).map( ([k, value]) => ( 
-        <div style={String(category)===k ? styles.selected : styles.unselected} onClick={() => handleClick(k)} key={String(value)+""+k}> 
+        <div style={String(category)===k ? styles.selected : styles.unselected} onClick={() => handleClick(k)} key={`${value}${k}`}> 
             <p style={styles.topLevelCategory}>
               {k === "Input Summary" && results?.status === "Incomplete" ? "PARETO Input File" : k}
             </p>
@@ -209,7 +209,7 @@ export default function Sidebar(props: SidebarProps) {
       <Collapse in={openDynamic} timeout="auto" unmountOnExit>
       {Subcategories.Dynamic.map( (value,index) => {
         return(
-          <div style={getStyle(value)} onClick={() => handleClick(value)} key={value+""+index}> 
+          <div style={getStyle(value)} onClick={() => handleClick(value)} key={`${value}${index}`}> 
           <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <p style={styles.subcategory}>
               {CategoryNames[value] ? CategoryNames[value] : 
@@ -239,7 +239,7 @@ export default function Sidebar(props: SidebarProps) {
       <Collapse in={openStatic} timeout="auto" unmountOnExit>
       {Subcategories.Static.map( (value,index) => {
         return (
-          <div style={getStyle(value)} onClick={() => handleClick(value)} key={value+""+index}> 
+          <div style={getStyle(value)} onClick={() => handleClick(value)} key={`${value}${index}`}> 
           <Tooltip title={ParetoDictionary[value] ? ParetoDictionary[value] : CategoryNames[value] ? CategoryNames[value] : value} placement="right-start">
             <p style={styles.subcategory}>
               {CategoryNames[value] ? CategoryNames[value] : 
@@ -275,7 +275,7 @@ export default function Sidebar(props: SidebarProps) {
           </div>
         )}
         {Object.entries(results?.data || {}).map( ([key, value]) => ( 
-          <div style={getStyle(key)} onClick={() => handleClick(key)} key={key+""+value}> 
+          <div style={getStyle(key)} onClick={() => handleClick(key)} key={`${key}${value}`}> 
               <p style={styles.subcategory}>
                 {CategoryNames[key] ? CategoryNames[key] :
                     key.replace('_dict','')

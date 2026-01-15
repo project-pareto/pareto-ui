@@ -1,16 +1,21 @@
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
-import type { Scenario, ScenarioCompareProps } from '../../types';
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
 import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
 import ScenarioCompareOverrides from './ScenarioCompareOverrides';
 import SubHeader from './SubHeader';
 import { Subcategories } from '../../assets/utils';
+import { useScenario } from 'context/ScenarioContext';
 
 
-export default function ScenarioCompare(props: ScenarioCompareProps) {
-    const {scenarios, compareScenarioIndexes, setCompareScenarioIndexes, setScenarioIndex} = props
+export default function ScenarioCompare() {
+    const {
+        scenarios,
+        compareScenarioIndexes,
+        setCompareScenarioIndexes,
+        setScenarioIndex
+    } = useScenario();
     const [ primaryScenarioIndex, setPrimaryScenarioIndex ] = useState<string | number | null>(null)
     const [ referenceScenarioIndex, setReferenceScenarioIndex ] = useState<string | number | null>(null)
     const [ kpiDataPrimary, setKpiDataPrimary ] = useState<Record<string, any> | null>(null)
@@ -149,7 +154,7 @@ export default function ScenarioCompare(props: ScenarioCompareProps) {
         let description = item[1]
         let unit = item[2]
         let value = item[3]
-        tempData[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[0]].name}
+        tempData[`${key}`] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[0]].name}
     }
     setKpiDataPrimary(tempData)
     let tempData2 = {}
@@ -159,7 +164,7 @@ export default function ScenarioCompare(props: ScenarioCompareProps) {
         let description = item[1]
         let unit = item[2]
         let value = item[3]
-        tempData2[key] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[1]].name}
+        tempData2[`${key}`] = {"description": description, "unit": unit, "value": value, name: scenarios[tempIndexes[1]].name}
     }
     setKpiDataReference(tempData2)
     unpackBarChartData(tempData,tempData2)

@@ -36,16 +36,16 @@ export default function ScenarioCompareInput(props: ScenarioCompareInputProps) {
           Object.entries(primaryScenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
             if (ind === 0) {
               value.map ((v,i) => {
-                tempRowNodesMapping.push(i+"::"+v)
-                tempRowNodes[i+"::"+v] = true
+                tempRowNodesMapping.push(`${i}::${v}`)
+                tempRowNodes[`${i}::${v}`] = true
                 return 1
               })
             } else {
-              tempColumnNodesMapping.push(ind+"::"+key)
-              tempColumnNodes[ind+"::"+key] = true
+              tempColumnNodesMapping.push(`${ind}::${key}`)
+              tempColumnNodes[`${ind}::${key}`] = true
             }
             primaryScenario.data_input.df_parameters[category][key].map( (value, index) => {
-              tempEditDict[""+ind+":"+index] = false
+              tempEditDict[`${ind}:${index}`] = false
               return 1
             })
             return 1
@@ -77,6 +77,7 @@ export default function ScenarioCompareInput(props: ScenarioCompareInputProps) {
             </Grid>
             <Grid item xs={11}>
               <DataTable
+                  key={category}
                   section="compare"
                   category={category}
                   scenario={primaryScenario}

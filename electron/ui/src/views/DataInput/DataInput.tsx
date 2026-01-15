@@ -66,7 +66,7 @@ export default function DataInput(props: DataInputProps) {
           if (!grabbedRowList) {
             let tempRowList = scenario.data_input.df_parameters[category][colKey]
             for (let rowKey of tempRowList) {
-              if(Object.keys(tempRowFilterSet).includes(rowKey)) tempRowFilterSet[rowKey].amt = tempRowFilterSet[rowKey].amt + 1
+              if(Object.keys(tempRowFilterSet).includes(`${rowKey}`)) tempRowFilterSet[rowKey].amt = tempRowFilterSet[rowKey].amt + 1
               else tempRowFilterSet[rowKey] = {amt: 1, checked: true}
             }
             grabbedRowList = true
@@ -80,16 +80,16 @@ export default function DataInput(props: DataInputProps) {
           if (ind === 0) {
             // tempRowNodesMapping = value
             value.map ((v,i) => {
-              tempRowNodesMapping.push(i+"::"+v)
-              tempRowNodes[i+"::"+v] = true
+              tempRowNodesMapping.push(`${i}::${v}`)
+              tempRowNodes[`${i}::${v}`] = true
               return 1
             })
           } else {
-            tempColumnNodesMapping.push(ind+"::"+key)
-            tempColumnNodes[ind+"::"+key] = true
+            tempColumnNodesMapping.push(`${ind}::${key}`)
+            tempColumnNodes[`${ind}::${key}`] = true
           }
           scenario.data_input.df_parameters[category][key].map( (value, index) => {
-            tempEditDict[""+ind+":"+index] = false
+            tempEditDict[`${ind}:${index}`] = false
             return 1
           })
           return 1
@@ -123,7 +123,7 @@ export default function DataInput(props: DataInputProps) {
     let tempEditDict = {}
     Object.entries(scenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
       scenario.data_input.df_parameters[category][key].map( (value, index) => {
-        tempEditDict[""+ind+":"+index] = false
+        tempEditDict[`${ind}:${index}`] = false
         return 1
       })
       return 1
@@ -334,6 +334,7 @@ const handleRowFilter = (row) => {
           </Grid>
           <Grid item xs={11}>
             <DataTable
+              key={category}
               section="input"
               editDict={editDict}
               setEditDict={setEditDict}

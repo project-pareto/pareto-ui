@@ -1,29 +1,23 @@
 import { render, screen } from '@testing-library/react';
-import Header from "../components/Header/Header"
-import mockScenarios from './data/mockScenarios.json'
-import mockScenario from './data/mockScenario.json'
-import * as React from 'react'
-import { BrowserRouter } from "react-router-dom";
+import Header from "../components/Header/Header";
+import { MemoryRouter } from "react-router-dom";
+import { ScenarioProvider } from 'context/ScenarioContext';
+import { AppProvider } from 'AppContext';
 
-const mockFunction = () => {
-    console.log("function");
-};
+const navigate = () => {};
 
-const mockIndex = 1;
+test('test header when not on root path', () => {
+  render(
+    <AppProvider>
+      <MemoryRouter initialEntries={['/test']}>
+        <ScenarioProvider navigate={navigate}>
+          <Header />
+        </ScenarioProvider>
+      </MemoryRouter>
+    </AppProvider>
+  );
 
-
-test('test header', () => {
-    render( <BrowserRouter><Header 
-            scenarios={mockScenarios} 
-            scenarioData={mockScenario} 
-            index={mockIndex} 
-            handleNewScenario={mockFunction} 
-            handleSelection={mockFunction}
-            showHeader={true}
-            /></BrowserRouter> )
-
-    expect(screen.getByRole('img', {  name: /Pareto logo/i})).toBeInTheDocument();
-    // expect(screen.getByRole('button', {  name: /case study 2/i})).toBeInTheDocument();
-    // expect(screen.getByRole('button', {  name: /View Scenario List/i})).toBeInTheDocument();
-
-})
+  expect(
+    screen.getByRole('img', { name: /Pareto logo/i })
+  ).toBeInTheDocument();
+});

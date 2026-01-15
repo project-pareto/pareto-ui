@@ -13,17 +13,17 @@ import PopupModal from '../../components/PopupModal/PopupModal'
 import { runModel } from '../../services/app.service'
 import { useApp } from '../../AppContext';
 import { MapProvider } from '../../context/MapContext';
+import { useScenario } from "../../context/ScenarioContext";
 
-import type { DashboardProps } from '../../types';
 
-export default function Dashboard(props: DashboardProps) {
+export default function Dashboard() {
   const { 
-    scenarios, scenario, navigateHome, updateScenario, updateAppState,
+    scenarios, scenarioData: scenario, navigateToScenarioList: navigateHome, handleScenarioUpdate: updateScenario, updateAppState,
     addTask, handleEditScenarioName, section, category, handleSetSection,
     handleSetCategory, appState, backgroundTasks, syncScenarioData,
     copyAndRunOptimization, handleUpdateExcel,
-  } = props;
-  // const networkMapData = scenario?.data_input?.map_data;
+  } = useScenario();
+  
   const [ name, setName ] = useState<string>('')
   const [ openEditName, setOpenEditName ] = useState<boolean>(false)
   const [ inputDataEdited, setInputDataEdited ] = useState<boolean>(false)
@@ -32,20 +32,25 @@ export default function Dashboard(props: DashboardProps) {
 
   const handleOpenEditName = () => setOpenEditName(true);
   const handleCloseEditName = () => setOpenEditName(false);
-  const { port } = useApp()
+  const { port } = useApp();
+
+  /*
+    TODO: make api call to fetch scenario by ID here.
+  */
 
   useEffect(()=>{
     try {
       if(!scenario) {
         navigateHome()
+      } else {
+        setInputDataEdited(false)
+        setName(scenario.name)
       }
-      setInputDataEdited(false)
-      setName(scenario.name)
     }
     catch (e){
       console.error('unable to set scenario name: ',e)
     }
-  }, [props, scenario]);
+  }, [scenario]);
 
    const styles = {
     shiftTextLeft: {

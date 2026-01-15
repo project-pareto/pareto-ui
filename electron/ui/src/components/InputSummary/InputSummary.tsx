@@ -80,8 +80,9 @@ export default function InputSummary(props: InputSummaryProps) {
             let disposalCapacity = 0
             for (let each in props.initialDisposalCapacity) {
                 for (let value of props.initialDisposalCapacity[each]) {
-                    if (!isNaN(value)) {
-                        disposalCapacity+=Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        disposalCapacity += num;
                     }
                 }
             }
@@ -89,8 +90,9 @@ export default function InputSummary(props: InputSummaryProps) {
             let treatmentCapacity = 0
             for (let each in props.initialTreatmentCapacity) {
                 for (let value of props.initialTreatmentCapacity[each]) {
-                    if (!isNaN(value)) {
-                        treatmentCapacity+=Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        treatmentCapacity += num;
                     }
                 }
             }
@@ -106,9 +108,10 @@ export default function InputSummary(props: InputSummaryProps) {
             for (let each in props.completionsDemand) {
                 let nextTime = 0
                 for (let value of props.completionsDemand[each]) {
-                    if (!isNaN(value)) {
-                        totCompletionsDemand+=Number(value)
-                        nextTime += Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        totCompletionsDemand+=num;
+                        nextTime += num;
                     }
                 }
                 completionsDemandByTime.push(nextTime)
@@ -122,9 +125,10 @@ export default function InputSummary(props: InputSummaryProps) {
             for (let each in props.padRates) {
                 let nextTime = 0
                 for (let value of props.padRates[each]) {
-                    if (!isNaN(value)) {
-                        totProducedWater+=Number(value)
-                        nextTime += Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        totProducedWater+=num;
+                        nextTime += num;
                     }
                 }
                 padRatesByTime.push(nextTime)
@@ -134,9 +138,10 @@ export default function InputSummary(props: InputSummaryProps) {
             for (let each in props.flowbackRates) {
                 let nextTime = 0
                 for (let value of props.flowbackRates[each]) {
-                    if (!isNaN(value)) {
-                        totProducedWater+=Number(value)
-                        nextTime += Number(value)
+                    const num = Number(value);
+                    if (!Number.isNaN(num)) {
+                        totProducedWater+=num;
+                        nextTime += num;
                     }
                 }
                 flowbackRatesByTime.push(nextTime)
@@ -276,7 +281,7 @@ export default function InputSummary(props: InputSummaryProps) {
                 <TableBody>
                     {sumValues.map((v,i) => {
                         return (
-                            <TableRow key={""+v+i}>
+                            <TableRow key={`${v}${i}`}>
                                 <TableCell style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{v.statistic}</Typography></TableCell>
                                 <TableCell align="right">{v.value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                                 <TableCell align="right">{v.units}</TableCell>
@@ -294,20 +299,20 @@ export default function InputSummary(props: InputSummaryProps) {
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key="headRow2">
                     {Object.entries(props.completionsDemand).map(([key,value], index) => {
-                        return <TableCell key={""+key+index} align="right" style={index > 0 ? styles.headerCell : styles.headerCell}>{index > 0 ? key : ""}</TableCell>
+                        return <TableCell key={`${key}${index}`} align="right" style={index > 0 ? styles.headerCell : styles.headerCell}>{index > 0 ? key : ""}</TableCell>
                     })}
                 </TableRow>
                 </TableHead>
                 <TableBody>
                 {Object.entries(timeSumValues).map(([key,statistic]) => {
                     return (
-                    <TableRow key={""+key+statistic}>
+                    <TableRow key={`${key}${statistic}`}>
                         {statistic.map((value, index) => {
                             return (
                             index > 0 ? 
-                            <TableCell key={""+value+index} align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
+                            <TableCell key={`${value}${index}`} align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                             :
-                            <TableCell key={""+value+index} style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{key}</Typography></TableCell>
+                            <TableCell key={`${value}${index}`} style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{key}</Typography></TableCell>
                             )
                         })}
                     </TableRow>
