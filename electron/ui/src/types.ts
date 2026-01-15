@@ -10,7 +10,7 @@
 /** Common scalar types seen in tables */
 export type Scalar = string | number | boolean | null;
 
-/** Common cell value in your “table arrays” (often numbers or "" placeholders) */
+/** Common cell value in data table arrays (often numbers or "" placeholders) */
 export type Cell = string | number | null;
 
 /** A column in a dataframe-like object */
@@ -37,7 +37,7 @@ export type DfSets = Record<string, string[]>;
  * Some parameter tables can be empty objects {}.
  */
 export type ParameterTable =
-  | Record<string, string[] | Cell[]> // common case
+  | Record<string, string[] | Cell[]>
   | Record<string, never>; // empty object
 
 export type DfParameters = Record<string, ParameterTable>;
@@ -111,7 +111,7 @@ export interface MapArc {
   styleUrl?: string;
   tessellate?: string;
 
-  /** list of coordinate triplets (mostly strings in your JSON) */
+  /** list of coordinate triplets */
   coordinates?: Array<[string, string, string] | any[]>;
 
   LineString?: string;
