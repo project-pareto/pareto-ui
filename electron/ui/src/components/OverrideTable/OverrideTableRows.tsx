@@ -40,7 +40,7 @@ export default function OverrideTableRows(props: OverrideTableRowsProps): JSX.El
   }
 
     const getCheckboxValue = (index: string) => {
-        if(Object.keys(scenario.override_values[category]).includes(""+index)) {
+        if(Object.keys(scenario.override_values[category]).includes(`${index}`)) {
             return true
         } else return false
     }
@@ -220,8 +220,8 @@ function BinaryVariableRow(props: any) {
     // console.log('new index is: ')
     // console.log(newIndex)
     setUniqueIndex(newIndex)
-    if(Object.keys(scenario.override_values[category]).includes(""+newIndex) && !overrideChecked) setOverrideChecked(true)
-    else if (!Object.keys(scenario.override_values[category]).includes(""+newIndex) && overrideChecked) setOverrideChecked(false)
+    if(Object.keys(scenario.override_values[category]).includes(`${newIndex}`) && !overrideChecked) setOverrideChecked(true)
+    else if (!Object.keys(scenario.override_values[category]).includes(`${newIndex}`) && overrideChecked) setOverrideChecked(false)
   }, [scenario])
 
   const getValueSelectValue = () => {
@@ -254,14 +254,14 @@ function BinaryVariableRow(props: any) {
       try {
         return (
           <Tooltip 
-            title={Object.keys(scenario.override_values[category]).includes(""+index) ? `To add more options, edit the ${CategoryNames[INFRASTRUCTURE_CAPEX_MAPPING[value[0]].input_table]} table in the data input section.` : ''} 
+            title={Object.keys(scenario.override_values[category]).includes(`${index}`) ? `To add more options, edit the ${CategoryNames[INFRASTRUCTURE_CAPEX_MAPPING[value[0]].input_table]} table in the data input section.` : ''} 
             placement="top" 
             enterDelay={500}
           >
           <FormControl sx={{ width: "100%" }} size="small">
             <InputLabel id="">Value</InputLabel>
             <Select
-              disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+              disabled={!Object.keys(scenario.override_values[category]).includes(`${index}`)}
               labelId=""
               id=""
               name={`${index}::select`}
@@ -305,7 +305,7 @@ function BinaryVariableRow(props: any) {
             size="small" 
             label="Value"
             value={scenario.override_values[category][index].value !== undefined ? scenario.override_values[category][index].value : ""}
-            disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+            disabled={!Object.keys(scenario.override_values[category]).includes(`${index}`)}
             onChange={handleInputOverrideValue} 
             onFocus={(event) => event.target.select()}
           />
@@ -318,7 +318,7 @@ function BinaryVariableRow(props: any) {
           size="small" 
           label="Value"
           value={scenario.override_values[category][uniqueIndex] !== undefined ? scenario.override_values[category][uniqueIndex].value : ""}
-          disabled={!Object.keys(scenario.override_values[category]).includes(""+uniqueIndex)}
+          disabled={!Object.keys(scenario.override_values[category]).includes(`${uniqueIndex}`)}
           onChange={handleInputOverrideValue} 
           onFocus={(event) => event.target.select()}
         />
@@ -348,7 +348,7 @@ function BinaryVariableRow(props: any) {
                   <FormControl sx={{ width: "100%" }} size="small">
                   <InputLabel id="">Value</InputLabel>
                   <Select
-                    // disabled={!Object.keys(scenario.override_values[category]).includes(""+index)}
+                    // disabled={!Object.keys(scenario.override_values[category]).includes(`${index}`)}
                     labelId=""
                     id=""
                     name={`${uniqueIndex}::technology`}
@@ -435,8 +435,8 @@ function RegularVariableRow(props) {
   useEffect(() => {
     let newIndex = `${value[0]}:${value[1]}:${value[2]}`
     setUniqueIndex(newIndex)
-    if(Object.keys(scenario.override_values[category]).includes(""+newIndex) && !overrideChecked) setOverrideChecked(true)
-    else if (!Object.keys(scenario.override_values[category]).includes(""+newIndex) && overrideChecked) setOverrideChecked(false)
+    if(Object.keys(scenario.override_values[category]).includes(`${newIndex}`) && !overrideChecked) setOverrideChecked(true)
+    else if (!Object.keys(scenario.override_values[category]).includes(`${newIndex}`) && overrideChecked) setOverrideChecked(false)
   }, [scenario])
 
   const handleInput = (event) => {
@@ -471,7 +471,7 @@ return (
                 size="small" 
                 label="Value"
                 value={scenario.override_values[category][uniqueIndex] !== undefined ? scenario.override_values[category][uniqueIndex].value : ""}
-                disabled={!Object.keys(scenario.override_values[category]).includes(""+uniqueIndex)}
+                disabled={!Object.keys(scenario.override_values[category]).includes(`${uniqueIndex}`)}
                 onChange={handleInput} 
                 onFocus={(event) => event.target.select()}
           />

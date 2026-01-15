@@ -45,7 +45,7 @@ export default function ScenarioCompareInput(props: ScenarioCompareInputProps) {
               tempColumnNodes[ind+"::"+key] = true
             }
             primaryScenario.data_input.df_parameters[category][key].map( (value, index) => {
-              tempEditDict[""+ind+":"+index] = false
+              tempEditDict[`${ind}:${index}`] = false
               return 1
             })
             return 1

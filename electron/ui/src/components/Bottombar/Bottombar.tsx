@@ -141,7 +141,7 @@ export default function Bottombar(props) {
         
       }
 
-      const handleEditNewScenarioName = (event) => {
+      const handleEditNewScenarioName = (event: any) => {
         setNewScenarioName(event.target.value)
       }
 

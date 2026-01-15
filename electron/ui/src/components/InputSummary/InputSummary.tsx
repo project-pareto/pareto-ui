@@ -281,7 +281,7 @@ export default function InputSummary(props: InputSummaryProps) {
                 <TableBody>
                     {sumValues.map((v,i) => {
                         return (
-                            <TableRow key={""+v+i}>
+                            <TableRow key={`${v}${i}`}>
                                 <TableCell style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{v.statistic}</Typography></TableCell>
                                 <TableCell align="right">{v.value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                                 <TableCell align="right">{v.units}</TableCell>
@@ -299,20 +299,20 @@ export default function InputSummary(props: InputSummaryProps) {
                 <TableHead style={{backgroundColor:"#6094bc", color:"white"}}>
                 <TableRow key="headRow2">
                     {Object.entries(props.completionsDemand).map(([key,value], index) => {
-                        return <TableCell key={""+key+index} align="right" style={index > 0 ? styles.headerCell : styles.headerCell}>{index > 0 ? key : ""}</TableCell>
+                        return <TableCell key={`${key}${index}`} align="right" style={index > 0 ? styles.headerCell : styles.headerCell}>{index > 0 ? key : ""}</TableCell>
                     })}
                 </TableRow>
                 </TableHead>
                 <TableBody>
                 {Object.entries(timeSumValues).map(([key,statistic]) => {
                     return (
-                    <TableRow key={""+key+statistic}>
+                    <TableRow key={`${key}${statistic}`}>
                         {statistic.map((value, index) => {
                             return (
                             index > 0 ? 
-                            <TableCell key={""+value+index} align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
+                            <TableCell key={`${value}${index}`} align="right">{value.toLocaleString('en-US', {maximumFractionDigits:0})}</TableCell>
                             :
-                            <TableCell key={""+value+index} style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{key}</Typography></TableCell>
+                            <TableCell key={`${value}${index}`} style={styles.firstCol as React.CSSProperties}><Typography noWrap={true}>{key}</Typography></TableCell>
                             )
                         })}
                     </TableRow>

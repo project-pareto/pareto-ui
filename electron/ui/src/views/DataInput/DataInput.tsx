@@ -89,7 +89,7 @@ export default function DataInput(props: DataInputProps) {
             tempColumnNodes[ind+"::"+key] = true
           }
           scenario.data_input.df_parameters[category][key].map( (value, index) => {
-            tempEditDict[""+ind+":"+index] = false
+            tempEditDict[`${ind}:${index}`] = false
             return 1
           })
           return 1
@@ -123,7 +123,7 @@ export default function DataInput(props: DataInputProps) {
     let tempEditDict = {}
     Object.entries(scenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
       scenario.data_input.df_parameters[category][key].map( (value, index) => {
-        tempEditDict[""+ind+":"+index] = false
+        tempEditDict[`${ind}:${index}`] = false
         return 1
       })
       return 1

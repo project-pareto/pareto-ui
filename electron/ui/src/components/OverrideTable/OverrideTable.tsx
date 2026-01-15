@@ -89,7 +89,7 @@ export default function OverrideTable(props: OverrideTableProps): JSX.Element {
       if(category ==="vb_y_overview_dict") override_object.value=1
       else override_object.value=""
         let tempOverrideValues = {...scenario.override_values}
-        if(Object.keys(tempOverrideValues[category]).includes(""+index)) {
+        if(Object.keys(tempOverrideValues[category]).includes(`${index}`)) {
         delete tempOverrideValues[category][index]
         } else {
             tempOverrideValues[category][index] = override_object

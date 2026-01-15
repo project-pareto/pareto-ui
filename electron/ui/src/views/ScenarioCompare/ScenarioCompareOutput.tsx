@@ -178,7 +178,7 @@ export default function ScenarioCompareOutput(props: ScenarioCompareOutputProps)
             // if (key === "e_CompletionsReusedFrac") returnGuy = Math.round(diff)
             if (key === "e_CompletionsReusedFrac") returnGuy = formatPercentage(diff, 0)
             else returnGuy = diff.toLocaleString('en-US', {maximumFractionDigits:0})
-            returnGuy = ""+returnGuy
+            returnGuy = `${returnGuy}`
             if (diff > 0) returnGuy = "+" + returnGuy
             return returnGuy
         }

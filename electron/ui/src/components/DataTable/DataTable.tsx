@@ -29,7 +29,7 @@ export default function DataTable(props: DataTableProps): JSX.Element {
 
   var keyIndexMapping: Record<number, string> = {}
 
-  const styles: any ={
+  const styles: any = {
     firstCol: {
       backgroundColor: "#f4f4f4", 
       border:"1px solid #ddd",
@@ -64,8 +64,8 @@ export default function DataTable(props: DataTableProps): JSX.Element {
     let ind = parseInt(inds[0])
     let colName = keyIndexMapping[parseInt(inds[1])].split('::')[1]
     let tempScenario = {...props.scenario}
-    console.log('setting value to : ')
-    console.log(event.target.value)
+    console.debug('setting value to : ')
+    console.debug(event.target.value)
     const val = (event.target as HTMLInputElement).value
     if (isNaN(Number(val))) {
       tempScenario.data_input.df_parameters[props.category][colName][ind] = val
@@ -90,9 +90,9 @@ const handleDoubleClick = (ind: number, index: number) => {
       setDoubleClickIndex(ind)
     } else {
       if (props.editDict && props.setEditDict) {
-        if(!props.editDict[""+ind+":"+index]) {
+        if(!props.editDict[`${ind}:${index}`]) {
           let tempEditDict = {...props.editDict}
-          tempEditDict[""+ind+":"+index] = true
+          tempEditDict[`${ind}:${index}`] = true
           props.setEditDict(tempEditDict)
           props.handleEditInput && props.handleEditInput(true)
         }
@@ -136,7 +136,7 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
   
 }
   
-  const renderInputRow = (ind) => {
+  const renderInputRow = (ind: number) => {
       var cells = []
 
       Object.entries(props.data[props.category]).forEach(function([key, value]) {
@@ -154,13 +154,13 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
        if (index === 0 || props.columnNodes[props.columnNodesMapping[index - 1]] || Object.keys(props.columnNodes).length === 0) {
         if(props.section === "input") {
           return (
-            <Tooltip key={"tooltip_"+ind+":"+index} title={props.editDict[""+ind+":"+index] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
-            <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={""+ind+":"+index} data-name={""+ind+":"+index} style={index === 0 ? styles.firstCol : styles.other}>
-            {props.editDict && props.editDict[""+ind+":"+index] ? 
+            <Tooltip key={"tooltip_"+ind+":"+index} title={props.editDict[`${ind}:${index}`] ? "Hit enter to lock value in" : index> 0 ? "Doubleclick to edit value" : ""} arrow>
+            <TableCell onKeyDown={handleKeyDown} onDoubleClick={() => handleDoubleClick(ind, index)} key={`${ind}:${index}`} data-name={`${ind}:${index}`} style={index === 0 ? styles.firstCol : styles.other}>
+            {props.editDict && props.editDict[`${ind}:${index}`] ? 
               index === 0 ? value : 
               <TextField 
                 autoFocus
-                name={""+ind+":"+index} 
+                name={`${ind}:${index}`} 
                 size="small" label={""} 
                 defaultValue={value} 
                 onChange={handleChangeValue} 
@@ -178,7 +178,7 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
         }
         else if(props.section === "compare") {
           return (
-            <TableCell onKeyDown={handleKeyDown} key={""+ind+":"+index} data-name={""+ind+":"+index} style={index === 0 ? styles.firstCol : props.deltaDictionary[props.category].includes(index+"::"+ind) ? styles.inputDifference : styles.other}>
+            <TableCell onKeyDown={handleKeyDown} key={`${ind}:${index}`} data-name={`${ind}:${index}`} style={index === 0 ? styles.firstCol : props.deltaDictionary[props.category].includes(index+"::"+ind) ? styles.inputDifference : styles.other}>
             {
               value.toLocaleString('en-US', {maximumFractionDigits:2})
             }
