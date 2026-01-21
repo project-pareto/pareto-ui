@@ -799,5 +799,54 @@ class ScenarioHandler:
             WriteDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
 
+    def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario"):
+        current_day = datetime.date.today()
+        date = datetime.date.strftime(current_day, "%m/%d/%Y")
+        return_object = {
+            "name": scenarioName, 
+            "id": self.next_id, 
+            "date": date,
+            "data_input": data_input, 
+            "optimization": 
+                {
+                    "objective":"cost", 
+                    "runtime": 900, 
+                    "pipeline_cost": "distance_based", 
+                    "waterQuality": "false", 
+                    "hydraulics": "false",
+                    "solver": "cbc",
+                    "build_units": "scaled_units",
+                    "optimalityGap": 0,
+                    "scale_model": True
+                }, 
+            "results": {"status": "Draft", "data": {}},
+            "override_values": 
+                {
+                    "vb_y_overview_dict": {},
+                    "v_F_Piped_dict": {},
+                    "v_F_Sourced_dict": {},
+                    "v_F_Trucked_dict": {},
+                    "v_L_Storage_dict": {},
+                    "v_L_PadStorage_dict": {},
+                    "vb_y_Pipeline_dict": {},
+                    "vb_y_Disposal_dict": {},
+                    "vb_y_Storage_dict": {},
+                    "vb_y_Treatment_dict": {}
+                }
+            }
+
+        # check if db is in use. if so, wait til its done being used
+        locked = self.LOCKED
+        while(locked):
+            time.sleep(0.5)
+            locked = self.LOCKED
+        self.LOCKED = True
+        self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
+        self.LOCKED = False
+
+        self.update_next_id()
+        self.retrieve_scenarios()
+        
+        return return_object
 
 scenario_handler = ScenarioHandler()
