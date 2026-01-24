@@ -90,7 +90,7 @@ def ParseKMZ(filename, default_node = None, initial_map_data = None):
         disposal_sites = initial_map_data.get("disposal_sites", {})
         treatment_sites = initial_map_data.get("treatment_sites", {})
         storage_sites = initial_map_data.get("storage_sites", {})
-        freshwater_sources = initial_map_data.get("freshwater_sources", {})
+        externalwater_sources = initial_map_data.get("externalwater_sources", {})
         reuse_options = initial_map_data.get("reuse_options", {})
         other_nodes = initial_map_data.get("other_nodes", {})
         arcs = initial_map_data.get("arcs", {})
@@ -106,7 +106,7 @@ def ParseKMZ(filename, default_node = None, initial_map_data = None):
         disposal_sites = {}
         treatment_sites = {}
         storage_sites = {}
-        freshwater_sources = {}
+        externalwater_sources = {}
         reuse_options = {}
         other_nodes = {}
         arcs = {}
@@ -140,7 +140,7 @@ def ParseKMZ(filename, default_node = None, initial_map_data = None):
     data['SWDSites'] = disposal_sites
     data['TreatmentSites'] = treatment_sites
     data['StorageSites'] = storage_sites
-    data['FreshwaterSources'] = freshwater_sources
+    data['ExternalWaterSources'] = externalwater_sources
     data['ReuseOptions'] = reuse_options
     data['other_nodes'] = other_nodes
     data['connections'] = connections

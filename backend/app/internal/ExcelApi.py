@@ -77,7 +77,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     ## step 3: add nodes
     node_keys = [
-        'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
+        'ProductionPads', 'CompletionsPads', 'SWDSites', 'ExternalWaterSources', 
         'StorageSites', 'TreatmentSites', 'NetworkNodes', "ReuseOptions"
     ]
 
@@ -104,7 +104,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "NOA": ["NetworkNodes", "ReuseOptions"],
         "SNA": ["StorageSites", "NetworkNodes"],
         "SOA": ["StorageSites", "ReuseOptions"],
-        "FCA": ["FreshwaterSources", "CompletionsPads"],
+        "FCA": ["ExternalWaterSources", "CompletionsPads"],
         "RCA": ["TreatmentSites", "CompletionsPads"],
         "RSA": ["TreatmentSites", "StorageSites"],
         "SCA": ["StorageSites", "CompletionsPads"],
@@ -151,7 +151,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     trucked_arcs = {
         "PCT": ["ProductionPads", "CompletionsPads"],
-        "FCT": ["FreshwaterSources", "CompletionsPads"],
+        "FCT": ["ExternalWaterSources", "CompletionsPads"],
         "PKT": ["ProductionPads", "SWDSites"],
         "CKT": ["CompletionsPads", "SWDSites"],
         "CCT": ["CompletionsPads", "CompletionsPads"],
@@ -188,7 +188,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     ## step 5: add elevations:
     elevation_nodes = [
-        'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
+        'ProductionPads', 'CompletionsPads', 'SWDSites', 'ExternalWaterSources', 
         'StorageSites', 'TreatmentSites', 'ReuseOptions', 'NetworkNodes'
     ]
 
@@ -218,7 +218,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "WellPressure": ["ProductionPads", "CompletionsPads"],
         "ReuseMinimum": ["ReuseOptions"],
         "ReuseCapacity": ["ReuseOptions"],
-        "FreshwaterSourcingAvailability": ["FreshwaterSources"],
+        "ExtWaterSourcingAvailability": ["ExternalWaterSources"],
         "DisposalOperatingCapacity": ["SWDSites"], ## AUTOFILL with ones?
     }
 
@@ -236,19 +236,19 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     ## step 7: add initial pipelines, capacities, ...
     initial_pipeline_tabs = {
         "InitialPipelineCapacity": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "InitialPipelineDiameters": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "PipelineOperationalCost": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "PipelineExpansionDistance": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "TruckingTime": [
@@ -309,8 +309,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
         "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
-        "FreshSourcingCost": ["FreshwaterSofurces"],
-        "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "FreshwaterSources"],
+        "ExternalSourcingCost": ["ExternalWaterSources"],
+        "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "ExternalWaterSources"],
         "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
         "BeneficialReuseCost": ["ReuseOptions"],
         "BeneficialReuseCredit": ["ReuseOptions"],
@@ -739,7 +739,7 @@ def PreprocessMapData(map_data):
         'SWDSites': {},
         'TreatmentSites': {},
         'StorageSites': {},
-        'FreshwaterSources': {},
+        'ExternalWaterSources': {},
         'ReuseOptions': {},
         'connections': {}
     }
@@ -751,7 +751,7 @@ def PreprocessMapData(map_data):
         'DisposalSite': 'SWDSites',
         'TreatmentSite': 'TreatmentSites',
         'StorageSite': 'StorageSites',
-        'FreshwaterSource': 'FreshwaterSources',
+        'ExternalWaterSource': 'ExternalWaterSources',
         'ReuseOption': 'ReuseOptions'
     }
 
