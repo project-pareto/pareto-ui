@@ -19,8 +19,6 @@ import time
 from pathlib import Path
 import tinydb
 from fastapi import HTTPException
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
 from importlib.resources import files
 
 import idaes.logger as idaeslog
@@ -28,7 +26,7 @@ from pareto.utilities.get_data import get_display_units
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
-from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel
+from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel, WriteJSONToExcel
 from app.internal.util import time_it
 
 # _log = idaeslog.getLogger(__name__)
@@ -768,12 +766,13 @@ class ScenarioHandler:
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
 
     ## TODO: generate excel for this scenario as well.
-    def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario"):
+    def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario From Data Input"):
+        new_id = self.next_id
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")
         return_object = {
             "name": scenarioName, 
-            "id": self.next_id, 
+            "id": new_id, 
             "date": date,
             "data_input": data_input, 
             "optimization": 
@@ -804,15 +803,40 @@ class ScenarioHandler:
                 }
             }
 
+        # write data to excel
+
+        excel_path = f"{self.excelsheets_path}/{new_id}"
+        excel_data = {
+            #  **data_input["df_sets"],
+            # **data_input["df_parameters"],
+        }
+        excel_data["display_units"] = data_input["display_units"]
+        for key in data_input["df_sets"]:
+            if key in excel_data:
+                _log.info(f"{key} is ALREADY IN data")
+            val = data_input["df_sets"][key]
+            excel_data[key] = val
+            # _log.info(f"{key} :: {val}")
+    
+        for key in data_input["df_parameters"]:
+            if key in excel_data:
+                _log.info(f"{key} is ALREADY IN data")
+            val = data_input["df_parameters"][key]
+            excel_data[key] = val
+            # _log.info(f"{key} :: {val}")
+        _log.info(f"Writing JSON To Excel")
+        WriteJSONToExcel(data=excel_data, output_file_name=excel_path)
+
+
         # check if db is in use. if so, wait til its done being used
+        # TODO: uncomment
         locked = self.LOCKED
         while(locked):
             time.sleep(0.5)
             locked = self.LOCKED
         self.LOCKED = True
-        self._db.insert({'id_': self.next_id, "scenario": return_object, 'version': self.VERSION})
+        self._db.insert({'id_': new_id, "scenario": return_object, 'version': self.VERSION})
         self.LOCKED = False
-
         self.update_next_id()
         self.retrieve_scenarios()
         
