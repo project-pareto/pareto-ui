@@ -138,7 +138,7 @@ export interface MapData {
   SWDSites: Record<string, any>;
   TreatmentSites: Record<string, any>;
   StorageSites: Record<string, any>;
-  FreshwaterSources: Record<string, any>;
+  ExternalWaterSources: Record<string, any>;
   ReuseOptions: Record<string, any>;
   other_nodes: Record<string, any>;
 
