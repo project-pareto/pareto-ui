@@ -1,6 +1,5 @@
 import shutil
 import os
-import time
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
@@ -605,9 +604,54 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     wb.close()
     return "success"
 
-## TODO: write this function
-def WriteJSONToExcel(data, output_file_name):
-    _log.info(f"writing json to excel")
+## TODO: test this function
+def WriteJSONToExcel(data, output_file_name, template_location = None):
+    _log.info("writing json to excel")
+    if template_location is None:
+        template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
+
+    excel_path = f'{output_file_name}.xlsx'
+    _print(f'writing data to excel at {excel_path}')
+
+    # step 1: copy pareto_input_template to new file for writing
+    shutil.copyfile(template_location, excel_path)
+
+    # step 2: open excel workbook
+    wb = load_workbook(excel_path, data_only=True)
+
+    for table_key, updatedTable in data.items():
+        if table_key not in wb.sheetnames:
+            _log.warning(f"unable to find sheet for {table_key}; skipping")
+            continue
+
+        ws = wb[table_key]
+        if isinstance(updatedTable, list):
+            row = 2
+            for cellValue in updatedTable:
+                cellLocation = f'{get_column_letter(1)}{row}'
+                ws[cellLocation] = None if cellValue == "" else cellValue
+                row += 1
+            continue
+
+        if not isinstance(updatedTable, dict):
+            _log.warning(f"unexpected table data for {table_key}; skipping")
+            continue
+
+        # update excel sheet, include headers
+        column = 1
+        for column_key in updatedTable:
+            headerLocation = f'{get_column_letter(column)}{2}'
+            ws[headerLocation] = column_key
+            row = 3
+            for cellValue in updatedTable[column_key]:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = None if cellValue == "" else cellValue
+                row += 1
+            column += 1
+
+    wb.save(excel_path)
+    wb.close()
+    return "success"
 
 def UpdateExcel(excel_path, table_key, updatedTable):
         try:
