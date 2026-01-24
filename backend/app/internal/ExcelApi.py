@@ -621,7 +621,6 @@ def WriteJSONToExcel(data, output_file_name, template_location = None):
         wb = load_workbook(excel_path, data_only=True)
 
         for table_key, updatedTable in data.items():
-            print(f"{table_key} :: {updatedTable}")
             if table_key not in wb.sheetnames:
                 _log.warning(f"unable to find sheet for {table_key}; skipping")
                 continue
