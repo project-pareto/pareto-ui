@@ -1,14 +1,18 @@
 import shutil
 import os
+import time
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+
+import logging
+_log = logging.getLogger(__name__)
 
 print_output = False
 def _print(output):
     if print_output:
-        print(output)
+        _log.info(output)
 
-def WriteDataToExcel(data, output_file_name, template_location = None):
+def WriteMapDataToExcel(data, output_file_name, template_location = None):
     """
     Write map_data to excel
     Accepts: map_data, output file name, template location (optional)
@@ -600,6 +604,46 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
     wb.save(excel_path)
     wb.close()
     return "success"
+
+## TODO: write this function
+def WriteJSONToExcel(data, output_file_name):
+    _log.info(f"writing json to excel")
+
+def UpdateExcel(excel_path, table_key, updatedTable):
+        try:
+            wb = load_workbook(excel_path, data_only=True)
+            _log.info(f'loaded workbook from path: {excel_path}')
+            x = 1
+            y = 3
+            ws = wb[table_key]
+
+            # update excel sheet
+            _log.info(f'updating table: {updatedTable}')
+            for column in updatedTable:
+                y = 3
+                for cellValue in updatedTable[column]:
+                    cellLocation = f'{get_column_letter(x)}{y}'
+                    originalValue = ws[cellLocation].value
+                    if cellValue == "":
+                        newValue = None
+                    else:
+                        newValue = cellValue
+                    if originalValue != newValue:
+                        _log.info(f'updating {cellLocation} to {newValue}')
+                        ws[cellLocation] = newValue
+                    y+=1
+                x+=1
+            wb.save(excel_path)
+            wb.close()
+            _log.info(f'saved workbook')
+
+        except Exception as e:
+            _log.error(f"Unable to update excel: {e}")
+            return "failure"
+
+        return "success"
+
+
 
 def determineConnectionsFromArcs(data):
     """

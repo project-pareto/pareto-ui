@@ -28,7 +28,7 @@ from pareto.utilities.get_data import get_display_units
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
-from app.internal.ExcelApi import PreprocessMapData, WriteDataToExcel
+from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel
 from app.internal.util import time_it
 
 # _log = idaeslog.getLogger(__name__)
@@ -701,40 +701,8 @@ class ScenarioHandler:
     def update_excel(self, id, table_key, updatedTable):
         _log.info(f'updating id {id} table {table_key}')
         excel_path = self.get_excelsheet_path(id)
-        wb = load_workbook(excel_path, data_only=True)
-        _log.info(f'loaded workbook from path: {excel_path}')
 
-        x = 1
-        y = 3
-        ws = wb[table_key]
-        # for column in scenario["data_input"]["df_parameters"][table_key]:
-
-        # update excel sheet
-        # _log.info(f'updating table: {updatedTable}')
-        for column in updatedTable:
-            y = 3
-            for cellValue in updatedTable[column]:
-                cellLocation = f'{get_column_letter(x)}{y}'
-                originalValue = ws[cellLocation].value
-                if cellValue == "":
-                    newValue = None
-                else:
-                    newValue = cellValue
-                    # try:
-                    #     newValue = int(cellValue)
-                    # except ValueError:
-                    #     try:
-                    #         newValue = float(cellValue)
-                    #     except: 
-                    #         newValue = cellValue
-                if originalValue != newValue:
-                    # print('updating value')
-                    ws[cellLocation] = newValue
-                y+=1
-            x+=1
-        wb.save(excel_path)
-        wb.close()
-        _log.info(f'saved workbook')
+        UpdateExcel(excel_path=excel_path, table_key=table_key, updatedTable=updatedTable)
         # fetch scenario
         try:
             # check if db is in use. if so, wait til its done being used
@@ -796,9 +764,10 @@ class ScenarioHandler:
         excel_path = self.get_excelsheet_path(scenario.get("id"))
         if map_data is not None:
             preprocessed_map_data = PreprocessMapData(map_data)
-            WriteDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
+            WriteMapDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
 
+    ## TODO: generate excel for this scenario as well.
     def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario"):
         current_day = datetime.date.today()
         date = datetime.date.strftime(current_day, "%m/%d/%Y")

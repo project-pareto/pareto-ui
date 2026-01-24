@@ -24,7 +24,7 @@ from app.internal.scenario_handler import (
     scenario_handler,
 )
 from app.internal.KMZParser import ParseKMZ
-from app.internal.ExcelApi import WriteDataToExcel, PreprocessMapData
+from app.internal.ExcelApi import WriteMapDataToExcel, PreprocessMapData
 from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
 from app.internal.util import time_it
 
@@ -106,7 +106,7 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
                 content = await file.read()
                 await out_file.write(content) 
             kmz_data = ParseKMZ(kmz_path, defaultNodeType)
-            WriteDataToExcel(kmz_data, excel_path)
+            WriteMapDataToExcel(kmz_data, excel_path)
             kmz_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=kmz_data)
         except Exception as e:
@@ -123,7 +123,7 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
             shp_paths = extract_shp_paths(zip_path)
             map_data = parseShapefiles(shp_paths, defaultNodeType)
             map_data = PreprocessMapData(map_data)
-            WriteDataToExcel(map_data, excel_path)
+            WriteMapDataToExcel(map_data, excel_path)
             map_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=map_data)
         except Exception as e:
@@ -166,7 +166,7 @@ async def upload_additional_map(scenario_id: int, defaultNodeType: str = "Networ
                 content = await file.read()
                 await out_file.write(content) 
             map_data = ParseKMZ(kmz_path, defaultNodeType, initial_map_data=initial_map_data)
-            WriteDataToExcel(map_data, excel_path)
+            WriteMapDataToExcel(map_data, excel_path)
             return scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
         except Exception as e:
             _log.error(f"error on file upload: {str(e)}")
@@ -181,7 +181,7 @@ async def upload_additional_map(scenario_id: int, defaultNodeType: str = "Networ
             shp_paths = extract_shp_paths(zip_path)
             map_data = parseShapefiles(shp_paths, defaultNodeType, initial_map_data)
             map_data = PreprocessMapData(map_data)
-            WriteDataToExcel(map_data, excel_path)
+            WriteMapDataToExcel(map_data, excel_path)
             return scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
         except Exception as e:
             _log.exception(f"Error on file upload")
