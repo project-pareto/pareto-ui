@@ -16,8 +16,10 @@ import ScenarioList from "./views/ScenarioList/ScenarioList";
 import ScenarioCompare from "./views/ScenarioCompare/ScenarioCompare";
 import LandingPage from "./views/LandingPage/LandingPage";
 import ModelCompletionBar from "./components/ModelCompletionBar/ModelCompletionBar";
+import AIPromptStatusBar from "./components/AIPromptStatusBar/AIPromptStatusBar";
 
 import { ScenarioProvider, useScenario } from "./context/ScenarioContext";
+import { AIPromptProvider } from "./context/AIPromptContext";
 
 function AppInner(): React.ReactElement {
   const {
@@ -69,9 +71,8 @@ function AppInner(): React.ReactElement {
           <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
 
-        {showCompletedOptimization && (
-          <ModelCompletionBar/>
-        )}
+        {showCompletedOptimization && <ModelCompletionBar/>}
+        <AIPromptStatusBar/>
       </div>
     </ThemeProvider>
   );
@@ -82,7 +83,9 @@ function App(): React.ReactElement {
 
   return (
     <ScenarioProvider navigate={navigate}>
-      <AppInner />
+      <AIPromptProvider>
+        <AppInner />
+      </AIPromptProvider>
     </ScenarioProvider>
   );
 }

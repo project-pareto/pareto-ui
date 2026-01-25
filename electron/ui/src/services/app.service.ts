@@ -136,6 +136,6 @@ export const requestAIDataUpdate = (backend_port: number, id: number | string, p
     return fetch(endpoint, {
         method: 'POST', 
         mode: 'cors',
-        body: JSON.stringify(prompt)
+        body: JSON.stringify({"prompt": prompt})
     });
 }

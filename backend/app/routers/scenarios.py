@@ -453,7 +453,7 @@ async def generate_report(id: str):
 
 
 @router.post("/request_ai_data_update/{id}")
-async def request_ai_data_update(request: Request, id: str) -> dict:
+async def request_ai_data_update(request: Request, id: int) -> dict:
     """Prompt AI to fill out data.
     TODO: 
         - In the future, we should add authentication to this endpoint.

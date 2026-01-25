@@ -12,6 +12,8 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import AddIcon from '@mui/icons-material/Add';
 import { generateExcelFromMap } from '../../services/app.service';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AIPromptDialog from '../AIPromptDialog/AIPromptDialog';
 
 
 export default function Bottombar(props) {
@@ -39,11 +41,14 @@ export default function Bottombar(props) {
     const [ newScenarioName, setNewScenarioName ] = useState('')
     const [ showModalError, setShowModalError ] = useState(false)
     const [ modalError, setModalError ] = useState('')
+    const [ openAIPrompt, setOpenAIPrompt ] = useState(false)
     const [ key, setKey ] =  useState(null)
     const [ hasOverride, setHasOverride ] = useState(false)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
     const handleCloseSaveModal = () => setOpenSaveModal(false);
     const handleCloseRerunModal = () => setOpenRerunModal(false);
+    const handleOpenAIPrompt = () => setOpenAIPrompt(true);
+    const handleCloseAIPrompt = () => setOpenAIPrompt(false);
 
 
     const styles = {
@@ -191,15 +196,26 @@ export default function Bottombar(props) {
                             >
                               continue to optimization
                             </Button> : 
-                            <Button
-                              sx={styles.filled}
-                              onClick={handleClickGenerateSpreadsheet}
-                              variant="contained"
-                              size="large"
-                              startIcon={<FileDownloadIcon />}
-                            >
-                              Generate Spreadsheet From Network
-                            </Button>
+                            <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                              <Button
+                                sx={styles.filled}
+                                onClick={handleClickGenerateSpreadsheet}
+                                variant="contained"
+                                size="large"
+                                startIcon={<FileDownloadIcon />}
+                              >
+                                Generate Spreadsheet From Network
+                              </Button>
+                              <Button
+                                sx={styles.unfilled}
+                                onClick={handleOpenAIPrompt}
+                                variant="outlined"
+                                size="large"
+                                startIcon={<AutoAwesomeIcon />}
+                              >
+                                AI Fill Inputs
+                              </Button>
+                            </Box>
                         )}
                         {section === 1 && (
                           <Button
@@ -270,9 +286,13 @@ export default function Bottombar(props) {
         showError={showModalError}
         errorText={modalError}
       />
+      <AIPromptDialog
+        open={openAIPrompt}
+        onClose={handleCloseAIPrompt}
+        scenarioId={id}
+        scenarioName={name}
+      />
     </Box>
   );
 
 }
-
-

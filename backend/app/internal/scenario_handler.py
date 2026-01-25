@@ -20,6 +20,7 @@ from pathlib import Path
 import tinydb
 from fastapi import HTTPException
 from importlib.resources import files
+import json
 
 import idaes.logger as idaeslog
 from pareto.utilities.get_data import get_display_units
@@ -27,7 +28,7 @@ from pareto.utilities.get_data import get_display_units
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
 from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel, WriteJSONToExcel
-from app.internal.util import time_it, PromptPrefix
+from app.internal.util import time_it, FormatPrompt
 from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
@@ -134,6 +135,7 @@ class ScenarioHandler:
         self.LOCKED = False
 
     def retrieve_scenario(self, id):
+        ## TODO: this function is broken
         _log.info(f"retrieving scenario: {id}")
         query = tinydb.Query()
         res = self._db.search((query.id_ == id) & (query.version == self.VERSION))
@@ -592,6 +594,8 @@ class ScenarioHandler:
         self.retrieve_scenarios()
 
     def get_scenario(self, id):
+        ## TODO: THis function is broken. should id be string or number, or does it not matter?
+        _log.info(f"inside get_scenario")
         try:
             # check if db is in use. if so, wait til its done being used
             locked = self.LOCKED
@@ -602,6 +606,7 @@ class ScenarioHandler:
             query = tinydb.Query()
             scenario = self._db.search((query.id_ == id) & (query.version == self.VERSION))
             self.LOCKED = False
+            _log.info(f"returning scenario[0]['scenario]")
             return scenario[0]['scenario']
         except Exception as e:
             _log.error(f'unable to get scenario with id {id}: {e}')
@@ -846,15 +851,24 @@ class ScenarioHandler:
     def udpate_map_data_from_JSON(self):
         _log.info(f"udpate_map_data_from_JSON")
     
+    @time_it
     def generate_data_with_ai(self, id, user_prompt):
         _log.info(f"generate_data_with_ai user prompt: {user_prompt}")
-        scenario = self.retrieve_scenario(id)
-        data_input = scenario.get("data_input", None)
+        try:
+
+            scenario = self.scenario_list[id]
+            data_input = scenario.get("data_input", None)
+        except Exception as e:
+            return {
+                "error": "invalid scenario"
+            }
         if data_input:
-            prompt_prefix = PromptPrefix()
-            prompt = f"{prompt_prefix}\n{user_prompt}"
-            _log.info(f"full prompt: {prompt}")
+            prompt = FormatPrompt(user_prompt=user_prompt, data=data_input)
+            # _log.info(f"full prompt: {prompt}")
+            _log.info(f"hitting cborg now")
             resp = cborg.prompt(prompt)
+            _log.info(f"resp: {resp}")
+            answer = json.loads(resp)
 
             ## TODO: 
             ## 1) check if the prompt response was good (resp.status)
@@ -862,17 +876,19 @@ class ScenarioHandler:
             ## 3) We must also update the map data (need function for this) and excel sheet
             ## 4) Optionally, we could display the updates to the user 
 
-            status = resp.get("status")
+            ## sample prompt: Can you fill in completions demand with 10000 barrels in each time period
+
+            status = answer.get("status")
             _log.info(f"ai response status: {status}")
             if status == "error":
-                _log.info(f"error response from AI: {resp.get('errorMessage')}")
-                return resp
+                _log.info(f"error response from AI: {answer.get('errorMessage')}")
+                return answer
             
-            updatedScenario = resp.get("updatedScenario")
-            return resp
+            updatedScenario = answer.get("updatedScenario")
+            return answer
         else:
             return {
-                "error": "invalid scenario"
+                "error": "unable to process request"
             }
 
 
