@@ -32,6 +32,10 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
   const [prompt, setPrompt] = useState("");
   const [promptError, setPromptError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"notes" | "diff">("notes");
+  const aiDataInput = useMemo(() => {
+    if (!updatedScenario) return null;
+    return (updatedScenario as any).data_input ? (updatedScenario as any).data_input : updatedScenario;
+  }, [updatedScenario]);
 
   const statusLabel = useMemo(() => {
     if (status === "running") return "Running";
@@ -52,7 +56,6 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
 
   const handleSaveUpdates = (): void => {
     if (!scenarioData || !updatedScenario) return;
-    const aiDataInput = (updatedScenario as any).data_input ? (updatedScenario as any).data_input : updatedScenario;
     const mergedScenario = {
       ...scenarioData,
       data_input: {
@@ -76,39 +79,111 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
 
   const hasUpdates = updateNotes.length > 0;
   const showSuccessPanel = status === "success";
-  const diffLines = useMemo(() => {
-    if (!scenarioData || !updatedScenario) return [];
-    const aiDataInput = (updatedScenario as any).data_input ? (updatedScenario as any).data_input : updatedScenario;
-    const current = scenarioData.data_input || {};
-    const next = aiDataInput || {};
-    const lines: string[] = [];
+  const sanitizedUpdateNotes = useMemo(() => {
+    const stripPrefix = (note: string): string =>
+      note
+        .replace(/df_parameters\[['"]([^'"]+)['"]\]/g, "$1")
+        .replace(/df_parameters\./g, "");
+    return updateNotes.map(stripPrefix);
+  }, [updateNotes]);
+  const diffTables = useMemo(() => {
+    if (!scenarioData || !aiDataInput) return [];
+    const currentTables = scenarioData.data_input?.df_parameters || {};
+    const nextTables = (aiDataInput as any).df_parameters || {};
+    const tableKeys = new Set<string>([...Object.keys(currentTables), ...Object.keys(nextTables)]);
+    const tableDiffs: Array<{
+      key: string;
+      columns: string[];
+      rows: Array<{ index: number; cells: any[]; changed: boolean[] }>;
+      totalChangedRows: number;
+      hasMoreRows: boolean;
+      nonTabular: boolean;
+    }> = [];
 
-    const summarize = (value: any): string => {
-      if (Array.isArray(value)) return `array(${value.length})`;
-      if (value && typeof value === "object") return `object(${Object.keys(value).length})`;
-      return JSON.stringify(value);
-    };
+      const formatCell = (value: any): string => {
+        if (value === "" || value === null || value === undefined) return "—";
+        if (typeof value === "object") return "…";
+        return String(value);
+      };
 
-    const compare = (prev: any, nextVal: any, prefix: string): void => {
-      const prevObj = prev && typeof prev === "object" && !Array.isArray(prev);
-      const nextObj = nextVal && typeof nextVal === "object" && !Array.isArray(nextVal);
-      if (!prevObj || !nextObj) {
-        if (JSON.stringify(prev) !== JSON.stringify(nextVal)) {
-          lines.push(`${prefix}: ${summarize(prev)} -> ${summarize(nextVal)}`);
-        }
+    tableKeys.forEach((tableKey) => {
+      const prevTable = currentTables[tableKey] || {};
+      const nextTable = nextTables[tableKey] || {};
+      if (JSON.stringify(prevTable) === JSON.stringify(nextTable)) return;
+
+      const columnKeys = Array.from(
+        new Set<string>([...Object.keys(prevTable || {}), ...Object.keys(nextTable || {})])
+      );
+      const nonTabular = columnKeys.some((key) => {
+        const prevVal = (prevTable as any)[key];
+        const nextVal = (nextTable as any)[key];
+        const testVal = nextVal !== undefined ? nextVal : prevVal;
+        return testVal !== undefined && !Array.isArray(testVal);
+      });
+
+      if (nonTabular) {
+        tableDiffs.push({
+          key: tableKey,
+          columns: [],
+          rows: [],
+          totalChangedRows: 0,
+          hasMoreRows: false,
+          nonTabular: true,
+        });
         return;
       }
 
-      const keys = new Set<string>([...Object.keys(prev || {}), ...Object.keys(nextVal || {})]);
-      keys.forEach((key) => {
-        compare(prev?.[key], nextVal?.[key], prefix ? `${prefix}.${key}` : key);
-      });
-    };
+      const maxRows = Math.max(
+        ...columnKeys.map((key) => {
+          const prevVal = (prevTable as any)[key] || [];
+          const nextVal = (nextTable as any)[key] || [];
+          return Math.max(prevVal.length || 0, nextVal.length || 0);
+        }),
+        0
+      );
 
-    compare(current, next, "");
-    return lines;
-  }, [scenarioData, updatedScenario]);
-  const diffPreview = diffLines.slice(0, 200);
+      const changedRows: Array<{ index: number; cells: any[]; changed: boolean[] }> = [];
+      for (let rowIndex = 0; rowIndex < maxRows; rowIndex += 1) {
+        let rowChanged = false;
+        const cells = columnKeys.map((key) => {
+          const nextVal = (nextTable as any)[key] || [];
+          return nextVal[rowIndex];
+        });
+        const changed = columnKeys.map((key, idx) => {
+          const prevVal = (prevTable as any)[key] || [];
+          const nextVal = (nextTable as any)[key] || [];
+          const prevCell = prevVal[rowIndex];
+          const nextCell = nextVal[rowIndex];
+          const cellChanged = JSON.stringify(prevCell) !== JSON.stringify(nextCell);
+          if (cellChanged) rowChanged = true;
+          return cellChanged;
+        });
+        if (rowChanged) {
+          changedRows.push({
+            index: rowIndex,
+            cells: cells.map(formatCell),
+            changed,
+          });
+        }
+      }
+
+      const previewRows = changedRows.slice(0, 6);
+      tableDiffs.push({
+        key: tableKey,
+        columns: columnKeys.slice(0, 6),
+        rows: previewRows.map((row) => ({
+          ...row,
+          cells: row.cells.slice(0, 6),
+          changed: row.changed.slice(0, 6),
+        })),
+        totalChangedRows: changedRows.length,
+        hasMoreRows: changedRows.length > previewRows.length,
+        nonTabular: false,
+      });
+    });
+
+    return tableDiffs;
+  }, [aiDataInput, scenarioData]);
 
   return (
     <Dialog
@@ -187,7 +262,7 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
             {viewMode === "notes" ? (
               hasUpdates ? (
                 <Box component="ul" sx={{ paddingLeft: "18px", margin: 0, color: "text.secondary" }}>
-                  {updateNotes.map((note, index) => (
+                  {sanitizedUpdateNotes.map((note, index) => (
                     <Typography key={`${index}-${note}`} component="li" variant="body2" sx={{ mb: 0.5 }}>
                       {note}
                     </Typography>
@@ -198,19 +273,82 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
                   No update notes returned. You can still save the changes if needed.
                 </Typography>
               )
-            ) : diffPreview.length ? (
-              <Box component="ul" sx={{ paddingLeft: "18px", margin: 0, color: "text.secondary" }}>
-                {diffPreview.map((line, index) => (
-                  <Typography key={`${index}-${line}`} component="li" variant="body2" sx={{ mb: 0.5 }}>
-                    {line}
-                  </Typography>
+            ) : diffTables.length ? (
+              <Stack spacing={2}>
+                {diffTables.map((table) => (
+                  <Box key={table.key} sx={{ border: "1px solid rgba(1, 103, 143, 0.2)", borderRadius: 2 }}>
+                    <Box
+                      sx={{
+                        px: 2,
+                        py: 1,
+                        bgcolor: "rgba(1, 103, 143, 0.08)",
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                      }}
+                    >
+                      <Typography variant="subtitle2">{table.key}</Typography>
+                    </Box>
+                    {table.nonTabular ? (
+                      <Box sx={{ px: 2, py: 1.5 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Updated non-tabular values detected for this table.
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box sx={{ px: 2, py: 1.5, overflowX: "auto" }}>
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: `minmax(36px, 48px) repeat(${table.columns.length}, minmax(120px, 1fr))`,
+                            gap: 1.5,
+                            fontSize: "0.75rem",
+                            minWidth: `${(table.columns.length + 1) * 120}px`,
+                          }}
+                        >
+                          <Box sx={{ fontWeight: 600, color: "text.secondary" }}>#</Box>
+                          {table.columns.map((col) => (
+                            <Box key={col} sx={{ fontWeight: 600, color: "text.secondary" }}>
+                              {col}
+                            </Box>
+                          ))}
+                          {table.rows.map((row) => (
+                            <React.Fragment key={`${table.key}-${row.index}`}>
+                              <Box sx={{ color: "text.secondary" }}>{row.index + 1}</Box>
+                              {row.cells.map((cell, idx) => (
+                                <Box
+                                  key={`${table.key}-${row.index}-${idx}`}
+                                  sx={{
+                                    px: 0.5,
+                                    py: 0.25,
+                                    borderRadius: 1,
+                                    border: row.changed[idx]
+                                      ? "1px solid rgba(1, 103, 143, 0.55)"
+                                      : "1px solid rgba(0, 0, 0, 0.08)",
+                                    bgcolor: row.changed[idx] ? "rgba(1, 103, 143, 0.22)" : "transparent",
+                                    color: row.changed[idx] ? "text.primary" : "text.secondary",
+                                    fontWeight: row.changed[idx] ? 600 : 400,
+                                    opacity: row.changed[idx] ? 1 : 0.55,
+                                  }}
+                                >
+                                  {cell}
+                                </Box>
+                              ))}
+                            </React.Fragment>
+                          ))}
+                        </Box>
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {table.totalChangedRows === 0
+                              ? "No row-level changes detected."
+                              : `Showing ${table.rows.length} of ${table.totalChangedRows} changed rows.`}
+                            {table.hasMoreRows ? " Refine your prompt or review full data after saving." : ""}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
                 ))}
-                {diffLines.length > diffPreview.length && (
-                  <Typography variant="caption" color="text.secondary">
-                    Showing first {diffPreview.length} changes of {diffLines.length}.
-                  </Typography>
-                )}
-              </Box>
+              </Stack>
             ) : (
               <Typography variant="body2" color="text.secondary">
                 No differences detected between the current scenario and the AI updates.
