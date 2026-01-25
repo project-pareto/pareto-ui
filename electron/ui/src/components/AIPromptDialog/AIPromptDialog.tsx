@@ -9,6 +9,8 @@ import {
   DialogTitle,
   LinearProgress,
   Stack,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -29,6 +31,7 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
   const { scenarioData, handleScenarioUpdate } = useScenario();
   const [prompt, setPrompt] = useState("");
   const [promptError, setPromptError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"notes" | "diff">("notes");
 
   const statusLabel = useMemo(() => {
     if (status === "running") return "Running";
@@ -57,15 +60,14 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
         ...aiDataInput,
       },
     };
-    console.log("handlesaveupdate:")
-    console.log(mergedScenario)
-    handleScenarioUpdate(mergedScenario, false, true);
+    handleScenarioUpdate(mergedScenario, false, false);
   };
 
   const handleClearPrompt = (): void => {
     clearResult();
     setPrompt("");
     setPromptError(null);
+    setViewMode("notes");
   };
 
   const handleClose = (): void => {
@@ -74,6 +76,39 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
 
   const hasUpdates = updateNotes.length > 0;
   const showSuccessPanel = status === "success";
+  const diffLines = useMemo(() => {
+    if (!scenarioData || !updatedScenario) return [];
+    const aiDataInput = (updatedScenario as any).data_input ? (updatedScenario as any).data_input : updatedScenario;
+    const current = scenarioData.data_input || {};
+    const next = aiDataInput || {};
+    const lines: string[] = [];
+
+    const summarize = (value: any): string => {
+      if (Array.isArray(value)) return `array(${value.length})`;
+      if (value && typeof value === "object") return `object(${Object.keys(value).length})`;
+      return JSON.stringify(value);
+    };
+
+    const compare = (prev: any, nextVal: any, prefix: string): void => {
+      const prevObj = prev && typeof prev === "object" && !Array.isArray(prev);
+      const nextObj = nextVal && typeof nextVal === "object" && !Array.isArray(nextVal);
+      if (!prevObj || !nextObj) {
+        if (JSON.stringify(prev) !== JSON.stringify(nextVal)) {
+          lines.push(`${prefix}: ${summarize(prev)} -> ${summarize(nextVal)}`);
+        }
+        return;
+      }
+
+      const keys = new Set<string>([...Object.keys(prev || {}), ...Object.keys(nextVal || {})]);
+      keys.forEach((key) => {
+        compare(prev?.[key], nextVal?.[key], prefix ? `${prefix}.${key}` : key);
+      });
+    };
+
+    compare(current, next, "");
+    return lines;
+  }, [scenarioData, updatedScenario]);
+  const diffPreview = diffLines.slice(0, 200);
 
   return (
     <Dialog
@@ -136,20 +171,49 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
         )}
         {showSuccessPanel && (
           <Box sx={{ mt: 3, p: 2, borderRadius: 2, bgcolor: "rgba(1, 103, 143, 0.08)" }}>
+            <Tabs
+              value={viewMode}
+              onChange={(_, value) => setViewMode(value as "notes" | "diff")}
+              textColor="primary"
+              indicatorColor="primary"
+              sx={{ mb: 2 }}
+            >
+              <Tab value="notes" label="Update Notes" />
+              <Tab value="diff" label="View Diff" />
+            </Tabs>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Update Notes
+              {viewMode === "notes" ? "Update Notes" : "Data Diff"}
             </Typography>
-            {hasUpdates ? (
+            {viewMode === "notes" ? (
+              hasUpdates ? (
+                <Box component="ul" sx={{ paddingLeft: "18px", margin: 0, color: "text.secondary" }}>
+                  {updateNotes.map((note, index) => (
+                    <Typography key={`${index}-${note}`} component="li" variant="body2" sx={{ mb: 0.5 }}>
+                      {note}
+                    </Typography>
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No update notes returned. You can still save the changes if needed.
+                </Typography>
+              )
+            ) : diffPreview.length ? (
               <Box component="ul" sx={{ paddingLeft: "18px", margin: 0, color: "text.secondary" }}>
-                {updateNotes.map((note, index) => (
-                  <Typography key={`${index}-${note}`} component="li" variant="body2" sx={{ mb: 0.5 }}>
-                    {note}
+                {diffPreview.map((line, index) => (
+                  <Typography key={`${index}-${line}`} component="li" variant="body2" sx={{ mb: 0.5 }}>
+                    {line}
                   </Typography>
                 ))}
+                {diffLines.length > diffPreview.length && (
+                  <Typography variant="caption" color="text.secondary">
+                    Showing first {diffPreview.length} changes of {diffLines.length}.
+                  </Typography>
+                )}
               </Box>
             ) : (
               <Typography variant="body2" color="text.secondary">
-                No update notes returned. You can still save the changes if needed.
+                No differences detected between the current scenario and the AI updates.
               </Typography>
             )}
           </Box>

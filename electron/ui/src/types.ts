@@ -254,6 +254,21 @@ export interface AppState {
   [key: string]: any;
 }
 
+export interface AIPromptUpdatedScenario {
+  df_sets?: DfSets;
+  df_parameters?: DfParameters;
+  display_units?: DisplayUnits;
+  map_data?: any;
+}
+
+export interface AIPromptResponse {
+  status: "success" | "error";
+  updatedScenario?: AIPromptUpdatedScenario;
+  updateNotes?: string[];
+  errorMessage?: string;
+  error?: string;
+}
+
 // Map / Editor related types
 export type CoordinateTuple = [number | string, number | string];
 
@@ -604,4 +619,3 @@ export interface ScenarioCompareSidebarProps {
   compareScenarioIndexes?: Array<string | number>;
   [key: string]: any;
 }
-

@@ -227,16 +227,12 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     const temp = { ...scenarios };
     temp[scenarioIndex as any] = { ...updatedScenario };
     setScenarios(temp);
-    console.log("setting scenario data: ")
-    console.log(updatedScenario)
     setScenarioData({ ...updatedScenario });
 
     updateScenario(port, { updatedScenario: { ...updatedScenario }, propagateChanges: propagateChanges || false })
       .then((response) => response.json())
       .then((data) => {
         if (propagateChanges) {
-          console.log("setting scenario data again")
-          console.log(data.data)
           setScenarioData({ ...data.data });
         }
       })

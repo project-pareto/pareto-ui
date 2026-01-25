@@ -1,24 +1,9 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { requestAIDataUpdate } from "../services/app.service";
 import { useApp } from "../AppContext";
-import type { DfParameters, DfSets, DisplayUnits } from "../types";
+import type { AIPromptResponse, AIPromptUpdatedScenario } from "../types";
 
 type AIPromptStatus = "idle" | "running" | "success" | "error";
-
-export interface AIPromptUpdatedScenario {
-  df_sets?: DfSets;
-  df_parameters?: DfParameters;
-  display_units?: DisplayUnits;
-  map_data?: any;
-}
-
-export interface AIPromptResponse {
-  status: "success" | "error";
-  updatedScenario?: AIPromptUpdatedScenario;
-  updateNotes?: string[];
-  errorMessage?: string;
-  error?: string;
-}
 
 export interface AIPromptContextValue {
   status: AIPromptStatus;
