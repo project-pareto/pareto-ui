@@ -272,7 +272,7 @@ class OpenAIClientWrapper:
 
 base_url = os.environ.get("CBORG_BASE_URL", "https://api.cborg.lbl.gov")
 
-wrapper = OpenAIClientWrapper(
+cborg = OpenAIClientWrapper(
     api_key=os.environ.get("CBORG_API_KEY"),
     base_url=base_url,
     model="openai/gpt-5.2",

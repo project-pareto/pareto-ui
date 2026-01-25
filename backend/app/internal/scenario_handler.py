@@ -27,7 +27,8 @@ from pareto.utilities.get_data import get_display_units
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
 from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel, WriteJSONToExcel
-from app.internal.util import time_it
+from app.internal.util import time_it, PromptPrefix
+from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -765,7 +766,6 @@ class ScenarioHandler:
             WriteMapDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
 
-    ## TODO: generate excel for this scenario as well.
     def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario From Data Input"):
         new_id = self.next_id
         current_day = datetime.date.today()
@@ -841,5 +841,39 @@ class ScenarioHandler:
         self.retrieve_scenarios()
         
         return return_object
+    
+    ## TODO: fill this function out
+    def udpate_map_data_from_JSON(self):
+        _log.info(f"udpate_map_data_from_JSON")
+    
+    def generate_data_with_ai(self, id, user_prompt):
+        _log.info(f"generate_data_with_ai user prompt: {user_prompt}")
+        scenario = self.retrieve_scenario(id)
+        data_input = scenario.get("data_input", None)
+        if data_input:
+            prompt_prefix = PromptPrefix()
+            prompt = f"{prompt_prefix}\n{user_prompt}"
+            _log.info(f"full prompt: {prompt}")
+            resp = cborg.prompt(prompt)
+
+            ## TODO: 
+            ## 1) check if the prompt response was good (resp.status)
+            ## 2) If ok, update scenario in DB
+            ## 3) We must also update the map data (need function for this) and excel sheet
+            ## 4) Optionally, we could display the updates to the user 
+
+            status = resp.get("status")
+            _log.info(f"ai response status: {status}")
+            if status == "error":
+                _log.info(f"error response from AI: {resp.get('errorMessage')}")
+                return resp
+            
+            updatedScenario = resp.get("updatedScenario")
+            return resp
+        else:
+            return {
+                "error": "invalid scenario"
+            }
+
 
 scenario_handler = ScenarioHandler()

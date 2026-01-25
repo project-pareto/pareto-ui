@@ -450,3 +450,29 @@ async def generate_report(id: str):
     """
     path = scenario_handler.get_excel_output_path(id)
     return FileResponse(path)
+
+
+@router.post("/request_ai_data_update/{id}")
+async def request_ai_data_update(request: Request, id: str) -> dict:
+    """Prompt AI to fill out data.
+    TODO: 
+        - In the future, we should add authentication to this endpoint.
+        - We could even host this endpoint on a server somewhere else that
+            is locked down.
+        - User would have to provide their own API key.
+        - We can also allow for choice of model, model base_url, etc.
+
+    Args:
+        id: scenario id
+        request.prompt: Prompt to provide to AI.
+
+    Returns:
+        Updated scenario
+    """
+    req = await request.json()
+    prompt = req.get("prompt", None)
+    if prompt:
+        updatedScenario = scenario_handler.generate_data_with_ai(id, prompt)
+    else:
+        raise HTTPException(400, detail=f"Please provide a prompt.")
+    return updatedScenario
