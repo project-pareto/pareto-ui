@@ -763,6 +763,8 @@ class ScenarioHandler:
     
     @time_it
     def propagate_scenario_changes(self, scenario):
+        ##TODO: this propogates map to json
+        # We need a function that propogates json to map
         data_input = scenario.get("data_input", {})
         map_data = data_input.get("map_data", None)
         excel_path = self.get_excelsheet_path(scenario.get("id"))

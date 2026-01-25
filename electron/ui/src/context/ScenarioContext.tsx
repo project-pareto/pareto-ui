@@ -219,7 +219,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     navigate("/scenario", { replace: true });
   };
 
-  const handleScenarioUpdate = (updatedScenario: any, keepOptimized?: boolean, propagateChanges?: boolean): void => {
+  const handleScenarioUpdate = (updatedScenario: any, keepOptimized?: boolean, propagateChanges: boolean = false): void => {
     if (updatedScenario.results.status === "Optimized" && !keepOptimized) {
       updatedScenario.results.status = "Not Optimized";
     }
@@ -227,12 +227,16 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     const temp = { ...scenarios };
     temp[scenarioIndex as any] = { ...updatedScenario };
     setScenarios(temp);
+    console.log("setting scenario data: ")
+    console.log(updatedScenario)
     setScenarioData({ ...updatedScenario });
 
     updateScenario(port, { updatedScenario: { ...updatedScenario }, propagateChanges: propagateChanges || false })
       .then((response) => response.json())
       .then((data) => {
         if (propagateChanges) {
+          console.log("setting scenario data again")
+          console.log(data.data)
           setScenarioData({ ...data.data });
         }
       })
