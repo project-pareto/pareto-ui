@@ -78,7 +78,7 @@ async def update(request: Request):
     scenario_id = updated_scenario.get("id")
     if propagate_changes and scenario_id:
         _log.info(f"propagating changes to excel")
-        scenario_handler.propagate_scenario_changes(updated_scenario)
+        scenario_handler.propagate_map_data(updated_scenario)
         scenario = scenario_handler.get_scenario(scenario_id)
         return {"data": scenario}
 
@@ -434,7 +434,7 @@ async def generate_excel_from_map(id: int):
     """
     scenario = scenario_handler.get_scenario(id)
     excel_path = scenario_handler.get_excelsheet_path(id)
-    scenario_handler.propagate_scenario_changes(scenario=scenario)
+    scenario_handler.propagate_map_data(scenario=scenario)
     return FileResponse(excel_path)
 
 

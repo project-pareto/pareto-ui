@@ -762,8 +762,8 @@ class ScenarioHandler:
         return Path(f'{os.path.dirname(os.path.abspath(__file__))}/assets/')
     
     @time_it
-    def propagate_scenario_changes(self, scenario):
-        ##TODO: this propagates map to json
+    def propagate_map_data(self, scenario):
+        ##TODO: this propagates map to Excel, json
         # We need a function that propogates json to map
         data_input = scenario.get("data_input", {})
         map_data = data_input.get("map_data", None)
@@ -777,6 +777,24 @@ class ScenarioHandler:
 
             ## 3) Extract Excel data into JSON, save in DB
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
+
+    @time_it
+    def propagate_json_data(self, scenario):
+        data_input = scenario.get("data_input", {})
+        excel_path = self.get_excelsheet_path(scenario.get("id"))
+        if data_input is not None:
+            ## 1) TODO: Format JSON data to map
+
+            ## 2) TODO: After formatting, save in DB
+            self.update_scenario(scenario=scenario)
+
+            ## 3) Update Excel
+            excel_data = {
+                **data_input.get("df_sets"),
+                **data_input.get("df_parameters"),
+            }
+            WriteJSONToExcel(excel_data, excel_path.replace(".xlsx", ""))
+            
 
     def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario From Data Input"):
         new_id = self.next_id
@@ -855,7 +873,7 @@ class ScenarioHandler:
         
         return return_object
     
-    ## TODO: fill this function out
+    ## TODO: fill this function out (or expand on propagate function)
     def udpate_map_data_from_JSON(self):
         _log.info(f"udpate_map_data_from_JSON")
     
