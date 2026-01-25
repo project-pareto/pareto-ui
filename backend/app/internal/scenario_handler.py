@@ -763,14 +763,19 @@ class ScenarioHandler:
     
     @time_it
     def propagate_scenario_changes(self, scenario):
-        ##TODO: this propogates map to json
+        ##TODO: this propagates map to json
         # We need a function that propogates json to map
         data_input = scenario.get("data_input", {})
         map_data = data_input.get("map_data", None)
         excel_path = self.get_excelsheet_path(scenario.get("id"))
         if map_data is not None:
+            ## 1) Format map data for writing to Excel
             preprocessed_map_data = PreprocessMapData(map_data)
+
+            ## 2) Write map data to Excel
             WriteMapDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
+
+            ## 3) Extract Excel data into JSON, save in DB
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
 
     def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario From Data Input"):
@@ -832,7 +837,8 @@ class ScenarioHandler:
             excel_data[key] = val
             # _log.info(f"{key} :: {val}")
         _log.info(f"Writing JSON To Excel")
-        WriteJSONToExcel(data=excel_data, output_file_name=excel_path)
+        pareto_excel_template = f"{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx"
+        WriteJSONToExcel(data=excel_data, output_file_name=excel_path, template_location=pareto_excel_template)
 
 
         # check if db is in use. if so, wait til its done being used

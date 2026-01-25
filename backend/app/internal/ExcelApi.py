@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 import logging
 _log = logging.getLogger(__name__)
 
-print_output = False
+print_output = True
 def _print(output):
     if print_output:
         _log.info(output)
@@ -607,16 +607,26 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 ## TODO:
 # expand this function to also work for updating existing excel file
 def WriteJSONToExcel(data, output_file_name, template_location = None):
+    """
+        - This function takes our JSON formatted data and writes it to excel.
+        - If an excel file location is provided, use that 
+            (this usually means we are updating rather than creating a scenario)
+        - If not, use the default input template
+
+    :param data: Data from our df_parameters and df_sets
+    :param output_file_name: Location of scenario Excel file
+    :param template_location: Template to use as initial scenario Excel file, if provided
+    """
     _log.info(f"writing json to excel at {output_file_name}")
     try:
-        if template_location is None:
-            template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
+        provided_template = template_location is not None
 
         excel_path = f'{output_file_name}.xlsx'
         _print(f'writing data to excel at {excel_path}')
 
         # copy template to new file for writing
-        shutil.copyfile(template_location, excel_path)
+        if provided_template:
+            shutil.copyfile(template_location, excel_path)
 
         # open excel workbook
         wb = load_workbook(excel_path, data_only=True)
@@ -627,6 +637,11 @@ def WriteJSONToExcel(data, output_file_name, template_location = None):
                 continue
 
             ws = wb[table_key]
+            ## TODO: Test that our table clearing works as intended
+            if not provided_template:
+                for row in ws.iter_rows(min_row=2, max_row=ws.max_row, max_col=ws.max_column):
+                    for cell in row:
+                        cell.value = None
             if isinstance(updatedTable, list):
                 row = 2
                 for cellValue in updatedTable:
@@ -692,7 +707,6 @@ def UpdateExcel(excel_path, table_key, updatedTable):
             return False
 
         return True
-
 
 
 def determineConnectionsFromArcs(data):
@@ -765,7 +779,6 @@ def PreprocessMapData(map_data):
             continue
         excel_data[excel_key][node] = node_data
 
-        ## TODO:
         ## PARETO's get_data() / read_data() / _sheets_to_dfs() fails if disposal sites is empty
     
     _print(f"finished adding nodes to excel data")
