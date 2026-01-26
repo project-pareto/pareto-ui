@@ -605,7 +605,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     return True
 
 ## TODO:
-# expand this function to also work for updating existing excel file
+# TEST this function for updating existing excel file
 def WriteJSONToExcel(data, output_file_name, template_location = None):
     """
         - This function takes our JSON formatted data and writes it to excel.

@@ -28,7 +28,7 @@ from pareto.utilities.get_data import get_display_units
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
 from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel, WriteJSONToExcel
-from app.internal.util import time_it, FormatPrompt
+from app.internal.util import time_it, FormatPrompt, build_map_data_from_json
 from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
@@ -763,8 +763,6 @@ class ScenarioHandler:
     
     @time_it
     def propagate_map_data(self, scenario):
-        ##TODO: this propagates map to Excel, json
-        # We need a function that propogates json to map
         data_input = scenario.get("data_input", {})
         map_data = data_input.get("map_data", None)
         excel_path = self.get_excelsheet_path(scenario.get("id"))
@@ -783,10 +781,11 @@ class ScenarioHandler:
         data_input = scenario.get("data_input", {})
         excel_path = self.get_excelsheet_path(scenario.get("id"))
         if data_input is not None:
-            ## 1) TODO: Format JSON data to map
+            scenario.setdefault("data_input", {})
+            scenario["data_input"]["map_data"] = build_map_data_from_json(data_input)
 
-            ## 2) TODO: After formatting, save in DB
-            self.update_scenario(scenario=scenario)
+            ## 2) After formatting, save in DB
+            self.update_scenario(scenario)
 
             ## 3) Update Excel
             excel_data = {
