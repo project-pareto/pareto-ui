@@ -164,7 +164,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
             }
         }
 
-        handleUpdateScenario(updatedScenario, false, true)
+        handleUpdateScenario(updatedScenario, false, "map")
         deselectActiveNode();
     }
 
@@ -198,7 +198,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
             }
         }
 
-        handleUpdateScenario(updatedScenario, false, true)
+        handleUpdateScenario(updatedScenario, false, "map")
         deselectActiveNode();
     }
 

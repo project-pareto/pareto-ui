@@ -86,11 +86,17 @@ async def update(request: Request):
     propagate_changes = data.get("propagateChanges")
     scenario_handler.update_scenario(updated_scenario)
     scenario_id = updated_scenario.get("id")
-    if propagate_changes and scenario_id:
-        _log.info(f"propagating changes to excel")
-        scenario_handler.propagate_map_data(updated_scenario)
-        scenario = scenario_handler.get_scenario(scenario_id)
-        return {"data": scenario}
+    if scenario_id:
+        if propagate_changes == "map":
+            _log.info(f"propagating map changes")
+            scenario_handler.propagate_map_data(updated_scenario)
+            scenario = scenario_handler.get_scenario(scenario_id)
+            return {"data": scenario}
+        elif propagate_changes == "json":
+            _log.info(f"propagating JSON changes")
+            scenario_handler.propagate_json_data(updated_scenario)
+            scenario = scenario_handler.get_scenario(scenario_id)
+            return {"data": scenario}
 
     return {"data": updated_scenario}
 

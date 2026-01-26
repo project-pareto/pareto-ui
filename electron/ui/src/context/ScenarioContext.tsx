@@ -38,7 +38,7 @@ export interface ScenarioContextValue {
   navigateToScenarioList: () => void;
   handleScenarioSelection: (scenario: string | number) => void;
   handleNewScenario: (data: Scenario) => void;
-  handleScenarioUpdate: (updatedScenario: any, keepOptimized?: boolean, propagateChanges?: boolean) => void;
+  handleScenarioUpdate: (updatedScenario: any, keepOptimized?: boolean, propagateChanges?: string) => void;
   handleSetSection: (section: number) => void;
   handleSetCategory: (category: string) => void;
   handleEditScenarioName: (newName: string, id: string | number, updateScenarioData?: boolean) => void;
@@ -70,7 +70,6 @@ interface ScenarioProviderProps {
 export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, navigate }) => {
   const { port } = useApp();
 
-  // ---- original App.tsx state ----
   const [scenarioData, setScenarioData] = useState<Scenario | null>(null);
   const [scenarios, setScenarios] = useState<ScenarioMap>({});
   const [appState, setAppState] = useState<AppState | null>(null);
@@ -84,7 +83,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
   const [lastCompletedScenario, setLastCompletedScenario] = useState<string | number | null>(null);
   const [compareScenarioIndexes, setCompareScenarioIndexes] = useState<Array<string | number>>([]);
 
-  // ---- constants from App.tsx ----
+  // ---- constants ----
   const INITIAL_STATES = useMemo(() => ["Draft", "Incomplete"], []);
   const RUNNING_STATES = useMemo(() => ["Initializing", "Solving Model", "Generating Output"], []);
   const COMPLETED_STATES = useMemo(() => ["Optimized", "failure", "Infeasible"], []);
@@ -219,7 +218,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     navigate("/scenario", { replace: true });
   };
 
-  const handleScenarioUpdate = (updatedScenario: any, keepOptimized?: boolean, propagateChanges: boolean = false): void => {
+  const handleScenarioUpdate = (updatedScenario: any, keepOptimized?: boolean, propagateChanges?: string): void => {
     if (updatedScenario.results.status === "Optimized" && !keepOptimized) {
       updatedScenario.results.status = "Not Optimized";
     }
@@ -229,7 +228,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     setScenarios(temp);
     setScenarioData({ ...updatedScenario });
 
-    updateScenario(port, { updatedScenario: { ...updatedScenario }, propagateChanges: propagateChanges || false })
+    updateScenario(port, { updatedScenario: { ...updatedScenario }, propagateChanges })
       .then((response) => response.json())
       .then((data) => {
         if (propagateChanges) {
@@ -274,10 +273,11 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     updateExcel(port, { id, tableKey, updatedTable })
       .then((response) => response.json())
       .then((data) => {
-        if (data.results.status === "Optimized") {
-          data.results.status = "Not Optimized";
-          handleScenarioUpdate(data, true, true);
-        }
+        handleScenarioUpdate(data, false, "json");
+        // if (data.results.status === "Optimized") {
+        //   data.results.status = "Not Optimized";
+        //   handleScenarioUpdate(data, true, "json");
+        // }
       })
       .catch((e) => {
         console.error("unable to update excel: ", e);

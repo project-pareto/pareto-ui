@@ -324,7 +324,7 @@ export interface MapContextValue {
 export interface MapProviderProps {
   children: React.ReactNode;
   scenario?: Scenario | null;
-  handleUpdateScenario: (updatedScenario: Scenario | null, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
+  handleUpdateScenario: (updatedScenario: Scenario | null, setScenarioData?: boolean, propagateChanges?: string) => void;
 }
 
 export interface ModelResultsProps {
@@ -355,7 +355,7 @@ export interface KPIDashboardProps {
 
 export interface OptimizationProps {
   scenario: Scenario;
-  updateScenario: (updatedScenario: any, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
+  updateScenario: (updatedScenario: any, setScenarioData?: boolean, propagateChanges?: string) => void;
   disabled: boolean;
   setDisabled: (disabled: boolean) => void;
   handleRunModel: () => void;
