@@ -11,7 +11,7 @@ gurobipy==10.0.0
 h11==0.13.0
 idaes-pse
 idna==3.3
-openai
+openai==2.15.0
 pint==0.23
 pydantic==1.9.1
 pyinstaller==5.3
