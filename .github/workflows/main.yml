@@ -36,6 +36,19 @@ jobs:
           environment-file: environment.yml
           miniforge-version: latest
           activate-environment: pareto-ui-env
+
+      - name: DEBUG - Install reqs without project-pareto (to isolate conflict)
+        shell: bash -l {0}
+        run: |
+          python -m pip install -U pip setuptools wheel
+          grep -v "git+https://github.com/project-pareto/project-pareto.git" backend/requirements.txt > /tmp/req-no-git.txt
+          pip install -r /tmp/req-no-git.txt
+
+      - name: DEBUG - Install project-pareto with verbose resolver
+        shell: bash -l {0}
+        run: |
+          pip install -vvv "git+https://github.com/project-pareto/project-pareto.git" 2>&1 | tee pareto-debug.log
+          tail -n 200 pareto-debug.log
       
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
