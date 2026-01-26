@@ -44,14 +44,14 @@ class OpenAIClientWrapper:
         if api_key is None:
             api_key = os.environ.get("CBORG_API_KEY") or os.environ.get("OPENAI_API_KEY")
 
-        if api_key is None:
-            raise ValueError("API key must be provided either as argument or via environment variable.")
-
-        client_kwargs = {"api_key": api_key}
-        if base_url:
-            client_kwargs["base_url"] = base_url
-
-        self.client = openai.OpenAI(**client_kwargs)
+        self.api_key = api_key
+        self.base_url = base_url
+        self.client = None
+        if api_key is not None:
+            client_kwargs = {"api_key": api_key}
+            if base_url:
+                client_kwargs["base_url"] = base_url
+            self.client = openai.OpenAI(**client_kwargs)
         self.model = model
         self.default_temperature = default_temperature
         self.max_retries = max_retries
@@ -91,10 +91,17 @@ class OpenAIClientWrapper:
 
     def set_api_key(self, api_key: str, base_url: Optional[str] = None) -> None:
         """Change API key (reinitializes underlying client)."""
+        self.api_key = api_key
+        if base_url is not None:
+            self.base_url = base_url
         kwargs = {"api_key": api_key}
-        if base_url:
-            kwargs["base_url"] = base_url
+        if self.base_url:
+            kwargs["base_url"] = self.base_url
         self.client = openai.OpenAI(**kwargs)
+
+    def is_available(self) -> bool:
+        """Return True if the client is configured with an API key."""
+        return self.client is not None
 
     # -------------------------
     # Core call logic
@@ -139,6 +146,9 @@ class OpenAIClientWrapper:
         Returns:
             assistant response string (concatenated if streaming).
         """
+        if not self.is_available():
+            raise RuntimeError("AI client is not configured; set an API key first.")
+
         if temperature is None:
             temperature = self.default_temperature
 

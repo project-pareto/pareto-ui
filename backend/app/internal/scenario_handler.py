@@ -888,6 +888,11 @@ class ScenarioHandler:
             return {
                 "error": "invalid scenario"
             }
+        if not cborg.is_available():
+            return {
+                "error": "ai_unavailable",
+                "detail": "AI client is not configured. Provide an API key to enable AI features."
+            }
         if data_input:
             prompt = FormatPrompt(user_prompt=user_prompt, data=data_input)
             # _log.info(f"full prompt: {prompt}")

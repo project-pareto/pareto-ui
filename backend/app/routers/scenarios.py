@@ -27,6 +27,7 @@ from app.internal.KMZParser import ParseKMZ
 from app.internal.ExcelApi import WriteMapDataToExcel, PreprocessMapData
 from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
 from app.internal.util import time_it
+from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -43,6 +44,15 @@ async def get_project_name():
     Get project name.
     """
     return "pareto"
+
+@router.get("/ai_available")
+async def ai_available():
+    """
+    Return whether the AI functionality is configured and available.
+    """
+    return {
+        "available": cborg.is_available()
+    }
 
 @router.get("/get_scenario_list")
 async def get_scenario_list():
