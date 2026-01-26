@@ -2,7 +2,17 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 import { requestAIDataUpdate } from "../services/app.service";
 import { useApp } from "../AppContext";
 import type { AIPromptResponse, AIPromptUpdatedScenario } from "../types";
-import sampleResponse from "../data/sample_ai_response.json";
+const SAMPLE_RESPONSE_PATH = "../data/sample_ai_response.json";
+
+const loadSampleResponse = async (): Promise<AIPromptResponse | null> => {
+  try {
+    const mod = await import(SAMPLE_RESPONSE_PATH);
+    const payload = (mod as { default?: AIPromptResponse }).default ?? (mod as AIPromptResponse);
+    return payload ?? null;
+  } catch (err) {
+    return null;
+  }
+};
 
 type AIPromptStatus = "idle" | "running" | "success" | "error";
 
@@ -50,13 +60,15 @@ export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) 
 
     try {
       if (USE_SAMPLE_AI_RESPONSE) {
-        const payload = sampleResponse as AIPromptResponse;
-        setResponse(payload);
-        setUpdatedScenario(payload.updatedScenario || null);
-        setUpdateNotes(payload.updateNotes || (payload as any).updatedNotes || []);
-        setStatus(payload.status === "success" ? "success" : "error");
-        setErrorMessage(payload.errorMessage || payload.error || null);
-        return;
+        const payload = await loadSampleResponse();
+        if (payload) {
+          setResponse(payload);
+          setUpdatedScenario(payload.updatedScenario || null);
+          setUpdateNotes(payload.updateNotes || (payload as any).updatedNotes || []);
+          setStatus(payload.status === "success" ? "success" : "error");
+          setErrorMessage(payload.errorMessage || payload.error || null);
+          return;
+        }
       }
 
       const result = await requestAIDataUpdate(port, scenarioId, prompt);
