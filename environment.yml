@@ -6,4 +6,4 @@ dependencies:
   - pip
   - nodejs=18
   - pip:
-    - -r backend/requirements-new.txt
+    - -r backend/requirements.txt
