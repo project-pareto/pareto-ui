@@ -12,8 +12,8 @@ h11==0.13.0
 idaes-pse
 idna==3.3
 openai==2.15.0
-pint==0.23
-pydantic==1.9.1
+pint>=0.23
+pydantic==1.10.12
 pyinstaller==5.3
 pyinstaller-hooks-contrib==2022.9
 pyomo
