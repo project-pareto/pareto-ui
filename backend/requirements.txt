@@ -4,14 +4,16 @@ asgiref==3.5.2
 certifi==2021.10.8
 chardet==5.1.0
 click==8.1.3
-fastapi==0.120.1
+fastapi==0.103.2
+# fastapi==0.120.1
 geopandas==1.0.1
 geopy==2.4.1
 gurobipy==11.0.0
 h11==0.13.0
 idaes-pse
 idna==3.3
-openai==2.15.0
+openai==1.8.0
+# openai==2.15.0
 pint>=0.23
 pydantic
 pydantic-settings
@@ -23,6 +25,7 @@ python-multipart==0.0.5
 sniffio==1.2.0
 # starlette==0.19.1
 tinydb==4.7.1
-typing_extensions==4.15.0
+typing_extensions
+# typing_extensions==4.15.0
 uvicorn==0.17.6
 git+https://github.com/project-pareto/project-pareto.git@1.1.0
