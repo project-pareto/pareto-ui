@@ -1,5 +1,5 @@
 aiofiles==22.1.0
-anyio==3.6.1
+anyio
 asgiref==3.5.2
 certifi==2021.10.8
 chardet==5.1.0
