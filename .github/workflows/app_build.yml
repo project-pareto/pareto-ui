@@ -151,9 +151,12 @@ jobs:
         working-directory: ../
         run: git clone https://github.com/${{ inputs.project-pareto-repo }}.git && cd project-pareto && git fetch --all --tags && git checkout ${{ inputs.project-pareto-branch }} && pip install --progress-bar off .
 
-      - name: install exact buld requirements
+      # - name: install exact buld requirements
+      #   working-directory: ./backend
+      #   run: pip install -r requirements-build.txt
+      - name: install Python packages
         working-directory: ./backend
-        run: pip install -r requirements-build.txt
+        run: pip install -r requirements.txt
 
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
