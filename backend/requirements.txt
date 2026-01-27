@@ -18,7 +18,7 @@ pint>=0.23
 pydantic
 pydantic-settings
 pyinstaller==5.13.0
-pyinstaller-hooks-contrib==2022.9
+pyinstaller-hooks-contrib==2026.0
 pyomo
 python-dotenv
 python-multipart==0.0.5
