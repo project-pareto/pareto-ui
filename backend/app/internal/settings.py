@@ -15,34 +15,47 @@ Configuration for the backend
 """
 from pathlib import Path
 import logging
-from pydantic import (
-    BaseSettings,
-    validator
-)
+import logging.handlers
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class AppSettings(BaseSettings):
     #: List of package names in which to look for flowsheets
-    data_basedir: Path = None
-    log_dir: Path = None
+    data_basedir: Path | None = None
+    log_dir: Path | None = None
 
-    @validator("data_basedir", always=True)
-    def validate_data_basedir(cls, v):
+    # Settings config: env prefix (replaces class Config in v1)
+    model_config = SettingsConfigDict(env_prefix="pareto_")
+
+    @field_validator("data_basedir", mode="after")
+    def validate_data_basedir(cls, v: Path | None) -> Path:
+        # If unset, default to ~/.pareto and ensure it exists
         if v is None:
-            v = Path.home() / ".pareto" 
+            v = Path.home() / ".pareto"
         v.mkdir(parents=True, exist_ok=True)
         return v
 
-    @validator("log_dir", always=True)
-    def validate_log_dir(cls, v):
+    @field_validator("log_dir", mode="after")
+    def validate_log_dir(cls, v: Path | None) -> Path:
+        # If unset, default to ~/.pareto/logs and ensure it exists
         if v is None:
             v = Path.home() / ".pareto" / "logs"
         v.mkdir(parents=True, exist_ok=True)
-        
-        loggingFormat = "[%(levelname)s] %(asctime)s %(name)s (%(filename)s:%(lineno)s): %(message)s"
-        loggingFileHandler = logging.handlers.RotatingFileHandler(v / "ui_backend_logs.log", backupCount=2, maxBytes=5000000)
-        logging.basicConfig(level=logging.INFO, format=loggingFormat, handlers=[loggingFileHandler, logging.StreamHandler()])
-        return v
 
-    class Config:
-        env_prefix = "pareto_"
+        logging_format = "[%(levelname)s] %(asctime)s %(name)s (%(filename)s:%(lineno)s): %(message)s"
+        log_file_path = v / "ui_backend_logs.log"
+
+        # RotatingFileHandler wants a filename (str); convert explicitly for safety
+        rotating_handler = logging.handlers.RotatingFileHandler(str(log_file_path),
+                                                               backupCount=2,
+                                                               maxBytes=5_000_000)
+
+        # Configure basic logging once (this will affect global logging config)
+        logging.basicConfig(
+            level=logging.INFO,
+            format=logging_format,
+            handlers=[rotating_handler, logging.StreamHandler()]
+        )
+
+        return v
