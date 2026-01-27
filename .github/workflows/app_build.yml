@@ -156,7 +156,7 @@ jobs:
       #   run: pip install -r requirements-build.txt
       - name: install Python packages
         working-directory: ./backend
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-build.txt
 
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui

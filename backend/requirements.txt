@@ -14,6 +14,7 @@ idaes-pse
 idna==3.3
 openai==2.15.0
 pint>=0.23
+## TODO: we need to pin pydantic to at least greater than a certain version
 pydantic
 pydantic-settings
 pyinstaller==5.13.0
