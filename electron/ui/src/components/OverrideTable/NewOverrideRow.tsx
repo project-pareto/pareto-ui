@@ -45,7 +45,7 @@ export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.El
     const [ presetValues, setPresetValues ] = useState<Record<string, any>>({})
     const [ nodeConnections, setNodeConnections ] = useState<Record<string, string[]>>({})
     const pipelineTables = ['PNA', 'CNA','CCA','NNA', 'NCA','NKA', 'NRA', 'NSA','FCA','RCA','RNA','RSA','SCA','SNA']
-    const pipelineTypes = {'P': 'ProductionPads', 'C': 'CompletionsPads', 'N': "NetworkNodes", 'F': 'FreshwaterSources', 'R': 'TreatmentSites', 'S': 'StorageSites'}
+    const pipelineTypes = {'P': 'ProductionPads', 'C': 'CompletionsPads', 'N': "NetworkNodes", 'F': 'ExternalWaterSources', 'R': 'TreatmentSites', 'S': 'StorageSites'}
     
     useEffect(() => {
   

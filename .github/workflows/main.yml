@@ -36,6 +36,9 @@ jobs:
           environment-file: environment.yml
           miniforge-version: latest
           activate-environment: pareto-ui-env
+
+      - name: Install python packages
+        run: pip install -r backend/requirements.txt
       
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
@@ -44,10 +47,6 @@ jobs:
 
       - name: get idaes extensions
         run: idaes get-extensions
-
-      - name: Install correct branch of pareto
-        working-directory: ../
-        run: git clone https://github.com/project-pareto/project-pareto.git && cd project-pareto && pip install --progress-bar off .
 
       - name: Install electron JS dependencies
         run: |
@@ -59,6 +58,9 @@ jobs:
 
       - name: run component tests
         run: npm --prefix electron/ui test
+
+      - name: DEBUG - pip freeze
+        run: pip freeze
 
       - name: run backend server
         working-directory: backend/app

@@ -1,0 +1,270 @@
+"""
+openai_client_wrapper.py
+
+A small wrapper around the OpenAI Python client that:
+- encapsulates client creation
+- provides methods to prompt the model
+- stores chat history
+- offers retry/backoff and basic streaming callback support
+- allows model / api key swapping and saving/loading history
+
+"""
+
+import os
+import time
+import json
+from typing import List, Optional, Dict, Callable, Any
+from dotenv import load_dotenv
+import openai
+
+load_dotenv()
+
+
+class OpenAIClientWrapper:
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model: str = "openai/gpt-5.2",
+        default_temperature: float = 0.0,
+        max_retries: int = 3,
+        backoff_factor: float = 1.0,
+    ):
+        """
+        Create the wrapper.
+
+        Args:
+            api_key: API key string. If None, will use environment variable 'CBORG_API_KEY'.
+            base_url: custom base_url for the OpenAI-compatible API (e.g., 'https://api.cborg.lbl.gov').
+            model: default model to use for completions.
+            default_temperature: default temperature for calls.
+            max_retries: number of retries for transient errors.
+            backoff_factor: multiplier for exponential backoff (seconds).
+        """
+        if api_key is None:
+            api_key = os.environ.get("CBORG_API_KEY") or os.environ.get("OPENAI_API_KEY")
+
+        self.api_key = api_key
+        self.base_url = base_url
+        self.client = None
+        if api_key is not None:
+            client_kwargs = {"api_key": api_key}
+            if base_url:
+                client_kwargs["base_url"] = base_url
+            self.client = openai.OpenAI(**client_kwargs)
+        self.model = model
+        self.default_temperature = default_temperature
+        self.max_retries = max_retries
+        self.backoff_factor = backoff_factor
+
+        # chat history (list of message dicts as expected by OpenAI chat API)
+        # Example: {"role": "system", "content": "..."}
+        self.history: List[Dict[str, str]] = []
+
+    # -------------------------
+    # History management
+    # -------------------------
+    def add_message_to_history(self, role: str, content: str) -> None:
+        """Append a message to the conversation history."""
+        self.history.append({"role": role, "content": content})
+
+    def clear_history(self) -> None:
+        """Clear conversation history."""
+        self.history = []
+
+    def save_history(self, path: str) -> None:
+        """Save history to a JSON file."""
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(self.history, fh, ensure_ascii=False, indent=2)
+
+    def load_history(self, path: str) -> None:
+        """Load history from a JSON file (overwrites current history)."""
+        with open(path, "r", encoding="utf-8") as fh:
+            self.history = json.load(fh)
+
+    # -------------------------
+    # Model / Key helpers
+    # -------------------------
+    def set_model(self, model_name: str) -> None:
+        """Change the model to use for subsequent calls."""
+        self.model = model_name
+
+    def set_api_key(self, api_key: str, base_url: Optional[str] = None) -> None:
+        """Change API key (reinitializes underlying client)."""
+        self.api_key = api_key
+        if base_url is not None:
+            self.base_url = base_url
+        kwargs = {"api_key": api_key}
+        if self.base_url:
+            kwargs["base_url"] = self.base_url
+        self.client = openai.OpenAI(**kwargs)
+
+    def is_available(self) -> bool:
+        """Return True if the client is configured with an API key."""
+        return self.client is not None
+
+    # -------------------------
+    # Core call logic
+    # -------------------------
+    def _call_with_retries(self, payload_fn: Callable[[], Any]) -> Any:
+        """Helper that runs payload_fn with simple retry/backoff on exceptions."""
+        attempt = 0
+        while True:
+            try:
+                return payload_fn()
+            except Exception as e:
+                attempt += 1
+                if attempt > self.max_retries:
+                    raise
+                sleep_for = self.backoff_factor * (2 ** (attempt - 1))
+                # small jitter
+                jitter = min(1.0, sleep_for * 0.1)
+                time.sleep(sleep_for + jitter)
+
+    def chat(
+        self,
+        prompt: Optional[str] = None,
+        messages: Optional[List[Dict[str, str]]] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        add_to_history: bool = True,
+        stream: bool = False,
+        stream_callback: Optional[Callable[[str], None]] = None,
+    ) -> str:
+        """
+        Send a prompt (or messages) to the model and return the assistant's text content.
+
+        Args:
+            prompt: a single-user prompt string. If provided, it will be appended to messages.
+            messages: fully-formed list of message dicts (role/content). If not provided, uses history.
+            temperature: override default temperature for this call.
+            max_tokens: optional max_tokens to pass.
+            add_to_history: whether to append the user prompt and assistant response to history.
+            stream: if True, try to stream results and call stream_callback for each chunk.
+            stream_callback: function called with each text chunk when stream=True.
+
+        Returns:
+            assistant response string (concatenated if streaming).
+        """
+        if not self.is_available():
+            raise RuntimeError("AI client is not configured; set an API key first.")
+
+        if temperature is None:
+            temperature = self.default_temperature
+
+        # Build messages list: priority order -- explicit messages param, else history + prompt
+        if messages is not None:
+            request_messages = [m.copy() for m in messages]
+        else:
+            request_messages = [m.copy() for m in self.history]
+
+        if prompt is not None:
+            request_messages.append({"role": "user", "content": prompt})
+
+        # use the client to call the chat completions endpoint
+        def payload():
+            create_kwargs = {
+                "model": self.model,
+                "messages": request_messages,
+                "temperature": temperature,
+            }
+            if max_tokens is not None:
+                create_kwargs["max_tokens"] = max_tokens
+
+            # If streaming is requested, rely on the SDK's stream behavior (if supported)
+            # Note, this is untested
+            if stream:
+                # SDK usually returns an iterator when stream=True; iterate and collect text
+                create_kwargs["stream"] = True
+                iterator = self.client.chat.completions.create(**create_kwargs)
+                # Some SDKs yield events with 'choices' containing 'delta' or 'message' pieces.
+                # We'll attempt to handle a few common patterns robustly.
+                full_text = ""
+                for event in iterator:
+                    # event may be dict-like; try to extract incremental content
+                    try:
+                        # Newer SDK: event.choices[0].delta.content or event.choices[0].message.content
+                        choices = getattr(event, "choices", None) or event.get("choices", None)
+                        if choices:
+                            # get the most recent choice piece
+                            piece = choices[0]
+                            # delta form
+                            if isinstance(piece, dict):
+                                delta = piece.get("delta", {})
+                                chunk = delta.get("content")
+                                if not chunk:
+                                    # older variant
+                                    message = piece.get("message", {})
+                                    chunk = message.get("content")
+                            else:
+                                # try attribute access
+                                delta = getattr(piece, "delta", None)
+                                if delta:
+                                    chunk = getattr(delta, "content", None)
+                                else:
+                                    message = getattr(piece, "message", None)
+                                    chunk = getattr(message, "content", None) if message else None
+                            if chunk:
+                                full_text += chunk
+                                if stream_callback:
+                                    stream_callback(chunk)
+                    except Exception:
+                        # best-effort: if event itself is a str, append
+                        try:
+                            if isinstance(event, str):
+                                full_text += event
+                                if stream_callback:
+                                    stream_callback(event)
+                        except Exception:
+                            pass
+                return full_text
+            else:
+                # Non-streaming
+                resp = self.client.chat.completions.create(**create_kwargs)
+                # Accessing last choice
+                # Support both dict-like and attribute-like responses
+                try:
+                    # prefer attribute access if available
+                    content = resp.choices[-1].message.content
+                except Exception:
+                    # fallback for dict-like responses
+                    content = resp.get("choices", [{}])[-1].get("message", {}).get("content", "")
+                return content
+
+        assistant_text = self._call_with_retries(payload)
+
+        # Optionally update history
+        if add_to_history:
+            if prompt is not None:
+                # append the user message we sent
+                self.add_message_to_history("user", prompt)
+            # append assistant response
+            self.add_message_to_history("assistant", assistant_text)
+
+        return assistant_text
+
+    # A function for one-off prompts
+    def prompt(
+        self,
+        text: str,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        **kwargs,
+    ) -> str:
+        """
+        Convenience method to send a simple user prompt and get the response.
+        Same args as `chat` but takes a single text string.
+        """
+        return self.chat(prompt=text, temperature=temperature, max_tokens=max_tokens, **kwargs)
+        
+
+base_url = os.environ.get("CBORG_BASE_URL", "https://api.cborg.lbl.gov")
+
+cborg = OpenAIClientWrapper(
+    api_key=os.environ.get("CBORG_API_KEY"),
+    base_url=base_url,
+    model="openai/gpt-5.2",
+    default_temperature=0.0,
+    max_retries=2,
+    backoff_factor=1.0,
+)

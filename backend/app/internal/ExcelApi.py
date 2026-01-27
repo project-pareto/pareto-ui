@@ -3,12 +3,15 @@ import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-print_output = False
+import logging
+_log = logging.getLogger(__name__)
+
+print_output = True
 def _print(output):
     if print_output:
-        print(output)
+        _log.info(output)
 
-def WriteDataToExcel(data, output_file_name, template_location = None):
+def WriteMapDataToExcel(data, output_file_name, template_location = None):
     """
     Write map_data to excel
     Accepts: map_data, output file name, template location (optional)
@@ -74,7 +77,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
 
     ## step 3: add nodes
     node_keys = [
-        'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
+        'ProductionPads', 'CompletionsPads', 'SWDSites', 'ExternalWaterSources', 
         'StorageSites', 'TreatmentSites', 'NetworkNodes', "ReuseOptions"
     ]
 
@@ -101,7 +104,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         "NOA": ["NetworkNodes", "ReuseOptions"],
         "SNA": ["StorageSites", "NetworkNodes"],
         "SOA": ["StorageSites", "ReuseOptions"],
-        "FCA": ["FreshwaterSources", "CompletionsPads"],
+        "FCA": ["ExternalWaterSources", "CompletionsPads"],
         "RCA": ["TreatmentSites", "CompletionsPads"],
         "RSA": ["TreatmentSites", "StorageSites"],
         "SCA": ["StorageSites", "CompletionsPads"],
@@ -148,7 +151,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
 
     trucked_arcs = {
         "PCT": ["ProductionPads", "CompletionsPads"],
-        "FCT": ["FreshwaterSources", "CompletionsPads"],
+        "FCT": ["ExternalWaterSources", "CompletionsPads"],
         "PKT": ["ProductionPads", "SWDSites"],
         "CKT": ["CompletionsPads", "SWDSites"],
         "CCT": ["CompletionsPads", "CompletionsPads"],
@@ -185,7 +188,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
 
     ## step 5: add elevations:
     elevation_nodes = [
-        'ProductionPads', 'CompletionsPads', 'SWDSites', 'FreshwaterSources', 
+        'ProductionPads', 'CompletionsPads', 'SWDSites', 'ExternalWaterSources', 
         'StorageSites', 'TreatmentSites', 'ReuseOptions', 'NetworkNodes'
     ]
 
@@ -215,7 +218,7 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
         "WellPressure": ["ProductionPads", "CompletionsPads"],
         "ReuseMinimum": ["ReuseOptions"],
         "ReuseCapacity": ["ReuseOptions"],
-        "FreshwaterSourcingAvailability": ["FreshwaterSources"],
+        "ExtWaterSourcingAvailability": ["ExternalWaterSources"],
         "DisposalOperatingCapacity": ["SWDSites"], ## AUTOFILL with ones?
     }
 
@@ -233,19 +236,19 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
     ## step 7: add initial pipelines, capacities, ...
     initial_pipeline_tabs = {
         "InitialPipelineCapacity": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "InitialPipelineDiameters": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "PipelineOperationalCost": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "PipelineExpansionDistance": [
-            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "FreshwaterSources", "TreatmentSites"], 
+            ["ProductionPads", "CompletionsPads", "NetworkNodes", "StorageSites", "ExternalWaterSources", "TreatmentSites"], 
             ["NetworkNodes", "SWDSites", "TreatmentSites", "StorageSites", "ReuseOptions", "CompletionsPads"],
         ],
         "TruckingTime": [
@@ -306,8 +309,8 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
         "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
-        "FreshSourcingCost": ["FreshwaterSofurces"],
-        "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "FreshwaterSources"],
+        "ExternalSourcingCost": ["ExternalWaterSources"],
+        "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "ExternalWaterSources"],
         "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
         "BeneficialReuseCost": ["ReuseOptions"],
         "BeneficialReuseCredit": ["ReuseOptions"],
@@ -599,7 +602,112 @@ def WriteDataToExcel(data, output_file_name, template_location = None):
     ## final step: Save and close
     wb.save(excel_path)
     wb.close()
-    return "success"
+    return True
+
+## TODO:
+# TEST this function for updating existing excel file
+def WriteJSONToExcel(data, output_file_name, template_location = None):
+    """
+        - This function takes our JSON formatted data and writes it to excel.
+        - If an excel file location is provided, use that 
+            (this usually means we are updating rather than creating a scenario)
+        - If not, use the default input template
+
+    :param data: Data from our df_parameters and df_sets
+    :param output_file_name: Location of scenario Excel file
+    :param template_location: Template to use as initial scenario Excel file, if provided
+    """
+    _log.info(f"writing json to excel at {output_file_name}")
+    try:
+        provided_template = template_location is not None
+
+        excel_path = f'{output_file_name}.xlsx'
+        _print(f'writing data to excel at {excel_path}')
+
+        # copy template to new file for writing
+        if provided_template:
+            shutil.copyfile(template_location, excel_path)
+
+        # open excel workbook
+        wb = load_workbook(excel_path, data_only=True)
+
+        for table_key, updatedTable in data.items():
+            if table_key not in wb.sheetnames:
+                _log.warning(f"unable to find sheet for {table_key}; skipping")
+                continue
+
+            ws = wb[table_key]
+            ## TODO: Test that our table clearing works as intended
+            if not provided_template:
+                for row in ws.iter_rows(min_row=2, max_row=ws.max_row, max_col=ws.max_column):
+                    for cell in row:
+                        cell.value = None
+            if isinstance(updatedTable, list):
+                row = 2
+                for cellValue in updatedTable:
+                    cellLocation = f'{get_column_letter(1)}{row}'
+                    ws[cellLocation] = None if cellValue == "" else cellValue
+                    row += 1
+                continue
+
+            if not isinstance(updatedTable, dict):
+                _log.warning(f"unexpected table data for {table_key}; skipping")
+                continue
+
+            # update excel sheet, include headers
+            column = 1
+            for column_key in updatedTable:
+                headerLocation = f'{get_column_letter(column)}{2}'
+                ws[headerLocation] = column_key
+                row = 3
+                for cellValue in updatedTable[column_key]:
+                    cellLocation = f'{get_column_letter(column)}{row}'
+                    ws[cellLocation] = None if cellValue == "" else cellValue
+                    row += 1
+                column += 1
+
+        # save and close workbook
+        wb.save(excel_path)
+        wb.close()
+        return True
+    except Exception as e:
+        _log.error(f"Unable to WriteJSONToExcel: {e}")
+        return False
+
+def UpdateExcel(excel_path, table_key, updatedTable):
+        try:
+            wb = load_workbook(excel_path, data_only=True)
+            _log.info(f'loaded workbook from path: {excel_path}')
+            x = 1
+            y = 3
+            ws = wb[table_key]
+
+            # update excel sheet
+            _log.info(f'updating table: {updatedTable}')
+            for column in updatedTable:
+                y = 3
+                for cellValue in updatedTable[column]:
+                    cellLocation = f'{get_column_letter(x)}{y}'
+                    originalValue = ws[cellLocation].value
+                    if cellValue == "":
+                        newValue = None
+                    else:
+                        newValue = cellValue
+                    if originalValue != newValue:
+                        _log.info(f'updating {cellLocation} to {newValue}')
+                        ws[cellLocation] = newValue
+                    y+=1
+                x+=1
+            wb.save(excel_path)
+            wb.close()
+            _log.info(f'saved workbook')
+
+        except Exception as e:
+            _log.error(f"Unable to update excel: {e}")
+            return False
+
+        return True
+
 
 def determineConnectionsFromArcs(data):
     """
@@ -646,7 +754,7 @@ def PreprocessMapData(map_data):
         'SWDSites': {},
         'TreatmentSites': {},
         'StorageSites': {},
-        'FreshwaterSources': {},
+        'ExternalWaterSources': {},
         'ReuseOptions': {},
         'connections': {}
     }
@@ -658,7 +766,7 @@ def PreprocessMapData(map_data):
         'DisposalSite': 'SWDSites',
         'TreatmentSite': 'TreatmentSites',
         'StorageSite': 'StorageSites',
-        'FreshwaterSource': 'FreshwaterSources',
+        'ExternalWaterSource': 'ExternalWaterSources',
         'ReuseOption': 'ReuseOptions'
     }
 
@@ -671,7 +779,6 @@ def PreprocessMapData(map_data):
             continue
         excel_data[excel_key][node] = node_data
 
-        ## TODO:
         ## PARETO's get_data() / read_data() / _sheets_to_dfs() fails if disposal sites is empty
     
     _print(f"finished adding nodes to excel data")

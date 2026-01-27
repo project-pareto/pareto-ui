@@ -138,7 +138,7 @@ export interface MapData {
   SWDSites: Record<string, any>;
   TreatmentSites: Record<string, any>;
   StorageSites: Record<string, any>;
-  FreshwaterSources: Record<string, any>;
+  ExternalWaterSources: Record<string, any>;
   ReuseOptions: Record<string, any>;
   other_nodes: Record<string, any>;
 
@@ -254,6 +254,21 @@ export interface AppState {
   [key: string]: any;
 }
 
+export interface AIPromptUpdatedScenario {
+  df_sets?: DfSets;
+  df_parameters?: DfParameters;
+  display_units?: DisplayUnits;
+  map_data?: any;
+}
+
+export interface AIPromptResponse {
+  status: "success" | "error";
+  updatedScenario?: AIPromptUpdatedScenario;
+  updateNotes?: string[];
+  errorMessage?: string;
+  error?: string;
+}
+
 // Map / Editor related types
 export type CoordinateTuple = [number | string, number | string];
 
@@ -309,7 +324,7 @@ export interface MapContextValue {
 export interface MapProviderProps {
   children: React.ReactNode;
   scenario?: Scenario | null;
-  handleUpdateScenario: (updatedScenario: Scenario | null, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
+  handleUpdateScenario: (updatedScenario: Scenario | null, setScenarioData?: boolean, propagateChanges?: string) => void;
 }
 
 export interface ModelResultsProps {
@@ -340,7 +355,7 @@ export interface KPIDashboardProps {
 
 export interface OptimizationProps {
   scenario: Scenario;
-  updateScenario: (updatedScenario: any, setScenarioData?: boolean, skipBackendUpdate?: boolean) => void;
+  updateScenario: (updatedScenario: any, setScenarioData?: boolean, propagateChanges?: string) => void;
   disabled: boolean;
   setDisabled: (disabled: boolean) => void;
   handleRunModel: () => void;
@@ -604,4 +619,3 @@ export interface ScenarioCompareSidebarProps {
   compareScenarioIndexes?: Array<string | number>;
   [key: string]: any;
 }
-
