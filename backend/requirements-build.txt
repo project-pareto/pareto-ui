@@ -92,7 +92,8 @@ scipy==1.13.1
 six
 sniffio==1.2.0
 stack-data==0.6.3
-starlette==0.19.1
+# starlette==0.19.1
+starlette==0.45.1
 sympy==1.12.1
 tenacity==8.3.0
 # tensorboard==2.13.0
@@ -110,5 +111,6 @@ uvicorn==0.17.6
 wcwidth==0.2.13
 Werkzeug==3.0.3
 widgetsnbextension==4.0.11
-wrapt==1.16.0
+# wrapt==1.16.0
+wrapt==2.0.1
 zipp==3.19.2
