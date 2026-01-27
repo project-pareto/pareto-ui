@@ -10,6 +10,7 @@ import {
   storageSiteIcon, 
   reuseOptionIcon 
 } from './custom-icons';
+import { CoordinateTuple } from 'types';
 
 export const NetworkNodeTypes = {
   TreatmentSite: {
@@ -241,10 +242,10 @@ export const formatCoordinatesFromNodes = (nodes) => {
   return coordinates;
 }
 
-export const reverseMapCoordinates = (coords) => {
+export const reverseMapCoordinates = (coords: CoordinateTuple) => {
     try {
-      if (coords?.lat && coords?.lng) {
-        const coordinates = [String(coords?.lng), String(coords?.lat)];
+      if (coords?.length >= 2) {
+        const coordinates = [String(coords[0]), String(coords[1])];
         return coordinates;
       }
       console.log(`coordinates formatted incorrectly: `);
