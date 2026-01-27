@@ -172,6 +172,7 @@ class OpenAIClientWrapper:
                 create_kwargs["max_tokens"] = max_tokens
 
             # If streaming is requested, rely on the SDK's stream behavior (if supported)
+            # Note, this is untested
             if stream:
                 # SDK usually returns an iterator when stream=True; iterate and collect text
                 create_kwargs["stream"] = True
@@ -242,7 +243,7 @@ class OpenAIClientWrapper:
 
         return assistant_text
 
-    # A convenience wrapper for simple one-shot prompts
+    # A function for one-off prompts
     def prompt(
         self,
         text: str,
@@ -256,29 +257,6 @@ class OpenAIClientWrapper:
         """
         return self.chat(prompt=text, temperature=temperature, max_tokens=max_tokens, **kwargs)
         
-
-
-# if __name__ == "__main__":
-#     base_url = os.environ.get("CBORG_BASE_URL", "https://api.cborg.lbl.gov")
-
-#     wrapper = OpenAIClientWrapper(
-#         api_key=os.environ.get("CBORG_API_KEY"),
-#         base_url=base_url,
-#         model="openai/gpt-5.2",
-#         default_temperature=0.0,
-#         max_retries=2,
-#         backoff_factor=1.0,
-#     )
-
-#     # Optionally add a system message that will be included in subsequent calls
-#     wrapper.add_message_to_history("system", "You are a helpful assistant that replies concisely.")
-
-#     try:
-#         answer = wrapper.prompt("Please summarize the stages of photosynthesis in 2 sentences.")
-#         print("Assistant:", answer)
-#     except Exception as e:
-#         print("Model call failed:", e)
-
 
 base_url = os.environ.get("CBORG_BASE_URL", "https://api.cborg.lbl.gov")
 
