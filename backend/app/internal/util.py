@@ -120,11 +120,8 @@ def determineArcsAndConnections(data):
             new_node = {
                 "name": closest_node,
                 "coordinates": arc_coordinates,
-                "incoming_nodes": [],
                 "outgoing_nodes": []
             }
-            if origin_node:
-                new_node["incoming_nodes"].append(origin_node)
             nodes.append(new_node)
             node_list.append(closest_node)
             ## update previous node's outgoing node to include this one
@@ -133,6 +130,10 @@ def determineArcsAndConnections(data):
             prev_node = new_node
         # arc['node_list'] = node_list
         arc['nodes'] = nodes
+
+        ## the top level coordinates will no longer be necessary
+        ## we store the coordinates of each node inside the node list
+        del arc['coordinates']
     return data
 
 ## TODO: we must handle elevation
@@ -294,13 +295,11 @@ def build_map_data_from_json(data_input):
                     {
                         "name": node_a,
                         "coordinates": coords_a,
-                        "incoming_nodes": [node_b],
                         "outgoing_nodes": [node_b],
                     },
                     {
                         "name": node_b,
                         "coordinates": coords_b,
-                        "incoming_nodes": [node_a],
                         "outgoing_nodes": [node_a],
                     },
                 ],

@@ -715,6 +715,20 @@ def determineConnectionsFromArcs(data):
     Accepts: map_data output from parsed .kmz, .shp
     Returns
       - dict updated with connections data
+
+    Notes:
+    map_data.arcs contains a list of objects, one for each pipeline.
+    each pipeline object is in the following format:
+        - name: str
+        - node_type: path
+        - nodes: list of connecting nodes containing the following:
+            - name: str
+            - coordinates: list of coords (location of this node)
+            - outgoing_nodes: list of nodes that this node transfers water to
+
+    In this function, we convert map_data.arcs into a "connections" object for writing to excel.
+    This connections object is a dictionary containing the following:
+        - {node_name}: {list of outgoing nodes}
     """
     arcs = data.get("arcs", {})
     connections = {
