@@ -1,9 +1,0 @@
-name: pareto-ui-env
-channels:
-  - conda-forge/osx-arm64
-dependencies:
-  - python=3.9.19
-  - pip
-  - nodejs=18
-  - pip:
-    - -r backend/requirements.txt

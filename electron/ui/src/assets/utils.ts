@@ -10,6 +10,7 @@ import {
   storageSiteIcon, 
   reuseOptionIcon 
 } from './custom-icons';
+import { CoordinateTuple } from 'types';
 
 export const NetworkNodeTypes = {
   TreatmentSite: {
@@ -241,10 +242,10 @@ export const formatCoordinatesFromNodes = (nodes) => {
   return coordinates;
 }
 
-export const reverseMapCoordinates = (coords) => {
+export const reverseMapCoordinates = (coords: CoordinateTuple) => {
     try {
-      if (coords?.lat && coords?.lng) {
-        const coordinates = [String(coords?.lng), String(coords?.lat)];
+      if (coords?.length >= 2) {
+        const coordinates = [String(coords[0]), String(coords[1])];
         return coordinates;
       }
       console.log(`coordinates formatted incorrectly: `);
@@ -342,7 +343,7 @@ export const ParetoDictionary = {
   "InitialPipelineCapacity": "",
   "InitialDisposalCapacity": "",
   "InitialTreatmentCapacity": "",
-  "FreshwaterSourcingAvailability": "",
+  "ExtWaterSourcingAvailability": "",
   "PadOffloadingCapacity": "",
   "CompletionsPadStorage": "",
   "DisposalOperationalCost": "",
@@ -457,7 +458,6 @@ export const CategoryNames = {
   "InitialPipelineDiameters":"Initial Pipeline Diameters",
   "InitialDisposalCapacity":"Initial Disposal Capacity",
   "InitialTreatmentCapacity":"Initial Treatment Capacity",
-  "FreshwaterSourcingAvailability":"External Water Sourcing",
   "ExtWaterSourcingAvailability": "External Water Sourcing",
   "PadOffloadingCapacity":"Pad Offloading Capacity",
   "CompletionsPadStorage":"Completions PadStorage",

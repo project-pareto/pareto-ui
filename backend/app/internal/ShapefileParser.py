@@ -66,7 +66,7 @@ def ParseShapefile(filename, default_node = None):
         print("Warning: Could not reproject — CRS missing, assuming already EPSG:4326.")
 
     all_nodes, production_pads, completion_pads, network_nodes, disposal_sites, \
-    treatment_sites, storage_sites, freshwater_sources, reuse_options, \
+    treatment_sites, storage_sites, externalwater_sources, reuse_options, \
     other_nodes, arcs, polygons = [{} for _ in range(12)]
     # all_nodes, arcs, polygons = {}, {}, {}
 
@@ -140,7 +140,7 @@ def ParseShapefile(filename, default_node = None):
         'SWDSites': disposal_sites,
         'TreatmentSites': treatment_sites,
         'StorageSites': storage_sites,
-        'FreshwaterSources': freshwater_sources,
+        'ExternalWaterSources': externalwater_sources,
         'ReuseOptions': reuse_options,
         'other_nodes': other_nodes,
         'connections': connections,

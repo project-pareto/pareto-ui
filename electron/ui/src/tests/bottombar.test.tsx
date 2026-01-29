@@ -3,6 +3,8 @@ import Bottombar from "../components/Bottombar/Bottombar"
 import mockScenario from './data/mockScenario.json'
 import * as React from 'react'
 
+jest.mock("../components/AIPromptDialog/AIPromptDialog", () => () => null);
+
 const mockFunction = () => {
     console.log("function");
 };

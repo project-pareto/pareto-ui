@@ -24,9 +24,10 @@ from app.internal.scenario_handler import (
     scenario_handler,
 )
 from app.internal.KMZParser import ParseKMZ
-from app.internal.ExcelApi import WriteDataToExcel, PreprocessMapData
+from app.internal.ExcelApi import WriteMapDataToExcel, PreprocessMapData
 from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
 from app.internal.util import time_it
+from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -43,6 +44,15 @@ async def get_project_name():
     Get project name.
     """
     return "pareto"
+
+@router.get("/ai_available")
+async def ai_available():
+    """
+    Return whether the AI functionality is configured and available.
+    """
+    return {
+        "available": cborg.is_available()
+    }
 
 @router.get("/get_scenario_list")
 async def get_scenario_list():
@@ -76,11 +86,17 @@ async def update(request: Request):
     propagate_changes = data.get("propagateChanges")
     scenario_handler.update_scenario(updated_scenario)
     scenario_id = updated_scenario.get("id")
-    if propagate_changes and scenario_id:
-        _log.info(f"propagating changes to excel")
-        scenario_handler.propagate_scenario_changes(updated_scenario)
-        scenario = scenario_handler.get_scenario(scenario_id)
-        return {"data": scenario}
+    if scenario_id:
+        if propagate_changes == "map":
+            _log.info(f"propagating map changes")
+            scenario_handler.propagate_map_data(updated_scenario)
+            scenario = scenario_handler.get_scenario(scenario_id)
+            return {"data": scenario}
+        elif propagate_changes == "json":
+            _log.info(f"propagating JSON changes")
+            scenario_handler.propagate_json_data(updated_scenario)
+            scenario = scenario_handler.get_scenario(scenario_id)
+            return {"data": scenario}
 
     return {"data": updated_scenario}
 
@@ -106,7 +122,7 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
                 content = await file.read()
                 await out_file.write(content) 
             kmz_data = ParseKMZ(kmz_path, defaultNodeType)
-            WriteDataToExcel(kmz_data, excel_path)
+            WriteMapDataToExcel(kmz_data, excel_path)
             kmz_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=kmz_data)
         except Exception as e:
@@ -123,7 +139,7 @@ async def upload(scenario_name: str, defaultNodeType: str, file: UploadFile = Fi
             shp_paths = extract_shp_paths(zip_path)
             map_data = parseShapefiles(shp_paths, defaultNodeType)
             map_data = PreprocessMapData(map_data)
-            WriteDataToExcel(map_data, excel_path)
+            WriteMapDataToExcel(map_data, excel_path)
             map_data["defaultNode"] = defaultNodeType
             return scenario_handler.upload_excelsheet(output_path=f'{excel_path}.xlsx', scenarioName=scenario_name, filename=file.filename, map_data=map_data)
         except Exception as e:
@@ -166,7 +182,7 @@ async def upload_additional_map(scenario_id: int, defaultNodeType: str = "Networ
                 content = await file.read()
                 await out_file.write(content) 
             map_data = ParseKMZ(kmz_path, defaultNodeType, initial_map_data=initial_map_data)
-            WriteDataToExcel(map_data, excel_path)
+            WriteMapDataToExcel(map_data, excel_path)
             return scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
         except Exception as e:
             _log.error(f"error on file upload: {str(e)}")
@@ -181,7 +197,7 @@ async def upload_additional_map(scenario_id: int, defaultNodeType: str = "Networ
             shp_paths = extract_shp_paths(zip_path)
             map_data = parseShapefiles(shp_paths, defaultNodeType, initial_map_data)
             map_data = PreprocessMapData(map_data)
-            WriteDataToExcel(map_data, excel_path)
+            WriteMapDataToExcel(map_data, excel_path)
             return scenario_handler.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
         except Exception as e:
             _log.exception(f"Error on file upload")
@@ -434,7 +450,7 @@ async def generate_excel_from_map(id: int):
     """
     scenario = scenario_handler.get_scenario(id)
     excel_path = scenario_handler.get_excelsheet_path(id)
-    scenario_handler.propagate_scenario_changes(scenario=scenario)
+    scenario_handler.propagate_map_data(scenario=scenario)
     return FileResponse(excel_path)
 
 
@@ -450,3 +466,29 @@ async def generate_report(id: str):
     """
     path = scenario_handler.get_excel_output_path(id)
     return FileResponse(path)
+
+
+@router.post("/request_ai_data_update/{id}")
+async def request_ai_data_update(request: Request, id: int) -> dict:
+    """Prompt AI to fill out data.
+    TODO: 
+        - In the future, we should add authentication to this endpoint.
+        - We could even host this endpoint on a server somewhere else that
+            is locked down.
+        - User would have to provide their own API key.
+        - We can also allow for choice of model, model base_url, etc.
+
+    Args:
+        id: scenario id
+        request.prompt: Prompt to provide to AI.
+
+    Returns:
+        Updated scenario
+    """
+    req = await request.json()
+    prompt = req.get("prompt", None)
+    if prompt:
+        updatedScenario = scenario_handler.generate_data_with_ai(id, prompt)
+    else:
+        raise HTTPException(400, detail=f"Please provide a prompt.")
+    return updatedScenario

@@ -35,7 +35,7 @@ export default function ScenarioList() {
     let navigate = useNavigate();
     const { port } = useApp()
     const enabledStatusList = ['Optimized','Draft','failure', 'Not Optimized', 'Infeasible', 'Incomplete']
-    const enabledStatusListCompare = ['Optimized'] 
+    const enabledStatusListCompare = ['Optimized']
 
     useEffect(() => {
         let tempHasOverrideList = []

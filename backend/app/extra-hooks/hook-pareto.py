@@ -41,6 +41,9 @@ datas = []
 skip_expr = re.compile(r"_test|test_|__")
 print('inside hook-pareto.py')
 
+## TODO: remove reliance on local installation
+## - we can do the same thing from the conda path (outside of maybe some images)
+
 # add all png files to pyinstaller data
 pkg = "../../../project-pareto/docs/img"
 pkg_path = Path(f'{pkg}')

@@ -19,17 +19,17 @@ import time
 from pathlib import Path
 import tinydb
 from fastapi import HTTPException
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
 from importlib.resources import files
+import json
 
 import idaes.logger as idaeslog
 from pareto.utilities.get_data import get_display_units
 
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
-from app.internal.ExcelApi import PreprocessMapData, WriteDataToExcel
-from app.internal.util import time_it
+from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel, WriteJSONToExcel
+from app.internal.util import time_it, FormatPrompt, build_map_data_from_json
+from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -135,6 +135,7 @@ class ScenarioHandler:
         self.LOCKED = False
 
     def retrieve_scenario(self, id):
+        ## TODO: this function is broken
         _log.info(f"retrieving scenario: {id}")
         query = tinydb.Query()
         res = self._db.search((query.id_ == id) & (query.version == self.VERSION))
@@ -593,6 +594,8 @@ class ScenarioHandler:
         self.retrieve_scenarios()
 
     def get_scenario(self, id):
+        ## TODO: THis function is broken. should id be string or number, or does it not matter?
+        _log.info(f"inside get_scenario")
         try:
             # check if db is in use. if so, wait til its done being used
             locked = self.LOCKED
@@ -603,6 +606,7 @@ class ScenarioHandler:
             query = tinydb.Query()
             scenario = self._db.search((query.id_ == id) & (query.version == self.VERSION))
             self.LOCKED = False
+            _log.info(f"returning scenario[0]['scenario]")
             return scenario[0]['scenario']
         except Exception as e:
             _log.error(f'unable to get scenario with id {id}: {e}')
@@ -701,40 +705,8 @@ class ScenarioHandler:
     def update_excel(self, id, table_key, updatedTable):
         _log.info(f'updating id {id} table {table_key}')
         excel_path = self.get_excelsheet_path(id)
-        wb = load_workbook(excel_path, data_only=True)
-        _log.info(f'loaded workbook from path: {excel_path}')
 
-        x = 1
-        y = 3
-        ws = wb[table_key]
-        # for column in scenario["data_input"]["df_parameters"][table_key]:
-
-        # update excel sheet
-        # _log.info(f'updating table: {updatedTable}')
-        for column in updatedTable:
-            y = 3
-            for cellValue in updatedTable[column]:
-                cellLocation = f'{get_column_letter(x)}{y}'
-                originalValue = ws[cellLocation].value
-                if cellValue == "":
-                    newValue = None
-                else:
-                    newValue = cellValue
-                    # try:
-                    #     newValue = int(cellValue)
-                    # except ValueError:
-                    #     try:
-                    #         newValue = float(cellValue)
-                    #     except: 
-                    #         newValue = cellValue
-                if originalValue != newValue:
-                    # print('updating value')
-                    ws[cellLocation] = newValue
-                y+=1
-            x+=1
-        wb.save(excel_path)
-        wb.close()
-        _log.info(f'saved workbook')
+        UpdateExcel(excel_path=excel_path, table_key=table_key, updatedTable=updatedTable)
         # fetch scenario
         try:
             # check if db is in use. if so, wait til its done being used
@@ -790,14 +762,164 @@ class ScenarioHandler:
         return Path(f'{os.path.dirname(os.path.abspath(__file__))}/assets/')
     
     @time_it
-    def propagate_scenario_changes(self, scenario):
+    def propagate_map_data(self, scenario):
         data_input = scenario.get("data_input", {})
         map_data = data_input.get("map_data", None)
         excel_path = self.get_excelsheet_path(scenario.get("id"))
         if map_data is not None:
+            ## 1) Format map data for writing to Excel
             preprocessed_map_data = PreprocessMapData(map_data)
-            WriteDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
+
+            ## 2) Write map data to Excel
+            WriteMapDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
+
+            ## 3) Extract Excel data into JSON, save in DB
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
+
+    @time_it
+    def propagate_json_data(self, scenario):
+        data_input = scenario.get("data_input", {})
+        excel_path = self.get_excelsheet_path(scenario.get("id"))
+        if data_input is not None:
+            scenario.setdefault("data_input", {})
+            scenario["data_input"]["map_data"] = build_map_data_from_json(data_input)
+
+            ## 2) After formatting, save in DB
+            self.update_scenario(scenario)
+
+            ## 3) Update Excel
+            excel_data = {
+                **data_input.get("df_sets"),
+                **data_input.get("df_parameters"),
+            }
+            WriteJSONToExcel(excel_data, excel_path.replace(".xlsx", ""))
+            
+
+    def create_scenario_from_data_input_json(self, data_input, scenarioName = "New Scenario From Data Input"):
+        new_id = self.next_id
+        current_day = datetime.date.today()
+        date = datetime.date.strftime(current_day, "%m/%d/%Y")
+        return_object = {
+            "name": scenarioName, 
+            "id": new_id, 
+            "date": date,
+            "data_input": data_input, 
+            "optimization": 
+                {
+                    "objective":"cost", 
+                    "runtime": 900, 
+                    "pipeline_cost": "distance_based", 
+                    "waterQuality": "false", 
+                    "hydraulics": "false",
+                    "solver": "cbc",
+                    "build_units": "scaled_units",
+                    "optimalityGap": 0,
+                    "scale_model": True
+                }, 
+            "results": {"status": "Draft", "data": {}},
+            "override_values": 
+                {
+                    "vb_y_overview_dict": {},
+                    "v_F_Piped_dict": {},
+                    "v_F_Sourced_dict": {},
+                    "v_F_Trucked_dict": {},
+                    "v_L_Storage_dict": {},
+                    "v_L_PadStorage_dict": {},
+                    "vb_y_Pipeline_dict": {},
+                    "vb_y_Disposal_dict": {},
+                    "vb_y_Storage_dict": {},
+                    "vb_y_Treatment_dict": {}
+                }
+            }
+
+        # write data to excel
+
+        excel_path = f"{self.excelsheets_path}/{new_id}"
+        excel_data = {
+            #  **data_input["df_sets"],
+            # **data_input["df_parameters"],
+        }
+        excel_data["display_units"] = data_input["display_units"]
+        for key in data_input["df_sets"]:
+            if key in excel_data:
+                _log.info(f"{key} is ALREADY IN data")
+            val = data_input["df_sets"][key]
+            excel_data[key] = val
+            # _log.info(f"{key} :: {val}")
+    
+        for key in data_input["df_parameters"]:
+            if key in excel_data:
+                _log.info(f"{key} is ALREADY IN data")
+            val = data_input["df_parameters"][key]
+            excel_data[key] = val
+            # _log.info(f"{key} :: {val}")
+        _log.info(f"Writing JSON To Excel")
+        pareto_excel_template = f"{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx"
+        WriteJSONToExcel(data=excel_data, output_file_name=excel_path, template_location=pareto_excel_template)
+
+
+        # check if db is in use. if so, wait til its done being used
+        # TODO: uncomment
+        locked = self.LOCKED
+        while(locked):
+            time.sleep(0.5)
+            locked = self.LOCKED
+        self.LOCKED = True
+        self._db.insert({'id_': new_id, "scenario": return_object, 'version': self.VERSION})
+        self.LOCKED = False
+        self.update_next_id()
+        self.retrieve_scenarios()
+        
+        return return_object
+    
+    ## TODO: fill this function out (or expand on propagate function)
+    def udpate_map_data_from_JSON(self):
+        _log.info(f"udpate_map_data_from_JSON")
+    
+    @time_it
+    def generate_data_with_ai(self, id, user_prompt):
+        _log.info(f"generate_data_with_ai user prompt: {user_prompt}")
+        try:
+
+            scenario = self.scenario_list[id]
+            data_input = scenario.get("data_input", None)
+        except Exception as e:
+            return {
+                "error": "invalid scenario"
+            }
+        if not cborg.is_available():
+            return {
+                "error": "ai_unavailable",
+                "detail": "AI client is not configured. Provide an API key to enable AI features."
+            }
+        if data_input:
+            prompt = FormatPrompt(user_prompt=user_prompt, data=data_input)
+            # _log.info(f"full prompt: {prompt}")
+            _log.info(f"hitting cborg now")
+            resp = cborg.prompt(prompt)
+            _log.info(f"resp: {resp}")
+            answer = json.loads(resp)
+
+            ## TODO: 
+            ## 1) check if the prompt response was good (resp.status)
+            ## 2) If ok, update scenario in DB
+            ## 3) We must also update the map data (need function for this) and excel sheet
+            ## 4) Optionally, we could display the updates to the user 
+
+            ## sample prompt: Can you fill in completions demand with 10000 barrels in each time period
+
+            status = answer.get("status")
+            _log.info(f"ai response status: {status}")
+            if status == "error":
+                _log.info(f"error response from AI: {answer.get('errorMessage')}")
+                return answer
+            
+            updatedScenario = answer.get("updatedScenario")
+            return answer
+        else:
+            return {
+                "error": "unable to process request"
+            }
 
 
 scenario_handler = ScenarioHandler()
