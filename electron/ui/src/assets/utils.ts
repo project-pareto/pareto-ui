@@ -8,7 +8,8 @@ import {
   productionPadIcon, 
   networkNodeIcon, 
   storageSiteIcon, 
-  reuseOptionIcon 
+  reuseOptionIcon, 
+  externalWaterSourceIcon
 } from './custom-icons';
 import { CoordinateTuple } from 'types';
 
@@ -198,6 +199,22 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: null,
         units: "bbl/day",
+      },
+    ]
+  },  
+  ExternalWaterSource: {
+    key: 'R',
+    name: 'ExternalWaterSource',
+    displayName: 'Ext. Water Source',
+    icon: externalWaterSourceIcon,
+	  iconUrl: 'img/square-green.png',
+    additionalFields: [
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
     ]
   },
