@@ -119,8 +119,6 @@ def determineArcsAndConnections(data):
 
             new_node = {
                 "name": closest_node,
-                "incoming": True,
-                "outgoing": True,
                 "coordinates": arc_coordinates,
                 "incoming_nodes": [],
                 "outgoing_nodes": []
@@ -295,16 +293,12 @@ def build_map_data_from_json(data_input):
                 "nodes": [
                     {
                         "name": node_a,
-                        "incoming": True,
-                        "outgoing": True,
                         "coordinates": coords_a,
                         "incoming_nodes": [node_b],
                         "outgoing_nodes": [node_b],
                     },
                     {
                         "name": node_b,
-                        "incoming": True,
-                        "outgoing": True,
                         "coordinates": coords_b,
                         "incoming_nodes": [node_a],
                         "outgoing_nodes": [node_a],

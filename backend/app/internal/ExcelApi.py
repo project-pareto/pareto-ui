@@ -727,7 +727,9 @@ def determineConnectionsFromArcs(data):
         for connecting_node in nodes:
             connecting_node_name = connecting_node["name"]
             outgoing_nodes = connecting_node.get("outgoing_nodes", [])
-            connections["all_connections"][connecting_node_name] = outgoing_nodes
+            current_outgoing_nodes = connections["all_connections"].get(connecting_node_name, [])
+            current_outgoing_nodes.extend(outgoing_nodes)
+            connections["all_connections"][connecting_node_name] = current_outgoing_nodes
     return data
 
 def PreprocessMapData(map_data):
