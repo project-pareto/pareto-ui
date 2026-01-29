@@ -137,6 +137,7 @@ def determineArcsAndConnections(data):
         arc['nodes'] = nodes
     return data
 
+## TODO: we must handle elevation
 def build_map_data_from_json(data_input):
     """
     Build map_data from JSON data_input (df_sets/df_parameters), preserving

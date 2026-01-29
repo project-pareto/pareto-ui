@@ -28,6 +28,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         tip: "non-desalination (false) or desalination technology (true)"
       },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
     ]
   },
   ProductionPad: {
@@ -43,6 +50,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: 0,
         unit: "TDS"
+      },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
     ]
   },
@@ -88,6 +102,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         tip: "outside system (true) or not (false)"
       },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
     ]
   },
   DisposalSite: {
@@ -110,6 +131,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: 0,
         units: "USD/bbl",
+      },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
       {
         key: "SWDDeep",
@@ -184,6 +212,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         units: "mg/liter",
       },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
     ]
   },
   NetworkNode: {
@@ -199,6 +234,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: null,
         units: "bbl/day",
+      },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
     ]
   },  
@@ -231,6 +273,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: 0,
         units: "USD/bbl",
+      },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
       {
         key: "BeneficialReuseCost",
