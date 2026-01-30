@@ -884,8 +884,6 @@ class ScenarioHandler:
         """
         _log.info(f"validating scenario: {id}")
 
-        tables_with_issues = []
-
         # These tables are candidates for AI fill. They require inputs for each time period
         time_period_tables = ["CompletionsDemand", "PadRates", "FlowbackRates", 
             "WellPressure", "InitialPipelineCapacity", "InitialPipelineDiameters",
@@ -915,6 +913,23 @@ class ScenarioHandler:
             "DisposalExpansionLeadTime", "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist",
             "PipelineExpansionLeadTime_Capac"
         ]
+
+
+        tables_with_issues = []
+
+        try:
+            scenario = self.scenario_list[id]
+            data_input = scenario.get("data_input")
+            input_tables = data_input.get("df_sets", {}) | data_input.get("df_parameters", {})
+            # print(input_tables.keys())
+        
+        except Exception as e:
+            _log.error(f"Error on validate_scenario: {e}")
+            return {
+                "valid": False,
+                "error": f"{e}",
+                "tables_with_issues": tables_with_issues
+            }
 
         return {
             "valid": len(tables_with_issues) == 0,
