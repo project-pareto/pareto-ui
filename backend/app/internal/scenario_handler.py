@@ -872,9 +872,54 @@ class ScenarioHandler:
         
         return return_object
     
-    ## TODO: fill this function out (or expand on propagate function)
-    def udpate_map_data_from_JSON(self):
-        _log.info(f"udpate_map_data_from_JSON")
+    @time_it
+    def validate_scenario(self, id):
+        """
+        Docstring for validate_scenario
+        
+        :param id: scenario id
+
+        This function is designed to determine whether a scenario is ready to be optimized.
+        If not, return the tables that need to be completed.
+        """
+        _log.info(f"validating scenario: {id}")
+
+        tables_with_issues = []
+
+        # These tables are candidates for AI fill. They require inputs for each time period
+        time_period_tables = ["CompletionsDemand", "PadRates", "FlowbackRates", 
+            "WellPressure", "InitialPipelineCapacity", "InitialPipelineDiameters",
+            "InitialTreatmentCapacity", "ReuseMinimum", "ReuseCapacity", 
+            "ExtWaterSourcingAvailability", "DisposalOperatingCapacity"
+        ]
+
+        # Most of these are one off value for a node (node in table name)
+        # For TruckingTime, TruckingHourlyCost, PadWaterQuality, and 
+        # (possibly) PadStorageInitialWaterQuality, we need to look at CP and PP
+        manual_fill_tables = [
+            "InitialDisposalCapacity", "InitialStorageCapacity", "CompletionsPadStorage",
+            "PadOffloadingCapacity", "NodeCapacities", "DisposalOperationalCost", "ReuseOperationalCost", 
+            "PipelineOperationalCost", "ExternalSourcingCost", "TruckingHourlyCost",
+            "TruckingTime", "PipelineExpansionDistance", "BeneficialReuseCost",
+            "BeneficialReuseCredit", "ExternalWaterQuality", "PadWaterQuality",
+            "PadStorageInitialWaterQuality", "SWDDeep", "SWDAveragePressure", "SWDProxPAWell",
+            "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", 
+            "SWDRiskFactors"
+        ]
+
+        ## TODO: need to figure out what to do with these tables
+        question_marks = [
+            "TreatmentOperationalCost", "DisposalExpansionCost", "DisposalCapacityIncrements",
+            "StorageExpansionCost", "StorageCapacityIncrements", "TreatmentExpansionCost",
+            "TreatmentCapacityIncrements", "PipelineCapexCapacityBased", "TreatmentExpansionLeadTime",
+            "DisposalExpansionLeadTime", "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist",
+            "PipelineExpansionLeadTime_Capac"
+        ]
+
+        return {
+            "valid": len(tables_with_issues) == 0,
+            "tables_with_issues": tables_with_issues
+        }
     
     @time_it
     def generate_data_with_ai(self, id, user_prompt):

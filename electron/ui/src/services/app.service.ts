@@ -139,3 +139,10 @@ export const requestAIDataUpdate = (backend_port: number, id: number | string, p
         body: JSON.stringify({"prompt": prompt})
     });
 }
+
+export const validateScenario = (backend_port: number, id: number | string) => {
+    return fetch(BACKEND_URL+':'+backend_port+'/validate_scenario/'+id, {
+        method: 'GET',
+        mode: 'cors'
+    });
+};
