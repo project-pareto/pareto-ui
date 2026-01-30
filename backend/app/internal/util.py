@@ -18,6 +18,38 @@ DEFAULT_UNITS = {
     "mass": "g"
 }
 
+ARC_TABLES = {
+    "PNA": "ProductionPads",
+    "CNA": "CompletionsPads",
+    "CCA": "CompletionsPads",
+    "NNA": "NetworkNodes",
+    "NCA": "NetworkNodes",
+    "NKA": "NetworkNodes",
+    "NRA": "NetworkNodes",
+    "NSA": "NetworkNodes",
+    "FCA": "ExternalWaterSources",
+    "RCA": "TreatmentSites",
+    "RNA": "TreatmentSites",
+    "RSA": "TreatmentSites",
+    "SCA": "StorageSites",
+    "SNA": "StorageSites",
+    "ROA": "TreatmentSites",
+    "RKA": "TreatmentSites",
+    "SOA": "StorageSites",
+    "NOA": "NetworkNodes",
+    "PCT": "ProductionPads",
+    "PKT": "ProductionPads",
+    "FCT": "ExternalWaterSources",
+    "CST": "CompletionsPads",
+    "CCT": "CompletionsPads",
+    "CKT": "CompletionsPads",
+    "RST": "TreatmentSites",
+    "ROT": "TreatmentSites",
+    "SOT": "StorageSites",
+    "RKT": "TreatmentSites",
+}
+
+
 def time_it(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -353,3 +385,80 @@ def FormatPrompt(user_prompt, data = None):
     prompt = f"{user_disclosure}{dataset_rules}{prompt_data}Here is the prompt:\n{user_prompt}"
 
     return prompt
+
+def deriveConnections(input_data: dict):
+    ## From Arc tables, derive a dictionary of node -> [list of nodes] connections
+    # _log.info(f"deriving connections")
+    params = input_data.get("df_parameters")
+    connections = {}
+    for arc_table_name in ARC_TABLES:
+        try:
+            i = 0
+            arc_table_key = ARC_TABLES[arc_table_name]
+            arc_table = params.get(arc_table_name, [])
+            vertical_nodes = arc_table[arc_table_key]
+            for col in arc_table:
+                if i > 0: # skip first column
+                    ## col = arc_table_key
+                    values = arc_table[col]
+                    horizontal_node = col
+                    for j in range(len(values)):
+                        val = values[j]
+                        if val is not None and val != "":
+                            vertical_node = vertical_nodes[j]
+
+                            vertical_node_connections = connections.get(vertical_node, [])
+                            vertical_node_connections.append(horizontal_node)
+                            connections[vertical_node] = vertical_node_connections
+                            ## TODO: Add reverse connection as well?
+                i += 1
+        except Exception as e:
+            _log.info(f"failed to derive connections from table {arc_table_name}: {e}")
+    _log.info(f"connections: {connections}")
+    return connections
+
+def checkArcValues(input_table: dict, connections: dict, input_table_key: str = "NODES") -> bool:
+    # _log.info(f"checking arc values")
+    
+    if input_table_key not in input_table:
+        _log.info(f"missing input_table_key '{input_table_key}' in input_table")
+        return False
+
+    row_labels = input_table.get(input_table_key, [])
+    if not isinstance(row_labels, list):
+        _log.info(f"input_table_key '{input_table_key}' is not a list")
+        return False
+
+    row_index = {label: i for i, label in enumerate(row_labels)}
+    missing_any = False
+
+    for row_label, expected_cols in connections.items():
+        if row_label not in row_index:
+            _log.info(f"missing row '{row_label}' in input_table '{input_table_key}'")
+            missing_any = True
+            continue
+
+        if not isinstance(expected_cols, list):
+            expected_cols = [expected_cols]
+
+        row_i = row_index[row_label]
+        for col_label in expected_cols:
+            if col_label not in input_table:
+                _log.info(f"missing column '{col_label}' for row '{row_label}'")
+                missing_any = True
+                continue
+
+            col_values = input_table.get(col_label, [])
+            if row_i >= len(col_values):
+                _log.info(
+                    f"missing value at row '{row_label}' (index {row_i}) column '{col_label}': column shorter than rows"
+                )
+                missing_any = True
+                continue
+
+            val = col_values[row_i]
+            if val is None or val == "":
+                _log.info(f"missing connection value at row '{row_label}' column '{col_label}' (index {row_i})")
+                missing_any = True
+
+    return not missing_any

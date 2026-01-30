@@ -28,7 +28,14 @@ from pareto.utilities.get_data import get_display_units
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
 from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel, WriteJSONToExcel
-from app.internal.util import time_it, FormatPrompt, build_map_data_from_json
+from app.internal.util import (
+    time_it, 
+    FormatPrompt,
+    build_map_data_from_json,
+    deriveConnections,
+    checkArcValues
+)
+    
 from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
@@ -898,8 +905,8 @@ class ScenarioHandler:
             # We know where the arcs are, so we know WHICH cells need values here
             # We can probably use AI Fill for these
             # InitialPipelineDiameters must use values from PipelineDiameterValues table
-            "InitialTreatmentCapacity", ## TODO: How to handle this <- guy with technologies
             "PipelineOperationalCost", "InitialPipelineDiameters", "PipelineExpansionDistance",
+            # "InitialTreatmentCapacity", <- ## TODO: How to handle this guy with technologies
         ]
 
         # Most of the following are one off value for a node
@@ -942,6 +949,17 @@ class ScenarioHandler:
             scenario = self.scenario_list[id]
             data_input = scenario.get("data_input")
             input_tables = data_input.get("df_sets", {}) | data_input.get("df_parameters", {})
+
+            connections = deriveConnections(data_input)
+            for arc_table in arc_tables:
+                input_table = input_tables[arc_table]
+                is_valid = checkArcValues(
+                    input_table=input_table,
+                    input_table_key="NODES",
+                    connections=connections
+                )
+                if not is_valid:
+                    tables_with_issues.append(arc_table)
             # print(input_tables.keys())
         
         except Exception as e:
