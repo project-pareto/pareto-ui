@@ -310,6 +310,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
         "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
         "ExternalSourcingCost": ["ExternalWaterSources"],
+        "ExternalWaterQuality": ["ExternalWaterSources"],
         "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "ExternalWaterSources"],
         "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
         "BeneficialReuseCost": ["ReuseOptions"],
