@@ -202,12 +202,14 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             valueCellLocation = f'{get_column_letter(column+1)}{row}'
             ws[nodeCellLocation] = node
             current_node = data[node_key][node]
-            altitude = current_node.get("altitude", None)
+            elevation = current_node.get("Elevation", None)
+            if elevation is None:
+                elevation = current_node.get("altitude", None)
             try:
-                ws[valueCellLocation] = float(altitude)
+                ws[valueCellLocation] = float(elevation)
             except:
-                _print(f'unable to convert elevation to float. adding it as is: {altitude}')
-                ws[valueCellLocation] = altitude
+                _print(f'unable to convert elevation to float. adding it as is: {elevation}')
+                ws[valueCellLocation] = elevation
             row+=1
 
     ## step 6: add forecasts (with empty values)
