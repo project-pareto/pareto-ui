@@ -7,7 +7,7 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PublishIcon from '@mui/icons-material/Publish';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import AddIcon from '@mui/icons-material/Add';
@@ -210,6 +210,16 @@ export default function Bottombar(props) {
           })
       }
 
+      const validateScenarioButton = <Button
+                                sx={styles.unfilled}
+                                onClick={handleValidateScenario}
+                                variant="outlined"
+                                size="large"
+                                startIcon={<FactCheckIcon /> }
+                              >
+                                Validate Scenario
+                              </Button>
+
   return ( 
     <Box sx={{ width: 500 }}>
       <CssBaseline />
@@ -227,14 +237,7 @@ export default function Bottombar(props) {
                         {section === 0 && (
                             status != "Incomplete" ?
                             <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                              <Button
-                                sx={styles.unfilled}
-                                onClick={handleValidateScenario}
-                                variant="outlined"
-                                size="large"
-                              >
-                                Validate Scenario
-                              </Button>
+                              {validateScenarioButton}
                               <Button
                                 sx={styles.filled}
                                 onClick={() => handleClick(1)}
@@ -246,14 +249,7 @@ export default function Bottombar(props) {
                               </Button>
                             </Box> : 
                             <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                              <Button
-                                sx={styles.unfilled}
-                                onClick={handleValidateScenario}
-                                variant="outlined"
-                                size="large"
-                              >
-                                Validate Scenario
-                              </Button>
+                              {validateScenarioButton}
                               <Button
                                 sx={styles.unfilled}
                                 onClick={handleOpenAIPrompt}
