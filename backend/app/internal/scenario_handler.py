@@ -885,28 +885,49 @@ class ScenarioHandler:
         _log.info(f"validating scenario: {id}")
 
         # These tables are candidates for AI fill. They require inputs for each time period
-        time_period_tables = ["CompletionsDemand", "PadRates", "FlowbackRates", 
-            "WellPressure", "InitialPipelineCapacity", "InitialPipelineDiameters",
-            "InitialTreatmentCapacity", "ReuseMinimum", "ReuseCapacity", 
+        forecast_tables = [
+            # Do these all need values? It appears some can be 0
+            # Is there a rule for how the values in these tables must add up?
+            "CompletionsDemand", "PadRates", "FlowbackRates", 
+            "WellPressure", "InitialPipelineCapacity",
+            "ReuseMinimum", "ReuseCapacity", 
             "ExtWaterSourcingAvailability", "DisposalOperatingCapacity"
         ]
 
-        # Most of these are one off value for a node (node in table name)
+        arc_tables = [
+            # We know where the arcs are, so we know WHICH cells need values here
+            # We can probably use AI Fill for these
+            # InitialPipelineDiameters must use values from PipelineDiameterValues table
+            "InitialTreatmentCapacity", ## TODO: How to handle this <- guy with technologies
+            "PipelineOperationalCost", "InitialPipelineDiameters", "PipelineExpansionDistance",
+        ]
+
+        # Most of the following are one off value for a node
         # For TruckingTime, TruckingHourlyCost, PadWaterQuality, and 
         # (possibly) PadStorageInitialWaterQuality, we need to look at CP and PP
+        initial_capacities = [
+            # ASSUMING these all need to have values
+            "InitialDisposalCapacity", "InitialStorageCapacity", "PadOffloadingCapacity",
+            "NodeCapacities", "CompletionsPadStorage",
+        ]
+
+        simple_cost_tables = [
+            "DisposalOperationalCost", "ReuseOperationalCost", "ExternalSourcingCost",
+            "TruckingHourlyCost", "BeneficialReuseCost", "BeneficialReuseCredit",
+
+        ]
+        
         manual_fill_tables = [
-            "InitialDisposalCapacity", "InitialStorageCapacity", "CompletionsPadStorage",
-            "PadOffloadingCapacity", "NodeCapacities", "DisposalOperationalCost", "ReuseOperationalCost", 
-            "PipelineOperationalCost", "ExternalSourcingCost", "TruckingHourlyCost",
-            "TruckingTime", "PipelineExpansionDistance", "BeneficialReuseCost",
-            "BeneficialReuseCredit", "ExternalWaterQuality", "PadWaterQuality",
-            "PadStorageInitialWaterQuality", "SWDDeep", "SWDAveragePressure", "SWDProxPAWell",
-            "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", 
-            "SWDRiskFactors"
+            # These can all be filled in on the map
+            "DesalinationSites", "CompletionsPadOutsideSystem", "ExternalWaterQuality",
+            "PadWaterQuality", "StorageInitialWaterQuality", "PadStorageInitialWaterQuality",
+            "SWDDeep", "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", 
+            "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors"
         ]
 
         ## TODO: need to figure out what to do with these tables
         question_marks = [
+            "TruckingTime", ## TruckingTime maps PP, CP against K
             "TreatmentOperationalCost", "DisposalExpansionCost", "DisposalCapacityIncrements",
             "StorageExpansionCost", "StorageCapacityIncrements", "TreatmentExpansionCost",
             "TreatmentCapacityIncrements", "PipelineCapexCapacityBased", "TreatmentExpansionLeadTime",

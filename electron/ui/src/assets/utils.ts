@@ -258,6 +258,20 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         units: "foot"
       },
+      {
+        key: "ExternalWaterQuality",
+        displayName: "Water Quality",
+        type: "number",
+        defaultValue: 0,
+        units: "mg/liter"
+      },
+      {
+        key: "ExternalSourcingCost",
+        displayName: "Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl"
+      },
     ]
   },
   ReuseOption: {
