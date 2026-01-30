@@ -324,22 +324,55 @@ export const reverseMapCoordinates = (coords: CoordinateTuple) => {
     }
 }
 
+/* TODO:
+The following are categories that cannot be filled in by initial map parsing, assumptions.
+Some will neeed AI fill, some can be filled in on the map.
+Candidates for AI Fill:
+  "CompletionsDemand","PadRates","FlowbackRates", "WellPressure", "InitialPipelineCapacity", 
+  "InitialPipelineDiameters", "InitialTreatmentCapacity", "ReuseMinimum", "ReuseCapacity",
+  "ExtWaterSourcingAvailability", "DisposalOperatingCapacity",
+
+Manually Map fill:
+  "InitialDisposalCapacity", "InitialStorageCapacity", "CompletionsPadStorage", "PadOffloadingCapacity",
+  "NodeCapacities", "DisposalOperationalCost", "ReuseOperationalCost", "PipelineOperationalCost",
+  "ExternalSourcingCost", "TruckingHourlyCost" (CP, PP),  "TruckingTime" (CP, PP),
+  "PipelineExpansionDistance", "BeneficialReuseCost", "BeneficialReuseCredit", "ExternalWaterQuality",
+  "PadWaterQuality" (CP, PP), "PadStorageInitialWaterQuality", "SWDDeep", "SWDAveragePressure",
+  "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors"
+
+Unsure how to handle:
+  "TreatmentOperationalCost", "DisposalExpansionCost", "DisposalCapacityIncrements",
+  "StorageExpansionCost", "StorageCapacityIncrements", "TreatmentExpansionCost",
+  "TreatmentCapacityIncrements", "PipelineCapexCapacityBased", "TreatmentExpansionLeadTime",
+  "DisposalExpansionLeadTime", "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist",
+  "PipelineExpansionLeadTime_Capac", 
+
+*/ 
+
 export const Subcategories = {
   "Dynamic": [
-      "CompletionsDemand","DisposalOperationalCost","TreatmentOperationalCost","CompletionsPadOutsideSystem",
-      "DesalinationTechnologies","DesalinationSites","TruckingTime","PadRates","FlowbackRates","NodeCapacities",
-      "InitialPipelineCapacity","InitialPipelineDiameters", "InitialDisposalCapacity","InitialTreatmentCapacity","ExtWaterSourcingAvailability",
-      "PadOffloadingCapacity","CompletionsPadStorage","ReuseOperationalCost","PipelineOperationalCost",
-      "ExternalSourcingCost","TruckingHourlyCost","PipelineDiameterValues","DisposalCapacityIncrements",
-      "InitialStorageCapacity","StorageCapacityIncrements","TreatmentCapacityIncrements","TreatmentEfficiency",
-      "DisposalExpansionCost","StorageExpansionCost","TreatmentExpansionCost","PipelineCapexDistanceBased",
-      "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","WellPressure", "Hydraulics","Elevation",
-      "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity", "RemovalEfficiency",
-      "ReuseCapacity", "ReuseMinimum", "BeneficialReuseCost", "BeneficialReuseCredit", "TreatmentExpansionLeadTime", "DisposalExpansionLeadTime", 
-      "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac", "ExternalWaterQuality", "SWDDeep",
-      "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors",
-      "AirEmissionCoefficients", "TreatmentEmissionCoefficients", 
-      // "DesalinationSurrogate"
+      "CompletionsDemand","PadRates","FlowbackRates", "Elevation", "WellPressure",
+      "InitialPipelineDiameters", "InitialPipelineCapacity","InitialDisposalCapacity","InitialStorageCapacity", "InitialTreatmentCapacity", "ReuseMinimum", "ReuseCapacity",
+      "ExtWaterSourcingAvailability", "CompletionsPadStorage", "PadOffloadingCapacity", "NodeCapacities", 
+      "DisposalOperatingCapacity", "DisposalOperationalCost", "TreatmentOperationalCost",
+      "ReuseOperationalCost", "PipelineOperationalCost", "ExternalSourcingCost", "TruckingHourlyCost",
+      "TruckingTime", "DisposalExpansionCost", "DisposalCapacityIncrements", "StorageExpansionCost",
+      "StorageCapacityIncrements", "TreatmentExpansionCost", "TreatmentCapacityIncrements",
+      "PipelineCapexDistanceBased", "PipelineExpansionDistance", "PipelineCapexCapacityBased", 
+      "PipelineCapacityIncrements", "PipelineDiameterValues", "TreatmentEfficiency",
+      "RemovalEfficiency", "DesalinationTechnologies", "DesalinationSites", "BeneficialReuseCost",
+      "BeneficialReuseCredit", "CompletionsPadOutsideSystem", "Hydraulics", "Economics",
+      "ExternalWaterQuality", "PadWaterQuality", "StorageInitialWaterQuality", "AirEmissionCoefficients",
+      "TreatmentEmissionCoefficients", "PadStorageInitialWaterQuality",
+      "TreatmentExpansionLeadTime", "DisposalExpansionLeadTime",    
+      "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac",  
+      "SWDDeep", "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors",
+       
+      // The following are in the excel sheets, do we want them in pareto?
+      // "ProductionsPads", "CompletionsPads", "ExternalWaterSources", "WaterQualityComponents", "AirEmissionsComponents", "StorageSites", "TreatmentSites", "TreatmentTechnologies", "ReuseOptions",
+      // "NetworkNodes", "PipelineDiameters", "StorageCapacities", "TreatmentCapacities", "InjectionCapacities",
+
+      // "DesalinationSurrogate", 
   ],
   "Static": [
       "PNA", "CNA", "CCA", "NNA", "NCA", "NKA", "NRA", "NSA", "FCA", "RCA", "RNA", "RSA",
