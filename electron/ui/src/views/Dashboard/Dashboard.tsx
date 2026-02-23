@@ -23,7 +23,6 @@ export default function Dashboard() {
     handleSetCategory, appState, backgroundTasks, syncScenarioData,
     copyAndRunOptimization, handleUpdateExcel,
   } = useScenario();
-  console.log(scenario)
   
   const [ name, setName ] = useState<string>('')
   const [ openEditName, setOpenEditName ] = useState<boolean>(false)
