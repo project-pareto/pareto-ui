@@ -71,6 +71,13 @@ async def get_scenario(scenario_id: str):
     print(f"id is: {scenario_id}, {type(scenario_id)}")
     return scenario_handler.retrieve_scenario(scenario_id)
 
+@router.get("/validate_scenario/{scenario_id}")
+async def validate_scenario(scenario_id: int):
+    """
+    Validate whether a scenario is ready to be optimized.
+    """
+    return scenario_handler.validate_scenario(scenario_id)
+
 @router.post("/update")
 async def update(request: Request):
     """Update a given scenario.

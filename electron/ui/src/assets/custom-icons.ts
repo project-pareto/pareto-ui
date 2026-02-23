@@ -142,3 +142,12 @@ export let reuseOptionIcon = new Icon({
 	popupAnchor: [1, -34],
 	shadowSize: [41, 41]
 });
+
+export let externalWaterSourceIcon = new Icon({
+	iconUrl: 'img/square-green.png',
+	shadowUrl: 'img/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [20.5, 20.5],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});

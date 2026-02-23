@@ -8,7 +8,8 @@ import {
   productionPadIcon, 
   networkNodeIcon, 
   storageSiteIcon, 
-  reuseOptionIcon 
+  reuseOptionIcon, 
+  externalWaterSourceIcon
 } from './custom-icons';
 import { CoordinateTuple } from 'types';
 
@@ -27,6 +28,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         tip: "non-desalination (false) or desalination technology (true)"
       },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
     ]
   },
   ProductionPad: {
@@ -42,6 +50,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: 0,
         unit: "TDS"
+      },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
     ]
   },
@@ -87,6 +102,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         tip: "outside system (true) or not (false)"
       },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
     ]
   },
   DisposalSite: {
@@ -109,6 +131,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: 0,
         units: "USD/bbl",
+      },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
       {
         key: "SWDDeep",
@@ -183,6 +212,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         units: "mg/liter",
       },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
     ]
   },
   NetworkNode: {
@@ -199,6 +235,43 @@ export const NetworkNodeTypes = {
         defaultValue: null,
         units: "bbl/day",
       },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
+    ]
+  },  
+  ExternalWaterSource: {
+    key: 'R',
+    name: 'ExternalWaterSource',
+    displayName: 'Ext. Water Source',
+    icon: externalWaterSourceIcon,
+	  iconUrl: 'img/square-green.png',
+    additionalFields: [
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
+      },
+      {
+        key: "ExternalWaterQuality",
+        displayName: "Water Quality",
+        type: "number",
+        defaultValue: 0,
+        units: "mg/liter"
+      },
+      {
+        key: "ExternalSourcingCost",
+        displayName: "Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl"
+      },
     ]
   },
   ReuseOption: {
@@ -214,6 +287,13 @@ export const NetworkNodeTypes = {
         type: "number",
         defaultValue: 0,
         units: "USD/bbl",
+      },
+      {
+        key: "Elevation",
+        displayName: "Elevation",
+        type: "number",
+        defaultValue: 0,
+        units: "foot"
       },
       {
         key: "BeneficialReuseCost",
@@ -258,22 +338,55 @@ export const reverseMapCoordinates = (coords: CoordinateTuple) => {
     }
 }
 
+/* TODO:
+The following are categories that cannot be filled in by initial map parsing, assumptions.
+Some will neeed AI fill, some can be filled in on the map.
+Candidates for AI Fill:
+  "CompletionsDemand","PadRates","FlowbackRates", "WellPressure", "InitialPipelineCapacity", 
+  "InitialPipelineDiameters", "InitialTreatmentCapacity", "ReuseMinimum", "ReuseCapacity",
+  "ExtWaterSourcingAvailability", "DisposalOperatingCapacity",
+
+Manually Map fill:
+  "InitialDisposalCapacity", "InitialStorageCapacity", "CompletionsPadStorage", "PadOffloadingCapacity",
+  "NodeCapacities", "DisposalOperationalCost", "ReuseOperationalCost", "PipelineOperationalCost",
+  "ExternalSourcingCost", "TruckingHourlyCost" (CP, PP),  "TruckingTime" (CP, PP),
+  "PipelineExpansionDistance", "BeneficialReuseCost", "BeneficialReuseCredit", "ExternalWaterQuality",
+  "PadWaterQuality" (CP, PP), "PadStorageInitialWaterQuality", "SWDDeep", "SWDAveragePressure",
+  "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors"
+
+Unsure how to handle:
+  "TreatmentOperationalCost", "DisposalExpansionCost", "DisposalCapacityIncrements",
+  "StorageExpansionCost", "StorageCapacityIncrements", "TreatmentExpansionCost",
+  "TreatmentCapacityIncrements", "PipelineCapexCapacityBased", "TreatmentExpansionLeadTime",
+  "DisposalExpansionLeadTime", "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist",
+  "PipelineExpansionLeadTime_Capac", 
+
+*/ 
+
 export const Subcategories = {
   "Dynamic": [
-      "CompletionsDemand","DisposalOperationalCost","TreatmentOperationalCost","CompletionsPadOutsideSystem",
-      "DesalinationTechnologies","DesalinationSites","TruckingTime","PadRates","FlowbackRates","NodeCapacities",
-      "InitialPipelineCapacity","InitialPipelineDiameters", "InitialDisposalCapacity","InitialTreatmentCapacity","ExtWaterSourcingAvailability",
-      "PadOffloadingCapacity","CompletionsPadStorage","ReuseOperationalCost","PipelineOperationalCost",
-      "ExternalSourcingCost","TruckingHourlyCost","PipelineDiameterValues","DisposalCapacityIncrements",
-      "InitialStorageCapacity","StorageCapacityIncrements","TreatmentCapacityIncrements","TreatmentEfficiency",
-      "DisposalExpansionCost","StorageExpansionCost","TreatmentExpansionCost","PipelineCapexDistanceBased",
-      "PipelineCapexCapacityBased","PipelineCapacityIncrements","PipelineExpansionDistance","WellPressure", "Hydraulics","Elevation",
-      "Economics","PadWaterQuality","StorageInitialWaterQuality","PadStorageInitialWaterQuality","DisposalOperatingCapacity", "RemovalEfficiency",
-      "ReuseCapacity", "ReuseMinimum", "BeneficialReuseCost", "BeneficialReuseCredit", "TreatmentExpansionLeadTime", "DisposalExpansionLeadTime", 
-      "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac", "ExternalWaterQuality", "SWDDeep",
-      "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors",
-      "AirEmissionCoefficients", "TreatmentEmissionCoefficients", 
-      // "DesalinationSurrogate"
+      "CompletionsDemand","PadRates","FlowbackRates", "Elevation", "WellPressure",
+      "InitialPipelineDiameters", "InitialPipelineCapacity","InitialDisposalCapacity","InitialStorageCapacity", "InitialTreatmentCapacity", "ReuseMinimum", "ReuseCapacity",
+      "ExtWaterSourcingAvailability", "CompletionsPadStorage", "PadOffloadingCapacity", "NodeCapacities", 
+      "DisposalOperatingCapacity", "DisposalOperationalCost", "TreatmentOperationalCost",
+      "ReuseOperationalCost", "PipelineOperationalCost", "ExternalSourcingCost", "TruckingHourlyCost",
+      "TruckingTime", "DisposalExpansionCost", "DisposalCapacityIncrements", "StorageExpansionCost",
+      "StorageCapacityIncrements", "TreatmentExpansionCost", "TreatmentCapacityIncrements",
+      "PipelineCapexDistanceBased", "PipelineExpansionDistance", "PipelineCapexCapacityBased", 
+      "PipelineCapacityIncrements", "PipelineDiameterValues", "TreatmentEfficiency",
+      "RemovalEfficiency", "DesalinationTechnologies", "DesalinationSites", "BeneficialReuseCost",
+      "BeneficialReuseCredit", "CompletionsPadOutsideSystem", "Hydraulics", "Economics",
+      "ExternalWaterQuality", "PadWaterQuality", "StorageInitialWaterQuality", "AirEmissionCoefficients",
+      "TreatmentEmissionCoefficients", "PadStorageInitialWaterQuality",
+      "TreatmentExpansionLeadTime", "DisposalExpansionLeadTime",    
+      "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist", "PipelineExpansionLeadTime_Capac",  
+      "SWDDeep", "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors",
+       
+      // The following are in the excel sheets, do we want them in pareto?
+      // "ProductionsPads", "CompletionsPads", "ExternalWaterSources", "WaterQualityComponents", "AirEmissionsComponents", "StorageSites", "TreatmentSites", "TreatmentTechnologies", "ReuseOptions",
+      // "NetworkNodes", "PipelineDiameters", "StorageCapacities", "TreatmentCapacities", "InjectionCapacities",
+
+      // "DesalinationSurrogate", 
   ],
   "Static": [
       "PNA", "CNA", "CCA", "NNA", "NCA", "NKA", "NRA", "NSA", "FCA", "RCA", "RNA", "RSA",

@@ -28,7 +28,14 @@ from pareto.utilities.get_data import get_display_units
 from app.internal.get_data import get_data, get_input_lists
 from app.internal.settings import AppSettings
 from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, UpdateExcel, WriteJSONToExcel
-from app.internal.util import time_it, FormatPrompt, build_map_data_from_json
+from app.internal.util import (
+    time_it, 
+    FormatPrompt,
+    build_map_data_from_json,
+    deriveConnections,
+    checkArcValues
+)
+    
 from app.internal.openapi_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
@@ -872,9 +879,101 @@ class ScenarioHandler:
         
         return return_object
     
-    ## TODO: fill this function out (or expand on propagate function)
-    def udpate_map_data_from_JSON(self):
-        _log.info(f"udpate_map_data_from_JSON")
+    @time_it
+    def validate_scenario(self, id):
+        """
+        Docstring for validate_scenario
+        
+        :param id: scenario id
+
+        This function is designed to determine whether a scenario is ready to be optimized.
+        If not, return the tables that need to be completed.
+        """
+        _log.info(f"validating scenario: {id}")
+
+        # These tables are candidates for AI fill. They require inputs for each time period
+        forecast_tables = [
+            # Do these all need values? It appears some can be 0
+            # Is there a rule for how the values in these tables must add up?
+            "CompletionsDemand", "PadRates", "FlowbackRates", 
+            "WellPressure", "InitialPipelineCapacity",
+            "ReuseMinimum", "ReuseCapacity", 
+            "ExtWaterSourcingAvailability", "DisposalOperatingCapacity"
+        ]
+
+        arc_tables = [
+            # We know where the arcs are, so we know WHICH cells need values here
+            # We can probably use AI Fill for these
+            # InitialPipelineDiameters must use values from PipelineDiameterValues table
+            "PipelineOperationalCost", "InitialPipelineDiameters", "PipelineExpansionDistance",
+            # "InitialTreatmentCapacity", <- ## TODO: How to handle this guy with technologies
+        ]
+
+        # Most of the following are one off value for a node
+        # For TruckingTime, TruckingHourlyCost, PadWaterQuality, and 
+        # (possibly) PadStorageInitialWaterQuality, we need to look at CP and PP
+        initial_capacities = [
+            # ASSUMING these all need to have values
+            "InitialDisposalCapacity", "InitialStorageCapacity", "PadOffloadingCapacity",
+            "NodeCapacities", "CompletionsPadStorage",
+        ]
+
+        simple_cost_tables = [
+            "DisposalOperationalCost", "ReuseOperationalCost", "ExternalSourcingCost",
+            "TruckingHourlyCost", "BeneficialReuseCost", "BeneficialReuseCredit",
+
+        ]
+        
+        manual_fill_tables = [
+            # These can all be filled in on the map
+            "DesalinationSites", "CompletionsPadOutsideSystem", "ExternalWaterQuality",
+            "PadWaterQuality", "StorageInitialWaterQuality", "PadStorageInitialWaterQuality",
+            "SWDDeep", "SWDAveragePressure", "SWDProxPAWell", "SWDProxInactiveWell", 
+            "SWDProxEQ", "SWDProxFault", "SWDProxHpOrLpWell", "SWDRiskFactors"
+        ]
+
+        ## TODO: need to figure out what to do with these tables
+        question_marks = [
+            "TruckingTime", ## TruckingTime maps PP, CP against K
+            "TreatmentOperationalCost", "DisposalExpansionCost", "DisposalCapacityIncrements",
+            "StorageExpansionCost", "StorageCapacityIncrements", "TreatmentExpansionCost",
+            "TreatmentCapacityIncrements", "PipelineCapexCapacityBased", "TreatmentExpansionLeadTime",
+            "DisposalExpansionLeadTime", "StorageExpansionLeadTime", "PipelineExpansionLeadTime_Dist",
+            "PipelineExpansionLeadTime_Capac"
+        ]
+
+
+        tables_with_issues = []
+
+        try:
+            scenario = self.scenario_list[id]
+            data_input = scenario.get("data_input")
+            input_tables = data_input.get("df_sets", {}) | data_input.get("df_parameters", {})
+
+            connections = deriveConnections(data_input)
+            for arc_table in arc_tables:
+                input_table = input_tables[arc_table]
+                is_valid = checkArcValues(
+                    input_table=input_table,
+                    input_table_key="NODES",
+                    connections=connections
+                )
+                if not is_valid:
+                    tables_with_issues.append(arc_table)
+            # print(input_tables.keys())
+        
+        except Exception as e:
+            _log.error(f"Error on validate_scenario: {e}")
+            return {
+                "valid": False,
+                "error": f"{e}",
+                "tables_with_issues": tables_with_issues
+            }
+
+        return {
+            "valid": len(tables_with_issues) == 0,
+            "tables_with_issues": tables_with_issues
+        }
     
     @time_it
     def generate_data_with_ai(self, id, user_prompt):

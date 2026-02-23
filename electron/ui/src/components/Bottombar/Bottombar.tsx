@@ -7,13 +7,14 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PublishIcon from '@mui/icons-material/Publish';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import AddIcon from '@mui/icons-material/Add';
-import { generateExcelFromMap } from '../../services/app.service';
+import { generateExcelFromMap, validateScenario } from '../../services/app.service';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AIPromptDialog from '../AIPromptDialog/AIPromptDialog';
+import ScenarioValidationDialog from '../ScenarioValidationDialog/ScenarioValidationDialog';
 
 
 export default function Bottombar(props) {
@@ -44,11 +45,16 @@ export default function Bottombar(props) {
     const [ openAIPrompt, setOpenAIPrompt ] = useState(false)
     const [ key, setKey ] =  useState(null)
     const [ hasOverride, setHasOverride ] = useState(false)
+    const [ openValidationDialog, setOpenValidationDialog ] = useState(false)
+    const [ validationLoading, setValidationLoading ] = useState(false)
+    const [ validationError, setValidationError ] = useState<string | null>(null)
+    const [ validationResult, setValidationResult ] = useState<any>(null)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
     const handleCloseSaveModal = () => setOpenSaveModal(false);
     const handleCloseRerunModal = () => setOpenRerunModal(false);
     const handleOpenAIPrompt = () => setOpenAIPrompt(true);
     const handleCloseAIPrompt = () => setOpenAIPrompt(false);
+    const handleCloseValidationDialog = () => setOpenValidationDialog(false);
 
 
     const styles = {
@@ -171,41 +177,79 @@ export default function Bottombar(props) {
           })
       }
 
+      const handleValidateScenario = () => {
+        if (!id) {
+          setValidationError("No scenario selected.")
+          setValidationResult(null)
+          setOpenValidationDialog(true)
+          return
+        }
+        setValidationLoading(true)
+        setValidationError(null)
+        setValidationResult(null)
+        setOpenValidationDialog(true)
+        validateScenario(port, id)
+          .then((response) => {
+            if (!response.ok) {
+              setValidationError(`Validation failed (${response.status}).`)
+              setValidationLoading(false)
+              return null
+            }
+            return response.json()
+          })
+          .then((data) => {
+            if (data) {
+              setValidationResult(data)
+            }
+            setValidationLoading(false)
+          })
+          .catch((err) => {
+            console.error("error validating scenario: ", err)
+            setValidationError("Unable to validate scenario.")
+            setValidationLoading(false)
+          })
+      }
+
+      const validateScenarioButton = <Button
+                                sx={styles.unfilled}
+                                onClick={handleValidateScenario}
+                                variant="outlined"
+                                size="large"
+                                startIcon={<FactCheckIcon /> }
+                              >
+                                Validate Scenario
+                              </Button>
+
   return ( 
     <Box sx={{ width: 500 }}>
       <CssBaseline />
       <Paper sx={{ position: 'fixed', bottom: 0, left: '0px', right: 0, height: '60px', zIndex: 2 }} elevation={3}>
           {scenario ? 
             <Grid container sx={{marginTop: '10px'}}>
-                <Grid item xs={6}>
+                <Grid item xs={3}>
                     <Box sx={{display: 'flex', justifyContent: 'flex-start', marginLeft:'10px'}}>
                         {section === 1 && <Button sx={styles.unfilled} onClick={() => handleSelection(0)} size="large" startIcon={<ArrowBackIcon />}>back </Button>}
                         {section === 2 && <Button sx={styles.unfilled} onClick={() => handleSelection(0)} size="large" startIcon={<ArrowBackIcon />}> review inputs &amp; settings </Button>}
                     </Box>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={9}>
                     <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
                         {section === 0 && (
                             status != "Incomplete" ?
-                            <Button
-                              sx={styles.filled}
-                              onClick={() => handleClick(1)}
-                              variant="contained"
-                              size="large"
-                              endIcon={<ArrowForwardIcon /> }
-                            >
-                              continue to optimization
-                            </Button> : 
                             <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                              {validateScenarioButton}
                               <Button
                                 sx={styles.filled}
-                                onClick={handleClickGenerateSpreadsheet}
+                                onClick={() => handleClick(1)}
                                 variant="contained"
                                 size="large"
-                                startIcon={<FileDownloadIcon />}
+                                endIcon={<ArrowForwardIcon /> }
                               >
-                                Generate Spreadsheet From Network
+                                continue to optimization
                               </Button>
+                            </Box> : 
+                            <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                              {validateScenarioButton}
                               <Button
                                 sx={styles.unfilled}
                                 onClick={handleOpenAIPrompt}
@@ -214,6 +258,15 @@ export default function Bottombar(props) {
                                 startIcon={<AutoAwesomeIcon />}
                               >
                                 AI Fill Inputs
+                              </Button>
+                              <Button
+                                sx={styles.filled}
+                                onClick={handleClickGenerateSpreadsheet}
+                                variant="contained"
+                                size="large"
+                                startIcon={<FileDownloadIcon />}
+                              >
+                                Generate Spreadsheet From Network
                               </Button>
                             </Box>
                         )}
@@ -286,11 +339,18 @@ export default function Bottombar(props) {
         showError={showModalError}
         errorText={modalError}
       />
-      <AIPromptDialog
+        <AIPromptDialog
         open={openAIPrompt}
         onClose={handleCloseAIPrompt}
         scenarioId={id}
         scenarioName={name}
+      />
+      <ScenarioValidationDialog
+        open={openValidationDialog}
+        loading={validationLoading}
+        error={validationError}
+        result={validationResult}
+        onClose={handleCloseValidationDialog}
       />
     </Box>
   );

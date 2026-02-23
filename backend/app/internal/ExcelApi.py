@@ -202,12 +202,14 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             valueCellLocation = f'{get_column_letter(column+1)}{row}'
             ws[nodeCellLocation] = node
             current_node = data[node_key][node]
-            altitude = current_node.get("altitude", None)
+            elevation = current_node.get("Elevation", None)
+            if elevation is None:
+                elevation = current_node.get("altitude", None)
             try:
-                ws[valueCellLocation] = float(altitude)
+                ws[valueCellLocation] = float(elevation)
             except:
-                _print(f'unable to convert elevation to float. adding it as is: {altitude}')
-                ws[valueCellLocation] = altitude
+                _print(f'unable to convert elevation to float. adding it as is: {elevation}')
+                ws[valueCellLocation] = elevation
             row+=1
 
     ## step 6: add forecasts (with empty values)
@@ -308,10 +310,11 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
-        "ReuseOperationalCost": ["CompletionsPads"], ## AUTOFILL 0?
+        "ReuseOperationalCost": ["ReuseOptions"],
         "ExternalSourcingCost": ["ExternalWaterSources"],
+        "ExternalWaterQuality": ["ExternalWaterSources"],
         "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "ExternalWaterSources"],
-        "DesalinationSites": ["TreatmentSites"], ## AUTOFILL 0's or 1's?
+        "DesalinationSites": ["TreatmentSites"],
         "BeneficialReuseCost": ["ReuseOptions"],
         "BeneficialReuseCredit": ["ReuseOptions"],
         "CompletionsPadOutsideSystem": ["CompletionsPads"],
@@ -605,7 +608,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     return True
 
 ## TODO:
-# TEST this function for updating existing excel file
+# - Handle Elevation in this function. Elevation is its own table in the Excel
 def WriteJSONToExcel(data, output_file_name, template_location = None):
     """
         - This function takes our JSON formatted data and writes it to excel.
@@ -715,6 +718,20 @@ def determineConnectionsFromArcs(data):
     Accepts: map_data output from parsed .kmz, .shp
     Returns
       - dict updated with connections data
+
+    Notes:
+    map_data.arcs contains a list of objects, one for each pipeline.
+    each pipeline object is in the following format:
+        - name: str
+        - node_type: path
+        - nodes: list of connecting nodes containing the following:
+            - name: str
+            - coordinates: list of coords (location of this node)
+            - outgoing_nodes: list of nodes that this node transfers water to
+
+    In this function, we convert map_data.arcs into a "connections" object for writing to excel.
+    This connections object is a dictionary containing the following:
+        - {node_name}: {list of outgoing nodes}
     """
     arcs = data.get("arcs", {})
     connections = {
@@ -727,7 +744,9 @@ def determineConnectionsFromArcs(data):
         for connecting_node in nodes:
             connecting_node_name = connecting_node["name"]
             outgoing_nodes = connecting_node.get("outgoing_nodes", [])
-            connections["all_connections"][connecting_node_name] = outgoing_nodes
+            current_outgoing_nodes = connections["all_connections"].get(connecting_node_name, [])
+            current_outgoing_nodes.extend(outgoing_nodes)
+            connections["all_connections"][connecting_node_name] = current_outgoing_nodes
     return data
 
 def PreprocessMapData(map_data):

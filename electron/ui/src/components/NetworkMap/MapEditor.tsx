@@ -11,6 +11,8 @@ import Divider from '@mui/material/Divider';
 import PopupModal from '../PopupModal/PopupModal';
 import { NodeIcon } from './NodeIcon';
 import FileUploadModal from '../FileUploadModal/FileUploadModal';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
 // Reuse shared types from MapContext: CoordinateTuple, SelectedNodeState, MapEditorNode
 
@@ -266,26 +268,23 @@ export default function MapEditor() {
         }
     };
 
-    const handleUpdateOutgoingNodes = (value: string[], idx: number): void => {
-        // TODO: Two directions we can go with this
-        // Either, 
-        // 1) a user can add any node to this nodes outgoing nodes, in which case we should add that additional node
-        // as a connection if it is not already one, OR
-        // 2) a user can only add other connection nodes as outgoing nodes.
-        // FOR NOW: it seems that this should work. users just have to be smart about it and not create an impossible connection.
+    const handleToggleFlowBetweenNodes = (fromIdx: number, toIdx: number): void => {
         setSelectedNode(data => {
             if (!data) return data;
             const prevNode = { ...data.node } as MapEditorNode;
-            const updatedNodeList = (prevNode.nodes || []).map((n, i) => {
-                if (i === idx) {
-                    return {
-                        ...n,
-                        outgoing_nodes: value,
-                    } as any;
-                }
-                return n;
+            const prevNodes = prevNode.nodes || [];
+            const sourceName = prevNodes[fromIdx]?.name;
+            const targetName = prevNodes[toIdx]?.name;
+            if (!sourceName || !targetName) return data;
+            const updatedNodeList = prevNodes.map((n, i) => {
+                if (i !== fromIdx) return n;
+                const outgoing = Array.isArray(n.outgoing_nodes) ? n.outgoing_nodes : [];
+                const hasFlow = outgoing.includes(targetName);
+                return {
+                    ...n,
+                    outgoing_nodes: hasFlow ? outgoing.filter((item) => item !== targetName) : [...outgoing, targetName],
+                };
             });
-
             const node = {
                 ...prevNode,
                 nodes: updatedNodeList,
@@ -296,6 +295,13 @@ export default function MapEditor() {
             } as SelectedNodeState;
         });
     }
+
+    const hasFlowBetweenNodes = (fromIdx: number, toIdx: number): boolean => {
+        const fromNode = nodeData?.nodes?.[fromIdx];
+        const toNode = nodeData?.nodes?.[toIdx];
+        if (!fromNode?.name || !toNode?.name) return false;
+        return (fromNode?.outgoing_nodes || []).includes(toNode.name);
+    };
 
     const handleClickUploadAnotherMap = (): void => {
         setShowFileUpload(true);
@@ -417,6 +423,10 @@ export default function MapEditor() {
                     {
                         nodeData?.nodes?.map((connectionNode, idx) => {
                             const name = connectionNode.name;
+                            const nextNode = nodeData?.nodes?.[idx + 1];
+                            const canToggleFlow = Boolean(name && nextNode?.name);
+                            const hasDownFlow = canToggleFlow ? hasFlowBetweenNodes(idx, idx + 1) : false;
+                            const hasUpFlow = canToggleFlow ? hasFlowBetweenNodes(idx + 1, idx) : false;
                             return (
                                 <Stack direction="column" key={idx} spacing={1} sx={{marginBottom: 2}}>
                                     <Stack direction={'row'} spacing={1}>
@@ -452,35 +462,36 @@ export default function MapEditor() {
                                         </IconButton>
                                     </Tooltip>
                                     </Stack>
-
-                                    <Stack direction="row" spacing={1}>
-                                        <TextField
-                                            size="small"
-                                            label="Transfers water to"
-                                            fullWidth
-                                            select
-                                            value={connectionNode?.outgoing_nodes || []} // now an array of strings
-                                            onChange={(e) => handleUpdateOutgoingNodes(e.target.value as unknown as string[], idx)}
-                                            SelectProps={{
-                                                multiple: true,
-                                                MenuProps: {
-                                                PaperProps: {
-                                                    style: {
-                                                    maxHeight: 200
-                                                    }
-                                                }
-                                                }
-                                            }}
-                                            sx={{marginBottom: 1}}
-                                            >
-                                            {availableNodes?.map((node) => (
-                                                <MenuItem key={node.name} value={node.name}>
-                                                {node.name}
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
-                                    </Stack>
-                                    
+                                    {idx < (nodeData?.nodes?.length || 0) - 1 && (
+                                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ width: '100%' }}>
+                                            <Tooltip title={canToggleFlow ? `Flow from ${name} to ${nextNode?.name}` : "Select both nodes to set flow"}>
+                                                <span>
+                                                    <IconButton
+                                                        size="small"
+                                                        color={hasDownFlow ? 'primary' : 'default'}
+                                                        disabled={!canToggleFlow}
+                                                        onClick={() => handleToggleFlowBetweenNodes(idx, idx + 1)}
+                                                        aria-label={`Toggle flow from ${name || 'node'} to ${nextNode?.name || 'node'}`}
+                                                    >
+                                                        <ArrowDownwardIcon />
+                                                    </IconButton>
+                                                </span>
+                                            </Tooltip>
+                                            <Tooltip title={canToggleFlow ? `Flow from ${nextNode?.name} to ${name}` : "Select both nodes to set flow"}>
+                                                <span>
+                                                    <IconButton
+                                                        size="small"
+                                                        color={hasUpFlow ? 'primary' : 'default'}
+                                                        disabled={!canToggleFlow}
+                                                        onClick={() => handleToggleFlowBetweenNodes(idx + 1, idx)}
+                                                        aria-label={`Toggle flow from ${nextNode?.name || 'node'} to ${name || 'node'}`}
+                                                    >
+                                                        <ArrowUpwardIcon />
+                                                    </IconButton>
+                                                </span>
+                                            </Tooltip>
+                                        </Stack>
+                                    )}
                                 </Stack>
                                 
                             )
