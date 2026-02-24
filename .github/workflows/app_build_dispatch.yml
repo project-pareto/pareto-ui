@@ -40,6 +40,30 @@ jobs:
       job-name: ${{ steps.generate-dynamic-inputs.outputs.job-name }}
       os: ${{ steps.generate-dynamic-inputs.outputs.os }}
     steps:
+      - name: Log workflow inputs
+        env:
+          INPUT_OS_VERSION: ${{ inputs.os-version }}
+          INPUT_PROJECT_PARETO_REPO: ${{ inputs.project-pareto-repo }}
+          INPUT_PROJECT_PARETO_BRANCH: ${{ inputs.project-pareto-branch }}
+          INPUT_PROJECT_PARETO_VERSION: ${{ inputs.project-pareto-version }}
+          INPUT_PACKAGE_BUILD_NUMBER: ${{ inputs.package-build-number }}
+          INPUT_WINDOWS_INSTALLER_TARGET: ${{ inputs.windows-installer-target }}
+        run: |
+          echo "=================================================="
+          echo "Build Dispatch Inputs"
+          echo "=================================================="
+          echo "os-version: ${INPUT_OS_VERSION}"
+          echo "project-pareto-repo: ${INPUT_PROJECT_PARETO_REPO}"
+          echo "project-pareto-branch: ${INPUT_PROJECT_PARETO_BRANCH}"
+          echo "project-pareto-version: ${INPUT_PROJECT_PARETO_VERSION}"
+          if [ -z "${INPUT_PACKAGE_BUILD_NUMBER}" ]; then
+            echo "package-build-number: (empty, will be auto-generated)"
+          else
+            echo "package-build-number: ${INPUT_PACKAGE_BUILD_NUMBER}"
+          fi
+          echo "windows-installer-target: ${INPUT_WINDOWS_INSTALLER_TARGET}"
+          echo "=================================================="
+
       - name: Generate dynamic inputs
         id: generate-dynamic-inputs
         run: |
