@@ -22,9 +22,7 @@ a = Analysis(
     'pint', 
     'numbers', 
     'pyutilib', 
-    'pyomo',
-    'pkg_resources'
-    'pkg_resources.extern'],
+    'pyomo'],
     hookspath=['extra-hooks'],
     hooksconfig={},
     runtime_hooks=[],

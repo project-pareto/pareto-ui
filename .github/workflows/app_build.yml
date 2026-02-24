@@ -185,9 +185,6 @@ jobs:
           mkdir idaes_extensions
           idaes get-extensions --to ./idaes_extensions
 
-      - name: pip install setuptools
-        run: pip install "setuptools<82"
-
       - name: DEBUG - pip freeze
         run: pip freeze
 
