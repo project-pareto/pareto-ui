@@ -43,6 +43,7 @@ jobs:
       - name: Log workflow inputs
         env:
           INPUT_OS_VERSION: ${{ inputs.os-version }}
+          INPUT_PARETO_UI_BRANCH: ${{ github.ref_name }}
           INPUT_PROJECT_PARETO_REPO: ${{ inputs.project-pareto-repo }}
           INPUT_PROJECT_PARETO_BRANCH: ${{ inputs.project-pareto-branch }}
           INPUT_PROJECT_PARETO_VERSION: ${{ inputs.project-pareto-version }}
@@ -53,6 +54,7 @@ jobs:
           echo "Build Dispatch Inputs"
           echo "=================================================="
           echo "os-version: ${INPUT_OS_VERSION}"
+          echo "pareto-ui-branch: ${INPUT_PARETO_UI_BRANCH}"
           echo "project-pareto-repo: ${INPUT_PROJECT_PARETO_REPO}"
           echo "project-pareto-branch: ${INPUT_PROJECT_PARETO_BRANCH}"
           echo "project-pareto-version: ${INPUT_PROJECT_PARETO_VERSION}"
