@@ -185,6 +185,9 @@ jobs:
           mkdir idaes_extensions
           idaes get-extensions --to ./idaes_extensions
 
+      - name: DEBUG - pip freeze
+        run: pip freeze
+
       - name: Build Backend
         working-directory: ./electron
         run: npm run build-backend
