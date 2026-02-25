@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import type { NetworkMapProps } from '../../types';
 import type { LatLngBoundsExpression as LLBoundsExpr } from 'leaflet';
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
-import { LatLngBoundsExpression, LatLngBounds, LatLng } from 'leaflet'
+import { LatLngBoundsExpression, LatLngBounds, LatLng, divIcon } from 'leaflet'
 import { Box, Grid, Tabs, Tab, Button } from '@mui/material';
 import type { CoordinateTuple } from '../../types';
 import { Tooltip } from 'react-leaflet'
@@ -29,6 +29,20 @@ import { useMapValues } from '../../context/MapContext';
 
 const iconUrl = "http://maps.google.com/mapfiles/kml/"
 const PIPELINE_COLOR = "#A03232"
+const SELECTED_HIGHLIGHT_COLOR = "#FFD54F"
+const SELECTED_POINT_HALO_SIZE = 56
+const SELECTED_POINT_ICON = divIcon({
+    className: "",
+    html: `<div style="
+        width:${SELECTED_POINT_HALO_SIZE}px;
+        height:${SELECTED_POINT_HALO_SIZE}px;
+        border-radius:999px;
+        background:radial-gradient(circle, rgba(255, 213, 79, 0.58) 0%, rgba(255, 213, 79, 0.38) 55%, rgba(255, 213, 79, 0.08) 100%);
+        filter:blur(1.2px);
+    "></div>`,
+    iconSize: [SELECTED_POINT_HALO_SIZE, SELECTED_POINT_HALO_SIZE],
+    iconAnchor: [SELECTED_POINT_HALO_SIZE / 2, SELECTED_POINT_HALO_SIZE / 2],
+})
 
 
 export default function NetworkMap(props: NetworkMapProps) {
@@ -49,7 +63,10 @@ export default function NetworkMap(props: NetworkMapProps) {
         selectedNode,
         setNetworkMapData,
     } = useMapValues();
-    const isPathSelected = selectedNode?.node?.node_type === "path";
+    const selectedNodeData = selectedNode?.node ?? (selectedNode as any);
+    const selectedNodeType = selectedNodeData?.node_type;
+    const selectedNodeIdx = typeof selectedNode?.idx === "number" ? selectedNode.idx : undefined;
+    const isPathSelected = selectedNodeType === "path";
     const [ googleMapType, setGoogleMapType ] = useState<string>('y')
     const [ mapCenter, setMapCenter ] = useState<[number, number]>([38, -98])
     const [ mapZoom, setMapZoom ] = useState<number>(5)
@@ -204,59 +221,113 @@ export default function NetworkMap(props: NetworkMapProps) {
                     <MapClickHandler onClick={handleMapClick} />
         
                     {nodeData.map((value, index) => {
+                        const markerPosition: [number, number] = [
+                            Number(value.coordinates[1]),
+                            Number(value.coordinates[0]),
+                        ];
+                        const isSelectedPoint = !isPathSelected && (
+                            (selectedNodeIdx !== undefined && selectedNodeIdx === index) ||
+                            (selectedNodeIdx === undefined && selectedNodeData?.name === value.name)
+                        );
+
                         return (
-                            <Marker
-                                key={index}
-                                position={[
-                                    value.coordinates[1],
-                                    value.coordinates[0]
-                                ]}                        
-                                {...({ icon: NetworkNodeTypes[value.nodeType]?.icon } as any)}
-                                // icon={icons[0]}
-                                eventHandlers={{
-                                    click: (e: any) => {
-                                        e.originalEvent.stopPropagation();
-                                        handleClickNode(value, index);
-                                    }
-                                }}
-                                ref={(el) => {
-                                    const markerId = `node:${index}`
-                                    if (el) {
-                                        markerRefs.current[markerId] = el;
-                                    }
-                                }}
-                            >
-                                <Tooltip>{isPathSelected ? `Add ${value.name} as connection` : value.name}</Tooltip>
-                            </Marker>
+                            <React.Fragment key={index}>
+                                {isSelectedPoint && (
+                                    <Marker
+                                        position={markerPosition}
+                                        {...({
+                                            icon: SELECTED_POINT_ICON,
+                                            interactive: false,
+                                            bubblingMouseEvents: false,
+                                            keyboard: false,
+                                            zIndexOffset: -1000,
+                                        } as any)}
+                                    />
+                                )}
+                                <Marker
+                                    position={markerPosition}                        
+                                    {...({ icon: NetworkNodeTypes[value.nodeType]?.icon } as any)}
+                                    eventHandlers={{
+                                        click: (e: any) => {
+                                            e.originalEvent.stopPropagation();
+                                            handleClickNode(value, index);
+                                        }
+                                    }}
+                                    ref={(el) => {
+                                        const markerId = `node:${index}`
+                                        if (el) {
+                                            markerRefs.current[markerId] = el;
+                                        }
+                                    }}
+                                >
+                                    <Tooltip>{isPathSelected ? `Add ${value.name} as connection` : value.name}</Tooltip>
+                                </Marker>
+                            </React.Fragment>
                         )
                     })}
         
         
                     {lineData.map((value, index) => {
+                        const isSelectedLine = isPathSelected && (
+                            (selectedNodeIdx !== undefined && selectedNodeIdx === index) ||
+                            (selectedNodeIdx === undefined && selectedNodeData?.name === value.name)
+                        );
+                        const linePositions = formatCoordinatesFromNodes(value.nodes);
+
                         return (
-                            <Polyline
-                                key={index}
-                                pathOptions={{ 
-                                    color: PIPELINE_COLOR,
-                                    bubblingMouseEvents: false 
-                                }}
-                                positions={formatCoordinatesFromNodes(value.nodes)}
-                                eventHandlers={{
-                                    click: (e) => {
-                                        handleClickPipeline(value, index);
-                                    }
-                                }}
-                                ref={(el) => {
-                                    const markerId = `line:${index}`
-                                    if (el) {
-                                        markerRefs.current[markerId] = el;
-                                    }
-                                }}
-                            >
-                                <Tooltip>
-                                    {value.name}
-                                </Tooltip>
-                            </Polyline>
+                            <React.Fragment key={index}>
+                                {isSelectedLine && (
+                                    <React.Fragment>
+                                        <Polyline
+                                            pathOptions={{ 
+                                                color: SELECTED_HIGHLIGHT_COLOR,
+                                                weight: 16,
+                                                opacity: 0.16,
+                                                lineCap: "round",
+                                                lineJoin: "round",
+                                                bubblingMouseEvents: false,
+                                                interactive: false,
+                                            }}
+                                            positions={linePositions}
+                                        />
+                                        <Polyline
+                                            pathOptions={{ 
+                                                color: SELECTED_HIGHLIGHT_COLOR,
+                                                weight: 11,
+                                                opacity: 0.28,
+                                                lineCap: "round",
+                                                lineJoin: "round",
+                                                bubblingMouseEvents: false,
+                                                interactive: false,
+                                            }}
+                                            positions={linePositions}
+                                        />
+                                    </React.Fragment>
+                                )}
+                                <Polyline
+                                    pathOptions={{ 
+                                        color: PIPELINE_COLOR,
+                                        weight: 5,
+                                        bubblingMouseEvents: false 
+                                    }}
+                                    positions={linePositions}
+                                    eventHandlers={{
+                                        click: (e) => {
+                                            handleClickPipeline(value, index);
+                                        }
+                                    }}
+                                    ref={(el) => {
+                                        const markerId = `line:${index}`
+                                        if (el) {
+                                            markerRefs.current[markerId] = el;
+                                        }
+                                    }}
+                                >
+                                    <Tooltip>
+                                        {value.name}
+                                    </Tooltip>
+                                </Polyline>
+                            </React.Fragment>
                         ) 
                         })}
                     </MapContainer>
