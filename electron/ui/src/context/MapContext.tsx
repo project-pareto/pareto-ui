@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName, calculatePipelineSegmentLengths } from "../assets/utils";
+import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName, calculatePipelineSegmentLengths } from "../util";
 import { useApp } from '../AppContext';
 import { uploadAdditionalMap } from "../services/app.service";
 import type { Scenario } from "../types";

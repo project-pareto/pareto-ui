@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { CategoryNames, ParetoDictionary, Subcategories } from "../../assets/utils";
+import { CategoryNames, ParetoDictionary, Subcategories } from "../../util";
 import PopupModal from '../../components/PopupModal/PopupModal'
 import MapEditor from '../NetworkMap/MapEditor';
 import type { SidebarProps } from '../../types';

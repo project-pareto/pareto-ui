@@ -12,7 +12,7 @@ import {
     formatCoordinatesFromNodes,
     convertMapDataToFrontendFormat,
     convertMapDataToBackendFormat
-} from '../../assets/utils';
+} from '../../util';
 import { useMapValues } from '../../context/MapContext';
 
 // h = roads only

@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { FileUploader } from "react-drag-drop-files";
 import { fetchExcelFile } from '../../services/app.service';
 import { useApp } from '../../AppContext';
-import { NetworkNodeTypes } from '../../assets/utils';
+import { NetworkNodeTypes } from '../../util';
 import { NodeIcon } from '../NetworkMap/NodeIcon';
 import type { FileUploadModalProps } from '../../types';
 

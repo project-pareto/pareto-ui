@@ -4,7 +4,7 @@ import type { OverrideTableRowsProps, NewOverrideRowProps } from '../../types';
 import { TableBody, TableCell, TableRow, TextField, Tooltip, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import NewBinaryVariableRow from './NewOverrideRow';
 import { INFRASTRUCTURE_CAPEX_MAPPING }  from '../../assets/InfrastructureCapexMapping'
-import { CategoryNames } from "../../assets/utils";
+import { CategoryNames } from "../../util";
 
 export default function OverrideTableRows(props: OverrideTableRowsProps): JSX.Element {  
   const {
