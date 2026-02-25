@@ -3,7 +3,7 @@ import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Toolti
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import type { CoordinateTuple, SelectedNodeState, MapEditorNode } from '../../types';
-import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown } from '../../util';
+import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths } from '../../util';
 import CloseIcon from '@mui/icons-material/Close';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -142,9 +142,11 @@ export default function MapEditor() {
             const updatedNodeList = (idx === undefined || idx === "")
                 ? [...prevNodes, { name: name, incoming: true, outgoing: true }]
                 : prevNodes.map((n, i) => i === idx ? { ...n, name: name, coordinates: connectionNode?.coordinates } : n);
+            const lengths = calculatePipelineSegmentLengths(updatedNodeList);
             const node = {
                 ...prev,
                 nodes: updatedNodeList,
+                lengths,
             } as MapEditorNode;
             return {
                 ...data,
@@ -158,9 +160,47 @@ export default function MapEditor() {
             if (!data) return data;
             const prevNode = { ...data.node } as MapEditorNode;
             const updatedNodeList = (prevNode.nodes || []).filter((_, i) => i !== idx);
+            const lengths = calculatePipelineSegmentLengths(updatedNodeList);
             const node = {
                 ...prevNode,
                 nodes: updatedNodeList,
+                lengths,
+            } as MapEditorNode;
+            return {
+                ...data,
+                node,
+            } as SelectedNodeState;
+        });
+    };
+
+    const getPipelineLengths = (n?: MapEditorNode): number[] => {
+        const nodes = n?.nodes || [];
+        const expectedLength = Math.max((nodes.length || 0) - 1, 0);
+        const calculatedLengths = calculatePipelineSegmentLengths(nodes);
+        const existingLengths = Array.isArray(n?.lengths) ? n.lengths : [];
+
+        return Array.from({ length: expectedLength }, (_, idx) => {
+            const existing = Number(existingLengths[idx]);
+            if (!Number.isNaN(existing) && Number.isFinite(existing) && existing >= 0) return existing;
+            const calculated = Number(calculatedLengths[idx]);
+            if (!Number.isNaN(calculated) && Number.isFinite(calculated) && calculated >= 0) return calculated;
+            return 0;
+        });
+    };
+
+    const handleUpdateSegmentLength = (segmentIdx: number, value: string): void => {
+        const parsed = Number(value);
+        if (value !== "" && (Number.isNaN(parsed) || parsed < 0)) return;
+
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prevNode = { ...data.node } as MapEditorNode;
+            const lengths = [...getPipelineLengths(prevNode)];
+            if (segmentIdx < 0 || segmentIdx >= lengths.length) return data;
+            lengths[segmentIdx] = value === "" ? 0 : parsed;
+            const node = {
+                ...prevNode,
+                lengths,
             } as MapEditorNode;
             return {
                 ...data,
@@ -307,6 +347,8 @@ export default function MapEditor() {
         setShowFileUpload(true);
     }
 
+    const segmentLengths = getPipelineLengths(nodeData);
+
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
         <Typography variant="h6">
@@ -392,7 +434,7 @@ export default function MapEditor() {
             ) : ( // This is a pipeline
                 <Stack>
                     <Stack justifyContent={'space-between'} direction={'column'} style={styles.pipelineTopStack}>
-                        <TextField
+                        {/* <TextField
                             label="Pipeline Length"
                             size='small'
                             value={nodeData?.length || ''}
@@ -404,7 +446,7 @@ export default function MapEditor() {
                             InputProps={{
                                 endAdornment: <InputAdornment position="end">{units?.diameter || 'mi'}</InputAdornment>,
                             }}
-                        />
+                        /> */}
                         <TextField
                             label="Pipeline Diameter"
                             size='small'
@@ -477,6 +519,17 @@ export default function MapEditor() {
                                                     </IconButton>
                                                 </span>
                                             </Tooltip>
+                                            <TextField
+                                                label="Length"
+                                                size="small"
+                                                type="number"
+                                                value={segmentLengths?.[idx] ?? 0}
+                                                onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
+                                                sx={{ width: 160 }}
+                                                InputProps={{
+                                                    endAdornment: <InputAdornment position="end">{units?.distance || 'mi'}</InputAdornment>,
+                                                }}
+                                            />
                                             <Tooltip title={canToggleFlow ? `Flow from ${nextNode?.name} to ${name}` : "Select both nodes to set flow"}>
                                                 <span>
                                                     <IconButton
