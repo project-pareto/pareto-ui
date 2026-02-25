@@ -277,6 +277,7 @@ export type MapEditorNode = {
   node_type?: string; // node or path
   nodeType?: string; // type of node (NetworkNode, CompletionPad ...)
   coordinates?: CoordinateTuple;
+  lengths?: number[];
   nodes?: Array<{
     name: string;
     coordinates?: CoordinateTuple;
