@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
-import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip } from '@mui/material';
+import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import type { CoordinateTuple, SelectedNodeState, MapEditorNode } from '../../types';
@@ -13,6 +13,7 @@ import { NodeIcon } from './NodeIcon';
 import FileUploadModal from '../FileUploadModal/FileUploadModal';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 
 // Reuse shared types from MapContext: CoordinateTuple, SelectedNodeState, MapEditorNode
 
@@ -30,6 +31,8 @@ interface CoordinatesInputProps {
     coordinates: CoordinateTuple;
     onChange: (key: string, val: CoordinateTuple) => void;
 }
+
+type FlowDirection = "down" | "up" | "bidirectional";
 
 export default function MapEditor() {
     const {
@@ -253,23 +256,6 @@ export default function MapEditor() {
         return disable;
     }
 
-    const handleUpdatePipelineLength = (event: ChangeEvent<HTMLInputElement>): void => {
-        const value = event.target.value;
-        if (!Number.isNaN(Number(value))) {
-            setSelectedNode(data => {
-                const prevNode = {...data.node};
-                const node = {
-                    ...prevNode,
-                    length: Number(value)
-                };
-                return {
-                    ...data,
-                    node,
-                }
-            });
-        }
-    }
-
     const handleUpdatePipelineDiameter = (event: ChangeEvent<HTMLInputElement>): void => {
         const value = event.target.value;
         if (!Number.isNaN(Number(value))) {
@@ -308,23 +294,65 @@ export default function MapEditor() {
         }
     };
 
-    const handleToggleFlowBetweenNodes = (fromIdx: number, toIdx: number): void => {
-        setSelectedNode(data => {
+    const hasFlowBetweenNodes = (nodes: MapEditorNode["nodes"] = [], fromIdx: number, toIdx: number): boolean => {
+        const fromNode = nodes?.[fromIdx];
+        const toNode = nodes?.[toIdx];
+        if (!fromNode?.name || !toNode?.name) return false;
+        return (fromNode?.outgoing_nodes || []).includes(toNode.name);
+    };
+
+    const getDirectionState = (nodes: MapEditorNode["nodes"] = [], idx: number): FlowDirection => {
+        const nextNode = nodes?.[idx + 1];
+        if (!nextNode?.name) return "down";
+        const hasDownFlow = hasFlowBetweenNodes(nodes, idx, idx + 1);
+        const hasUpFlow = hasFlowBetweenNodes(nodes, idx + 1, idx);
+        if (hasDownFlow && hasUpFlow) return "bidirectional";
+        if (hasUpFlow) return "up";
+        return "down";
+    };
+
+    const setDirectedEdge = (
+        nodes: MapEditorNode["nodes"] = [],
+        fromIdx: number,
+        toIdx: number,
+        enabled: boolean
+    ): MapEditorNode["nodes"][number] => {
+        const source = nodes?.[fromIdx];
+        const targetName = nodes?.[toIdx]?.name;
+        if (!source?.name || !targetName) return source;
+        const outgoing = Array.isArray(source.outgoing_nodes) ? source.outgoing_nodes : [];
+        const alreadyIncludes = outgoing.includes(targetName);
+        if ((enabled && alreadyIncludes) || (!enabled && !alreadyIncludes)) return source;
+        return {
+            ...source,
+            outgoing_nodes: enabled ? [...outgoing, targetName] : outgoing.filter((item) => item !== targetName),
+        };
+    };
+
+    const handleCycleFlowDirection = (idx: number): void => {
+        setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
             const prevNode = { ...data.node } as MapEditorNode;
             const prevNodes = prevNode.nodes || [];
-            const sourceName = prevNodes[fromIdx]?.name;
-            const targetName = prevNodes[toIdx]?.name;
-            if (!sourceName || !targetName) return data;
+            if (!prevNodes[idx]?.name || !prevNodes[idx + 1]?.name) return data;
+
+            const currentDirection = getDirectionState(prevNodes, idx);
+            const nextDirection: FlowDirection = currentDirection === "down"
+                ? "up"
+                : currentDirection === "up"
+                    ? "bidirectional"
+                    : "down";
+
             const updatedNodeList = prevNodes.map((n, i) => {
-                if (i !== fromIdx) return n;
-                const outgoing = Array.isArray(n.outgoing_nodes) ? n.outgoing_nodes : [];
-                const hasFlow = outgoing.includes(targetName);
-                return {
-                    ...n,
-                    outgoing_nodes: hasFlow ? outgoing.filter((item) => item !== targetName) : [...outgoing, targetName],
-                };
+                if (i === idx) {
+                    return setDirectedEdge(prevNodes, idx, idx + 1, nextDirection === "down" || nextDirection === "bidirectional");
+                }
+                if (i === idx + 1) {
+                    return setDirectedEdge(prevNodes, idx + 1, idx, nextDirection === "up" || nextDirection === "bidirectional");
+                }
+                return n;
             });
+
             const node = {
                 ...prevNode,
                 nodes: updatedNodeList,
@@ -334,13 +362,6 @@ export default function MapEditor() {
                 node,
             } as SelectedNodeState;
         });
-    }
-
-    const hasFlowBetweenNodes = (fromIdx: number, toIdx: number): boolean => {
-        const fromNode = nodeData?.nodes?.[fromIdx];
-        const toNode = nodeData?.nodes?.[toIdx];
-        if (!fromNode?.name || !toNode?.name) return false;
-        return (fromNode?.outgoing_nodes || []).includes(toNode.name);
     };
 
     const handleClickUploadAnotherMap = (): void => {
@@ -348,6 +369,19 @@ export default function MapEditor() {
     }
 
     const segmentLengths = getPipelineLengths(nodeData);
+
+    const getDirectionTooltip = (direction: FlowDirection, fromNode?: string, toNode?: string): string => {
+        if (!fromNode || !toNode) return "Select adjacent nodes to set flow";
+        if (direction === "down") return `One-way: ${fromNode} -> ${toNode}`;
+        if (direction === "up") return `One-way: ${toNode} -> ${fromNode}`;
+        return `Bidirectional: ${fromNode} <-> ${toNode}`;
+    };
+
+    const getDirectionIcon = (direction: FlowDirection) => {
+        if (direction === "up") return <ArrowUpwardIcon fontSize="small" />;
+        if (direction === "bidirectional") return <SwapVertIcon fontSize="small" />;
+        return <ArrowDownwardIcon fontSize="small" />;
+    };
 
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
@@ -434,19 +468,6 @@ export default function MapEditor() {
             ) : ( // This is a pipeline
                 <Stack>
                     <Stack justifyContent={'space-between'} direction={'column'} style={styles.pipelineTopStack}>
-                        {/* <TextField
-                            label="Pipeline Length"
-                            size='small'
-                            value={nodeData?.length || ''}
-                            onChange={handleUpdatePipelineLength}
-                            type="number"
-                            variant="outlined"
-                            fullWidth
-                            sx={{marginBottom: 2}}
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">{units?.diameter || 'mi'}</InputAdornment>,
-                            }}
-                        /> */}
                         <TextField
                             label="Pipeline Diameter"
                             size='small'
@@ -462,95 +483,98 @@ export default function MapEditor() {
                         />
                         <span >Connections</span>
                     </Stack>
-                    {
-                        nodeData?.nodes?.map((connectionNode, idx) => {
-                            const name = connectionNode.name;
-                            const nextNode = nodeData?.nodes?.[idx + 1];
-                            const canToggleFlow = Boolean(name && nextNode?.name);
-                            const hasDownFlow = canToggleFlow ? hasFlowBetweenNodes(idx, idx + 1) : false;
-                            const hasUpFlow = canToggleFlow ? hasFlowBetweenNodes(idx + 1, idx) : false;
-                            return (
-                                <Stack direction="column" key={idx} spacing={1} sx={{marginBottom: 2}}>
-                                    <Stack direction={'row'} spacing={1}>
-                                        <Tooltip title={pipelineConnectionIssues?.includes(name) ? 'Please select a valid node.' : ''}>
-                                            <TextField
-                                                size='small'
-                                                label="Node"
-                                                fullWidth
-                                                select
-                                                value={pipelineConnectionIssues?.includes(name) ? '' : name}
-                                                error={pipelineConnectionIssues?.includes(name)}
-                                                onChange={(e) => handleUpdateConnection(e.target.value, idx)}
-                                                SelectProps={{
-                                                    MenuProps: {
-                                                        PaperProps: {
-                                                            style: {
-                                                                maxHeight: 200
+                    <Box sx={{ border: "1px solid #d9dde3", borderRadius: 1, overflowX: "auto", overflowY: "hidden", mb: 1 }}>
+                        <Table size="small" sx={{ tableLayout: "fixed" }}>
+                            <TableHead>
+                                <TableRow sx={{ backgroundColor: "#f7f8fa" }}>
+                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Node</TableCell>
+                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Direction</TableCell>
+                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Length ({units?.distance || "mi"})</TableCell>
+                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {nodeData?.nodes?.map((connectionNode, idx) => {
+                                    const name = connectionNode.name;
+                                    const nextNode = nodeData?.nodes?.[idx + 1];
+                                    const isLastNode = idx >= (nodeData?.nodes?.length || 0) - 1;
+                                    const canToggleFlow = Boolean(name && nextNode?.name);
+                                    const directionState = getDirectionState(nodeData?.nodes || [], idx);
+
+                                    return (
+                                        <TableRow key={idx} hover>
+                                            <TableCell sx={{ py: 0.75 }}>
+                                                <Tooltip title={pipelineConnectionIssues?.includes(name) ? "Please select a valid node." : ""}>
+                                                    <TextField
+                                                        size='small'
+                                                        fullWidth
+                                                        select
+                                                        value={pipelineConnectionIssues?.includes(name) ? '' : name}
+                                                        error={pipelineConnectionIssues?.includes(name)}
+                                                        onChange={(e) => handleUpdateConnection(e.target.value, idx)}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                PaperProps: {
+                                                                    style: {
+                                                                        maxHeight: 200
+                                                                    }
+                                                                }
                                                             }
-                                                        }
-                                                    }
-                                                }}
-                                            >
-                                            {availableNodes?.map((node) => (
-                                                <MenuItem key={node.name} value={node.name}>
-                                                    {node.name}
-                                                </MenuItem>
-                                            ))}
-                                            </TextField>
-                                        </Tooltip>
-                                    <Tooltip title="remove node from pipeline" placement="right">
-                                        <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
-                                            <CloseIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                    </Stack>
-                                    {idx < (nodeData?.nodes?.length || 0) - 1 && (
-                                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ width: '100%' }}>
-                                            <Tooltip title={canToggleFlow ? `Flow from ${name} to ${nextNode?.name}` : "Select both nodes to set flow"}>
-                                                <span>
-                                                    <IconButton
-                                                        size="small"
-                                                        color={hasDownFlow ? 'primary' : 'default'}
-                                                        disabled={!canToggleFlow}
-                                                        onClick={() => handleToggleFlowBetweenNodes(idx, idx + 1)}
-                                                        aria-label={`Toggle flow from ${name || 'node'} to ${nextNode?.name || 'node'}`}
+                                                        }}
                                                     >
-                                                        <ArrowDownwardIcon />
-                                                    </IconButton>
-                                                </span>
-                                            </Tooltip>
-                                            <TextField
-                                                label="Length"
-                                                size="small"
-                                                type="number"
-                                                value={segmentLengths?.[idx] ?? 0}
-                                                onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
-                                                sx={{ width: 160 }}
-                                                InputProps={{
-                                                    endAdornment: <InputAdornment position="end">{units?.distance || 'mi'}</InputAdornment>,
-                                                }}
-                                            />
-                                            <Tooltip title={canToggleFlow ? `Flow from ${nextNode?.name} to ${name}` : "Select both nodes to set flow"}>
-                                                <span>
-                                                    <IconButton
+                                                    {availableNodes?.map((node) => (
+                                                        <MenuItem key={node.name} value={node.name}>
+                                                            {node.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                    </TextField>
+                                                </Tooltip>
+                                            </TableCell>
+                                            <TableCell sx={{ py: 0.75 }}>
+                                                {!isLastNode ? (
+                                                    <Tooltip title={getDirectionTooltip(directionState, name, nextNode?.name)} placement="top">
+                                                        <span>
+                                                            <IconButton
+                                                                size="small"
+                                                                color="primary"
+                                                                disabled={!canToggleFlow}
+                                                                onClick={() => handleCycleFlowDirection(idx)}
+                                                                aria-label={`Cycle flow direction between ${name || 'node'} and ${nextNode?.name || 'node'}`}
+                                                            >
+                                                                {getDirectionIcon(directionState)}
+                                                            </IconButton>
+                                                        </span>
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Typography variant="body2" color="text.secondary">—</Typography>
+                                                )}
+                                            </TableCell>
+                                            <TableCell sx={{ py: 0.75 }}>
+                                                {!isLastNode ? (
+                                                    <TextField
                                                         size="small"
-                                                        color={hasUpFlow ? 'primary' : 'default'}
-                                                        disabled={!canToggleFlow}
-                                                        onClick={() => handleToggleFlowBetweenNodes(idx + 1, idx)}
-                                                        aria-label={`Toggle flow from ${nextNode?.name || 'node'} to ${name || 'node'}`}
-                                                    >
-                                                        <ArrowUpwardIcon />
+                                                        type="number"
+                                                        value={segmentLengths?.[idx] ?? 0}
+                                                        onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
+                                                        inputProps={{ min: 0, step: "0.001" }}
+                                                    />
+                                                ) : (
+                                                    <Typography variant="body2" color="text.secondary">—</Typography>
+                                                )}
+                                            </TableCell>
+                                            <TableCell sx={{ py: 0.75 }}>
+                                                <Tooltip title="remove node from pipeline" placement="left">
+                                                    <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
+                                                        <CloseIcon />
                                                     </IconButton>
-                                                </span>
-                                            </Tooltip>
-                                        </Stack>
-                                    )}
-                                </Stack>
-                                
-                            )
-                            
-                        })
-                    }
+                                                </Tooltip>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                            </TableBody>
+                        </Table>
+                    </Box>
                     <Button
                         startIcon={<AddCircleIcon/>}
                         onClick={() => handleUpdateConnection("", "")}

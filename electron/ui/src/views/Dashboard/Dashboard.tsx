@@ -57,7 +57,7 @@ export default function Dashboard() {
       paddingLeft: '0px'
     },
     shiftTextRight: {
-      paddingLeft: '240px',
+      paddingLeft: 'var(--dashboard-sidebar-width, 240px)',
       pb: 7
       // paddingTop: '184px'
     },
@@ -211,5 +211,4 @@ export default function Dashboard() {
   );
 
 }
-
 
