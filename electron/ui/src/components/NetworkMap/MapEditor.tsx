@@ -393,9 +393,11 @@ export default function MapEditor() {
 
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
-        <Typography variant="h6">
-            Map Editor
-        </Typography>
+        <Box sx={{ borderBottom: '1px solid #d9dde3', pb: 0.5, mb: 1 }}>
+            <Typography variant="h6">
+                Map Editor
+            </Typography>
+        </Box>
         {nodeData ? (
             <Box>
                 <NameField {...nameFieldProps}/>
