@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName } from "../assets/utils";
+import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName, calculatePipelineSegmentLengths } from "../assets/utils";
 import { useApp } from '../AppContext';
 import { uploadAdditionalMap } from "../services/app.service";
 import type { Scenario } from "../types";
@@ -83,10 +83,12 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
             if (!data) return data;
             const prev = { ...data.node } as MapEditorNode;
             const prevNodes = prev.nodes || [];
-            const updatedNodeList = [...prevNodes, { name: newConnectingNode.name, incoming: true, outgoing: true, coordinates: newConnectingNode.coordinates }]
+            const updatedNodeList = [...prevNodes, { name: newConnectingNode.name, coordinates: newConnectingNode.coordinates }]
+            const lengths = calculatePipelineSegmentLengths(updatedNodeList);
             const node = {
                 ...prev,
                 nodes: updatedNodeList,
+                lengths,
             } as MapEditorNode;
             return {
                 ...data,

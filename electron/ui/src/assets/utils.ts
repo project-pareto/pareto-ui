@@ -322,6 +322,52 @@ export const formatCoordinatesFromNodes = (nodes) => {
   return coordinates;
 }
 
+const EARTH_RADIUS_MILES = 3958.7613;
+
+const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
+
+/**
+ * Great-circle distance (miles) between two [lon, lat] coordinates.
+ */
+export const calculateDistanceFromCoordinates = (startCoords, endCoords): number => {
+  const lon1 = Number(startCoords?.[0]);
+  const lat1 = Number(startCoords?.[1]);
+  const lon2 = Number(endCoords?.[0]);
+  const lat2 = Number(endCoords?.[1]);
+
+  if ([lon1, lat1, lon2, lat2].some((v) => Number.isNaN(v))) return 0;
+
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const lat1Rad = toRadians(lat1);
+  const lat2Rad = toRadians(lat2);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return EARTH_RADIUS_MILES * c;
+}
+
+/**
+ * Returns segment lengths in miles where lengths[i] is distance between
+ * nodes[i] and nodes[i + 1].
+ */
+export const calculatePipelineSegmentLengths = (nodes = []) => {
+  if (!Array.isArray(nodes) || nodes.length < 2) return [];
+
+  const lengths = [];
+  for (let i = 0; i < nodes.length - 1; i += 1) {
+    const startCoords = nodes[i]?.coordinates;
+    const endCoords = nodes[i + 1]?.coordinates;
+    lengths.push(calculateDistanceFromCoordinates(startCoords, endCoords));
+  }
+
+  return lengths;
+}
+
 export const reverseMapCoordinates = (coords: CoordinateTuple) => {
     try {
       if (coords?.length >= 2) {
