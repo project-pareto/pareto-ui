@@ -54,6 +54,7 @@ export default function MapEditor() {
     const { units } = networkMapData || {};
 
     const [editingName, setEditingName] = useState<boolean>(creatingNewNode);
+    const [editingSegmentLengthIdx, setEditingSegmentLengthIdx] = useState<number | null>(null);
     const [showDeleteWarning, setShowDeleteWarning] = useState<boolean>(false);
     const [showFileUpload, setShowFileUpload] = useState<boolean>(false);
     const { node: nodeData, idx: nodeIdx } = (selectedNode as SelectedNodeState | null) || {};
@@ -383,6 +384,13 @@ export default function MapEditor() {
         return <ArrowDownwardIcon fontSize="small" />;
     };
 
+    const getSegmentLengthDisplayValue = (idx: number): string | number => {
+        const value = segmentLengths?.[idx];
+        if (value === undefined || value === null || Number.isNaN(Number(value))) return 0;
+        if (editingSegmentLengthIdx === idx) return value;
+        return Number(value).toFixed(3);
+    };
+
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
         <Typography variant="h6">
@@ -554,8 +562,10 @@ export default function MapEditor() {
                                                     <TextField
                                                         size="small"
                                                         type="number"
-                                                        value={segmentLengths?.[idx] ?? 0}
+                                                        value={getSegmentLengthDisplayValue(idx)}
                                                         onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
+                                                        onFocus={() => setEditingSegmentLengthIdx(idx)}
+                                                        onBlur={() => setEditingSegmentLengthIdx(null)}
                                                         inputProps={{ min: 0, step: "0.001" }}
                                                     />
                                                 ) : (
@@ -579,13 +589,13 @@ export default function MapEditor() {
                         startIcon={<AddCircleIcon/>}
                         onClick={() => handleUpdateConnection("", "")}
                         variant='contained'
-                        sx={{marginBottom: 1}}
+                        sx={{ marginBottom: 1, width: "100%", maxWidth: "300px", alignSelf: "center" }}
                     >
                         Add Connection
                     </Button>
                 </Stack>
             )}
-            <Stack direction='row' justifyContent='space-between' sx={styles.stack} spacing={1}>
+            <Stack direction='row' justifyContent='space-around' sx={styles.stack} spacing={1}>
                 <Button variant="outlined" onClick={handleClose}>
                     Close
                 </Button>
