@@ -484,12 +484,12 @@ export default function MapEditor() {
                         <span >Connections</span>
                     </Stack>
                     <Box sx={{ border: "1px solid #d9dde3", borderRadius: 1, overflowX: "auto", overflowY: "hidden", mb: 1 }}>
-                        <Table size="small" sx={{ tableLayout: "fixed" }}>
+                        <Table size="small" >
                             <TableHead>
                                 <TableRow sx={{ backgroundColor: "#f7f8fa" }}>
                                     <TableCell sx={{ width: "25%", fontWeight: 600 }}>Node</TableCell>
-                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Direction</TableCell>
-                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Length ({units?.distance || "mi"})</TableCell>
+                                    <TableCell sx={{ width: "20%", fontWeight: 600 }}>Flow</TableCell>
+                                    <TableCell sx={{ width: "30%", fontWeight: 600, minWidth: "100px" }}>Length ({units?.distance || "mi"})</TableCell>
                                     <TableCell sx={{ width: "25%", fontWeight: 600 }}>Actions</TableCell>
                                 </TableRow>
                             </TableHead>

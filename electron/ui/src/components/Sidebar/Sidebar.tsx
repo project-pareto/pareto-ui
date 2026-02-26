@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import { CategoryNames, ParetoDictionary, Subcategories } from "../../util";
 import PopupModal from '../../components/PopupModal/PopupModal'
 import MapEditor from '../NetworkMap/MapEditor';
@@ -38,7 +40,8 @@ export default function Sidebar(props: SidebarProps) {
   const isIncomplete = results?.status === "Incomplete";
   const isMapEditorOpen = Boolean(isIncomplete && category === "Network Diagram");
   const hasSelectedMapItem = Boolean(selectedNode && (showNetworkNode || showNetworkPipeline));
-  const activeDrawerWidth = isMapEditorOpen && hasSelectedMapItem ? expandedDrawerWidth : drawerWidth;
+  const [ isMapEditorExpanded, setIsMapEditorExpanded ] = useState<boolean>(false);
+  const activeDrawerWidth = isMapEditorExpanded ? expandedDrawerWidth : drawerWidth;
   const [ openSaveModal, setOpenSaveModal ] = useState<boolean>(false)
   const [ key, setKey ] =  useState<string | null>(null)
   const [ openDynamic, setOpenDynamic ] = useState<boolean>(true)
@@ -60,11 +63,15 @@ export default function Sidebar(props: SidebarProps) {
   },[scenario])
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--dashboard-sidebar-width', `${activeDrawerWidth}px`);
-    return () => {
-      document.documentElement.style.setProperty('--dashboard-sidebar-width', `${drawerWidth}px`);
-    };
-  }, [activeDrawerWidth]);
+    if (!isMapEditorOpen) {
+      return;
+    }
+    if (hasSelectedMapItem) {
+      setIsMapEditorExpanded(true);
+    } else {
+      setIsMapEditorExpanded(false);
+    }
+  }, [isMapEditorOpen, hasSelectedMapItem]);
 
   const handleOpenSaveModal = () => setOpenSaveModal(true);
   const handleCloseSaveModal = () => setOpenSaveModal(false);
@@ -319,6 +326,10 @@ export default function Sidebar(props: SidebarProps) {
     } else return false
   }
 
+  const toggleMapEditorExpanded = () => {
+    setIsMapEditorExpanded((prev) => !prev);
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -328,18 +339,38 @@ export default function Sidebar(props: SidebarProps) {
           width: activeDrawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: {backgroundColor:"#F5F5F6",  width: activeDrawerWidth, boxSizing: 'border-box' },
-          [`& .MuiBox-root`]: {marginBottom: '60px' },
         }}
         PaperProps={{
             sx: {
             width: activeDrawerWidth,
             marginTop: '158px',
             paddingBottom: '158px',
-            zIndex:1
+            zIndex: 2,
+            overflow: 'visible',
+            boxShadow: isMapEditorExpanded ? '8px 0 24px rgba(0, 0, 0, 0.22)' : 'none',
+            transition: 'width 180ms ease',
             }
         }}
         open={true}
       >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 10,
+            right: -16,
+            zIndex: 3,
+            backgroundColor: '#ffffff',
+            border: '1px solid #d9dde3',
+            borderRadius: '999px',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+          }}
+        >
+          <Tooltip title={isMapEditorExpanded ? "Collapse Sidebar" : "Expand Sidebar"}>
+            <IconButton size="small" onClick={toggleMapEditorExpanded}>
+              {isMapEditorExpanded ? <KeyboardDoubleArrowLeftIcon /> : <KeyboardDoubleArrowRightIcon />}
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
             {scenario && !isIncomplete &&
               renderAdditionalCategories()
