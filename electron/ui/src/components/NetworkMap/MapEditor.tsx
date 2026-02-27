@@ -535,9 +535,14 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
                                 ))}
                             </Select>
                         </FormControl>
-                        <span>Connections</span>
                     </Stack>
                     <Box sx={{ border: "1px solid #d9dde3", borderRadius: 1, overflowX: "auto", overflowY: "hidden", mb: 1 }}>
+                        <Typography
+                            variant="subtitle1"
+                            sx={{ px: 1.5, py: 1, borderBottom: "1px solid #d9dde3", fontWeight: 600 }}
+                        >
+                            Pipeline Connections
+                        </Typography>
                         <Table size="small" >
                             <TableHead>
                                 <TableRow sx={{ backgroundColor: "#f7f8fa" }}>
