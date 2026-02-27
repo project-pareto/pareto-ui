@@ -285,7 +285,7 @@ export type MapEditorNode = {
     [key: string]: any;
   }>;
   length?: number;
-  diameter?: number;
+  diameter?: number | string;
   [key: string]: any;
 };
 

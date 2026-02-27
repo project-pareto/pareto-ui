@@ -3,7 +3,7 @@ import type { ScenarioCompareSidebarProps } from '../../types';
 import { Box, Drawer, CssBaseline, Collapse, Button, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { CategoryNames, ParetoDictionary, Subcategories } from "../../assets/utils";
+import { CategoryNames, ParetoDictionary, Subcategories } from "../../util";
 import { OVERRIDE_CATEGORIES }  from '../../assets/InfrastructureCapexMapping'
 
 

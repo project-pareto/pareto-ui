@@ -5,7 +5,7 @@ import ScenarioCompareOutput from './ScenarioCompareOutput';
 import ScenarioCompareInput from './ScenarioCompareInput';
 import ScenarioCompareOverrides from './ScenarioCompareOverrides';
 import SubHeader from './SubHeader';
-import { Subcategories } from '../../assets/utils';
+import { Subcategories } from '../../util';
 import { useScenario } from 'context/ScenarioContext';
 
 

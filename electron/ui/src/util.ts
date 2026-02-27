@@ -10,7 +10,7 @@ import {
   storageSiteIcon, 
   reuseOptionIcon, 
   externalWaterSourceIcon
-} from './custom-icons';
+} from './assets/custom-icons';
 import { CoordinateTuple } from 'types';
 
 export const NetworkNodeTypes = {

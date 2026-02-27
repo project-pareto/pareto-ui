@@ -12,7 +12,7 @@ import {
     formatCoordinatesFromNodes,
     convertMapDataToFrontendFormat,
     convertMapDataToBackendFormat
-} from '../../assets/utils';
+} from '../../util';
 import { useMapValues } from '../../context/MapContext';
 
 // h = roads only
@@ -63,7 +63,6 @@ export default function NetworkMap(props: NetworkMapProps) {
         selectedNode,
         setNetworkMapData,
     } = useMapValues();
-    console.log(selectedNode);
     const selectedNodeData = selectedNode?.node ?? (selectedNode as any);
     const selectedNodeType = selectedNodeData?.node_type;
     const selectedNodeIdx = typeof selectedNode?.idx === "number" ? selectedNode.idx : undefined;

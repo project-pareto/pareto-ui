@@ -11,9 +11,9 @@ import {
   Tooltip,
 } from '@mui/material';
 import OverrideTable from '../OverrideTable/OverrideTable';
-import { CategoryNames, ParetoDictionary } from '../../assets/utils';
+import { CategoryNames, ParetoDictionary } from '../../util';
 import PopupModal from '../../components/PopupModal/PopupModal';
-import { default_override_values } from '../../assets/utils';
+import { default_override_values } from '../../util';
 
 export default function DataTable(props: DataTableProps): JSX.Element {
   const {

@@ -1,6 +1,6 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material';
-import { CategoryNames } from "../../assets/utils";
+import { CategoryNames } from "../../util";
 import type { ComparisonTableProps } from '../../types';
 
 export default function ComparisonTable(props: ComparisonTableProps): JSX.Element {
