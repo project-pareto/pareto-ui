@@ -491,7 +491,7 @@ export default function MapEditor() {
                                 endAdornment: <InputAdornment position="end">{units?.diameter || 'in'}</InputAdornment>,
                             }}
                         />
-                        <span >Connections</span>
+                        <span>Connections</span>
                     </Stack>
                     <Box sx={{ border: "1px solid #d9dde3", borderRadius: 1, overflowX: "auto", overflowY: "hidden", mb: 1 }}>
                         <Table size="small" >
@@ -587,6 +587,15 @@ export default function MapEditor() {
                             </TableBody>
                         </Table>
                     </Box>
+                    {(nodeData?.nodes?.length || 0) < 2 && (
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ mb: 1, width: "100%", alignSelf: "center" }}
+                        >
+                            You can add connections by selecting nodes on the map.
+                        </Typography>
+                    )}
                     <Button
                         startIcon={<AddCircleIcon/>}
                         onClick={() => handleUpdateConnection("", "")}
