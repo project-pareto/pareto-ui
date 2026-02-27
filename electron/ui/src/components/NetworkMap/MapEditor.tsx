@@ -37,9 +37,13 @@ type FlowDirection = "down" | "up" | "bidirectional";
 
 interface MapEditorProps {
     isExpanded?: boolean;
+    PipelineDiameterValues?: {
+        PipelineDiameters?: Array<string | number>;
+        VALUE?: Array<string | number>;
+    };
 }
 
-export default function MapEditor({ isExpanded = false }: MapEditorProps) {
+export default function MapEditor({ isExpanded = false, PipelineDiameterValues }: MapEditorProps) {
     const {
         saveNodeChanges,
         setShowNetworkNode,
@@ -87,6 +91,12 @@ export default function MapEditor({ isExpanded = false }: MapEditorProps) {
         }
         return null;
     }).filter(Boolean);
+    const pipelineDiameterIds = Array.isArray(PipelineDiameterValues?.PipelineDiameters) ? PipelineDiameterValues.PipelineDiameters : [];
+    const pipelineDiameterDisplayValues = Array.isArray(PipelineDiameterValues?.VALUE) ? PipelineDiameterValues.VALUE : [];
+    const pipelineDiameterOptions = pipelineDiameterIds.map((diameterId, idx) => ({
+        value: String(diameterId),
+        label: pipelineDiameterDisplayValues[idx] ?? diameterId,
+    }));
 
     const styles = {
         buttonStyle: {
@@ -284,21 +294,27 @@ export default function MapEditor({ isExpanded = false }: MapEditorProps) {
         return disable;
     }
 
-    const handleUpdatePipelineDiameter = (event: ChangeEvent<HTMLInputElement>): void => {
-        const value = event.target.value;
-        if (!Number.isNaN(Number(value))) {
-            setSelectedNode(data => {
-                const prevNode = {...data.node};
-                const node = {
-                    ...prevNode,
-                    diameter: Number(value)
-                };
-                return {
-                    ...data,
-                    node,
-                }
-            });
-        }
+    const getSelectedPipelineDiameter = (diameter?: string | number): string => {
+        if (diameter === undefined || diameter === null || diameter === "") return "";
+        const raw = String(diameter);
+        if (pipelineDiameterOptions.some((option) => option.value === raw)) return raw;
+        const byDisplayedValue = pipelineDiameterOptions.find((option) => String(option.label) === raw);
+        return byDisplayedValue?.value || "";
+    };
+
+    const handleUpdatePipelineDiameter = (value: string): void => {
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prevNode = { ...data.node } as MapEditorNode;
+            const node = {
+                ...prevNode,
+                diameter: value,
+            } as MapEditorNode;
+            return {
+                ...data,
+                node,
+            } as SelectedNodeState;
+        });
     }
 
     const handleUpdateAdditionalField = (
@@ -505,19 +521,20 @@ export default function MapEditor({ isExpanded = false }: MapEditorProps) {
             ) : ( // This is a pipeline
                 <Stack>
                     <Stack justifyContent={'space-between'} direction={'column'} style={styles.pipelineTopStack}>
-                        <TextField
-                            label="Pipeline Diameter"
-                            size='small'
-                            value={nodeData?.diameter || ''}
-                            onChange={handleUpdatePipelineDiameter}
-                            type="number"
-                            variant="outlined"
-                            fullWidth
-                            sx={{marginBottom: 2}}
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">{units?.diameter || 'in'}</InputAdornment>,
-                            }}
-                        />
+                        <FormControl size="small" fullWidth sx={{ marginBottom: 2 }}>
+                            <InputLabel>{`Pipeline Diameter (${units?.diameter || "in"})`}</InputLabel>
+                            <Select
+                                value={getSelectedPipelineDiameter(nodeData?.diameter)}
+                                label={`Pipeline Diameter (${units?.diameter || "in"})`}
+                                onChange={(e) => handleUpdatePipelineDiameter(String(e.target.value))}
+                            >
+                                {pipelineDiameterOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                        {option.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         <span>Connections</span>
                     </Stack>
                     <Box sx={{ border: "1px solid #d9dde3", borderRadius: 1, overflowX: "auto", overflowY: "hidden", mb: 1 }}>

@@ -31,11 +31,14 @@ export default function Sidebar(props: SidebarProps) {
     showNetworkPipeline,
   } = useMapValues();
 
-  const optimized_override_values = (scenario as any)?.optimized_override_values;
-  const data_input = (scenario as any)?.data_input;
-  const id = (scenario as any)?.id;
-  const optimization = (scenario as any)?.optimization || {};
-  const results = (scenario as any)?.results || {};
+  const optimized_override_values = scenario?.optimized_override_values;
+  const data_input = scenario?.data_input;
+  const id = scenario?.id;
+  const optimization = scenario?.optimization || {};
+  const results = scenario?.results || {};
+
+  const { df_parameters } = data_input || {};
+  const { PipelineDiameterValues } = df_parameters || {};
 
   const isIncomplete = results?.status === "Incomplete";
   const isMapEditorOpen = Boolean(isIncomplete && category === "Network Diagram");
@@ -386,7 +389,10 @@ export default function Sidebar(props: SidebarProps) {
             {
               scenario && isIncomplete && (
                  category === "Network Diagram" ?
-                <MapEditor isExpanded={isMapEditorExpanded}/> :
+                <MapEditor 
+                  isExpanded={isMapEditorExpanded}
+                  PipelineDiameterValues={PipelineDiameterValues}
+                /> :
                 renderTopLevelCategories()
               )
             }
