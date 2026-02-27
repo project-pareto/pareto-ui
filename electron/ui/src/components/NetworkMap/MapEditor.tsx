@@ -4,9 +4,10 @@ import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import type { CoordinateTuple, SelectedNodeState, MapEditorNode } from '../../types';
 import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths } from '../../util';
-import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import Divider from '@mui/material/Divider';
 import PopupModal from '../PopupModal/PopupModal';
 import { NodeIcon } from './NodeIcon';
@@ -206,6 +207,28 @@ export default function MapEditor({ isExpanded = false }: MapEditorProps) {
             const lengths = [...getPipelineLengths(prevNode)];
             if (segmentIdx < 0 || segmentIdx >= lengths.length) return data;
             lengths[segmentIdx] = value === "" ? 0 : parsed;
+            const node = {
+                ...prevNode,
+                lengths,
+            } as MapEditorNode;
+            return {
+                ...data,
+                node,
+            } as SelectedNodeState;
+        });
+    };
+
+    const handleResetSegmentLength = (segmentIdx: number): void => {
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prevNode = { ...data.node } as MapEditorNode;
+            const lengths = [...getPipelineLengths(prevNode)];
+            if (segmentIdx < 0 || segmentIdx >= lengths.length) return data;
+
+            const calculatedLengths = calculatePipelineSegmentLengths(prevNode.nodes || []);
+            const calculated = Number(calculatedLengths[segmentIdx]);
+            lengths[segmentIdx] = (!Number.isNaN(calculated) && Number.isFinite(calculated) && calculated >= 0) ? calculated : 0;
+
             const node = {
                 ...prevNode,
                 lengths,
@@ -501,10 +524,10 @@ export default function MapEditor({ isExpanded = false }: MapEditorProps) {
                         <Table size="small" >
                             <TableHead>
                                 <TableRow sx={{ backgroundColor: "#f7f8fa" }}>
-                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Node</TableCell>
-                                    <TableCell sx={{ width: "20%", fontWeight: 600 }}>Flow</TableCell>
-                                    <TableCell sx={{ width: "30%", fontWeight: 600, minWidth: "100px" }}>Length ({units?.distance || "mi"})</TableCell>
-                                    <TableCell sx={{ width: "25%", fontWeight: 600 }}>Actions</TableCell>
+                                    <TableCell sx={{ width: "30%", fontWeight: 600 }} align='center'>Node</TableCell>
+                                    <TableCell sx={{ width: "20%", fontWeight: 600}} align='center'>Flow</TableCell>
+                                    <TableCell sx={{ width: "30%", fontWeight: 600, minWidth: "100px" }} align='center'>Length ({units?.distance || "mi"})</TableCell>
+                                    <TableCell sx={{ width: "20%", fontWeight: 600 }} align='right'>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -544,7 +567,7 @@ export default function MapEditor({ isExpanded = false }: MapEditorProps) {
                                                     </TextField>
                                                 </Tooltip>
                                             </TableCell>
-                                            <TableCell sx={{ py: 0.75 }}>
+                                            <TableCell sx={{ py: 0.75 }} align='center'>
                                                 {!isLastNode ? (
                                                     <Tooltip title={getDirectionTooltip(directionState, name, nextNode?.name)} placement="top">
                                                         <span>
@@ -578,12 +601,21 @@ export default function MapEditor({ isExpanded = false }: MapEditorProps) {
                                                     <Typography variant="body2" color="text.secondary">—</Typography>
                                                 )}
                                             </TableCell>
-                                            <TableCell sx={{ py: 0.75 }}>
-                                                <Tooltip title="remove node from pipeline" placement="left">
-                                                    <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
-                                                        <CloseIcon />
-                                                    </IconButton>
-                                                </Tooltip>
+                                            <TableCell sx={{ py: 0.75, textAlign: "right" }}>
+                                                <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={0}>
+                                                    {!isLastNode && (
+                                                        <Tooltip title="reset length to auto-calculated distance" placement="left">
+                                                            <IconButton onClick={() => handleResetSegmentLength(idx)} size="small">
+                                                                <RefreshIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    )}
+                                                    <Tooltip title="remove node from pipeline" placement="left">
+                                                        <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
+                                                            <DeleteOutlineIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Stack>
                                             </TableCell>
                                         </TableRow>
                                     )
