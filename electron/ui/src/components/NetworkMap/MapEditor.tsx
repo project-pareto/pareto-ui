@@ -34,7 +34,11 @@ interface CoordinatesInputProps {
 
 type FlowDirection = "down" | "up" | "bidirectional";
 
-export default function MapEditor() {
+interface MapEditorProps {
+    isExpanded?: boolean;
+}
+
+export default function MapEditor({ isExpanded = false }: MapEditorProps) {
     const {
         saveNodeChanges,
         setShowNetworkNode,
@@ -606,17 +610,26 @@ export default function MapEditor() {
                     </Button>
                 </Stack>
             )}
-            <Stack direction='row' justifyContent='space-around' sx={styles.stack} spacing={1}>
-                <Button variant="outlined" onClick={handleClose}>
+            <Stack
+                direction='row'
+                justifyContent={'space-around'}
+                sx={{
+                    ...styles.stack,
+                    ...(isExpanded ? { width: "100%", maxWidth: "360px", mx: "auto" } : {}),
+                }}
+                spacing={1}
+            >
+                <Button variant="outlined" onClick={handleClose} sx={isExpanded ? { minWidth: 96 } : undefined}>
                     Close
                 </Button>
-                <Button variant="outlined" color='error' onClick={() => setShowDeleteWarning(true)}>
+                <Button variant="outlined" color='error' onClick={() => setShowDeleteWarning(true)} sx={isExpanded ? { minWidth: 96 } : undefined}>
                     Delete
                 </Button>
                 <Button
                     variant="contained"
                     onClick={() => saveNodeChanges(nodeData)}
                     disabled={disableSave(nodeData)}
+                    sx={isExpanded ? { minWidth: 96 } : undefined}
                 >
                     Save
                 </Button>

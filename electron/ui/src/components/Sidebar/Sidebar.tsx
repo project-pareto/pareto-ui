@@ -386,7 +386,7 @@ export default function Sidebar(props: SidebarProps) {
             {
               scenario && isIncomplete && (
                  category === "Network Diagram" ?
-                <MapEditor/> :
+                <MapEditor isExpanded={isMapEditorExpanded}/> :
                 renderTopLevelCategories()
               )
             }
