@@ -775,7 +775,7 @@ class ScenarioHandler:
         excel_path = self.get_excelsheet_path(scenario.get("id"))
         if map_data is not None:
             ## 1) Format map data for writing to Excel
-            preprocessed_map_data = PreprocessMapData(map_data)
+            preprocessed_map_data = PreprocessMapData(data_input)
 
             ## 2) Write map data to Excel
             WriteMapDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))

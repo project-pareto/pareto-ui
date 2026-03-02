@@ -712,7 +712,7 @@ def UpdateExcel(excel_path, table_key, updatedTable):
         return True
 
 
-def determineConnectionsFromArcs(data):
+def determineConnectionsFromArcs(data, pipeline_diameter_values, pipeline_capacity_increments):
     """
     Derives connections from 'arcs' data.
     Accepts: map_data output from parsed .kmz, .shp
@@ -751,7 +751,7 @@ def determineConnectionsFromArcs(data):
             current_outgoing_nodes.extend(outgoing_nodes)
             connections["all_connections"][connecting_node_name] = current_outgoing_nodes
 
-        ## store connections as key value in the following format:
+        ## ALSO, store connections as key value in the following format:
         ## <node1_node2>: {diameter: <diameter-value>, length: <length-value>}
         i = 0
         nodes_amt = len(nodes)
@@ -762,10 +762,13 @@ def determineConnectionsFromArcs(data):
                 node2 = nodes[i+1]
                 node2_name = node2["name"]
                 connection_key = f"{node1_name}::{node2_name}"
+                # print(f"adding metadata for {connection_key}")
                 connection_meta = {
                     "pipeline_length": pipeline_length,
-                    "pipeline_diameter": diameter,
+                    "pipeline_diameter": pipeline_diameter_values.get(diameter),
+                    "pipeline_capacity": pipeline_capacity_increments.get(diameter),
                 }
+                # print(f"{connection_meta}")
                 connections["connection_metadata"][connection_key] = connection_meta
                 i+=1
             else:
@@ -774,7 +777,36 @@ def determineConnectionsFromArcs(data):
     # print(f"{data}")
     return data
 
-def PreprocessMapData(map_data):
+def _column_table_to_dict(table_data, key_column="PipelineDiameters", value_column="VALUE"):
+    """
+    Convert a two-column table-like dict into a key-value dict.
+    Example input:
+      {"PipelineDiameters": ["D0", "D4"], "VALUE": [0, 4]}
+    Example output:
+      {"D0": 0, "D4": 4}
+    """
+    if not isinstance(table_data, dict):
+        return {}
+
+    keys = table_data.get(key_column, [])
+    values = table_data.get(value_column, [])
+    if not isinstance(keys, list) or not isinstance(values, list):
+        return {}
+
+    if len(keys) != len(values):
+        _log.warning(
+            f"mismatched column lengths for {key_column}/{value_column}: "
+            f"{len(keys)} keys vs {len(values)} values"
+        )
+
+    result = {}
+    for key, value in zip(keys, values):
+        if key in [None, ""]:
+            continue
+        result[key] = value
+    return result
+
+def PreprocessMapData(data_input):
     """
     Preprocess map_data. 
         - On the frontend, we only update 'all_nodes' and 'arcs'
@@ -785,6 +817,7 @@ def PreprocessMapData(map_data):
     Returns
       - dict updated with updated ProductionPads, CompletionsPads..., connections
     """
+    map_data = data_input.get("map_data", None)
     all_nodes = map_data.get("all_nodes", {})
     default_node_type = map_data.get("defaultNode", "NetworkNode") ## default to network node if we don't have a default node type
 
@@ -827,7 +860,11 @@ def PreprocessMapData(map_data):
     
     _print(f"finished adding nodes to excel data")
 
-    data = determineConnectionsFromArcs(excel_data)
+    df_parameters = data_input.get("df_parameters", {})
+    pipeline_diameter_values = _column_table_to_dict(df_parameters.get("PipelineDiameterValues", {}))
+    pipeline_capacity_increments = _column_table_to_dict(df_parameters.get("PipelineCapacityIncrements", {}))
+
+    data = determineConnectionsFromArcs(excel_data, pipeline_diameter_values, pipeline_capacity_increments)
 
     return data
 
