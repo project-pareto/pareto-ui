@@ -374,7 +374,15 @@ export default function Sidebar(props: SidebarProps) {
             </IconButton>
           </Tooltip>
         </Box>
-        <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
+        <Box
+          key="drawer_box"
+          sx={{
+            height: 'calc(100vh - 216px)',
+            minHeight: 0,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+          }}
+        >
             {scenario && !isIncomplete &&
               renderAdditionalCategories()
             }
