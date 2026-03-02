@@ -261,6 +261,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     
     for initial_pipeline_tab in initial_pipeline_tabs:
         ws = wb[initial_pipeline_tab]
+        row_lookup = {}
+        column_lookup = {}
 
         # write row indexes
         column = 1
@@ -271,6 +273,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             for node in data.get(node_key, {}):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                row_lookup[node] = row
                 row+=1
         
         # write column indexes
@@ -282,7 +285,34 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             for node in data.get(node_key, {}):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                column_lookup[node] = column
                 column+=1
+
+        # populate matrix values from connection metadata for relevant tabs
+        metadata_key = None
+        if initial_pipeline_tab == "InitialPipelineCapacity":
+            metadata_key = "pipeline_capacity"
+        elif initial_pipeline_tab == "InitialPipelineDiameters":
+            metadata_key = "pipeline_diameter"
+
+        if metadata_key is not None:
+            connection_metadata = data.get("connections", {}).get("connection_metadata", {})
+            for connection_key, connection_values in connection_metadata.items():
+                try:
+                    node1_name, node2_name = connection_key.split("::", 1)
+                except ValueError:
+                    _print(f"unable to parse connection key for {initial_pipeline_tab}: {connection_key}")
+                    continue
+
+                if node1_name not in row_lookup or node2_name not in column_lookup:
+                    continue
+
+                value = connection_values.get(metadata_key)
+                if value is None:
+                    continue
+                
+                value_cell_location = f'{get_column_letter(column_lookup[node2_name])}{row_lookup[node1_name]}'
+                ws[value_cell_location] = value
 
     initial_capacity_tabs = {
         "InitialDisposalCapacity": "SWDSites",
