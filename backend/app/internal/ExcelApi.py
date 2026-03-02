@@ -735,18 +735,43 @@ def determineConnectionsFromArcs(data):
     """
     arcs = data.get("arcs", {})
     connections = {
-        "all_connections": {}
+        "all_connections": {},
+        "connection_metadata": {},
     }
     data["connections"] = connections
     for arc_key in arcs:
         arc = arcs[arc_key]
         nodes = arc.get("nodes")
+        diameter = arc.get("diameter")
+        pipeline_lengths = arc.get("lengths", [])
         for connecting_node in nodes:
             connecting_node_name = connecting_node["name"]
             outgoing_nodes = connecting_node.get("outgoing_nodes", [])
             current_outgoing_nodes = connections["all_connections"].get(connecting_node_name, [])
             current_outgoing_nodes.extend(outgoing_nodes)
             connections["all_connections"][connecting_node_name] = current_outgoing_nodes
+
+        ## store connections as key value in the following format:
+        ## <node1_node2>: {diameter: <diameter-value>, length: <length-value>}
+        i = 0
+        nodes_amt = len(nodes)
+        for pipeline_length in pipeline_lengths:
+            if pipeline_length > 0 and nodes_amt > i:
+                node1 = nodes[i]
+                node1_name = node1["name"]
+                node2 = nodes[i+1]
+                node2_name = node2["name"]
+                connection_key = f"{node1_name}::{node2_name}"
+                connection_meta = {
+                    "pipeline_length": pipeline_length,
+                    "pipeline_diameter": diameter,
+                }
+                connections["connection_metadata"][connection_key] = connection_meta
+                i+=1
+            else:
+                break
+
+    # print(f"{data}")
     return data
 
 def PreprocessMapData(map_data):
