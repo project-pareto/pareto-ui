@@ -2,8 +2,8 @@ import { useEffect, useState, type ChangeEvent } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
-import type { CoordinateTuple, SelectedNodeState, MapEditorNode } from '../../types';
-import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths } from '../../util';
+import type { CoordinateTuple, SelectedNodeState, MapEditorNode, DimensionIndexedTable, Cell } from '../../types';
+import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths, convertTreatmentCapacityIncrementsToDict } from '../../util';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -41,9 +41,10 @@ interface MapEditorProps {
         PipelineDiameters?: Array<string | number>;
         VALUE?: Array<string | number>;
     };
+    TreatmentCapacityIncrements?: DimensionIndexedTable<"TreatmentCapacities", string, Cell>
 }
 
-export default function MapEditor({ isExpanded = false, PipelineDiameterValues }: MapEditorProps) {
+export default function MapEditor({ isExpanded = false, PipelineDiameterValues, TreatmentCapacityIncrements }: MapEditorProps) {
     const {
         saveNodeChanges,
         setShowNetworkNode,
@@ -61,6 +62,10 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
         handleFileUpload,
     } = useMapValues();
     const { units } = networkMapData || {};
+
+    const scenario_data_input = {
+        TreatmentCapacityIncrements: convertTreatmentCapacityIncrementsToDict(TreatmentCapacityIncrements),
+    }
 
     const [editingName, setEditingName] = useState<boolean>(creatingNewNode);
     const [editingSegmentLengthIdx, setEditingSegmentLengthIdx] = useState<number | null>(null);
@@ -345,6 +350,44 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
         });
     };
 
+    const getDynamicDropdownOptions = (
+        additionalField: any,
+        currentNode?: MapEditorNode
+    ): Array<string | number> => {
+        const fallbackOptions = Array.isArray(additionalField?.defaultOptions) ? additionalField.defaultOptions : [];
+        const sourceKey = additionalField?.usesKey;
+        const reliesOnKey = additionalField?.reliesOn;
+        if (!sourceKey || !reliesOnKey) return fallbackOptions;
+
+        const sourceTable = scenario_data_input?.[sourceKey];
+        if (!sourceTable || typeof sourceTable !== "object") return fallbackOptions;
+
+        const reliesOnValue = currentNode?.[reliesOnKey];
+        if (reliesOnValue === undefined || reliesOnValue === null || reliesOnValue === "") return fallbackOptions;
+
+        const dynamicOptions = sourceTable[String(reliesOnValue)];
+        if (Array.isArray(dynamicOptions) && dynamicOptions.length > 0) return dynamicOptions;
+        return fallbackOptions;
+    };
+
+    const getDynamicDropdownValue = (
+        additionalField: any,
+        currentNode?: MapEditorNode
+    ): string | number => {
+        const options = getDynamicDropdownOptions(additionalField, currentNode);
+        const currentValue = currentNode?.[additionalField?.key];
+        if (currentValue !== undefined && currentValue !== null && currentValue !== "") {
+            if (options.some((option) => String(option) === String(currentValue))) return currentValue;
+        }
+
+        const defaultValue = additionalField?.defaultValue;
+        if (defaultValue !== undefined && defaultValue !== null && defaultValue !== "") {
+            if (options.some((option) => String(option) === String(defaultValue))) return defaultValue;
+        }
+
+        return options[0] ?? defaultValue ?? "";
+    };
+
     const hasFlowBetweenNodes = (nodes: MapEditorNode["nodes"] = [], fromIdx: number, toIdx: number): boolean => {
         const fromNode = nodes?.[fromIdx];
         const toNode = nodes?.[toIdx];
@@ -534,6 +577,27 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
                                     >
                                         {(additionalField.defaultOptions || []).map((option: string | number) => (
                                             <MenuItem key={String(option)} value={String(option)}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            ) : additionalField.type === "dynamic_dropdown" ? (
+                                <FormControl
+                                    key={additionalField.key}
+                                    size="small"
+                                    fullWidth
+                                    sx={{ marginBottom: 2 }}
+                                >
+                                    <InputLabel>{additionalField?.displayName}</InputLabel>
+                                    <Select
+                                        label={additionalField?.displayName}
+                                        name={additionalField.key}
+                                        value={getDynamicDropdownValue(additionalField, nodeData)}
+                                        onChange={(e) => handleUpdateAdditionalField(e, additionalField.key, additionalField.type)}
+                                    >
+                                        {getDynamicDropdownOptions(additionalField, nodeData).map((option: string | number) => (
+                                            <MenuItem key={String(option)} value={option}>
                                                 {option}
                                             </MenuItem>
                                         ))}
