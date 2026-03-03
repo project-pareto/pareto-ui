@@ -272,10 +272,15 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
         if (isNode) {
             // Ensure we have valid coordinates
             if (!n?.coordinates || n.coordinates.length !== 2) return true;
+            const rawLong = n.coordinates[0];
+            const rawLat = n.coordinates[1];
+            if (rawLong === "" || rawLong === null || rawLong === undefined) return true;
+            if (rawLat === "" || rawLat === null || rawLat === undefined) return true;
             // coerce to numbers for validation
-            const long = Number(n.coordinates[0]);
-            const lat = Number(n.coordinates[1]);
+            const long = Number(rawLong);
+            const lat = Number(rawLat);
             if (Number.isNaN(lat) || Number.isNaN(long)) return true;
+            if (lat === 0 && long === 0) return true;
             if (lat > 90 || lat < -90 || long > 180 || long < -180) return true;
         } else {
             const connectionsAmt = n.nodes?.length || 0;
