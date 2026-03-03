@@ -482,6 +482,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "InitialTreatmentCapacity": "TreatmentSites"
     }
     
+    treatment_technology_keys = list(treatment_technologies.keys())
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]
@@ -493,9 +494,23 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             column+=1
         row = 3
         _print(f'tab {tab}: adding {node_key}')
-        for node in data.get(node_key, {}):
+        treatment_nodes = data.get(node_key, {})
+        for node_name in treatment_nodes:
+            node = treatment_nodes[node_name]
+            _print(f"InitialTreatmentCapacity: {node_name}")
             cellLocation = f'{get_column_letter(1)}{row}'
-            ws[cellLocation] = node
+            ws[cellLocation] = node_name
+
+            capacity = node.get("Capacity", None)
+            treatment_technology = node.get("TreatmentTechnology", None)
+            if treatment_technology in treatment_technology_keys and capacity is not None:
+                technology_index = treatment_technology_keys.index(treatment_technology)
+                
+                ## Start at the second column because the first column is the node names
+                capacityColumn = technology_index + 2
+                capacityCellLocation = f'{get_column_letter(capacityColumn)}{row}'
+                ws[capacityCellLocation] = capacity
+
             row+=1
     
     tabs = {
