@@ -22,6 +22,14 @@ export const NetworkNodeTypes = {
 	  iconUrl: 'img/target-green.png',
     additionalFields: [
       {
+        key: "TreatmentTechnology",
+        displayName: "Treatment Technology",
+        type: "dropdown",
+        /* TODO: these options should ideally come from the scenario (df_sets[TreatmentTechnologies])*/
+        defaultOptions: ["CB", "CB-EV", "MVC", "MD"],
+        defaultValue: "CB",
+      },
+      {
         key: "DesalinationSites",
         displayName: "Desalination Technology",
         type: "boolean",

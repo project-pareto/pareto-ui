@@ -324,23 +324,25 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
 
     const handleUpdateAdditionalField = (
         event: any,
-        fieldKey: string
+        fieldKey: string,
+        fieldType: string = "number"
     ): void => {
         const value = event?.target?.value;
-        if (!Number.isNaN(Number(value))) {
-            setSelectedNode((data: SelectedNodeState | null) => {
-                if (!data) return data;
-                const prevNode = { ...data.node } as Record<string, any>;
-                const node = {
-                    ...prevNode,
-                    [fieldKey]: Number(value),
-                } as MapEditorNode;
-                return {
-                    ...data,
-                    node,
-                } as SelectedNodeState;
-            });
-        }
+        if (fieldType === "number" && Number.isNaN(Number(value))) return;
+
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prevNode = { ...data.node } as Record<string, any>;
+            const normalizedValue = fieldType === "number" ? Number(value) : value;
+            const node = {
+                ...prevNode,
+                [fieldKey]: normalizedValue,
+            } as MapEditorNode;
+            return {
+                ...data,
+                node,
+            } as SelectedNodeState;
+        });
     };
 
     const hasFlowBetweenNodes = (nodes: MapEditorNode["nodes"] = [], fromIdx: number, toIdx: number): boolean => {
@@ -498,7 +500,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
                                         endAdornment: <InputAdornment position="end">{additionalField.units || ""}</InputAdornment>,
                                     }}
                                 />
-                            ) : additionalField.type === "boolean" && (
+                            ) : additionalField.type === "boolean" ? (
                                 <Tooltip title={additionalField.tip || ""} key={additionalField.key} placement="right">
                                     <FormControl
                                         size="small"
@@ -509,14 +511,35 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
                                             label={additionalField?.displayName}
                                             name={additionalField.key}
                                             value={nodeData[additionalField.key] || 0}
-                                            onChange={(e) => handleUpdateAdditionalField(e, additionalField.key)}
+                                            onChange={(e) => handleUpdateAdditionalField(e, additionalField.key, additionalField.type)}
                                         >
                                             <MenuItem value={0}>{additionalField.booleanValues?.["false"] || "false"}</MenuItem>
                                             <MenuItem value={1}>{additionalField.booleanValues?.["true"] || "true"}</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Tooltip>
-                            )
+                            ) : additionalField.type === "dropdown" ? (
+                                <FormControl
+                                    key={additionalField.key}
+                                    size="small"
+                                    fullWidth
+                                    sx={{ marginBottom: 2 }}
+                                >
+                                    <InputLabel>{additionalField?.displayName}</InputLabel>
+                                    <Select
+                                        label={additionalField?.displayName}
+                                        name={additionalField.key}
+                                        value={nodeData[additionalField.key] ?? additionalField.defaultValue ?? ""}
+                                        onChange={(e) => handleUpdateAdditionalField(e, additionalField.key, additionalField.type)}
+                                    >
+                                        {(additionalField.defaultOptions || []).map((option: string | number) => (
+                                            <MenuItem key={String(option)} value={String(option)}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            ) : null
                             // TODO: add functionality for other field types
 
                         ))
