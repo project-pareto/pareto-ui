@@ -11,7 +11,12 @@ import {
   reuseOptionIcon, 
   externalWaterSourceIcon
 } from './assets/custom-icons';
-import { CoordinateTuple } from 'types';
+import {
+  CoordinateTuple,
+  DimensionIndexedTable,
+  SeriesByKey,
+  Cell,
+} from 'types';
 
 export const NetworkNodeTypes = {
   TreatmentSite: {
@@ -21,6 +26,23 @@ export const NetworkNodeTypes = {
     icon: treatmentIcon,
 	  iconUrl: 'img/target-green.png',
     additionalFields: [
+      {
+        key: "TreatmentTechnology",
+        displayName: "Treatment Technology",
+        type: "dropdown",
+        /* TODO: these options should ideally come from the scenario (df_sets[TreatmentTechnologies])*/
+        defaultOptions: ["CB", "CB-EV", "MVC", "MD"],
+        defaultValue: "",
+      },
+      {
+        key: "Capacity",
+        displayName: "Treatment Capacity",
+        type: "dynamic_dropdown",
+        reliesOn: "TreatmentTechnology",
+        usesKey: "TreatmentCapacityIncrements",
+        defaultOptions: [0],
+        defaultValue: 0,
+      },
       {
         key: "DesalinationSites",
         displayName: "Desalination Technology",
@@ -879,6 +901,48 @@ export const convertMapDataToFrontendFormat = (map_data) => {
     mapCenter = [totalCoords[1]/amt, totalCoords[0]/amt]
   else mapCenter = undefined
   return [nodeData, lineData, mapCenter]
+}
+
+export const convertTreatmentCapacityIncrementsToDict = (
+  table?: DimensionIndexedTable<"TreatmentCapacities", string, Cell>
+): SeriesByKey<string, Cell> => {
+  /*
+    Input format:
+      {
+        TreatmentCapacities: ["CB", "CB-EV", ...],
+        J0: [0, 0, ...],
+        J1: [10000, 10000, ...],
+        ...
+      }
+    Output format:
+      {
+        "CB": [0, 10000, ...],
+        "CB-EV": [0, 10000, ...],
+        ...
+      }
+  */
+  if (!table || typeof table !== "object") return {};
+
+  const treatmentTechnologies = Array.isArray(table?.TreatmentCapacities)
+    ? table.TreatmentCapacities
+    : [];
+  if (!treatmentTechnologies.length) return {};
+
+  const incrementColumns = Object.keys(table)
+    .filter((key) => key !== "TreatmentCapacities" && Array.isArray(table[key]))
+    .sort((a, b) => {
+      const aMatch = a.match(/^J(\d+)$/);
+      const bMatch = b.match(/^J(\d+)$/);
+      if (aMatch && bMatch) return Number(aMatch[1]) - Number(bMatch[1]);
+      return a.localeCompare(b);
+    });
+
+  const result: SeriesByKey<string, Cell> = {};
+  treatmentTechnologies.forEach((tech, techIdx) => {
+    result[tech] = incrementColumns.map((columnKey) => table[columnKey][techIdx]);
+  });
+
+  return result;
 }
 
 export const generateNewName = (nodeList, nodeType = "Node") => {

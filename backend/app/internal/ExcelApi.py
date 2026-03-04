@@ -261,6 +261,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     
     for initial_pipeline_tab in initial_pipeline_tabs:
         ws = wb[initial_pipeline_tab]
+        row_lookup = {}
+        column_lookup = {}
 
         # write row indexes
         column = 1
@@ -271,6 +273,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             for node in data.get(node_key, {}):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                row_lookup[node] = row
                 row+=1
         
         # write column indexes
@@ -282,7 +285,38 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             for node in data.get(node_key, {}):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
+                column_lookup[node] = column
                 column+=1
+
+        # populate matrix values from connection metadata for relevant tabs
+        metadata_key = None
+        if initial_pipeline_tab == "InitialPipelineCapacity":
+            metadata_key = "pipeline_capacity"
+        elif initial_pipeline_tab == "InitialPipelineDiameters":
+            metadata_key = "pipeline_diameter"
+        elif initial_pipeline_tab == "PipelineExpansionDistance":
+            metadata_key = "pipeline_length"
+
+            
+
+        if metadata_key is not None:
+            connection_metadata = data.get("connections", {}).get("connection_metadata", {})
+            for connection_key, connection_values in connection_metadata.items():
+                try:
+                    node1_name, node2_name = connection_key.split("::", 1)
+                except ValueError:
+                    _print(f"unable to parse connection key for {initial_pipeline_tab}: {connection_key}")
+                    continue
+
+                if node1_name not in row_lookup or node2_name not in column_lookup:
+                    continue
+
+                value = connection_values.get(metadata_key)
+                if value is None:
+                    continue
+                
+                value_cell_location = f'{get_column_letter(column_lookup[node2_name])}{row_lookup[node1_name]}'
+                ws[value_cell_location] = value
 
     initial_capacity_tabs = {
         "InitialDisposalCapacity": "SWDSites",
@@ -452,6 +486,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "InitialTreatmentCapacity": "TreatmentSites"
     }
     
+    treatment_technology_keys = list(treatment_technologies.keys())
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]
@@ -463,9 +498,23 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             column+=1
         row = 3
         _print(f'tab {tab}: adding {node_key}')
-        for node in data.get(node_key, {}):
+        treatment_nodes = data.get(node_key, {})
+        for node_name in treatment_nodes:
+            node = treatment_nodes[node_name]
+            _print(f"InitialTreatmentCapacity: {node_name}")
             cellLocation = f'{get_column_letter(1)}{row}'
-            ws[cellLocation] = node
+            ws[cellLocation] = node_name
+
+            capacity = node.get("Capacity", None)
+            treatment_technology = node.get("TreatmentTechnology", None)
+            if treatment_technology in treatment_technology_keys and capacity is not None:
+                technology_index = treatment_technology_keys.index(treatment_technology)
+                
+                ## Start at the second column because the first column is the node names
+                capacityColumn = technology_index + 2
+                capacityCellLocation = f'{get_column_letter(capacityColumn)}{row}'
+                ws[capacityCellLocation] = capacity
+
             row+=1
     
     tabs = {
@@ -712,7 +761,7 @@ def UpdateExcel(excel_path, table_key, updatedTable):
         return True
 
 
-def determineConnectionsFromArcs(data):
+def determineConnectionsFromArcs(data, pipeline_diameter_values, pipeline_capacity_increments):
     """
     Derives connections from 'arcs' data.
     Accepts: map_data output from parsed .kmz, .shp
@@ -735,21 +784,78 @@ def determineConnectionsFromArcs(data):
     """
     arcs = data.get("arcs", {})
     connections = {
-        "all_connections": {}
+        "all_connections": {},
+        "connection_metadata": {},
     }
     data["connections"] = connections
     for arc_key in arcs:
         arc = arcs[arc_key]
         nodes = arc.get("nodes")
+        diameter = arc.get("diameter")
+        pipeline_lengths = arc.get("lengths", [])
         for connecting_node in nodes:
             connecting_node_name = connecting_node["name"]
             outgoing_nodes = connecting_node.get("outgoing_nodes", [])
             current_outgoing_nodes = connections["all_connections"].get(connecting_node_name, [])
             current_outgoing_nodes.extend(outgoing_nodes)
             connections["all_connections"][connecting_node_name] = current_outgoing_nodes
+
+        ## ALSO, store connections as key value in the following format:
+        ## <node1_node2>: {diameter: <diameter-value>, length: <length-value>}
+        i = 0
+        nodes_amt = len(nodes)
+        for pipeline_length in pipeline_lengths:
+            if pipeline_length > 0 and nodes_amt > i:
+                node1 = nodes[i]
+                node1_name = node1["name"]
+                node2 = nodes[i+1]
+                node2_name = node2["name"]
+                connection_key = f"{node1_name}::{node2_name}"
+                # print(f"adding metadata for {connection_key}")
+                connection_meta = {
+                    "pipeline_length": pipeline_length,
+                    "pipeline_diameter": pipeline_diameter_values.get(diameter),
+                    "pipeline_capacity": pipeline_capacity_increments.get(diameter),
+                }
+                # print(f"{connection_meta}")
+                connections["connection_metadata"][connection_key] = connection_meta
+                i+=1
+            else:
+                break
+
+    # print(f"{data}")
     return data
 
-def PreprocessMapData(map_data):
+def _column_table_to_dict(table_data, key_column="PipelineDiameters", value_column="VALUE"):
+    """
+    Convert a two-column table-like dict into a key-value dict.
+    Example input:
+      {"PipelineDiameters": ["D0", "D4"], "VALUE": [0, 4]}
+    Example output:
+      {"D0": 0, "D4": 4}
+    """
+    if not isinstance(table_data, dict):
+        return {}
+
+    keys = table_data.get(key_column, [])
+    values = table_data.get(value_column, [])
+    if not isinstance(keys, list) or not isinstance(values, list):
+        return {}
+
+    if len(keys) != len(values):
+        _log.warning(
+            f"mismatched column lengths for {key_column}/{value_column}: "
+            f"{len(keys)} keys vs {len(values)} values"
+        )
+
+    result = {}
+    for key, value in zip(keys, values):
+        if key in [None, ""]:
+            continue
+        result[key] = value
+    return result
+
+def PreprocessMapData(data_input):
     """
     Preprocess map_data. 
         - On the frontend, we only update 'all_nodes' and 'arcs'
@@ -760,6 +866,7 @@ def PreprocessMapData(map_data):
     Returns
       - dict updated with updated ProductionPads, CompletionsPads..., connections
     """
+    map_data = data_input.get("map_data", None)
     all_nodes = map_data.get("all_nodes", {})
     default_node_type = map_data.get("defaultNode", "NetworkNode") ## default to network node if we don't have a default node type
 
@@ -802,7 +909,11 @@ def PreprocessMapData(map_data):
     
     _print(f"finished adding nodes to excel data")
 
-    data = determineConnectionsFromArcs(excel_data)
+    df_parameters = data_input.get("df_parameters", {})
+    pipeline_diameter_values = _column_table_to_dict(df_parameters.get("PipelineDiameterValues", {}))
+    pipeline_capacity_increments = _column_table_to_dict(df_parameters.get("PipelineCapacityIncrements", {}))
+
+    data = determineConnectionsFromArcs(excel_data, pipeline_diameter_values, pipeline_capacity_increments)
 
     return data
 

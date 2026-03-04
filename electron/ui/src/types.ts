@@ -20,6 +20,26 @@ export type Column<T = Cell> = T[];
 export type DataFrameLike = Record<string, Column<any>>;
 
 /**
+ * Generic "dimension column + value columns" table shape.
+ * Example:
+ * {
+ *   TreatmentCapacities: ["CB", "CB-EV"],
+ *   J0: [0, 0],
+ *   J1: [10000, 10000]
+ * }
+ */
+export type DimensionIndexedTable<
+  TDimensionKey extends string = string,
+  TDimensionValue = string,
+  TValue = Cell
+> = DataFrameLike & {
+  [K in TDimensionKey]: Column<TDimensionValue>;
+} & Record<string, Column<TValue | TDimensionValue>>;
+
+/** Generic output map where each key maps to a vector of values. */
+export type SeriesByKey<TKey extends string = string, TValue = Cell> = Record<TKey, TValue[]>;
+
+/**
  * `df_sets` is a dictionary of set-name -> list of set members.
  * Example: ProductionPads: ["PP01", "PP02", ...]
  */

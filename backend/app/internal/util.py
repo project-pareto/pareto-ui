@@ -4,6 +4,7 @@ import functools
 
 import logging
 _log = logging.getLogger(__name__)
+EARTH_RADIUS_MILES = 3958.7613
 
 DEFAULT_UNITS = {
     "volume": "bbl",
@@ -91,6 +92,62 @@ def classifyNode(data, default_node):
     else:
         data["node_type"] = "NetworkNode"
 
+def _to_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+def calculate_distance_from_coordinates(start_coords, end_coords):
+    """
+    Great-circle distance (miles) between two [lon, lat] coordinates.
+    Mirrors frontend `calculateDistanceFromCoordinates`.
+    """
+    lon1 = _to_float(start_coords[0]) if isinstance(start_coords, (list, tuple)) and len(start_coords) >= 2 else None
+    lat1 = _to_float(start_coords[1]) if isinstance(start_coords, (list, tuple)) and len(start_coords) >= 2 else None
+    lon2 = _to_float(end_coords[0]) if isinstance(end_coords, (list, tuple)) and len(end_coords) >= 2 else None
+    lat2 = _to_float(end_coords[1]) if isinstance(end_coords, (list, tuple)) and len(end_coords) >= 2 else None
+
+    if None in (lon1, lat1, lon2, lat2):
+        return 0
+
+    d_lat = math.radians(lat2 - lat1)
+    d_lon = math.radians(lon2 - lon1)
+    lat1_rad = math.radians(lat1)
+    lat2_rad = math.radians(lat2)
+
+    a = (
+        math.sin(d_lat / 2) * math.sin(d_lat / 2) +
+        math.cos(lat1_rad) * math.cos(lat2_rad) *
+        math.sin(d_lon / 2) * math.sin(d_lon / 2)
+    )
+    # Guard against floating-point drift outside [0, 1].
+    a = max(0, min(1, a))
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return EARTH_RADIUS_MILES * c
+
+def calculatePipelineLenghts(arcs):
+    """
+    For each arc, derive segment lengths in miles such that:
+      lengths[i] is distance between nodes[i] and nodes[i + 1].
+    """
+    if not isinstance(arcs, dict):
+        return arcs
+
+    for arc in arcs.values():
+        nodes = arc.get("nodes", [])
+        if not isinstance(nodes, list) or len(nodes) < 2:
+            arc["lengths"] = []
+            continue
+
+        lengths = []
+        for idx in range(len(nodes) - 1):
+            start_coords = (nodes[idx] or {}).get("coordinates", [])
+            end_coords = (nodes[idx + 1] or {}).get("coordinates", [])
+            lengths.append(calculate_distance_from_coordinates(start_coords, end_coords))
+        arc["lengths"] = lengths
+
+    return arcs
 
 def determineArcsAndConnections(data):
     """
@@ -166,6 +223,9 @@ def determineArcsAndConnections(data):
         ## the top level coordinates will no longer be necessary
         ## we store the coordinates of each node inside the node list
         del arc['coordinates']
+    
+    calculatePipelineLenghts(arcs)
+
     return data
 
 ## TODO: we must handle elevation

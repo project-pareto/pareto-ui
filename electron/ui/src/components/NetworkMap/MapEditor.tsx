@@ -2,8 +2,8 @@ import { useEffect, useState, type ChangeEvent } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
-import type { CoordinateTuple, SelectedNodeState, MapEditorNode } from '../../types';
-import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths } from '../../util';
+import type { CoordinateTuple, SelectedNodeState, MapEditorNode, DimensionIndexedTable, Cell } from '../../types';
+import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths, convertTreatmentCapacityIncrementsToDict } from '../../util';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -41,9 +41,10 @@ interface MapEditorProps {
         PipelineDiameters?: Array<string | number>;
         VALUE?: Array<string | number>;
     };
+    TreatmentCapacityIncrements?: DimensionIndexedTable<"TreatmentCapacities", string, Cell>
 }
 
-export default function MapEditor({ isExpanded = false, PipelineDiameterValues }: MapEditorProps) {
+export default function MapEditor({ isExpanded = false, PipelineDiameterValues, TreatmentCapacityIncrements }: MapEditorProps) {
     const {
         saveNodeChanges,
         setShowNetworkNode,
@@ -61,6 +62,10 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
         handleFileUpload,
     } = useMapValues();
     const { units } = networkMapData || {};
+
+    const scenario_data_input = {
+        TreatmentCapacityIncrements: convertTreatmentCapacityIncrementsToDict(TreatmentCapacityIncrements),
+    }
 
     const [editingName, setEditingName] = useState<boolean>(creatingNewNode);
     const [editingSegmentLengthIdx, setEditingSegmentLengthIdx] = useState<number | null>(null);
@@ -207,6 +212,14 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
         });
     };
 
+    const getNodeForSave = (n: MapEditorNode): MapEditorNode => {
+        if (isNode) return n;
+        return {
+            ...n,
+            lengths: getPipelineLengths(n),
+        };
+    };
+
     const handleUpdateSegmentLength = (segmentIdx: number, value: string): void => {
         const parsed = Number(value);
         if (value !== "" && (Number.isNaN(parsed) || parsed < 0)) return;
@@ -272,10 +285,15 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
         if (isNode) {
             // Ensure we have valid coordinates
             if (!n?.coordinates || n.coordinates.length !== 2) return true;
+            const rawLong = n.coordinates[0];
+            const rawLat = n.coordinates[1];
+            if (rawLong === "" || rawLong === null || rawLong === undefined) return true;
+            if (rawLat === "" || rawLat === null || rawLat === undefined) return true;
             // coerce to numbers for validation
-            const long = Number(n.coordinates[0]);
-            const lat = Number(n.coordinates[1]);
+            const long = Number(rawLong);
+            const lat = Number(rawLat);
             if (Number.isNaN(lat) || Number.isNaN(long)) return true;
+            if (lat === 0 && long === 0) return true;
             if (lat > 90 || lat < -90 || long > 180 || long < -180) return true;
         } else {
             const connectionsAmt = n.nodes?.length || 0;
@@ -319,23 +337,63 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
 
     const handleUpdateAdditionalField = (
         event: any,
-        fieldKey: string
+        fieldKey: string,
+        fieldType: string = "number"
     ): void => {
         const value = event?.target?.value;
-        if (!Number.isNaN(Number(value))) {
-            setSelectedNode((data: SelectedNodeState | null) => {
-                if (!data) return data;
-                const prevNode = { ...data.node } as Record<string, any>;
-                const node = {
-                    ...prevNode,
-                    [fieldKey]: Number(value),
-                } as MapEditorNode;
-                return {
-                    ...data,
-                    node,
-                } as SelectedNodeState;
-            });
+        if (fieldType === "number" && Number.isNaN(Number(value))) return;
+
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prevNode = { ...data.node } as Record<string, any>;
+            const normalizedValue = fieldType === "number" ? Number(value) : value;
+            const node = {
+                ...prevNode,
+                [fieldKey]: normalizedValue,
+            } as MapEditorNode;
+            return {
+                ...data,
+                node,
+            } as SelectedNodeState;
+        });
+    };
+
+    const getDynamicDropdownOptions = (
+        additionalField: any,
+        currentNode?: MapEditorNode
+    ): Array<string | number> => {
+        const fallbackOptions = Array.isArray(additionalField?.defaultOptions) ? additionalField.defaultOptions : [];
+        const sourceKey = additionalField?.usesKey;
+        const reliesOnKey = additionalField?.reliesOn;
+        if (!sourceKey || !reliesOnKey) return fallbackOptions;
+
+        const sourceTable = scenario_data_input?.[sourceKey];
+        if (!sourceTable || typeof sourceTable !== "object") return fallbackOptions;
+
+        const reliesOnValue = currentNode?.[reliesOnKey];
+        if (reliesOnValue === undefined || reliesOnValue === null || reliesOnValue === "") return fallbackOptions;
+
+        const dynamicOptions = sourceTable[String(reliesOnValue)];
+        if (Array.isArray(dynamicOptions) && dynamicOptions.length > 0) return dynamicOptions;
+        return fallbackOptions;
+    };
+
+    const getDynamicDropdownValue = (
+        additionalField: any,
+        currentNode?: MapEditorNode
+    ): string | number => {
+        const options = getDynamicDropdownOptions(additionalField, currentNode);
+        const currentValue = currentNode?.[additionalField?.key];
+        if (currentValue !== undefined && currentValue !== null && currentValue !== "") {
+            if (options.some((option) => String(option) === String(currentValue))) return currentValue;
         }
+
+        const defaultValue = additionalField?.defaultValue;
+        if (defaultValue !== undefined && defaultValue !== null && defaultValue !== "") {
+            if (options.some((option) => String(option) === String(defaultValue))) return defaultValue;
+        }
+
+        return options[0] ?? defaultValue ?? "";
     };
 
     const hasFlowBetweenNodes = (nodes: MapEditorNode["nodes"] = [], fromIdx: number, toIdx: number): boolean => {
@@ -493,7 +551,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
                                         endAdornment: <InputAdornment position="end">{additionalField.units || ""}</InputAdornment>,
                                     }}
                                 />
-                            ) : additionalField.type === "boolean" && (
+                            ) : additionalField.type === "boolean" ? (
                                 <Tooltip title={additionalField.tip || ""} key={additionalField.key} placement="right">
                                     <FormControl
                                         size="small"
@@ -504,14 +562,56 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
                                             label={additionalField?.displayName}
                                             name={additionalField.key}
                                             value={nodeData[additionalField.key] || 0}
-                                            onChange={(e) => handleUpdateAdditionalField(e, additionalField.key)}
+                                            onChange={(e) => handleUpdateAdditionalField(e, additionalField.key, additionalField.type)}
                                         >
                                             <MenuItem value={0}>{additionalField.booleanValues?.["false"] || "false"}</MenuItem>
                                             <MenuItem value={1}>{additionalField.booleanValues?.["true"] || "true"}</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Tooltip>
-                            )
+                            ) : additionalField.type === "dropdown" ? (
+                                <FormControl
+                                    key={additionalField.key}
+                                    size="small"
+                                    fullWidth
+                                    sx={{ marginBottom: 2 }}
+                                >
+                                    <InputLabel>{additionalField?.displayName}</InputLabel>
+                                    <Select
+                                        label={additionalField?.displayName}
+                                        name={additionalField.key}
+                                        value={nodeData[additionalField.key] ?? additionalField.defaultValue ?? ""}
+                                        onChange={(e) => handleUpdateAdditionalField(e, additionalField.key, additionalField.type)}
+                                    >
+                                        {(additionalField.defaultOptions || []).map((option: string | number) => (
+                                            <MenuItem key={String(option)} value={String(option)}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            ) : additionalField.type === "dynamic_dropdown" ? (
+                                <FormControl
+                                    key={additionalField.key}
+                                    size="small"
+                                    fullWidth
+                                    sx={{ marginBottom: 2 }}
+                                >
+                                    <InputLabel>{additionalField?.displayName}</InputLabel>
+                                    <Select
+                                        label={additionalField?.displayName}
+                                        name={additionalField.key}
+                                        value={getDynamicDropdownValue(additionalField, nodeData)}
+                                        onChange={(e) => handleUpdateAdditionalField(e, additionalField.key, additionalField.type)}
+                                    >
+                                        {getDynamicDropdownOptions(additionalField, nodeData).map((option: string | number) => (
+                                            <MenuItem key={String(option)} value={option}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            ) : null
                             // TODO: add functionality for other field types
 
                         ))
@@ -681,7 +781,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues }
                 </Button>
                 <Button
                     variant="contained"
-                    onClick={() => saveNodeChanges(nodeData)}
+                    onClick={() => nodeData && saveNodeChanges(getNodeForSave(nodeData))}
                     disabled={disableSave(nodeData)}
                     sx={isExpanded ? { minWidth: 96 } : undefined}
                 >

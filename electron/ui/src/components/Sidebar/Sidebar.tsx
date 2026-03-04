@@ -31,14 +31,10 @@ export default function Sidebar(props: SidebarProps) {
     showNetworkPipeline,
   } = useMapValues();
 
-  const optimized_override_values = scenario?.optimized_override_values;
-  const data_input = scenario?.data_input;
-  const id = scenario?.id;
-  const optimization = scenario?.optimization || {};
-  const results = scenario?.results || {};
+  const { id, data_input, optimization, results, optimized_override_values} = scenario || {};
 
   const { df_parameters } = data_input || {};
-  const { PipelineDiameterValues } = df_parameters || {};
+  const { PipelineDiameterValues, TreatmentCapacityIncrements } = df_parameters || {};
 
   const isIncomplete = results?.status === "Incomplete";
   const isMapEditorOpen = Boolean(isIncomplete && category === "Network Diagram");
@@ -374,7 +370,15 @@ export default function Sidebar(props: SidebarProps) {
             </IconButton>
           </Tooltip>
         </Box>
-        <Box key="drawer_box" sx={{ overflow: 'auto', overflowX: 'hidden'}}>
+        <Box
+          key="drawer_box"
+          sx={{
+            height: 'calc(100vh - 216px)',
+            minHeight: 0,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+          }}
+        >
             {scenario && !isIncomplete &&
               renderAdditionalCategories()
             }
@@ -392,6 +396,7 @@ export default function Sidebar(props: SidebarProps) {
                 <MapEditor 
                   isExpanded={isMapEditorExpanded}
                   PipelineDiameterValues={PipelineDiameterValues}
+                  TreatmentCapacityIncrements={TreatmentCapacityIncrements}
                 /> :
                 renderTopLevelCategories()
               )
