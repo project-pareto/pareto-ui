@@ -212,6 +212,14 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         });
     };
 
+    const getNodeForSave = (n: MapEditorNode): MapEditorNode => {
+        if (isNode) return n;
+        return {
+            ...n,
+            lengths: getPipelineLengths(n),
+        };
+    };
+
     const handleUpdateSegmentLength = (segmentIdx: number, value: string): void => {
         const parsed = Number(value);
         if (value !== "" && (Number.isNaN(parsed) || parsed < 0)) return;
@@ -773,7 +781,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                 </Button>
                 <Button
                     variant="contained"
-                    onClick={() => saveNodeChanges(nodeData)}
+                    onClick={() => nodeData && saveNodeChanges(getNodeForSave(nodeData))}
                     disabled={disableSave(nodeData)}
                     sx={isExpanded ? { minWidth: 96 } : undefined}
                 >
