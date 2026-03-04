@@ -294,6 +294,10 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             metadata_key = "pipeline_capacity"
         elif initial_pipeline_tab == "InitialPipelineDiameters":
             metadata_key = "pipeline_diameter"
+        elif initial_pipeline_tab == "PipelineExpansionDistance":
+            metadata_key = "pipeline_length"
+
+            
 
         if metadata_key is not None:
             connection_metadata = data.get("connections", {}).get("connection_metadata", {})
