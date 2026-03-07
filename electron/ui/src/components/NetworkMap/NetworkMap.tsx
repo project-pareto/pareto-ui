@@ -30,6 +30,9 @@ import { useMapValues } from '../../context/MapContext';
 const iconUrl = "http://maps.google.com/mapfiles/kml/"
 const PIPELINE_COLOR = "#A03232"
 const SELECTED_HIGHLIGHT_COLOR = "#FFD54F"
+const SHOW_PIPELINE_FLOW_ARROWS = true
+const FLOW_ARROW_ICON_SIZE = 18
+const FLOW_ARROW_TARGET_RATIO = 0.92
 const SELECTED_POINT_HALO_SIZE = 56
 const SELECTED_POINT_ICON = divIcon({
     className: "",
@@ -43,6 +46,68 @@ const SELECTED_POINT_ICON = divIcon({
     iconSize: [SELECTED_POINT_HALO_SIZE, SELECTED_POINT_HALO_SIZE],
     iconAnchor: [SELECTED_POINT_HALO_SIZE / 2, SELECTED_POINT_HALO_SIZE / 2],
 })
+
+type LatLngPair = [number, number];
+
+const hasFlowBetweenNodes = (nodes: any[] = [], fromIdx: number, toIdx: number): boolean => {
+    const fromNode = nodes?.[fromIdx];
+    const toNode = nodes?.[toIdx];
+    if (!fromNode?.name || !toNode?.name) return false;
+    return Array.isArray(fromNode.outgoing_nodes) && fromNode.outgoing_nodes.includes(toNode.name);
+};
+
+const toLatLngPair = (coords?: Array<number | string>): LatLngPair | null => {
+    if (!Array.isArray(coords) || coords.length < 2) return null;
+    const lng = Number(coords[0]);
+    const lat = Number(coords[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return [lat, lng];
+};
+
+const getFlowArrowIcon = (rotationDeg: number) => divIcon({
+    className: "flow-arrow-marker",
+    html: `<div class="flow-arrow-glyph" style="transform: rotate(${rotationDeg}deg)">▲</div>`,
+    iconSize: [FLOW_ARROW_ICON_SIZE, FLOW_ARROW_ICON_SIZE],
+    iconAnchor: [FLOW_ARROW_ICON_SIZE / 2, FLOW_ARROW_ICON_SIZE / 2],
+});
+
+const getFlowArrowsForLine = (line: any, lineIndex: number) => {
+    const nodes = Array.isArray(line?.nodes) ? line.nodes : [];
+    const arrows: Array<{ key: string; position: LatLngPair; rotation: number }> = [];
+
+    for (let idx = 0; idx < nodes.length - 1; idx += 1) {
+        const fromCoords = toLatLngPair(nodes[idx]?.coordinates);
+        const toCoords = toLatLngPair(nodes[idx + 1]?.coordinates);
+        if (!fromCoords || !toCoords) continue;
+
+        const hasDownFlow = hasFlowBetweenNodes(nodes, idx, idx + 1);
+        const hasUpFlow = hasFlowBetweenNodes(nodes, idx + 1, idx);
+        const showDownFlow = hasDownFlow || (!hasDownFlow && !hasUpFlow);
+        const showUpFlow = hasUpFlow;
+
+        const pushArrow = (source: LatLngPair, target: LatLngPair, key: string) => {
+            const [sourceLat, sourceLng] = source;
+            const [targetLat, targetLng] = target;
+            const lat = sourceLat + (targetLat - sourceLat) * FLOW_ARROW_TARGET_RATIO;
+            const lng = sourceLng + (targetLng - sourceLng) * FLOW_ARROW_TARGET_RATIO;
+            const rotation = (Math.atan2(-(targetLat - sourceLat), targetLng - sourceLng) * 180) / Math.PI + 90;
+            arrows.push({
+                key,
+                position: [lat, lng],
+                rotation,
+            });
+        };
+
+        if (showDownFlow) {
+            pushArrow(fromCoords, toCoords, `${lineIndex}:${idx}:down`);
+        }
+        if (showUpFlow) {
+            pushArrow(toCoords, fromCoords, `${lineIndex}:${idx}:up`);
+        }
+    }
+
+    return arrows;
+};
 
 
 export default function NetworkMap(props: NetworkMapProps) {
@@ -273,6 +338,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                             (selectedNodeIdx === undefined && selectedNodeData?.name === value.name)
                         );
                         const linePositions = formatCoordinatesFromNodes(value.nodes);
+                        const flowArrows = SHOW_PIPELINE_FLOW_ARROWS ? getFlowArrowsForLine(value, index) : [];
 
                         return (
                             <React.Fragment key={index}>
@@ -327,6 +393,19 @@ export default function NetworkMap(props: NetworkMapProps) {
                                         {value.name}
                                     </Tooltip>
                                 </Polyline>
+                                {flowArrows.map((arrow) => (
+                                    <Marker
+                                        key={arrow.key}
+                                        position={arrow.position}
+                                        {...({
+                                            icon: getFlowArrowIcon(arrow.rotation),
+                                            interactive: false,
+                                            bubblingMouseEvents: false,
+                                            keyboard: false,
+                                            zIndexOffset: 600,
+                                        } as any)}
+                                    />
+                                ))}
                             </React.Fragment>
                         ) 
                         })}

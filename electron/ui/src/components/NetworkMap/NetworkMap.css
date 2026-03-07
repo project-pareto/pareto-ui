@@ -31,3 +31,18 @@
     height: 12px;
     border: 1px solid rgba(0, 0, 0, .2);
   }
+
+  .flow-arrow-marker {
+    background: transparent;
+    border: none;
+  }
+
+  .flow-arrow-glyph {
+    color: #7a1f1f;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 18px;
+    opacity: 0.9;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.95);
+    transform-origin: 50% 50%;
+  }
