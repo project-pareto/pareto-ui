@@ -344,7 +344,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
-        "ReuseOperationalCost": ["ReuseOptions"],
+        "ReuseOperationalCost": ["CompletionsPads"],
         "ExternalSourcingCost": ["ExternalWaterSources"],
         "ExternalWaterQuality": ["ExternalWaterSources"],
         "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "ExternalWaterSources"],
