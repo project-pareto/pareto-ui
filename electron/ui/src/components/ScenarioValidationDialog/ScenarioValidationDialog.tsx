@@ -28,13 +28,15 @@ interface ValidationResult {
 interface ScenarioValidationDialogProps {
   open: boolean;
   loading: boolean;
+  advancing?: boolean;
   error: string | null;
   result: ValidationResult | null;
+  onAdvance?: () => void;
   onClose: () => void;
 }
 
 export default function ScenarioValidationDialog(props: ScenarioValidationDialogProps): JSX.Element {
-  const { open, loading, error, result, onClose } = props;
+  const { open, loading, advancing = false, error, result, onAdvance, onClose } = props;
   const missingTables = result?.missing_tables ?? [];
   const tablesWithIssues = result?.tables_with_issues ?? [];
   const isValid = Boolean(result?.valid);
@@ -157,6 +159,15 @@ export default function ScenarioValidationDialog(props: ScenarioValidationDialog
         )}
       </DialogContent>
       <DialogActions>
+        {!loading && !error && isValid && (
+          <Button
+            onClick={onAdvance}
+            variant="contained"
+            disabled={advancing}
+          >
+            Advance to Optimization Setup
+          </Button>
+        )}
         <Button onClick={onClose} variant="contained">Close</Button>
       </DialogActions>
     </Dialog>
