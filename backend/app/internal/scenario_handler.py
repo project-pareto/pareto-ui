@@ -35,6 +35,7 @@ from app.internal.util import (
     deriveConnections,
     checkArcValues
 )
+from app.internal.util import check_for_missing_tables, check_for_infeasibility
     
 from app.internal.openapi_client_wrapper import cborg
 
@@ -878,6 +879,59 @@ class ScenarioHandler:
         self.retrieve_scenarios()
         
         return return_object
+    
+    @time_it
+    def validate__pareto_scenario(self, id):
+        try:
+            scenario = self.scenario_list[id]
+
+            ## step 1: check for missing tables
+            validation_results = check_for_missing_tables(scenario=scenario)
+            passed_validation = validation_results.get("result")
+            err = validation_results.get("e")
+
+            if not passed_validation:
+                if isinstance(err, str):
+                    err_message = err
+                else:
+                    err_message = getattr(err, "message", None)
+                    if not isinstance(err_message, str) or not err_message:
+                        err_args = getattr(err, "args", ())
+                        if len(err_args) > 0 and isinstance(err_args[0], str):
+                            err_message = err_args[0]
+                        else:
+                            err_message = str(err)
+
+                missing_tables_split = err_message.split("data tabs: ")
+                _log.info(f"missing_tables_split: {missing_tables_split}")
+                if len(missing_tables_split) > 1:
+                    missing_tables = missing_tables_split[1].split(", ")
+                else:
+                    missing_tables = []
+                return {
+                    "valid": False,
+                    "error": err_message,
+                    "missing_tables": missing_tables
+                }
+
+            ## step 2: use custom function to ensure minimum tables have values
+            ## must have at least one of the following:
+            ## ProductionPad, CompletionPad, StorageSite, DisposalSite, ExternalWaterSource, ReuseOption
+            
+            ## step 3: create the model and check for infeasbility
+            excel_path = f"{self.excelsheets_path}/{id}.xlsx"
+            check_for_infeasibility(scenario=scenario, excel_path=excel_path)
+
+        except Exception as e:
+            _log.exception("Error on validate_scenario")
+            return {
+                "valid": False,
+                "error": f"{e}"
+            }
+
+        return {
+            "valid": True
+        }
     
     @time_it
     def validate_scenario(self, id):

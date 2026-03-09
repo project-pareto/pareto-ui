@@ -3,6 +3,29 @@ import time
 import functools
 
 import logging
+
+from pareto.utilities.process_data import (
+    check_required_data,
+    model_infeasibility_detection,
+)
+from pareto.strategic_water_management.strategic_produced_water_optimization import (
+    create_model,
+    Objectives,
+    solve_model,
+    PipelineCost,
+    PipelineCapacity,
+    Hydraulics,
+    WaterQuality,
+    RemovalEfficiencyMethod,
+    InfrastructureTiming,
+    SubsurfaceRisk,
+    DesalinationModel,
+    CONFIG,
+)
+from pareto.utilities.get_data import get_data
+
+from app.internal.get_data import get_input_lists
+
 _log = logging.getLogger(__name__)
 EARTH_RADIUS_MILES = 3958.7613
 
@@ -522,3 +545,101 @@ def checkArcValues(input_table: dict, connections: dict, input_table_key: str = 
                 missing_any = True
 
     return not missing_any
+
+@time_it
+def check_for_infeasibility(scenario, excel_path):
+    ## TODO: this fails on get_data
+    ## we may need to create our own function to check for valid tables
+    modelParameters = prepare_config(scenario, expected_response="modelParameters")
+    default={
+        "objective": Objectives[modelParameters["objective"]],
+        "pipeline_cost": PipelineCost[modelParameters["pipeline_cost"]],
+        "pipeline_capacity": PipelineCapacity[modelParameters["pipeline_capacity"]],
+        "node_capacity": modelParameters["node_capacity"],
+        "water_quality": WaterQuality[modelParameters["water_quality"]],
+        "hydraulics": Hydraulics[modelParameters["hydraulics"]],
+        "removal_efficiency_method": RemovalEfficiencyMethod[modelParameters["removal_efficiency_method"]],
+        "infrastructure_timing": InfrastructureTiming[modelParameters["infrastructure_timing"]],
+        "subsurface_risk": SubsurfaceRisk[modelParameters["subsurface_risk"]],
+        "desalination_model": DesalinationModel[modelParameters["desalination_model"]]
+    }
+
+    [set_list, parameter_list] = get_input_lists()
+    
+    _log.info(f"getting data from excel sheet")
+    [df_sets, df_parameters] = get_data(excel_path, set_list, parameter_list)
+
+    strategic_model = create_model(
+        df_sets,
+        df_parameters,
+        default=default
+    )
+
+    try:
+        _log.info(f"calling model_infeasibility_detection")
+        strategic_model = model_infeasibility_detection(strategic_model)
+        _log.info(f"passed infeasibility check?")
+    except Exception as e:
+        _log.info(f"Exception: {e}")
+
+
+def check_for_missing_tables(scenario):
+    conf = prepare_config(scenario)
+    data_input = scenario.get("data_input")
+    df_sets = data_input.get("df_sets", {})
+    df_parameters = data_input.get("df_parameters", {})
+    display_units = data_input.get("display_units", {})
+    df_parameters["Units"] = display_units
+    try:
+        _log.info(f"calling check_required_data")
+        check_required_data(df_sets, df_parameters, conf)
+        _log.info(f"no error thrown")
+        return {
+            "result": True,
+        }
+    except Exception as e:
+        _log.info(f"{e}")
+        return {
+            "result": False,
+            "e": e,
+        }
+
+def prepare_config(scenario, expected_response="conf"):
+    _log.info(f"preparing config: ")
+    optimizationSettings = scenario.get('optimization')
+    modelParameters = {
+        "objective": optimizationSettings.get('objective',"cost"),
+        "runtime": optimizationSettings.get('runtime',900),
+        "pipeline_cost": optimizationSettings.get("pipeline_cost", "distance_based"),
+        "pipeline_capacity": optimizationSettings.get("pipeline_capacity", "input"),
+        "node_capacity": optimizationSettings.get("node_capacity", True),
+        "water_quality": optimizationSettings.get("waterQuality", "false"),
+        "solver": optimizationSettings.get('solver',None),
+        "build_units": optimizationSettings.get('build_units',"user_units"),
+        "optimalityGap": optimizationSettings.get("optimalityGap", 5),
+        "scale_model": optimizationSettings.get("scale_model", True),
+        "hydraulics": optimizationSettings.get('hydraulics',"false"),
+        "removal_efficiency_method": optimizationSettings.get('removal_efficiency_method',"concentration_based"),
+        "desalination_model": optimizationSettings.get("desalination_model", "false"),
+        "infrastructure_timing": optimizationSettings.get("infrastructure_timing", "false"),
+        "subsurface_risk": optimizationSettings.get("subsurface_risk", "false"),
+        "deactivate_slacks": optimizationSettings.get("deactivate_slacks", True),
+    }
+
+    default = {
+        "objective": modelParameters["objective"],
+        "pipeline_cost": modelParameters["pipeline_cost"],
+        "pipeline_capacity": modelParameters["pipeline_capacity"],
+        "hydraulics": modelParameters["hydraulics"],
+        "node_capacity": modelParameters["node_capacity"],
+        "water_quality": modelParameters["water_quality"],
+        "removal_efficiency_method": modelParameters["removal_efficiency_method"],
+        "infrastructure_timing": modelParameters["infrastructure_timing"],
+    }
+
+    if expected_response == "conf":
+        return CONFIG(default)
+    elif expected_response == "modelParameters":
+        return modelParameters
+    else:
+        return CONFIG(default)

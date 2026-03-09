@@ -76,7 +76,7 @@ async def validate_scenario(scenario_id: int):
     """
     Validate whether a scenario is ready to be optimized.
     """
-    return scenario_handler.validate_scenario(scenario_id)
+    return scenario_handler.validate__pareto_scenario(scenario_id)
 
 @router.post("/update")
 async def update(request: Request):
