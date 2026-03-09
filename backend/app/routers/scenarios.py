@@ -78,6 +78,14 @@ async def validate_scenario(scenario_id: int):
     """
     return scenario_handler.validate__pareto_scenario(scenario_id)
 
+@router.post("/advance_to_optimization_setup/{scenario_id}")
+async def advance_to_optimization_setup(scenario_id: int):
+    """
+    Mark a scenario as Incomplete so optimization setup can proceed.
+    """
+    updated_scenario = scenario_handler.set_scenario_status(scenario_id, "Draft")
+    return {"data": updated_scenario}
+
 @router.post("/update")
 async def update(request: Request):
     """Update a given scenario.

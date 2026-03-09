@@ -665,6 +665,23 @@ class ScenarioHandler:
     def get_excel_output_path(self, id):
         return f"{self.outputs_path}/{id}.xlsx"
 
+    def set_scenario_status(self, id, status):
+        _log.info(f"setting scenario {id} status to {status}")
+        try:
+            scenario = self.get_scenario(int(id))
+            if scenario is None or "error" in scenario:
+                raise HTTPException(404, f"unable to find scenario with id {id}")
+
+            if "results" not in scenario:
+                scenario["results"] = {}
+            scenario["results"]["status"] = status
+            return self.update_scenario(scenario)
+        except HTTPException:
+            raise
+        except Exception as e:
+            _log.error(f"unable to set scenario status for id {id}: {e}")
+            raise HTTPException(500, f"unable to set scenario status for id {id}: {e}")
+
     def get_diagram(self, diagram_type, id):
         try:
             diagramFileType = self.scenario_list[id][f'{diagram_type}DiagramExtension']
