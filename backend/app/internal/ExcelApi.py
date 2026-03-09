@@ -25,6 +25,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "CB-EV": {"TreatmentOperationalCost": 0.3, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0, "TreatmentExpansionCost": 100},
         "MVC": {"TreatmentOperationalCost": 0.5, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 1000},
         "MD": {"TreatmentOperationalCost": 1.0, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 500},
+        "OARO": {"TreatmentOperationalCost": 0.7, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 800}
     }
 
     treatment_capacities = {
