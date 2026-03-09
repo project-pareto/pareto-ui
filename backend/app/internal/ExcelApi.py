@@ -76,6 +76,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     ## step 2: open excel workbook
     wb = load_workbook(excel_path, data_only=True)
 
+    ## step 2.5: add TreatmentTechnologies table
     ws = wb["TreatmentTechnologies"]
     row = 2
     for technology in treatment_technologies:

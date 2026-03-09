@@ -566,7 +566,6 @@ def check_for_infeasibility(scenario, excel_path):
 
     [set_list, parameter_list] = get_input_lists()
     
-    _log.info(f"getting data from excel sheet")
     [df_sets, df_parameters] = get_data(excel_path, set_list, parameter_list)
 
     strategic_model = create_model(
@@ -578,9 +577,33 @@ def check_for_infeasibility(scenario, excel_path):
     try:
         _log.info(f"calling model_infeasibility_detection")
         strategic_model = model_infeasibility_detection(strategic_model)
-        _log.info(f"passed infeasibility check?")
+        return True
     except Exception as e:
-        _log.info(f"Exception: {e}")
+        _log.info(f"Exception during check_for_infeasibility: {e}")
+        return False
+
+
+def check_for_minimum_required_tables(scenario):
+    required_tables = [
+        "ProductionPads",
+        "CompletionsPads",
+        "StorageSites",
+        "SWDSites",
+        "ExternalWaterSources",
+        "ReuseOptions"
+    ]
+
+    data_input = scenario.get("data_input", {})
+    df_sets = data_input.get("df_sets", {})
+
+    missing_tables = []
+
+    for table_name in required_tables:
+        table = df_sets.get(table_name, [])
+        if len(table) == 0:
+            missing_tables.append(table_name)
+    
+    return missing_tables
 
 
 def check_for_missing_tables(scenario):

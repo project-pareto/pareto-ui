@@ -35,7 +35,7 @@ from app.internal.util import (
     deriveConnections,
     checkArcValues
 )
-from app.internal.util import check_for_missing_tables, check_for_infeasibility
+from app.internal.util import check_for_missing_tables, check_for_minimum_required_tables, check_for_infeasibility
     
 from app.internal.openapi_client_wrapper import cborg
 
@@ -911,16 +911,37 @@ class ScenarioHandler:
                 return {
                     "valid": False,
                     "error": err_message,
-                    "missing_tables": missing_tables
+                    "missing_tables": missing_tables,
+                    "check_for_missing_tables": False,
+                    "check_for_minimum_required_tables": False,
+                    "check_for_infeasibility": False,
                 }
+            else:
+                missing_tables = []
 
             ## step 2: use custom function to ensure minimum tables have values
-            ## must have at least one of the following:
-            ## ProductionPad, CompletionPad, StorageSite, DisposalSite, ExternalWaterSource, ReuseOption
+            tables_with_issues = check_for_minimum_required_tables(scenario)
+            if len(tables_with_issues) > 0:
+                return {
+                    "valid": False,
+                    "missing_tables": missing_tables,
+                    "check_for_missing_tables": True,
+                    "check_for_minimum_required_tables": False,
+                    "tables_with_issues": tables_with_issues,
+                    "check_for_infeasibility": False,
+                }
             
             ## step 3: create the model and check for infeasbility
             excel_path = f"{self.excelsheets_path}/{id}.xlsx"
-            check_for_infeasibility(scenario=scenario, excel_path=excel_path)
+            is_feasible = check_for_infeasibility(scenario=scenario, excel_path=excel_path)
+            return {
+                    "valid": is_feasible,
+                    "missing_tables": missing_tables,
+                    "check_for_missing_tables": True,
+                    "check_for_minimum_required_tables": True,
+                    "tables_with_issues": tables_with_issues,
+                    "check_for_infeasibility": is_feasible,
+                }
 
         except Exception as e:
             _log.exception("Error on validate_scenario")
@@ -928,10 +949,6 @@ class ScenarioHandler:
                 "valid": False,
                 "error": f"{e}"
             }
-
-        return {
-            "valid": True
-        }
     
     @time_it
     def validate_scenario(self, id):
