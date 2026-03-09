@@ -420,7 +420,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             row+=1
     
     capacity_increments_tabs = {
-        "DisposalCapacityIncrements": {"default": "InjectionCapacities"},
+        # "DisposalCapacityIncrements": {"default": "InjectionCapacities"},
         "StorageCapacityIncrements": {"default": "StorageCapacities"},
         "PipelineDiameterValues": {"default": "PipelineDiameters"},
         "PipelineCapacityIncrements": {"default": "PipelineDiameters"},
@@ -466,6 +466,33 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[valueCellLocation] = default_values[each][capacity_increments_tab]
                 column+=1
             row+=1
+
+    disposal_capacity_tab = "DisposalCapacityIncrements"
+    ws = wb[disposal_capacity_tab]
+
+    # header row: SWDSites + injection capacity levels (I0, I1, ...)
+    ws[f'{get_column_letter(1)}{2}'] = "SWDSites"
+    column = 2
+    for capacity_key in injection_capacities:
+        header_cell_location = f'{get_column_letter(column)}{2}'
+        ws[header_cell_location] = capacity_key
+        column += 1
+
+    # one row per SWD site, with values copied from injection_capacities for each level
+    row = 3
+    for swd_site in data.get("SWDSites", {}):
+        swd_cell_location = f'{get_column_letter(1)}{row}'
+        ws[swd_cell_location] = swd_site
+
+        column = 2
+        for capacity_key, capacity_values in injection_capacities.items():
+            value_cell_location = f'{get_column_letter(column)}{row}'
+            ws[value_cell_location] = capacity_values.get("DisposalCapacityIncrements", None)
+            column += 1
+
+        row += 1
+
+
 
     ## CODE TO GET TREATMENT TECHNOLOGIES. WE ARE DEFAULTING TO CB, CB-EV, MVC, and MD; so hard code those with corresponding values for now
 
