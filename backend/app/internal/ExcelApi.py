@@ -76,6 +76,14 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     ## step 2: open excel workbook
     wb = load_workbook(excel_path, data_only=True)
 
+    ws = wb["TreatmentTechnologies"]
+    row = 2
+    for technology in treatment_technologies:
+        _print(f'TreatmentTechnologies: adding {technology}')
+        cell_location = f'{get_column_letter(1)}{row}'
+        ws[cell_location] = technology
+        row += 1
+
     ## step 3: add nodes
     node_keys = [
         'ProductionPads', 'CompletionsPads', 'SWDSites', 'ExternalWaterSources', 
