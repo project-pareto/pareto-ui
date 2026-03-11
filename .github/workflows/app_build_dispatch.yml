@@ -35,7 +35,7 @@ on:
           - nsis
           - portable
           - zip
-        default: windows-latest
+        default: nsis
 
 jobs:
   prepare:

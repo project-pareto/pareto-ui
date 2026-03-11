@@ -266,15 +266,16 @@ jobs:
           fi
 
           echo "==== DEBUG: Acquire Key Vault access token (claims only; token not printed) ===="
-          # This is ONLY for debugging; we do NOT pass this token into AzureSignTool.
           KV_TOKEN="$(az account get-access-token \
             --tenant "${AZURE_TENANT_ID}" \
             --scope "https://vault.azure.net/.default" \
             --query accessToken -o tsv 2>/dev/null || true)"
 
           if [ -z "${KV_TOKEN}" ]; then
-            echo "WARNING: Could not acquire Key Vault token via az. (This may still work via DefaultAzureCredential.)"
+            echo "ERROR: Could not acquire Key Vault token via az."
+            exit 1
           else
+            export KV_TOKEN
             python - <<'PY'
           import os, json, base64
           t = os.environ.get("KV_TOKEN","")
@@ -294,11 +295,13 @@ jobs:
             print("Failed to decode JWT claims:", e)
           PY
           fi
+          AZURE_KEY_VAULT_ACCESS_TOKEN="${KV_TOKEN}"
           unset KV_TOKEN
 
           echo "==== DEBUG: Key Vault URI / cert name ===="
           echo "AZURE_KEY_VAULT_URI=${AZURE_KEY_VAULT_URI}"
           echo "AZURE_CERT_NAME=${AZURE_CERT_NAME}"
+          echo "Using AzureSignTool auth mode: access token"
 
           sign_one () {
             local file="$1"
@@ -311,7 +314,7 @@ jobs:
               out="$(AzureSignTool sign \
                 --azure-key-vault-url "${AZURE_KEY_VAULT_URI}" \
                 --azure-key-vault-certificate "${AZURE_CERT_NAME}" \
-                --azure-key-vault-managed-identity \
+                --azure-key-vault-accesstoken "${AZURE_KEY_VAULT_ACCESS_TOKEN}" \
                 --timestamp-rfc3161 http://timestamp.digicert.com \
                 --file-digest sha256 \
                 --timestamp-digest sha256 \
