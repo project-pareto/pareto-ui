@@ -70,13 +70,13 @@ jobs:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
           miniforge-version: 25.3.1-0
-      
+
         ## install Azure signtool for windows builds
       - name: Install Azure Signtool
         if: runner.os == 'Windows' && inputs.sign-distribution
         run: |
           dotnet tool install --global --version 7.0.* AzureSignTool
-      
+
         ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
         if: runner.os == 'macOS' && inputs.sign-distribution && env.BUILD_CERTIFICATE_BASE64 != '' && env.P12_PASSWORD != '' && env.KEYCHAIN_PASSWORD != ''
@@ -146,7 +146,7 @@ jobs:
             echo "artifact-name=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64" >> $GITHUB_OUTPUT
             echo "final-artifact=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64.dmg" >> $GITHUB_OUTPUT
           fi
-        
+
       - name: Update package.json with correct build version, name
         uses: restackio/update-json-file-action@2.1
         with:
@@ -157,7 +157,7 @@ jobs:
       - name: Install project pareto locally
         working-directory: ../
         run: git clone https://github.com/${{ inputs.project-pareto-repo }}.git && cd project-pareto && git fetch --all --tags && git checkout ${{ inputs.project-pareto-branch }} && pip install --progress-bar off .
-  
+
       - name: install Python packages
         working-directory: ./backend
         run: pip install -r requirements.txt
@@ -165,16 +165,16 @@ jobs:
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
         run: |
-            echo REACT_APP_PARETO_VERSION=${{ inputs.project-pareto-version }} >> .env
-            
+          echo REACT_APP_PARETO_VERSION=${{ inputs.project-pareto-version }} >> .env
+
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
         run: |
-            echo REACT_APP_BUILD_NUMBER=${{ steps.generate-build-number.outputs.build-number }} >> .env
+          echo REACT_APP_BUILD_NUMBER=${{ steps.generate-build-number.outputs.build-number }} >> .env
 
       - name: Install Electron JS dependencies
         working-directory: ./electron
-        run:  npm install
+        run: npm install
 
       - name: Install frontend JS dependencies
         working-directory: ./electron/ui
@@ -217,53 +217,121 @@ jobs:
           else
             npm run electron-build-win
           fi
-      
-        ## If building a zip, we build it unpacked so that it can be code signed. It is then zipped up as a github artifact
+
+      ## If building a zip, we build it unpacked so that it can be code signed. It is then zipped up as a github artifact
       - name: Azure Login (OIDC)
         env:
-            AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-            AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-            AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         if: runner.os == 'Windows' && inputs.sign-distribution && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          allow-no-subscriptions: true
 
       - name: Sign Windows Distribution (OIDC)
         if: runner.os == 'Windows' && inputs.sign-distribution && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CERT_NAME != ''
         env:
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+          # Ensure DefaultAzureCredential can see these in this step.
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         working-directory: electron/dist
         shell: bash
         run: |
-          # Ensure we are logged in and can reach the vault
-          az account show >/dev/null
+          set -euo pipefail
 
-          # AzureSignTool requires an explicit auth mode. Reuse the OIDC-backed Azure CLI
-          # session by requesting a Key Vault access token and passing it to the tool.
-          AZURE_KEY_VAULT_ACCESS_TOKEN="$(az account get-access-token \
-            --resource https://vault.azure.net \
-            --query accessToken \
-            -o tsv)"
+          echo "==== DEBUG: Azure CLI version ===="
+          az --version || true
 
-          if [ -z "${AZURE_KEY_VAULT_ACCESS_TOKEN}" ]; then
-            echo "Failed to acquire Azure Key Vault access token from Azure CLI context."
-            exit 1
+          echo "==== DEBUG: az cloud/account context ===="
+          az cloud show -o jsonc || true
+          az account show -o jsonc || true
+
+          echo "==== DEBUG: Workload Identity env (safe) ===="
+          echo "AZURE_CLIENT_ID=${AZURE_CLIENT_ID:-<empty>}"
+          echo "AZURE_TENANT_ID=${AZURE_TENANT_ID:-<empty>}"
+          echo "AZURE_FEDERATED_TOKEN_FILE=${AZURE_FEDERATED_TOKEN_FILE:-<empty>}"
+          if [ -n "${AZURE_FEDERATED_TOKEN_FILE:-}" ]; then
+            if [ -f "${AZURE_FEDERATED_TOKEN_FILE}" ]; then
+              echo "Federated token file exists."
+              echo "Federated token file size: $(wc -c < "${AZURE_FEDERATED_TOKEN_FILE}") bytes"
+            else
+              echo "WARNING: Federated token file path is set but file does not exist."
+            fi
           fi
+
+          echo "==== DEBUG: Acquire Key Vault access token (claims only; token not printed) ===="
+          # This is ONLY for debugging; we do NOT pass this token into AzureSignTool.
+          KV_TOKEN="$(az account get-access-token \
+            --tenant "${AZURE_TENANT_ID}" \
+            --scope "https://vault.azure.net/.default" \
+            --query accessToken -o tsv 2>/dev/null || true)"
+
+          if [ -z "${KV_TOKEN}" ]; then
+            echo "WARNING: Could not acquire Key Vault token via az. (This may still work via DefaultAzureCredential.)"
+          else
+            python - <<'PY'
+          import os, json, base64
+          t = os.environ.get("KV_TOKEN","")
+          try:
+            h,p,_ = t.split(".")
+            def b64(s):
+              s += "=" * (-len(s) % 4)
+              return json.loads(base64.urlsafe_b64decode(s).decode())
+            hdr = b64(h); pay = b64(p)
+            print("iss:", pay.get("iss"))
+            print("aud:", pay.get("aud"))
+            print("tid:", pay.get("tid"))
+            print("appid/azp:", pay.get("appid") or pay.get("azp"))
+            print("ver:", pay.get("ver"))
+            print("kid:", hdr.get("kid"))
+          except Exception as e:
+            print("Failed to decode JWT claims:", e)
+          PY
+          fi
+          unset KV_TOKEN
+
+          echo "==== DEBUG: Key Vault URI / cert name ===="
+          echo "AZURE_KEY_VAULT_URI=${AZURE_KEY_VAULT_URI}"
+          echo "AZURE_CERT_NAME=${AZURE_CERT_NAME}"
 
           sign_one () {
             local file="$1"
-            AzureSignTool sign \
-              --azure-key-vault-url "${AZURE_KEY_VAULT_URI}" \
-              --azure-key-vault-certificate "${AZURE_CERT_NAME}" \
-              --azure-key-vault-accesstoken "${AZURE_KEY_VAULT_ACCESS_TOKEN}" \
-              --timestamp-rfc3161 http://timestamp.digicert.com \
-              --file-digest sha256 \
-              --timestamp-digest sha256 \
-              --verbose "$file"
+            # Retry helps with intermittent AKV10046/401
+            local tries=5
+            local i=1
+            while [ $i -le $tries ]; do
+              echo "Signing (attempt $i/$tries): $file"
+              set +e
+              out="$(AzureSignTool sign \
+                --azure-key-vault-url "${AZURE_KEY_VAULT_URI}" \
+                --azure-key-vault-certificate "${AZURE_CERT_NAME}" \
+                --azure-key-vault-managed-identity \
+                --timestamp-rfc3161 http://timestamp.digicert.com \
+                --file-digest sha256 \
+                --timestamp-digest sha256 \
+                --verbose "$file" 2>&1)"
+              rc=$?
+              set -e
+              if [ $rc -eq 0 ]; then
+                return 0
+              fi
+              echo "$out" >&2
+              if echo "$out" | grep -q "AKV10046"; then
+                echo "Detected AKV10046; sleeping before retry..."
+                sleep $((i * 3))
+                i=$((i+1))
+                continue
+              fi
+              return $rc
+            done
+            echo "Signing failed after $tries attempts: $file" >&2
+            return 1
           }
 
           if [ "${{ inputs.windows-installer-target }}" = "zip" ]; then
@@ -286,6 +354,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-            include-hidden-files: true
-            name: ${{ steps.dynamic-variables.outputs.artifact-name }}
-            path: electron/dist/${{ steps.dynamic-variables.outputs.final-artifact }}
+          include-hidden-files: true
+          name: ${{ steps.dynamic-variables.outputs.artifact-name }}
+          path: electron/dist/${{ steps.dynamic-variables.outputs.final-artifact }}
