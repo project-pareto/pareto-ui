@@ -1,5 +1,8 @@
 name: App build
 run-name: PARETO UI Build
+permissions:
+  id-token: write
+  contents: read
 on:
   workflow_call:
     inputs:
@@ -213,44 +216,56 @@ jobs:
           fi
       
         ## If building a zip, we build it unpacked so that it can be code signed. It is then zipped up as a github artifact
-      - name: Sign Windows Distribution
-        if: runner.os == 'Windows' && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_CLIENT_SECRET != '' && env.AZURE_CERT_NAME != ''
+      - name: Azure Login (OIDC)
+        env:
+            AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+            AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+            AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        if: runner.os == 'Windows' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign Windows Distribution (OIDC)
+        if: runner.os == 'Windows' && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CERT_NAME != ''
         env:
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
         working-directory: electron/dist
+        shell: bash
         run: |
+          # Optional but helpful: ensure we’re logged in and can reach the vault
+          az account show >/dev/null
+
+          # ---- Pattern A: AzureSignTool uses Azure CLI context (no secret) ----
+          # Many versions can do this just by omitting -kvs and providing vault + cert.
+          # If this works for you, it’s the cleanest.
+
+          sign_one () {
+            local file="$1"
+            AzureSignTool sign \
+              -kvu "${AZURE_KEY_VAULT_URI}" \
+              -kvc "${AZURE_CERT_NAME}" \
+              -tr http://timestamp.digicert.com \
+              -v "$file"
+          }
+
           if [ "${{ inputs.windows-installer-target }}" = "zip" ]; then
             echo "Signing individual files in dir target"
-            mv win-unpacked ${{ steps.dynamic-variables.outputs.artifact-name }}
-            cd ${{ steps.dynamic-variables.outputs.artifact-name }}
+            mv win-unpacked "${{ steps.dynamic-variables.outputs.artifact-name }}"
+            cd "${{ steps.dynamic-variables.outputs.artifact-name }}"
             ls -a
 
             echo "Recursively signing .exe files"
-            find . -type f -name "*.exe" -exec azuresigntool sign \
-              -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" \
-              -kvi "${{ secrets.AZURE_CLIENT_ID }}" \
-              -kvt "${{ secrets.AZURE_TENANT_ID }}" \
-              -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" \
-              -kvc "${{ secrets.AZURE_CERT_NAME }}" \
-              -tr http://timestamp.digicert.com \
-              -v {} \;
+            find . -type f -name "*.exe" -print0 | while IFS= read -r -d '' f; do sign_one "$f"; done
 
             echo "Recursively signing .dll files"
-            find . -type f -name "*.dll" -exec azuresigntool sign \
-              -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" \
-              -kvi "${{ secrets.AZURE_CLIENT_ID }}" \
-              -kvt "${{ secrets.AZURE_TENANT_ID }}" \
-              -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" \
-              -kvc "${{ secrets.AZURE_CERT_NAME }}" \
-              -tr http://timestamp.digicert.com \
-              -v {} \;
+            find . -type f -name "*.dll" -print0 | while IFS= read -r -d '' f; do sign_one "$f"; done
           else
             echo "Signing windows artifact"
-            AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v ${{ steps.dynamic-variables.outputs.artifact-name }}.exe
+            sign_one "${{ steps.dynamic-variables.outputs.artifact-name }}.exe"
           fi
 
       - name: Upload artifact for ${{ steps.dynamic-variables.outputs.os }} build
