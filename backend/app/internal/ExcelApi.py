@@ -16,6 +16,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     Write map_data to excel
     Accepts: map_data, output file name, template location (optional)
     """
+    _log.info(f"WriteMapDataToExcel using {template_location}")
     if template_location is None:
         template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
 
@@ -71,7 +72,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     _print(f'writing data to excel at {excel_path}')
 
     ## step 1: copy pareto_input_template to new file for writing
-    shutil.copyfile(template_location, excel_path)
+    if template_location != excel_path:
+        shutil.copyfile(template_location, excel_path)
 
     ## step 2: open excel workbook
     wb = load_workbook(excel_path, data_only=True)
@@ -371,7 +373,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         for node_key in single_value_tabs[single_value_tab]:
             _print(f'single_value_tab {single_value_tab}: adding {node_key}')
             nodes = data.get(node_key, {})
-            for node in data.get(node_key, {}):
+            for node in nodes:
                 nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
