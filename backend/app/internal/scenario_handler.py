@@ -796,7 +796,7 @@ class ScenarioHandler:
             preprocessed_map_data = PreprocessMapData(data_input)
 
             ## 2) Write map data to Excel
-            WriteMapDataToExcel(preprocessed_map_data, template_location=excel_path.replace(".xlsx", ""))
+            WriteMapDataToExcel(preprocessed_map_data, output_file_name=excel_path.replace(".xlsx", ""), template_location=excel_path)
 
             ## 3) Extract Excel data into JSON, save in DB
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
@@ -952,7 +952,10 @@ class ScenarioHandler:
             ## Completions Demand, Pad Rates, Flowback Rates must be > 0
             ## completions pads need a Storage Capacity (Completions PadStorage)
             ## Storage Capacities cannot be 0
-
+            ## Disposal Capacity, operational cost
+            ## Reuse Operational Cost (this is a completion pad field)
+            ## Beneficial Reuse Cost, Credit
+            ## BeneficialReuseDestination (Reuse Minimum?)
             
             ## step 4: create the model and check for infeasbility
             excel_path = f"{self.excelsheets_path}/{id}.xlsx"
