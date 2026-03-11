@@ -32,7 +32,7 @@ on:
         required: false
       AZURE_TENANT_ID:
         required: false
-      AZURE_CLIENT_SECRET:
+      AZURE_SUBSCRIPTION_ID:
         required: false
       AZURE_CERT_NAME:
         required: false
@@ -72,7 +72,7 @@ jobs:
       - name: Install Azure Signtool
         if: runner.os == 'Windows'
         run: |
-          dotnet tool install --global AzureSignTool
+          dotnet tool install --global --version 7.0.* AzureSignTool
       
         ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
@@ -236,20 +236,31 @@ jobs:
         working-directory: electron/dist
         shell: bash
         run: |
-          # Optional but helpful: ensure we’re logged in and can reach the vault
+          # Ensure we are logged in and can reach the vault
           az account show >/dev/null
 
-          # ---- Pattern A: AzureSignTool uses Azure CLI context (no secret) ----
-          # Many versions can do this just by omitting -kvs and providing vault + cert.
-          # If this works for you, it’s the cleanest.
+          # AzureSignTool requires an explicit auth mode. Reuse the OIDC-backed Azure CLI
+          # session by requesting a Key Vault access token and passing it to the tool.
+          AZURE_KEY_VAULT_ACCESS_TOKEN="$(az account get-access-token \
+            --resource https://vault.azure.net \
+            --query accessToken \
+            -o tsv)"
+
+          if [ -z "${AZURE_KEY_VAULT_ACCESS_TOKEN}" ]; then
+            echo "Failed to acquire Azure Key Vault access token from Azure CLI context."
+            exit 1
+          fi
 
           sign_one () {
             local file="$1"
             AzureSignTool sign \
-              -kvu "${AZURE_KEY_VAULT_URI}" \
-              -kvc "${AZURE_CERT_NAME}" \
-              -tr http://timestamp.digicert.com \
-              -v "$file"
+              --azure-key-vault-url "${AZURE_KEY_VAULT_URI}" \
+              --azure-key-vault-certificate "${AZURE_CERT_NAME}" \
+              --azure-key-vault-accesstoken "${AZURE_KEY_VAULT_ACCESS_TOKEN}" \
+              --timestamp-rfc3161 http://timestamp.digicert.com \
+              --file-digest sha256 \
+              --timestamp-digest sha256 \
+              --verbose "$file"
           }
 
           if [ "${{ inputs.windows-installer-target }}" = "zip" ]; then
