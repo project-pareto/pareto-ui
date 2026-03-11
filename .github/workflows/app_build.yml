@@ -22,6 +22,9 @@ on:
         default: '1.1.0'
       package-build-number:
         type: string
+      sign-distribution:
+        type: boolean
+        default: true
       windows-installer-target:
         type: string
         default: nsis
@@ -70,13 +73,13 @@ jobs:
       
         ## install Azure signtool for windows builds
       - name: Install Azure Signtool
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && inputs.sign-distribution
         run: |
           dotnet tool install --global --version 7.0.* AzureSignTool
       
         ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
-        if: runner.os == 'macOS' && env.BUILD_CERTIFICATE_BASE64 != '' && env.P12_PASSWORD != '' && env.KEYCHAIN_PASSWORD != ''
+        if: runner.os == 'macOS' && inputs.sign-distribution && env.BUILD_CERTIFICATE_BASE64 != '' && env.P12_PASSWORD != '' && env.KEYCHAIN_PASSWORD != ''
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
@@ -221,7 +224,7 @@ jobs:
             AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
             AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
             AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        if: runner.os == 'Windows' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        if: runner.os == 'Windows' && inputs.sign-distribution && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -229,7 +232,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Sign Windows Distribution (OIDC)
-        if: runner.os == 'Windows' && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CERT_NAME != ''
+        if: runner.os == 'Windows' && inputs.sign-distribution && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CERT_NAME != ''
         env:
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
