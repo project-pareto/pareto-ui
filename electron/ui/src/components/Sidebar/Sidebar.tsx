@@ -395,13 +395,12 @@ export default function Sidebar(props: SidebarProps) {
             }
             {
               scenario && hasMapData && (
-                 category === "Network Diagram" ?
+                 category === "Network Diagram" &&
                 <MapEditor 
                   isExpanded={isMapEditorExpanded}
                   PipelineDiameterValues={PipelineDiameterValues}
                   TreatmentCapacityIncrements={TreatmentCapacityIncrements}
-                /> :
-                renderTopLevelCategories()
+                /> 
               )
             }
         </Box>
