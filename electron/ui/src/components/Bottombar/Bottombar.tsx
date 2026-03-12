@@ -11,7 +11,7 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import AddIcon from '@mui/icons-material/Add';
-import { generateExcelFromMap, validateScenario } from '../../services/app.service';
+import { advanceToOptimizationSetup, generateExcelFromMap, validateScenario } from '../../services/app.service';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AIPromptDialog from '../AIPromptDialog/AIPromptDialog';
 import ScenarioValidationDialog from '../ScenarioValidationDialog/ScenarioValidationDialog';
@@ -47,6 +47,7 @@ export default function Bottombar(props) {
     const [ hasOverride, setHasOverride ] = useState(false)
     const [ openValidationDialog, setOpenValidationDialog ] = useState(false)
     const [ validationLoading, setValidationLoading ] = useState(false)
+    const [ validationAdvancing, setValidationAdvancing ] = useState(false)
     const [ validationError, setValidationError ] = useState<string | null>(null)
     const [ validationResult, setValidationResult ] = useState<any>(null)
     const handleOpenSaveModal = () => setOpenSaveModal(true);
@@ -210,6 +211,33 @@ export default function Bottombar(props) {
           })
       }
 
+      const handleAdvanceToOptimizationSetup = () => {
+        if (!id) {
+          setValidationError("No scenario selected.")
+          return
+        }
+        setValidationAdvancing(true)
+        advanceToOptimizationSetup(port, id)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Advance failed (${response.status}).`)
+            }
+            return response.json()
+          })
+          .then(() => {
+            syncScenarioData()
+            handleCloseValidationDialog()
+            handleSelection(1)
+          })
+          .catch((err) => {
+            console.error("error advancing to optimization setup: ", err)
+            setValidationError("Unable to advance to optimization setup.")
+          })
+          .finally(() => {
+            setValidationAdvancing(false)
+          })
+      }
+
       const validateScenarioButton = <Button
                                 sx={styles.unfilled}
                                 onClick={handleValidateScenario}
@@ -348,8 +376,10 @@ export default function Bottombar(props) {
       <ScenarioValidationDialog
         open={openValidationDialog}
         loading={validationLoading}
+        advancing={validationAdvancing}
         error={validationError}
         result={validationResult}
+        onAdvance={handleAdvanceToOptimizationSetup}
         onClose={handleCloseValidationDialog}
       />
     </Box>

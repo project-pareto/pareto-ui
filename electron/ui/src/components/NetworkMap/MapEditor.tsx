@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { Fragment, useEffect, useState, type ChangeEvent } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
@@ -661,85 +661,92 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                     const directionState = getDirectionState(nodeData?.nodes || [], idx);
 
                                     return (
-                                        <TableRow key={idx} hover>
-                                            <TableCell sx={{ py: 0.75 }}>
-                                                <Tooltip title={pipelineConnectionIssues?.includes(name) ? "Please select a valid node." : ""}>
-                                                    <TextField
-                                                        size='small'
-                                                        fullWidth
-                                                        select
-                                                        value={pipelineConnectionIssues?.includes(name) ? '' : name}
-                                                        error={pipelineConnectionIssues?.includes(name)}
-                                                        onChange={(e) => handleUpdateConnection(e.target.value, idx)}
-                                                        SelectProps={{
-                                                            MenuProps: {
-                                                                PaperProps: {
-                                                                    style: {
-                                                                        maxHeight: 200
+                                        <Fragment key={idx}>
+                                            <TableRow hover>
+                                                <TableCell sx={{ py: 0.75 }}>
+                                                    <Tooltip title={pipelineConnectionIssues?.includes(name) ? "Please select a valid node." : ""}>
+                                                        <TextField
+                                                            size='small'
+                                                            fullWidth
+                                                            select
+                                                            value={pipelineConnectionIssues?.includes(name) ? '' : name}
+                                                            error={pipelineConnectionIssues?.includes(name)}
+                                                            onChange={(e) => handleUpdateConnection(e.target.value, idx)}
+                                                            SelectProps={{
+                                                                MenuProps: {
+                                                                    PaperProps: {
+                                                                        style: {
+                                                                            maxHeight: 200
+                                                                        }
                                                                     }
                                                                 }
-                                                            }
-                                                        }}
-                                                    >
-                                                    {availableNodes?.map((node) => (
-                                                        <MenuItem key={node.name} value={node.name}>
-                                                            {node.name}
-                                                        </MenuItem>
-                                                    ))}
-                                                    </TextField>
-                                                </Tooltip>
-                                            </TableCell>
-                                            <TableCell sx={{ py: 0.75 }} align='center'>
-                                                {!isLastNode ? (
-                                                    <Tooltip title={getDirectionTooltip(directionState, name, nextNode?.name)} placement="top">
-                                                        <span>
-                                                            <IconButton
-                                                                size="small"
-                                                                color="primary"
-                                                                disabled={!canToggleFlow}
-                                                                onClick={() => handleCycleFlowDirection(idx)}
-                                                                aria-label={`Cycle flow direction between ${name || 'node'} and ${nextNode?.name || 'node'}`}
-                                                            >
-                                                                {getDirectionIcon(directionState)}
-                                                            </IconButton>
-                                                        </span>
+                                                            }}
+                                                        >
+                                                            {availableNodes?.map((node) => (
+                                                                <MenuItem key={node.name} value={node.name}>
+                                                                    {node.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </TextField>
                                                     </Tooltip>
-                                                ) : (
+                                                </TableCell>
+                                                <TableCell sx={{ py: 0.75 }} align='center'>
                                                     <Typography variant="body2" color="text.secondary">—</Typography>
-                                                )}
-                                            </TableCell>
-                                            <TableCell sx={{ py: 0.75 }}>
-                                                {!isLastNode ? (
-                                                    <TextField
-                                                        size="small"
-                                                        type="number"
-                                                        value={getSegmentLengthDisplayValue(idx)}
-                                                        onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
-                                                        onFocus={() => setEditingSegmentLengthIdx(idx)}
-                                                        onBlur={() => setEditingSegmentLengthIdx(null)}
-                                                        inputProps={{ min: 0, step: "0.001" }}
-                                                    />
-                                                ) : (
+                                                </TableCell>
+                                                <TableCell sx={{ py: 0.75 }} align='center'>
                                                     <Typography variant="body2" color="text.secondary">—</Typography>
-                                                )}
-                                            </TableCell>
-                                            <TableCell sx={{ py: 0.75, textAlign: "right" }}>
-                                                <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={0}>
-                                                    {!isLastNode && (
-                                                        <Tooltip title="reset length to auto-calculated distance" placement="left">
-                                                            <IconButton onClick={() => handleResetSegmentLength(idx)} size="small">
-                                                                <RefreshIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    )}
+                                                </TableCell>
+                                                <TableCell sx={{ py: 0.75, textAlign: "right" }}>
                                                     <Tooltip title="remove node from pipeline" placement="left">
                                                         <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
                                                             <DeleteOutlineIcon />
                                                         </IconButton>
                                                     </Tooltip>
-                                                </Stack>
-                                            </TableCell>
-                                        </TableRow>
+                                                </TableCell>
+                                            </TableRow>
+                                            {!isLastNode && (
+                                                <TableRow sx={{ backgroundColor: "#fcfdff" }}>
+                                                    <TableCell sx={{ py: 0.75 }}>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Segment to {nextNode?.name || "next node"}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ py: 0.75 }} align='center'>
+                                                        <Tooltip title={getDirectionTooltip(directionState, name, nextNode?.name)} placement="top">
+                                                            <span>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    color="primary"
+                                                                    disabled={!canToggleFlow}
+                                                                    onClick={() => handleCycleFlowDirection(idx)}
+                                                                    aria-label={`Cycle flow direction between ${name || 'node'} and ${nextNode?.name || 'node'}`}
+                                                                >
+                                                                    {getDirectionIcon(directionState)}
+                                                                </IconButton>
+                                                            </span>
+                                                        </Tooltip>
+                                                    </TableCell>
+                                                    <TableCell sx={{ py: 0.75 }}>
+                                                        <TextField
+                                                            size="small"
+                                                            type="number"
+                                                            value={getSegmentLengthDisplayValue(idx)}
+                                                            onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
+                                                            onFocus={() => setEditingSegmentLengthIdx(idx)}
+                                                            onBlur={() => setEditingSegmentLengthIdx(null)}
+                                                            inputProps={{ min: 0, step: "0.001" }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell sx={{ py: 0.75, textAlign: "right" }}>
+                                                        <Tooltip title="reset length to auto-calculated distance" placement="left">
+                                                            <IconButton onClick={() => handleResetSegmentLength(idx)} size="small">
+                                                                <RefreshIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </Fragment>
                                     )
                                 })}
                             </TableBody>

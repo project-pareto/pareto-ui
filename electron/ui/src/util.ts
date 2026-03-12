@@ -97,6 +97,13 @@ export const NetworkNodeTypes = {
         units: "bbl/day",
       },
       {
+        key: "ReuseOperationalCost",
+        displayName: "Operational Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl",
+      },
+      {
         key: "PadOffloadingCapacity",
         displayName: "Offloading Capacity",
         type: "number",

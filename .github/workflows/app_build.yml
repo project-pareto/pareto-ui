@@ -17,6 +17,9 @@ on:
       project-pareto-version:
         type: string
         default: '1.1.0'
+      sign-distribution:
+        type: boolean
+        default: true
       package-build-number:
         type: string
       windows-installer-target:
@@ -67,13 +70,13 @@ jobs:
       
         ## install Azure signtool for windows builds
       - name: Install Azure Signtool
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && inputs.sign-distribution
         run: |
           dotnet tool install --global AzureSignTool
       
         ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
-        if: runner.os == 'macOS' && env.BUILD_CERTIFICATE_BASE64 != '' && env.P12_PASSWORD != '' && env.KEYCHAIN_PASSWORD != ''
+        if: runner.os == 'macOS' && inputs.sign-distribution && env.BUILD_CERTIFICATE_BASE64 != '' && env.P12_PASSWORD != '' && env.KEYCHAIN_PASSWORD != ''
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
@@ -214,7 +217,7 @@ jobs:
       
         ## If building a zip, we build it unpacked so that it can be code signed. It is then zipped up as a github artifact
       - name: Sign Windows Distribution
-        if: runner.os == 'Windows' && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_CLIENT_SECRET != '' && env.AZURE_CERT_NAME != ''
+        if: runner.os == 'Windows' && inputs.sign-distribution && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_CLIENT_SECRET != '' && env.AZURE_CERT_NAME != ''
         env:
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

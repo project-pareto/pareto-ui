@@ -37,6 +37,8 @@ export default function Sidebar(props: SidebarProps) {
   const { PipelineDiameterValues, TreatmentCapacityIncrements } = df_parameters || {};
 
   const isIncomplete = results?.status === "Incomplete";
+  const hasMapData = data_input?.map_data;
+  const showMapEditor = category === "Network Diagram" && hasMapData;
   const isMapEditorOpen = Boolean(isIncomplete && category === "Network Diagram");
   const hasSelectedMapItem = Boolean(selectedNode && (showNetworkNode || showNetworkPipeline));
   const [ isMapEditorExpanded, setIsMapEditorExpanded ] = useState<boolean>(false);
@@ -159,11 +161,12 @@ export default function Sidebar(props: SidebarProps) {
 
   const renderMapOptions = () => {
     const categories = {"Input Summary" :null, "Network Diagram": null}
+    const inputSummaryLabel = isIncomplete ? "PARETO Input File" : "Input Summary";
     return (
       Object.entries(categories).map( ([k, value]) => ( 
         <div style={String(category)===k ? styles.selected : styles.unselected} onClick={() => handleClick(k)} key={`${value}${k}`}> 
             <p style={styles.topLevelCategory}>
-              {k === "Input Summary" ? "PARETO Input File" : k}
+              {k === "Input Summary" ? inputSummaryLabel : k}
             </p>
         </div>
       ))
@@ -379,26 +382,25 @@ export default function Sidebar(props: SidebarProps) {
             overflowX: 'hidden',
           }}
         >
-            {scenario && !isIncomplete &&
+            {scenario && !showMapEditor &&
               renderAdditionalCategories()
             }
-            {scenario && !isIncomplete &&
+            {scenario && !showMapEditor &&
               renderTopLevelCategories()
             }
             {
-              scenario && isIncomplete && (
+              scenario && showMapEditor && (
                 renderMapOptions()
               )
             }
             {
-              scenario && isIncomplete && (
-                 category === "Network Diagram" ?
+              scenario && hasMapData && (
+                 category === "Network Diagram" &&
                 <MapEditor 
                   isExpanded={isMapEditorExpanded}
                   PipelineDiameterValues={PipelineDiameterValues}
                   TreatmentCapacityIncrements={TreatmentCapacityIncrements}
-                /> :
-                renderTopLevelCategories()
+                /> 
               )
             }
         </Box>
