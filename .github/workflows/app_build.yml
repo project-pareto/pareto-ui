@@ -245,12 +245,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "==== DEBUG: Azure CLI version ===="
-          az --version || true
-
-          echo "==== DEBUG: az cloud/account context ===="
-          az cloud show -o jsonc || true
-          az account show -o jsonc || true
+          echo "==== DEBUG: Azure account context ===="
+          az account show -o jsonc
 
           echo "==== DEBUG: Workload Identity env (safe) ===="
           echo "AZURE_CLIENT_ID=${AZURE_CLIENT_ID:-<empty>}"
@@ -315,6 +311,44 @@ jobs:
           echo "AZURE_KEY_VAULT_URI=${AZURE_KEY_VAULT_URI}"
           echo "AZURE_CERT_NAME=${AZURE_CERT_NAME}"
           echo "Using AzureSignTool auth mode: access token"
+
+          VAULT_NAME="$(python - <<'PY'
+          from urllib.parse import urlparse
+          import os
+          host = urlparse(os.environ["AZURE_KEY_VAULT_URI"]).hostname or ""
+          print(host.split(".")[0])
+          PY
+          )"
+
+          echo "==== DEBUG: Key Vault preflight ===="
+          echo "VAULT_NAME=${VAULT_NAME}"
+          CERT_JSON="$(az keyvault certificate show \
+            --vault-name "${VAULT_NAME}" \
+            --name "${AZURE_CERT_NAME}" \
+            -o json)"
+          echo "${CERT_JSON}" | python - <<'PY'
+          import json, sys
+          cert = json.load(sys.stdin)
+          print("certificate_id:", cert.get("id"))
+          print("key_id:", cert.get("kid"))
+          print("secret_id:", cert.get("sid"))
+          print("thumbprint:", cert.get("x509ThumbprintHex"))
+          PY
+
+          KEY_ID="$(echo "${CERT_JSON}" | python - <<'PY'
+          import json, sys
+          cert = json.load(sys.stdin)
+          print(cert.get("kid", ""))
+          PY
+          )"
+
+          az keyvault key show --id "${KEY_ID}" -o json | python - <<'PY'
+          import json, sys
+          key = json.load(sys.stdin)
+          print("key_ops:", key.get("key", {}).get("keyOps"))
+          print("kty:", key.get("key", {}).get("kty"))
+          print("size:", key.get("key", {}).get("keySize"))
+          PY
 
           sign_one () {
             local file="$1"
