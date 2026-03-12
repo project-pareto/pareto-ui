@@ -267,8 +267,7 @@ jobs:
 
           echo "==== DEBUG: Acquire Key Vault access token (claims only; token not printed) ===="
           KV_TOKEN="$(az account get-access-token \
-            --tenant "${AZURE_TENANT_ID}" \
-            --scope "https://vault.azure.net/.default" \
+            --resource "https://vault.azure.net" \
             --query accessToken -o tsv 2>/dev/null || true)"
 
           if [ -z "${KV_TOKEN}" ]; then
@@ -277,7 +276,7 @@ jobs:
           else
             export KV_TOKEN
             python - <<'PY'
-          import os, json, base64
+          import os, json, base64, datetime
           t = os.environ.get("KV_TOKEN","")
           try:
             h,p,_ = t.split(".")
@@ -285,12 +284,26 @@ jobs:
               s += "=" * (-len(s) % 4)
               return json.loads(base64.urlsafe_b64decode(s).decode())
             hdr = b64(h); pay = b64(p)
+            exp = pay.get("exp")
+            if exp is not None:
+              exp = datetime.datetime.utcfromtimestamp(exp).isoformat() + "Z"
+            print("==== DEBUG: Key Vault token claims ====")
             print("iss:", pay.get("iss"))
             print("aud:", pay.get("aud"))
             print("tid:", pay.get("tid"))
-            print("appid/azp:", pay.get("appid") or pay.get("azp"))
+            print("appid:", pay.get("appid"))
+            print("azp:", pay.get("azp"))
+            print("appidacr:", pay.get("appidacr"))
+            print("xms_mirid:", pay.get("xms_mirid"))
+            print("sub:", pay.get("sub"))
+            print("oid:", pay.get("oid"))
+            print("nbf:", pay.get("nbf"))
+            print("exp:", exp)
             print("ver:", pay.get("ver"))
+            print("==== DEBUG: Key Vault token header ====")
+            print("alg:", hdr.get("alg"))
             print("kid:", hdr.get("kid"))
+            print("x5t:", hdr.get("x5t"))
           except Exception as e:
             print("Failed to decode JWT claims:", e)
           PY
