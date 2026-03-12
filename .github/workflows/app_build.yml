@@ -326,25 +326,28 @@ jobs:
             --vault-name "${VAULT_NAME}" \
             --name "${AZURE_CERT_NAME}" \
             -o json)"
-          echo "${CERT_JSON}" | python - <<'PY'
-          import json, sys
-          cert = json.load(sys.stdin)
+          export CERT_JSON
+          python - <<'PY'
+          import json, os
+          cert = json.loads(os.environ["CERT_JSON"])
           print("certificate_id:", cert.get("id"))
           print("key_id:", cert.get("kid"))
           print("secret_id:", cert.get("sid"))
           print("thumbprint:", cert.get("x509ThumbprintHex"))
           PY
 
-          KEY_ID="$(echo "${CERT_JSON}" | python - <<'PY'
-          import json, sys
-          cert = json.load(sys.stdin)
+          KEY_ID="$(python - <<'PY'
+          import json, os
+          cert = json.loads(os.environ["CERT_JSON"])
           print(cert.get("kid", ""))
           PY
           )"
 
-          az keyvault key show --id "${KEY_ID}" -o json | python - <<'PY'
-          import json, sys
-          key = json.load(sys.stdin)
+          KEY_JSON="$(az keyvault key show --id "${KEY_ID}" -o json)"
+          export KEY_JSON
+          python - <<'PY'
+          import json, os
+          key = json.loads(os.environ["KEY_JSON"])
           print("key_ops:", key.get("key", {}).get("keyOps"))
           print("kty:", key.get("key", {}).get("kty"))
           print("size:", key.get("key", {}).get("keySize"))
