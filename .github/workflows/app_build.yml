@@ -62,19 +62,30 @@ jobs:
     runs-on: ${{ inputs.os-version }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: conda-incubator/setup-miniconda@v3
         with:
           environment-file: environment.yml
           activate-environment: pareto-ui-env
           miniforge-version: 25.3.1-0
-      
-        ## install Azure signtool for windows builds
-      - name: Install Azure Signtool
+
+      # Jsign is a Java jar - must set up Java
+      - name: Set up Java for Jsign
+        if: runner.os == 'Windows' && inputs.sign-distribution
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # download Jsign v7.4
+      - name: Download Jsign
         if: runner.os == 'Windows' && inputs.sign-distribution
         run: |
-          dotnet tool install --global AzureSignTool
-      
-        ## handle Apple certificate, keychain setup for mac builds
+          curl -L --fail \
+            -o "$RUNNER_TEMP/jsign.jar" \
+            "https://github.com/ebourg/jsign/releases/download/7.4/jsign-7.4.jar"
+
+      ## handle Apple certificate, keychain setup for mac builds
       - name: Install the Apple certificate
         if: runner.os == 'macOS' && inputs.sign-distribution && env.BUILD_CERTIFICATE_BASE64 != '' && env.P12_PASSWORD != '' && env.KEYCHAIN_PASSWORD != ''
         env:
@@ -99,7 +110,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-        ## use this for naming package
+      ## use this for naming package
       - name: Generate Package Build Number
         id: generate-build-number
         run: |
@@ -109,8 +120,8 @@ jobs:
             echo "build-number=${{ inputs.package-build-number }}" >> $GITHUB_OUTPUT
           fi
 
-        ## Generate os name, artifact file name, extensions
-        ## For build type of zip, we build it unpacked so it can be codesigned before being zipped up
+      ## Generate os name, artifact file name, extensions
+      ## For build type of zip, we build it unpacked so it can be codesigned before being zipped up
       - name: Generate os name, file extension, artifact path
         id: dynamic-variables
         run: |
@@ -143,7 +154,7 @@ jobs:
             echo "artifact-name=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64" >> $GITHUB_OUTPUT
             echo "final-artifact=PARETO-UI_${{ steps.generate-build-number.outputs.build-number }}_arm64.dmg" >> $GITHUB_OUTPUT
           fi
-        
+
       - name: Update package.json with correct build version, name
         uses: restackio/update-json-file-action@2.1
         with:
@@ -154,7 +165,7 @@ jobs:
       - name: Install project pareto locally
         working-directory: ../
         run: git clone https://github.com/${{ inputs.project-pareto-repo }}.git && cd project-pareto && git fetch --all --tags && git checkout ${{ inputs.project-pareto-branch }} && pip install --progress-bar off .
-  
+
       - name: install Python packages
         working-directory: ./backend
         run: pip install -r requirements.txt
@@ -162,16 +173,16 @@ jobs:
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
         run: |
-            echo REACT_APP_PARETO_VERSION=${{ inputs.project-pareto-version }} >> .env
-            
+          echo REACT_APP_PARETO_VERSION=${{ inputs.project-pareto-version }} >> .env
+
       - name: Add project pareto version to .env file
         working-directory: ./electron/ui
         run: |
-            echo REACT_APP_BUILD_NUMBER=${{ steps.generate-build-number.outputs.build-number }} >> .env
+          echo REACT_APP_BUILD_NUMBER=${{ steps.generate-build-number.outputs.build-number }} >> .env
 
       - name: Install Electron JS dependencies
         working-directory: ./electron
-        run:  npm install
+        run: npm install
 
       - name: Install frontend JS dependencies
         working-directory: ./electron/ui
@@ -214,8 +225,8 @@ jobs:
           else
             npm run electron-build-win
           fi
-      
-        ## If building a zip, we build it unpacked so that it can be code signed. It is then zipped up as a github artifact
+
+      # sign windows distribution with Jsign
       - name: Sign Windows Distribution
         if: runner.os == 'Windows' && inputs.sign-distribution && env.AZURE_KEY_VAULT_URI != '' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_CLIENT_SECRET != '' && env.AZURE_CERT_NAME != ''
         env:
@@ -226,40 +237,55 @@ jobs:
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
         working-directory: electron/dist
         run: |
+          set -euo pipefail
+
+          echo "Authenticating to Azure with service principal"
+          az login --service-principal \
+            --username "$AZURE_CLIENT_ID" \
+            --password "$AZURE_CLIENT_SECRET" \
+            --tenant "$AZURE_TENANT_ID" \
+            --output none
+
+          echo "Getting access token for Azure Key Vault"
+          ACCESS_TOKEN="$(az account get-access-token \
+            --resource https://vault.azure.net \
+            --query accessToken \
+            --output tsv)"
+
+          VAULT_NAME="${AZURE_KEY_VAULT_URI#https://}"
+          VAULT_NAME="${VAULT_NAME%%/}"
+          VAULT_NAME="${VAULT_NAME%%.vault.azure.net}"
+          VAULT_NAME="${VAULT_NAME%%.managedhsm.azure.net}"
+
+          JSIGN_CMD=(
+            java -jar "$RUNNER_TEMP/jsign.jar"
+            --storetype AZUREKEYVAULT
+            --keystore "$VAULT_NAME"
+            --storepass "$ACCESS_TOKEN"
+            --alias "$AZURE_CERT_NAME"
+            --tsaurl "http://timestamp.digicert.com"
+          )
+
           if [ "${{ inputs.windows-installer-target }}" = "zip" ]; then
             echo "Signing individual files in dir target"
-            mv win-unpacked ${{ steps.dynamic-variables.outputs.artifact-name }}
-            cd ${{ steps.dynamic-variables.outputs.artifact-name }}
-            ls -a
+            mv win-unpacked "${{ steps.dynamic-variables.outputs.artifact-name }}"
+            cd "${{ steps.dynamic-variables.outputs.artifact-name }}"
+            ls -la
 
-            echo "Recursively signing .exe files"
-            find . -type f -name "*.exe" -exec azuresigntool sign \
-              -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" \
-              -kvi "${{ secrets.AZURE_CLIENT_ID }}" \
-              -kvt "${{ secrets.AZURE_TENANT_ID }}" \
-              -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" \
-              -kvc "${{ secrets.AZURE_CERT_NAME }}" \
-              -tr http://timestamp.digicert.com \
-              -v {} \;
-
-            echo "Recursively signing .dll files"
-            find . -type f -name "*.dll" -exec azuresigntool sign \
-              -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" \
-              -kvi "${{ secrets.AZURE_CLIENT_ID }}" \
-              -kvt "${{ secrets.AZURE_TENANT_ID }}" \
-              -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" \
-              -kvc "${{ secrets.AZURE_CERT_NAME }}" \
-              -tr http://timestamp.digicert.com \
-              -v {} \;
+            echo "Recursively signing .exe and .dll files"
+            while IFS= read -r -d '' file; do
+              echo "Signing $file"
+              "${JSIGN_CMD[@]}" "$file"
+            done < <(find . -type f \( -iname "*.exe" -o -iname "*.dll" \) -print0)
           else
             echo "Signing windows artifact"
-            AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v ${{ steps.dynamic-variables.outputs.artifact-name }}.exe
+            "${JSIGN_CMD[@]}" "${{ steps.dynamic-variables.outputs.artifact-name }}.exe"
           fi
 
       - name: Upload artifact for ${{ steps.dynamic-variables.outputs.os }} build
         uses: actions/upload-artifact@v4
         if: always()
         with:
-            include-hidden-files: true
-            name: ${{ steps.dynamic-variables.outputs.artifact-name }}
-            path: electron/dist/${{ steps.dynamic-variables.outputs.final-artifact }}
+          include-hidden-files: true
+          name: ${{ steps.dynamic-variables.outputs.artifact-name }}
+          path: electron/dist/${{ steps.dynamic-variables.outputs.final-artifact }}
