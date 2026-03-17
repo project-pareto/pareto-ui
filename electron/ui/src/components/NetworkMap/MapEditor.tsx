@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { Fragment, useEffect, useState, type ChangeEvent } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
@@ -15,6 +15,8 @@ import FileUploadModal from '../FileUploadModal/FileUploadModal';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
+// import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 
 // Reuse shared types from MapContext: CoordinateTuple, SelectedNodeState, MapEditorNode
 
@@ -23,7 +25,6 @@ interface NameFieldProps {
     setEditingName: (value: boolean) => void;
     handleChange: (key: string, val: any) => void;
     nodeData?: MapEditorNode;
-    isNode: boolean;
     styles: any;
     nameIsNotUnique: boolean;
 }
@@ -60,6 +61,10 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         lineData: lineList,
         networkMapData,
         handleFileUpload,
+        selectingPipelineConnectionFromMap,
+        setSelectingPipelineConnectionFromMap,
+        pipelineConnectionSelectionIndex,
+        setPipelineConnectionSelectionIndex,
     } = useMapValues();
     const { units } = networkMapData || {};
 
@@ -140,6 +145,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         });
     };
     const handleClose = (): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         setSelectedNode(null);
         setShowNetworkNode(false);
         setShowNetworkPipeline(false);
@@ -155,6 +162,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const handleUpdateConnection = (name: string, idx?: number | ""): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         // Update pipeline connection
         // If no name is provided, this is a new connecting node being added
         // If idx is provided, we are updating a connection that is already present (prevNodes is the pipelines connecting nodes).
@@ -180,6 +189,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const handleRemoveConnection = (idx: number): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
             const prevNode = { ...data.node } as MapEditorNode;
@@ -264,6 +275,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const handleDelete = (): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         setShowDeleteWarning(false);
         deleteSelectedNode();
     }
@@ -273,7 +286,6 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         setEditingName,
         handleChange,
         nodeData,
-        isNode,
         styles,
         nameIsNotUnique
     }
@@ -661,85 +673,104 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                     const directionState = getDirectionState(nodeData?.nodes || [], idx);
 
                                     return (
-                                        <TableRow key={idx} hover>
-                                            <TableCell sx={{ py: 0.75 }}>
-                                                <Tooltip title={pipelineConnectionIssues?.includes(name) ? "Please select a valid node." : ""}>
-                                                    <TextField
-                                                        size='small'
-                                                        fullWidth
-                                                        select
-                                                        value={pipelineConnectionIssues?.includes(name) ? '' : name}
-                                                        error={pipelineConnectionIssues?.includes(name)}
-                                                        onChange={(e) => handleUpdateConnection(e.target.value, idx)}
-                                                        SelectProps={{
-                                                            MenuProps: {
-                                                                PaperProps: {
-                                                                    style: {
-                                                                        maxHeight: 200
+                                        <Fragment key={idx}>
+                                            <TableRow hover>
+                                                <TableCell sx={{ py: 0.75 }}>
+                                                    <Tooltip title={pipelineConnectionIssues?.includes(name) ? "Please select a valid node." : ""}>
+                                                        <TextField
+                                                            size='small'
+                                                            fullWidth
+                                                            select
+                                                            value={pipelineConnectionIssues?.includes(name) ? '' : name}
+                                                            error={pipelineConnectionIssues?.includes(name)}
+                                                            onChange={(e) => handleUpdateConnection(e.target.value, idx)}
+                                                            SelectProps={{
+                                                                MenuProps: {
+                                                                    PaperProps: {
+                                                                        style: {
+                                                                            maxHeight: 200
+                                                                        }
                                                                     }
                                                                 }
-                                                            }
-                                                        }}
-                                                    >
-                                                    {availableNodes?.map((node) => (
-                                                        <MenuItem key={node.name} value={node.name}>
-                                                            {node.name}
-                                                        </MenuItem>
-                                                    ))}
-                                                    </TextField>
-                                                </Tooltip>
-                                            </TableCell>
-                                            <TableCell sx={{ py: 0.75 }} align='center'>
-                                                {!isLastNode ? (
-                                                    <Tooltip title={getDirectionTooltip(directionState, name, nextNode?.name)} placement="top">
-                                                        <span>
-                                                            <IconButton
-                                                                size="small"
-                                                                color="primary"
-                                                                disabled={!canToggleFlow}
-                                                                onClick={() => handleCycleFlowDirection(idx)}
-                                                                aria-label={`Cycle flow direction between ${name || 'node'} and ${nextNode?.name || 'node'}`}
-                                                            >
-                                                                {getDirectionIcon(directionState)}
-                                                            </IconButton>
-                                                        </span>
+                                                            }}
+                                                        >
+                                                            {availableNodes?.map((node) => (
+                                                                <MenuItem key={node.name} value={node.name}>
+                                                                    {node.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </TextField>
                                                     </Tooltip>
-                                                ) : (
+                                                </TableCell>
+                                                <TableCell sx={{ py: 0.75 }} align='center'>
                                                     <Typography variant="body2" color="text.secondary">—</Typography>
-                                                )}
-                                            </TableCell>
-                                            <TableCell sx={{ py: 0.75 }}>
-                                                {!isLastNode ? (
-                                                    <TextField
-                                                        size="small"
-                                                        type="number"
-                                                        value={getSegmentLengthDisplayValue(idx)}
-                                                        onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
-                                                        onFocus={() => setEditingSegmentLengthIdx(idx)}
-                                                        onBlur={() => setEditingSegmentLengthIdx(null)}
-                                                        inputProps={{ min: 0, step: "0.001" }}
-                                                    />
-                                                ) : (
+                                                </TableCell>
+                                                <TableCell sx={{ py: 0.75 }} align='center'>
                                                     <Typography variant="body2" color="text.secondary">—</Typography>
-                                                )}
-                                            </TableCell>
-                                            <TableCell sx={{ py: 0.75, textAlign: "right" }}>
-                                                <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={0}>
-                                                    {!isLastNode && (
-                                                        <Tooltip title="reset length to auto-calculated distance" placement="left">
-                                                            <IconButton onClick={() => handleResetSegmentLength(idx)} size="small">
-                                                                <RefreshIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    )}
+                                                </TableCell>
+                                                <TableCell sx={{ py: 0.75, textAlign: "right" }}>
+                                                    <Tooltip title="Select from map" placement="left">
+                                                        <IconButton
+                                                            onClick={() => {
+                                                                setSelectingPipelineConnectionFromMap(true);
+                                                                setPipelineConnectionSelectionIndex(idx);
+                                                            }}
+                                                            size="small"
+                                                            color={selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === idx ? "primary" : "default"}
+                                                        >
+                                                            <AddLocationAltIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                     <Tooltip title="remove node from pipeline" placement="left">
                                                         <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
                                                             <DeleteOutlineIcon />
                                                         </IconButton>
                                                     </Tooltip>
-                                                </Stack>
-                                            </TableCell>
-                                        </TableRow>
+                                                </TableCell>
+                                            </TableRow>
+                                            {!isLastNode && (
+                                                <TableRow sx={{ backgroundColor: "#fcfdff" }}>
+                                                    <TableCell sx={{ py: 0.75 }}>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Segment to {nextNode?.name || "next node"}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ py: 0.75 }} align='center'>
+                                                        <Tooltip title={getDirectionTooltip(directionState, name, nextNode?.name)} placement="top">
+                                                            <span>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    color="primary"
+                                                                    disabled={!canToggleFlow}
+                                                                    onClick={() => handleCycleFlowDirection(idx)}
+                                                                    aria-label={`Cycle flow direction between ${name || 'node'} and ${nextNode?.name || 'node'}`}
+                                                                >
+                                                                    {getDirectionIcon(directionState)}
+                                                                </IconButton>
+                                                            </span>
+                                                        </Tooltip>
+                                                    </TableCell>
+                                                    <TableCell sx={{ py: 0.75 }}>
+                                                        <TextField
+                                                            size="small"
+                                                            type="number"
+                                                            value={getSegmentLengthDisplayValue(idx)}
+                                                            onChange={(e) => handleUpdateSegmentLength(idx, e.target.value)}
+                                                            onFocus={() => setEditingSegmentLengthIdx(idx)}
+                                                            onBlur={() => setEditingSegmentLengthIdx(null)}
+                                                            inputProps={{ min: 0, step: "0.001" }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell sx={{ py: 0.75, textAlign: "right" }}>
+                                                        <Tooltip title="reset length to auto-calculated distance" placement="left">
+                                                            <IconButton onClick={() => handleResetSegmentLength(idx)} size="small">
+                                                                <RefreshIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </Fragment>
                                     )
                                 })}
                             </TableBody>
@@ -761,6 +792,21 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                         sx={{ marginBottom: 1, width: "100%", maxWidth: "300px", alignSelf: "center" }}
                     >
                         Add Connection
+                    </Button>
+                    <Button
+                        startIcon={<AddLocationAltIcon />}
+                        onClick={() => {
+                            if (selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === null) {
+                                setSelectingPipelineConnectionFromMap(false);
+                            } else {
+                                setSelectingPipelineConnectionFromMap(true);
+                            }
+                            setPipelineConnectionSelectionIndex(null);
+                        }}
+                        variant={selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === null ? 'contained' : 'outlined'}
+                        sx={{ marginBottom: 1, width: "100%", maxWidth: "300px", alignSelf: "center" }}
+                    >
+                        Select from map
                     </Button>
                 </Stack>
             )}
@@ -835,7 +881,6 @@ function NameField(props: NameFieldProps) {
         setEditingName,
         handleChange,
         nodeData,
-        isNode,
         styles,
         nameIsNotUnique
     } = props;

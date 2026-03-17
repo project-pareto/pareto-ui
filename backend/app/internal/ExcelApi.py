@@ -16,6 +16,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     Write map_data to excel
     Accepts: map_data, output file name, template location (optional)
     """
+    _log.info(f"WriteMapDataToExcel using {template_location}")
     if template_location is None:
         template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
 
@@ -25,6 +26,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "CB-EV": {"TreatmentOperationalCost": 0.3, "TreatmentEfficiency": 0.95, "RemovalEfficiency": 0, "DesalinationTechnologies": 0, "TreatmentExpansionCost": 100},
         "MVC": {"TreatmentOperationalCost": 0.5, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 1000},
         "MD": {"TreatmentOperationalCost": 1.0, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 500},
+        "OARO": {"TreatmentOperationalCost": 0.7, "TreatmentEfficiency": 0.5, "RemovalEfficiency": 0.99, "DesalinationTechnologies": 1, "TreatmentExpansionCost": 800}
     }
 
     treatment_capacities = {
@@ -70,10 +72,20 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     _print(f'writing data to excel at {excel_path}')
 
     ## step 1: copy pareto_input_template to new file for writing
-    shutil.copyfile(template_location, excel_path)
+    if template_location != excel_path:
+        shutil.copyfile(template_location, excel_path)
 
     ## step 2: open excel workbook
     wb = load_workbook(excel_path, data_only=True)
+
+    ## step 2.5: add TreatmentTechnologies table
+    ws = wb["TreatmentTechnologies"]
+    row = 2
+    for technology in treatment_technologies:
+        _print(f'TreatmentTechnologies: adding {technology}')
+        cell_location = f'{get_column_letter(1)}{row}'
+        ws[cell_location] = technology
+        row += 1
 
     ## step 3: add nodes
     node_keys = [
@@ -344,7 +356,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
-        "ReuseOperationalCost": ["ReuseOptions"],
+        "ReuseOperationalCost": ["CompletionsPads"],
         "ExternalSourcingCost": ["ExternalWaterSources"],
         "ExternalWaterQuality": ["ExternalWaterSources"],
         "TruckingHourlyCost": ["ProductionPads", "CompletionsPads", "ExternalWaterSources"],
@@ -361,7 +373,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         for node_key in single_value_tabs[single_value_tab]:
             _print(f'single_value_tab {single_value_tab}: adding {node_key}')
             nodes = data.get(node_key, {})
-            for node in data.get(node_key, {}):
+            for node in nodes:
                 nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -420,7 +432,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             row+=1
     
     capacity_increments_tabs = {
-        "DisposalCapacityIncrements": {"default": "InjectionCapacities"},
+        # "DisposalCapacityIncrements": {"default": "InjectionCapacities"},
         "StorageCapacityIncrements": {"default": "StorageCapacities"},
         "PipelineDiameterValues": {"default": "PipelineDiameters"},
         "PipelineCapacityIncrements": {"default": "PipelineDiameters"},
@@ -466,6 +478,33 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[valueCellLocation] = default_values[each][capacity_increments_tab]
                 column+=1
             row+=1
+
+    disposal_capacity_tab = "DisposalCapacityIncrements"
+    ws = wb[disposal_capacity_tab]
+
+    # header row: SWDSites + injection capacity levels (I0, I1, ...)
+    ws[f'{get_column_letter(1)}{2}'] = "SWDSites"
+    column = 2
+    for capacity_key in injection_capacities:
+        header_cell_location = f'{get_column_letter(column)}{2}'
+        ws[header_cell_location] = capacity_key
+        column += 1
+
+    # one row per SWD site, with values copied from injection_capacities for each level
+    row = 3
+    for swd_site in data.get("SWDSites", {}):
+        swd_cell_location = f'{get_column_letter(1)}{row}'
+        ws[swd_cell_location] = swd_site
+
+        column = 2
+        for capacity_key, capacity_values in injection_capacities.items():
+            value_cell_location = f'{get_column_letter(column)}{row}'
+            ws[value_cell_location] = capacity_values.get("DisposalCapacityIncrements", None)
+            column += 1
+
+        row += 1
+
+
 
     ## CODE TO GET TREATMENT TECHNOLOGIES. WE ARE DEFAULTING TO CB, CB-EV, MVC, and MD; so hard code those with corresponding values for now
 

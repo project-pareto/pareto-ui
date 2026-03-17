@@ -146,3 +146,10 @@ export const validateScenario = (backend_port: number, id: number | string) => {
         mode: 'cors'
     });
 };
+
+export const advanceToOptimizationSetup = (backend_port: number, id: number | string) => {
+    return fetch(BACKEND_URL+':'+backend_port+'/advance_to_optimization_setup/'+id, {
+        method: 'POST',
+        mode: 'cors'
+    });
+};

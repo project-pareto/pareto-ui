@@ -35,6 +35,7 @@ from app.internal.util import (
     deriveConnections,
     checkArcValues
 )
+from app.internal.util import check_for_missing_tables, check_for_minimum_required_tables, check_for_infeasibility
     
 from app.internal.openapi_client_wrapper import cborg
 
@@ -664,6 +665,23 @@ class ScenarioHandler:
     def get_excel_output_path(self, id):
         return f"{self.outputs_path}/{id}.xlsx"
 
+    def set_scenario_status(self, id, status):
+        _log.info(f"setting scenario {id} status to {status}")
+        try:
+            scenario = self.get_scenario(int(id))
+            if scenario is None or "error" in scenario:
+                raise HTTPException(404, f"unable to find scenario with id {id}")
+
+            if "results" not in scenario:
+                scenario["results"] = {}
+            scenario["results"]["status"] = status
+            return self.update_scenario(scenario)
+        except HTTPException:
+            raise
+        except Exception as e:
+            _log.error(f"unable to set scenario status for id {id}: {e}")
+            raise HTTPException(500, f"unable to set scenario status for id {id}: {e}")
+
     def get_diagram(self, diagram_type, id):
         try:
             diagramFileType = self.scenario_list[id][f'{diagram_type}DiagramExtension']
@@ -778,7 +796,7 @@ class ScenarioHandler:
             preprocessed_map_data = PreprocessMapData(data_input)
 
             ## 2) Write map data to Excel
-            WriteMapDataToExcel(preprocessed_map_data, excel_path.replace(".xlsx", ""))
+            WriteMapDataToExcel(preprocessed_map_data, output_file_name=excel_path.replace(".xlsx", ""), template_location=excel_path)
 
             ## 3) Extract Excel data into JSON, save in DB
             self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
@@ -878,6 +896,76 @@ class ScenarioHandler:
         self.retrieve_scenarios()
         
         return return_object
+    
+    @time_it
+    def validate__pareto_scenario(self, id):
+        try:
+            scenario = self.scenario_list[id]
+
+            ## step 1: check for missing tables
+            validation_results = check_for_missing_tables(scenario=scenario)
+            passed_validation = validation_results.get("result")
+            err = validation_results.get("e")
+
+            if not passed_validation:
+                if isinstance(err, str):
+                    err_message = err
+                else:
+                    err_message = getattr(err, "message", None)
+                    if not isinstance(err_message, str) or not err_message:
+                        err_args = getattr(err, "args", ())
+                        if len(err_args) > 0 and isinstance(err_args[0], str):
+                            err_message = err_args[0]
+                        else:
+                            err_message = str(err)
+
+                missing_tables_split = err_message.split("data tabs: ")
+                _log.info(f"missing_tables_split: {missing_tables_split}")
+                if len(missing_tables_split) > 1:
+                    missing_tables = missing_tables_split[1].split(", ")
+                else:
+                    missing_tables = []
+                return {
+                    "valid": False,
+                    "error": err_message,
+                    "missing_tables": missing_tables,
+                    "check_for_missing_tables": False,
+                    "check_for_minimum_required_tables": False,
+                    "check_for_infeasibility": False,
+                }
+            else:
+                missing_tables = []
+
+            ## step 2: use custom function to ensure minimum tables have values
+            tables_with_issues = check_for_minimum_required_tables(scenario)
+            if len(tables_with_issues) > 0:
+                return {
+                    "valid": False,
+                    "missing_tables": missing_tables,
+                    "check_for_missing_tables": True,
+                    "check_for_minimum_required_tables": False,
+                    "tables_with_issues": tables_with_issues,
+                    "check_for_infeasibility": False,
+                }
+            
+            ## step 3: create the model and check for infeasbility
+            excel_path = f"{self.excelsheets_path}/{id}.xlsx"
+            is_feasible = check_for_infeasibility(scenario=scenario, excel_path=excel_path)
+            return {
+                    "valid": is_feasible,
+                    "missing_tables": missing_tables,
+                    "check_for_missing_tables": True,
+                    "check_for_minimum_required_tables": True,
+                    "tables_with_issues": tables_with_issues,
+                    "check_for_infeasibility": is_feasible,
+                }
+
+        except Exception as e:
+            _log.exception("Error on validate_scenario")
+            return {
+                "valid": False,
+                "error": f"{e}"
+            }
     
     @time_it
     def validate_scenario(self, id):

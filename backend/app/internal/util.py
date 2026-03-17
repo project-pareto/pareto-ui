@@ -3,6 +3,29 @@ import time
 import functools
 
 import logging
+
+from pareto.utilities.process_data import (
+    check_required_data,
+    model_infeasibility_detection,
+)
+from pareto.strategic_water_management.strategic_produced_water_optimization import (
+    create_model,
+    Objectives,
+    solve_model,
+    PipelineCost,
+    PipelineCapacity,
+    Hydraulics,
+    WaterQuality,
+    RemovalEfficiencyMethod,
+    InfrastructureTiming,
+    SubsurfaceRisk,
+    DesalinationModel,
+    CONFIG,
+)
+from pareto.utilities.get_data import get_data
+
+from app.internal.get_data import get_input_lists
+
 _log = logging.getLogger(__name__)
 EARTH_RADIUS_MILES = 3958.7613
 
@@ -97,6 +120,75 @@ def _to_float(value):
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _get_table_row_count(table_data):
+    if not isinstance(table_data, dict):
+        return 0
+
+    for values in table_data.values():
+        if isinstance(values, list):
+            return len(values)
+
+    return 0
+
+
+def _coerce_numeric_or_zero(value):
+    if value in (None, ""):
+        return 0.0
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _forecast_table_has_valid_rows(table_data):
+    row_count = _get_table_row_count(table_data)
+    if row_count == 0:
+        return False
+
+    period_columns = [
+        key for key, values in table_data.items()
+        if key.startswith("T") and isinstance(values, list)
+    ]
+
+    if not period_columns:
+        list_columns = [
+            key for key, values in table_data.items()
+            if isinstance(values, list)
+        ]
+        period_columns = list_columns[1:]
+
+    if not period_columns:
+        return False
+
+    for row_idx in range(row_count):
+        row_total = sum(
+            _coerce_numeric_or_zero(table_data.get(column, [])[row_idx] if row_idx < len(table_data.get(column, [])) else 0)
+            for column in period_columns
+        )
+        if row_total <= 0:
+            return False
+
+    return True
+
+
+def _value_table_has_valid_rows(table_data):
+    row_count = _get_table_row_count(table_data)
+    if row_count == 0:
+        return False
+
+    values = table_data.get("VALUE")
+    if not isinstance(values, list):
+        return False
+
+    for row_idx in range(row_count):
+        value = values[row_idx] if row_idx < len(values) else 0
+        if _coerce_numeric_or_zero(value) <= 0:
+            return False
+
+    return True
 
 def calculate_distance_from_coordinates(start_coords, end_coords):
     """
@@ -522,3 +614,167 @@ def checkArcValues(input_table: dict, connections: dict, input_table_key: str = 
                 missing_any = True
 
     return not missing_any
+
+@time_it
+def check_for_infeasibility(scenario, excel_path):
+    ## TODO: this fails on get_data
+    ## we may need to create our own function to check for valid tables
+    modelParameters = prepare_config(scenario, expected_response="modelParameters")
+    default={
+        "objective": Objectives[modelParameters["objective"]],
+        "pipeline_cost": PipelineCost[modelParameters["pipeline_cost"]],
+        "pipeline_capacity": PipelineCapacity[modelParameters["pipeline_capacity"]],
+        "node_capacity": modelParameters["node_capacity"],
+        "water_quality": WaterQuality[modelParameters["water_quality"]],
+        "hydraulics": Hydraulics[modelParameters["hydraulics"]],
+        "removal_efficiency_method": RemovalEfficiencyMethod[modelParameters["removal_efficiency_method"]],
+        "infrastructure_timing": InfrastructureTiming[modelParameters["infrastructure_timing"]],
+        "subsurface_risk": SubsurfaceRisk[modelParameters["subsurface_risk"]],
+        "desalination_model": DesalinationModel[modelParameters["desalination_model"]]
+    }
+
+    [set_list, parameter_list] = get_input_lists()
+    
+    [df_sets, df_parameters] = get_data(excel_path, set_list, parameter_list)
+
+    strategic_model = create_model(
+        df_sets,
+        df_parameters,
+        default=default
+    )
+
+    try:
+        _log.info(f"calling model_infeasibility_detection")
+        strategic_model = model_infeasibility_detection(strategic_model)
+        return True
+    except Exception as e:
+        _log.info(f"Exception during check_for_infeasibility: {e}")
+        return False
+
+
+def check_for_minimum_required_tables(scenario):
+    required_tables = [
+        "ProductionPads",
+        "CompletionsPads",
+        "StorageSites",
+        "SWDSites",
+        "ExternalWaterSources",
+        "ReuseOptions"
+    ]
+
+    data_input = scenario.get("data_input", {})
+    df_sets = data_input.get("df_sets", {})
+    df_parameters = data_input.get("df_parameters", {})
+
+    missing_tables = []
+
+    for table_name in required_tables:
+        table = df_sets.get(table_name, [])
+        if len(table) == 0:
+            missing_tables.append(table_name)
+
+    
+    ## The following lists of tables must have values > 0 for each row in each table
+    forecast_tables = [
+        "CompletionsDemand",
+        "PadRates",
+        "FlowbackRates",
+        "ReuseMinimum"
+    ]
+
+    capacity_tables = [
+        "InitialStorageCapacity",
+        "InitialDisposalCapacity",
+        "CompletionsPadStorage",
+        # "InitialTreatmentCapacity" TODO: this one is different
+    ]
+
+    operational_cost_tables = [
+        "DisposalOperationalCost",
+        "ReuseOperationalCost",
+    ]
+
+    beneficial_reuse_tables = [
+        "BeneficialReuseCost",
+        "BeneficialReuseCredit",
+    ]
+
+    for table_name in forecast_tables:
+        if not _forecast_table_has_valid_rows(df_parameters.get(table_name)):
+            missing_tables.append(table_name)
+
+    for table_name in capacity_tables:
+        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+            missing_tables.append(table_name)
+
+    for table_name in operational_cost_tables:
+        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+            missing_tables.append(table_name)
+
+    for table_name in beneficial_reuse_tables:
+        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+            missing_tables.append(table_name)
+    
+    return missing_tables
+
+
+def check_for_missing_tables(scenario):
+    conf = prepare_config(scenario)
+    data_input = scenario.get("data_input")
+    df_sets = data_input.get("df_sets", {})
+    df_parameters = data_input.get("df_parameters", {})
+    display_units = data_input.get("display_units", {})
+    df_parameters["Units"] = display_units
+    try:
+        _log.info(f"calling check_required_data")
+        check_required_data(df_sets, df_parameters, conf)
+        _log.info(f"no error thrown")
+        return {
+            "result": True,
+        }
+    except Exception as e:
+        _log.info(f"{e}")
+        return {
+            "result": False,
+            "e": e,
+        }
+
+def prepare_config(scenario, expected_response="conf"):
+    _log.info(f"preparing config: ")
+    optimizationSettings = scenario.get('optimization')
+    modelParameters = {
+        "objective": optimizationSettings.get('objective',"cost"),
+        "runtime": optimizationSettings.get('runtime',900),
+        "pipeline_cost": optimizationSettings.get("pipeline_cost", "distance_based"),
+        "pipeline_capacity": optimizationSettings.get("pipeline_capacity", "input"),
+        "node_capacity": optimizationSettings.get("node_capacity", True),
+        "water_quality": optimizationSettings.get("waterQuality", "false"),
+        "solver": optimizationSettings.get('solver',None),
+        "build_units": optimizationSettings.get('build_units',"user_units"),
+        "optimalityGap": optimizationSettings.get("optimalityGap", 5),
+        "scale_model": optimizationSettings.get("scale_model", True),
+        "hydraulics": optimizationSettings.get('hydraulics',"false"),
+        "removal_efficiency_method": optimizationSettings.get('removal_efficiency_method',"concentration_based"),
+        "desalination_model": optimizationSettings.get("desalination_model", "false"),
+        "infrastructure_timing": optimizationSettings.get("infrastructure_timing", "false"),
+        "subsurface_risk": optimizationSettings.get("subsurface_risk", "false"),
+        "deactivate_slacks": optimizationSettings.get("deactivate_slacks", True),
+    }
+
+    default = {
+        "objective": modelParameters["objective"],
+        "pipeline_cost": modelParameters["pipeline_cost"],
+        "pipeline_capacity": modelParameters["pipeline_capacity"],
+        "hydraulics": modelParameters["hydraulics"],
+        "node_capacity": modelParameters["node_capacity"],
+        "water_quality": modelParameters["water_quality"],
+        "removal_efficiency_method": modelParameters["removal_efficiency_method"],
+        "infrastructure_timing": modelParameters["infrastructure_timing"],
+    }
+
+    if expected_response == "conf":
+        return CONFIG(default)
+    elif expected_response == "modelParameters":
+        return modelParameters
+    else:
+        return CONFIG(default)

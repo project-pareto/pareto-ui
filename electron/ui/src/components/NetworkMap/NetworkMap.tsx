@@ -30,6 +30,10 @@ import { useMapValues } from '../../context/MapContext';
 const iconUrl = "http://maps.google.com/mapfiles/kml/"
 const PIPELINE_COLOR = "#A03232"
 const SELECTED_HIGHLIGHT_COLOR = "#FFD54F"
+const DRAFT_PIPELINE_COLOR = "#F28C28"
+const SHOW_PIPELINE_FLOW_ARROWS = true
+const FLOW_ARROW_ICON_SIZE = 18
+const FLOW_ARROW_TARGET_RATIO = 0.92
 const SELECTED_POINT_HALO_SIZE = 56
 const SELECTED_POINT_ICON = divIcon({
     className: "",
@@ -43,6 +47,97 @@ const SELECTED_POINT_ICON = divIcon({
     iconSize: [SELECTED_POINT_HALO_SIZE, SELECTED_POINT_HALO_SIZE],
     iconAnchor: [SELECTED_POINT_HALO_SIZE / 2, SELECTED_POINT_HALO_SIZE / 2],
 })
+
+type LatLngPair = [number, number];
+type SegmentPositions = [LatLngPair, LatLngPair];
+
+const hasFlowBetweenNodes = (nodes: any[] = [], fromIdx: number, toIdx: number): boolean => {
+    const fromNode = nodes?.[fromIdx];
+    const toNode = nodes?.[toIdx];
+    if (!fromNode?.name || !toNode?.name) return false;
+    return Array.isArray(fromNode.outgoing_nodes) && fromNode.outgoing_nodes.includes(toNode.name);
+};
+
+const toLatLngPair = (coords?: Array<number | string>): LatLngPair | null => {
+    if (!Array.isArray(coords) || coords.length < 2) return null;
+    const lng = Number(coords[0]);
+    const lat = Number(coords[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return [lat, lng];
+};
+
+const areLatLngPairsEqual = (left?: LatLngPair | null, right?: LatLngPair | null): boolean => {
+    if (!left || !right) return false;
+    return left[0] === right[0] && left[1] === right[1];
+};
+
+const areSegmentsEqual = (left?: SegmentPositions, right?: SegmentPositions): boolean => {
+    if (!left || !right) return false;
+    return areLatLngPairsEqual(left[0], right[0]) && areLatLngPairsEqual(left[1], right[1]);
+};
+
+const getLineSegments = (line?: any): SegmentPositions[] => {
+    const positions = formatCoordinatesFromNodes(line?.nodes || []).filter((coords: number[]) =>
+        Array.isArray(coords) &&
+        coords.length === 2 &&
+        Number.isFinite(coords[0]) &&
+        Number.isFinite(coords[1])
+    ) as LatLngPair[];
+
+    return positions.slice(0, -1).map((position, idx) => [position, positions[idx + 1]]);
+};
+
+const getDraftSegments = (draftLine?: any, savedLine?: any): SegmentPositions[] => {
+    const draftSegments = getLineSegments(draftLine);
+    const savedSegments = getLineSegments(savedLine);
+
+    return draftSegments.filter((segment, idx) => !areSegmentsEqual(segment, savedSegments[idx]));
+};
+
+const getFlowArrowIcon = (rotationDeg: number) => divIcon({
+    className: "flow-arrow-marker",
+    html: `<div class="flow-arrow-glyph" style="transform: rotate(${rotationDeg}deg)">▲</div>`,
+    iconSize: [FLOW_ARROW_ICON_SIZE, FLOW_ARROW_ICON_SIZE],
+    iconAnchor: [FLOW_ARROW_ICON_SIZE / 2, FLOW_ARROW_ICON_SIZE / 2],
+});
+
+const getFlowArrowsForLine = (line: any, lineIndex: number) => {
+    const nodes = Array.isArray(line?.nodes) ? line.nodes : [];
+    const arrows: Array<{ key: string; position: LatLngPair; rotation: number }> = [];
+
+    for (let idx = 0; idx < nodes.length - 1; idx += 1) {
+        const fromCoords = toLatLngPair(nodes[idx]?.coordinates);
+        const toCoords = toLatLngPair(nodes[idx + 1]?.coordinates);
+        if (!fromCoords || !toCoords) continue;
+
+        const hasDownFlow = hasFlowBetweenNodes(nodes, idx, idx + 1);
+        const hasUpFlow = hasFlowBetweenNodes(nodes, idx + 1, idx);
+        const showDownFlow = hasDownFlow || (!hasDownFlow && !hasUpFlow);
+        const showUpFlow = hasUpFlow;
+
+        const pushArrow = (source: LatLngPair, target: LatLngPair, key: string) => {
+            const [sourceLat, sourceLng] = source;
+            const [targetLat, targetLng] = target;
+            const lat = sourceLat + (targetLat - sourceLat) * FLOW_ARROW_TARGET_RATIO;
+            const lng = sourceLng + (targetLng - sourceLng) * FLOW_ARROW_TARGET_RATIO;
+            const rotation = (Math.atan2(-(targetLat - sourceLat), targetLng - sourceLng) * 180) / Math.PI + 90;
+            arrows.push({
+                key,
+                position: [lat, lng],
+                rotation,
+            });
+        };
+
+        if (showDownFlow) {
+            pushArrow(fromCoords, toCoords, `${lineIndex}:${idx}:down`);
+        }
+        if (showUpFlow) {
+            pushArrow(toCoords, fromCoords, `${lineIndex}:${idx}:up`);
+        }
+    }
+
+    return arrows;
+};
 
 
 export default function NetworkMap(props: NetworkMapProps) {
@@ -62,6 +157,7 @@ export default function NetworkMap(props: NetworkMapProps) {
         creatingNewNode,
         selectedNode,
         setNetworkMapData,
+        selectingPipelineConnectionFromMap,
     } = useMapValues();
     const selectedNodeData = selectedNode?.node ?? (selectedNode as any);
     const selectedNodeType = selectedNodeData?.node_type;
@@ -260,7 +356,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                                         }
                                     }}
                                 >
-                                    <Tooltip>{isPathSelected ? `Add ${value.name} as connection` : value.name}</Tooltip>
+                                    <Tooltip>{selectingPipelineConnectionFromMap ? `Add ${value.name} as connection` : value.name}</Tooltip>
                                 </Marker>
                             </React.Fragment>
                         )
@@ -273,6 +369,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                             (selectedNodeIdx === undefined && selectedNodeData?.name === value.name)
                         );
                         const linePositions = formatCoordinatesFromNodes(value.nodes);
+                        const flowArrows = SHOW_PIPELINE_FLOW_ARROWS ? getFlowArrowsForLine(value, index) : [];
 
                         return (
                             <React.Fragment key={index}>
@@ -327,9 +424,38 @@ export default function NetworkMap(props: NetworkMapProps) {
                                         {value.name}
                                     </Tooltip>
                                 </Polyline>
+                                {flowArrows.map((arrow) => (
+                                    <Marker
+                                        key={arrow.key}
+                                        position={arrow.position}
+                                        {...({
+                                            icon: getFlowArrowIcon(arrow.rotation),
+                                            interactive: false,
+                                            bubblingMouseEvents: false,
+                                            keyboard: false,
+                                            zIndexOffset: 600,
+                                        } as any)}
+                                    />
+                                ))}
                             </React.Fragment>
-                        ) 
-                        })}
+                        )
+                    })}
+                    {isPathSelected && getDraftSegments(
+                        selectedNodeData,
+                        selectedNodeIdx !== undefined ? lineData[selectedNodeIdx] : undefined
+                    ).map((segment, index) => (
+                        <Polyline
+                            key={`draft-segment:${selectedNodeData?.name || "pipeline"}:${index}`}
+                            pathOptions={{
+                                color: DRAFT_PIPELINE_COLOR,
+                                weight: 6,
+                                opacity: 0.95,
+                                bubblingMouseEvents: false,
+                                interactive: false,
+                            }}
+                            positions={segment}
+                        />
+                    ))}
                     </MapContainer>
                 }
             </Box>

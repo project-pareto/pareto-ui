@@ -335,6 +335,10 @@ export interface MapContextValue {
   handleMapClick: (coords: CoordinateTuple) => void;
   availableNodes: MapEditorNode[];
   creatingNewNode: boolean;
+  selectingPipelineConnectionFromMap: boolean;
+  setSelectingPipelineConnectionFromMap: React.Dispatch<React.SetStateAction<boolean>>;
+  pipelineConnectionSelectionIndex: number | null;
+  setPipelineConnectionSelectionIndex: React.Dispatch<React.SetStateAction<number | null>>;
   deleteSelectedNode: () => void;
   currentlyCreatingPipeline: boolean;
   currentlyCreatingNode: boolean;
