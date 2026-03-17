@@ -15,7 +15,8 @@ import FileUploadModal from '../FileUploadModal/FileUploadModal';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
+// import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 
 // Reuse shared types from MapContext: CoordinateTuple, SelectedNodeState, MapEditorNode
 
@@ -717,7 +718,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                                             size="small"
                                                             color={selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === idx ? "primary" : "default"}
                                                         >
-                                                            <LocationSearchingIcon />
+                                                            <AddLocationAltIcon />
                                                         </IconButton>
                                                     </Tooltip>
                                                     <Tooltip title="remove node from pipeline" placement="left">
@@ -793,7 +794,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                         Add Connection
                     </Button>
                     <Button
-                        startIcon={<LocationSearchingIcon />}
+                        startIcon={<AddLocationAltIcon />}
                         onClick={() => {
                             if (selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === null) {
                                 setSelectingPipelineConnectionFromMap(false);
