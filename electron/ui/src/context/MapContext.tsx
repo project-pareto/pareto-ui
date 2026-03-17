@@ -98,8 +98,6 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
     };
 
     const clickNode = (node: MapEditorNode, idx: number): void => {
-        // TODO: if currentlyCreatingPipeline, instead of selecting node, add it to pipeline
-        // console.log(node)
         if (selectedNode?.node?.node_type === "path") {
             addPipelineConnection(node)
         } else {

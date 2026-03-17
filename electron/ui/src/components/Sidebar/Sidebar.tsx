@@ -64,9 +64,6 @@ export default function Sidebar(props: SidebarProps) {
   },[scenario])
 
   useEffect(() => {
-    if (!isMapEditorOpen) {
-      return;
-    }
     if (hasSelectedMapItem) {
       setIsMapEditorExpanded(true);
     } else {
