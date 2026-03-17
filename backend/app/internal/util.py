@@ -121,6 +121,75 @@ def _to_float(value):
     except (TypeError, ValueError):
         return None
 
+
+def _get_table_row_count(table_data):
+    if not isinstance(table_data, dict):
+        return 0
+
+    for values in table_data.values():
+        if isinstance(values, list):
+            return len(values)
+
+    return 0
+
+
+def _coerce_numeric_or_zero(value):
+    if value in (None, ""):
+        return 0.0
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _forecast_table_has_valid_rows(table_data):
+    row_count = _get_table_row_count(table_data)
+    if row_count == 0:
+        return False
+
+    period_columns = [
+        key for key, values in table_data.items()
+        if key.startswith("T") and isinstance(values, list)
+    ]
+
+    if not period_columns:
+        list_columns = [
+            key for key, values in table_data.items()
+            if isinstance(values, list)
+        ]
+        period_columns = list_columns[1:]
+
+    if not period_columns:
+        return False
+
+    for row_idx in range(row_count):
+        row_total = sum(
+            _coerce_numeric_or_zero(table_data.get(column, [])[row_idx] if row_idx < len(table_data.get(column, [])) else 0)
+            for column in period_columns
+        )
+        if row_total <= 0:
+            return False
+
+    return True
+
+
+def _value_table_has_valid_rows(table_data):
+    row_count = _get_table_row_count(table_data)
+    if row_count == 0:
+        return False
+
+    values = table_data.get("VALUE")
+    if not isinstance(values, list):
+        return False
+
+    for row_idx in range(row_count):
+        value = values[row_idx] if row_idx < len(values) else 0
+        if _coerce_numeric_or_zero(value) <= 0:
+            return False
+
+    return True
+
 def calculate_distance_from_coordinates(start_coords, end_coords):
     """
     Great-circle distance (miles) between two [lon, lat] coordinates.
@@ -595,12 +664,55 @@ def check_for_minimum_required_tables(scenario):
 
     data_input = scenario.get("data_input", {})
     df_sets = data_input.get("df_sets", {})
+    df_parameters = data_input.get("df_parameters", {})
 
     missing_tables = []
 
     for table_name in required_tables:
         table = df_sets.get(table_name, [])
         if len(table) == 0:
+            missing_tables.append(table_name)
+
+    
+    ## The following lists of tables must have values > 0 for each row in each table
+    forecast_tables = [
+        "CompletionsDemand",
+        "PadRates",
+        "FlowbackRates",
+        "ReuseMinimum"
+    ]
+
+    capacity_tables = [
+        "InitialStorageCapacity",
+        "InitialDisposalCapacity",
+        "CompletionsPadStorage",
+        # "InitialTreatmentCapacity" TODO: this one is different
+    ]
+
+    operational_cost_tables = [
+        "DisposalOperationalCost",
+        "ReuseOperationalCost",
+    ]
+
+    beneficial_reuse_tables = [
+        "BeneficialReuseCost",
+        "BeneficialReuseCredit",
+    ]
+
+    for table_name in forecast_tables:
+        if not _forecast_table_has_valid_rows(df_parameters.get(table_name)):
+            missing_tables.append(table_name)
+
+    for table_name in capacity_tables:
+        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+            missing_tables.append(table_name)
+
+    for table_name in operational_cost_tables:
+        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+            missing_tables.append(table_name)
+
+    for table_name in beneficial_reuse_tables:
+        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
             missing_tables.append(table_name)
     
     return missing_tables
