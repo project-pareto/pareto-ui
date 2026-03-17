@@ -18,6 +18,8 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
     const [showNetworkNode, setShowNetworkNode] = useState<boolean>(false);
     const [showNetworkPipeline, setShowNetworkPipeline] = useState<boolean>(false);
     const [creatingNewNode, setCreatingNewNode] = useState<boolean>(false);
+    const [selectingPipelineConnectionFromMap, setSelectingPipelineConnectionFromMap] = useState<boolean>(false);
+    const [pipelineConnectionSelectionIndex, setPipelineConnectionSelectionIndex] = useState<number | null>(null);
     const currentlyCreatingPipeline: boolean = Boolean(showNetworkPipeline && selectedNode && creatingNewNode);
     const currentlyCreatingNode: boolean = Boolean(showNetworkNode && selectedNode && creatingNewNode);
     const deselectActiveNode = (): void => {
@@ -25,9 +27,13 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         setShowNetworkNode(false);
         setShowNetworkPipeline(false);
         setCreatingNewNode(false);
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
     }
 
     const addNode = (): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         const newNode: SelectedNodeState = {
             node: {
                 "name": generateNewName(nodeData, "Node"),
@@ -43,6 +49,8 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
     };
 
     const addPipeline = (): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         const newPipeline: SelectedNodeState = {
             node: {
                 name: generateNewName(lineData, "Pipeline"),
@@ -97,11 +105,41 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         });
     };
 
-    const clickNode = (node: MapEditorNode, idx: number): void => {
-        if (selectedNode?.node?.node_type === "path") {
-            addPipelineConnection(node)
-        } else {
+    const replacePipelineConnection = (connectionIdx: number, replacementNode: MapEditorNode): void => {
+        setSelectedNode((data: SelectedNodeState | null) => {
+            if (!data) return data;
+            const prev = { ...data.node } as MapEditorNode;
+            const prevNodes = prev.nodes || [];
+            const updatedNodeList = prevNodes.map((existingNode, idx) =>
+                idx === connectionIdx
+                    ? { ...existingNode, name: replacementNode.name, coordinates: replacementNode.coordinates }
+                    : existingNode
+            );
+            const lengths = calculatePipelineSegmentLengths(updatedNodeList);
+            const node = {
+                ...prev,
+                nodes: updatedNodeList,
+                lengths,
+            } as MapEditorNode;
+            return {
+                ...data,
+                node,
+            } as SelectedNodeState;
+        });
+    };
 
+    const clickNode = (node: MapEditorNode, idx: number): void => {
+        if (selectedNode?.node?.node_type === "path" && selectingPipelineConnectionFromMap) {
+            if (pipelineConnectionSelectionIndex === null) {
+                addPipelineConnection(node)
+            } else {
+                replacePipelineConnection(pipelineConnectionSelectionIndex, node);
+            }
+            setSelectingPipelineConnectionFromMap(false);
+            setPipelineConnectionSelectionIndex(null);
+        } else {
+            setSelectingPipelineConnectionFromMap(false);
+            setPipelineConnectionSelectionIndex(null);
             setCreatingNewNode(false);
             setSelectedNode({node, idx});
             setShowNetworkNode(true);
@@ -111,6 +149,8 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
 
     const clickPipeline = (node: MapEditorNode, idx: number): void => {
         // console.log(node)
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         setCreatingNewNode(false);
         setSelectedNode({node, idx});
         setShowNetworkPipeline(true);
@@ -256,6 +296,10 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         handleMapClick,
         availableNodes: nodeData,
         creatingNewNode,
+        selectingPipelineConnectionFromMap,
+        setSelectingPipelineConnectionFromMap,
+        pipelineConnectionSelectionIndex,
+        setPipelineConnectionSelectionIndex,
         deleteSelectedNode,
         currentlyCreatingPipeline,
         currentlyCreatingNode,

@@ -127,6 +127,7 @@ export default function NetworkMap(props: NetworkMapProps) {
         creatingNewNode,
         selectedNode,
         setNetworkMapData,
+        selectingPipelineConnectionFromMap,
     } = useMapValues();
     const selectedNodeData = selectedNode?.node ?? (selectedNode as any);
     const selectedNodeType = selectedNodeData?.node_type;
@@ -325,7 +326,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                                         }
                                     }}
                                 >
-                                    <Tooltip>{isPathSelected ? `Add ${value.name} as connection` : value.name}</Tooltip>
+                                    <Tooltip>{selectingPipelineConnectionFromMap ? `Add ${value.name} as connection` : value.name}</Tooltip>
                                 </Marker>
                             </React.Fragment>
                         )

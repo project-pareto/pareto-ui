@@ -15,6 +15,7 @@ import FileUploadModal from '../FileUploadModal/FileUploadModal';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
+import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 
 // Reuse shared types from MapContext: CoordinateTuple, SelectedNodeState, MapEditorNode
 
@@ -23,7 +24,6 @@ interface NameFieldProps {
     setEditingName: (value: boolean) => void;
     handleChange: (key: string, val: any) => void;
     nodeData?: MapEditorNode;
-    isNode: boolean;
     styles: any;
     nameIsNotUnique: boolean;
 }
@@ -60,6 +60,10 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         lineData: lineList,
         networkMapData,
         handleFileUpload,
+        selectingPipelineConnectionFromMap,
+        setSelectingPipelineConnectionFromMap,
+        pipelineConnectionSelectionIndex,
+        setPipelineConnectionSelectionIndex,
     } = useMapValues();
     const { units } = networkMapData || {};
 
@@ -140,6 +144,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         });
     };
     const handleClose = (): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         setSelectedNode(null);
         setShowNetworkNode(false);
         setShowNetworkPipeline(false);
@@ -155,6 +161,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const handleUpdateConnection = (name: string, idx?: number | ""): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         // Update pipeline connection
         // If no name is provided, this is a new connecting node being added
         // If idx is provided, we are updating a connection that is already present (prevNodes is the pipelines connecting nodes).
@@ -180,6 +188,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const handleRemoveConnection = (idx: number): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
             const prevNode = { ...data.node } as MapEditorNode;
@@ -264,6 +274,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const handleDelete = (): void => {
+        setSelectingPipelineConnectionFromMap(false);
+        setPipelineConnectionSelectionIndex(null);
         setShowDeleteWarning(false);
         deleteSelectedNode();
     }
@@ -273,7 +285,6 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         setEditingName,
         handleChange,
         nodeData,
-        isNode,
         styles,
         nameIsNotUnique
     }
@@ -697,6 +708,18 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                                     <Typography variant="body2" color="text.secondary">—</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ py: 0.75, textAlign: "right" }}>
+                                                    <Tooltip title="Select from map" placement="left">
+                                                        <IconButton
+                                                            onClick={() => {
+                                                                setSelectingPipelineConnectionFromMap(true);
+                                                                setPipelineConnectionSelectionIndex(idx);
+                                                            }}
+                                                            size="small"
+                                                            color={selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === idx ? "primary" : "default"}
+                                                        >
+                                                            <LocationSearchingIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                     <Tooltip title="remove node from pipeline" placement="left">
                                                         <IconButton onClick={() => handleRemoveConnection(idx)} size="small">
                                                             <DeleteOutlineIcon />
@@ -768,6 +791,21 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                         sx={{ marginBottom: 1, width: "100%", maxWidth: "300px", alignSelf: "center" }}
                     >
                         Add Connection
+                    </Button>
+                    <Button
+                        startIcon={<LocationSearchingIcon />}
+                        onClick={() => {
+                            if (selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === null) {
+                                setSelectingPipelineConnectionFromMap(false);
+                            } else {
+                                setSelectingPipelineConnectionFromMap(true);
+                            }
+                            setPipelineConnectionSelectionIndex(null);
+                        }}
+                        variant={selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === null ? 'contained' : 'outlined'}
+                        sx={{ marginBottom: 1, width: "100%", maxWidth: "300px", alignSelf: "center" }}
+                    >
+                        Select from map
                     </Button>
                 </Stack>
             )}
@@ -842,7 +880,6 @@ function NameField(props: NameFieldProps) {
         setEditingName,
         handleChange,
         nodeData,
-        isNode,
         styles,
         nameIsNotUnique
     } = props;
