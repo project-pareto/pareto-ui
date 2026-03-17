@@ -30,6 +30,7 @@ import { useMapValues } from '../../context/MapContext';
 const iconUrl = "http://maps.google.com/mapfiles/kml/"
 const PIPELINE_COLOR = "#A03232"
 const SELECTED_HIGHLIGHT_COLOR = "#FFD54F"
+const DRAFT_PIPELINE_COLOR = "#F28C28"
 const SHOW_PIPELINE_FLOW_ARROWS = true
 const FLOW_ARROW_ICON_SIZE = 18
 const FLOW_ARROW_TARGET_RATIO = 0.92
@@ -48,6 +49,7 @@ const SELECTED_POINT_ICON = divIcon({
 })
 
 type LatLngPair = [number, number];
+type SegmentPositions = [LatLngPair, LatLngPair];
 
 const hasFlowBetweenNodes = (nodes: any[] = [], fromIdx: number, toIdx: number): boolean => {
     const fromNode = nodes?.[fromIdx];
@@ -62,6 +64,34 @@ const toLatLngPair = (coords?: Array<number | string>): LatLngPair | null => {
     const lat = Number(coords[1]);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
     return [lat, lng];
+};
+
+const areLatLngPairsEqual = (left?: LatLngPair | null, right?: LatLngPair | null): boolean => {
+    if (!left || !right) return false;
+    return left[0] === right[0] && left[1] === right[1];
+};
+
+const areSegmentsEqual = (left?: SegmentPositions, right?: SegmentPositions): boolean => {
+    if (!left || !right) return false;
+    return areLatLngPairsEqual(left[0], right[0]) && areLatLngPairsEqual(left[1], right[1]);
+};
+
+const getLineSegments = (line?: any): SegmentPositions[] => {
+    const positions = formatCoordinatesFromNodes(line?.nodes || []).filter((coords: number[]) =>
+        Array.isArray(coords) &&
+        coords.length === 2 &&
+        Number.isFinite(coords[0]) &&
+        Number.isFinite(coords[1])
+    ) as LatLngPair[];
+
+    return positions.slice(0, -1).map((position, idx) => [position, positions[idx + 1]]);
+};
+
+const getDraftSegments = (draftLine?: any, savedLine?: any): SegmentPositions[] => {
+    const draftSegments = getLineSegments(draftLine);
+    const savedSegments = getLineSegments(savedLine);
+
+    return draftSegments.filter((segment, idx) => !areSegmentsEqual(segment, savedSegments[idx]));
 };
 
 const getFlowArrowIcon = (rotationDeg: number) => divIcon({
@@ -408,8 +438,24 @@ export default function NetworkMap(props: NetworkMapProps) {
                                     />
                                 ))}
                             </React.Fragment>
-                        ) 
-                        })}
+                        )
+                    })}
+                    {isPathSelected && getDraftSegments(
+                        selectedNodeData,
+                        selectedNodeIdx !== undefined ? lineData[selectedNodeIdx] : undefined
+                    ).map((segment, index) => (
+                        <Polyline
+                            key={`draft-segment:${selectedNodeData?.name || "pipeline"}:${index}`}
+                            pathOptions={{
+                                color: DRAFT_PIPELINE_COLOR,
+                                weight: 6,
+                                opacity: 0.95,
+                                bubblingMouseEvents: false,
+                                interactive: false,
+                            }}
+                            positions={segment}
+                        />
+                    ))}
                     </MapContainer>
                 }
             </Box>
