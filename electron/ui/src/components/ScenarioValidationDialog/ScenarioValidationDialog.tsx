@@ -6,24 +6,13 @@ import {
   DialogTitle,
   Button,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
   CircularProgress,
   Box,
   Divider
 } from '@mui/material';
+import type { ScenarioValidation } from '../../types';
 
-interface ValidationResult {
-  valid?: boolean;
-  missing_tables?: string[];
-  check_for_missing_tables?: boolean;
-  check_for_minimum_required_tables?: boolean;
-  tables_with_issues?: string[];
-  check_for_infeasibility?: boolean;
-  error?: string;
-  detail?: string;
-}
+interface ValidationResult extends ScenarioValidation {}
 
 interface ScenarioValidationDialogProps {
   open: boolean;
@@ -32,11 +21,12 @@ interface ScenarioValidationDialogProps {
   error: string | null;
   result: ValidationResult | null;
   onAdvance?: () => void;
+  onSelectTable?: (tableName: string) => void;
   onClose: () => void;
 }
 
 export default function ScenarioValidationDialog(props: ScenarioValidationDialogProps): JSX.Element {
-  const { open, loading, advancing = false, error, result, onAdvance, onClose } = props;
+  const { open, loading, advancing = false, error, result, onAdvance, onSelectTable, onClose } = props;
   const missingTables = result?.missing_tables ?? [];
   const tablesWithIssues = result?.tables_with_issues ?? [];
   const isValid = Boolean(result?.valid);
@@ -82,13 +72,19 @@ export default function ScenarioValidationDialog(props: ScenarioValidationDialog
       return <Typography variant="body2">No tables were returned.</Typography>;
     }
     return (
-      <List dense>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
         {tables.map((table) => (
-          <ListItem key={table} sx={{ py: 0 }}>
-            <ListItemText primary={table} />
-          </ListItem>
+          <Button
+            key={table}
+            variant="outlined"
+            size="small"
+            color="error"
+            onClick={() => onSelectTable?.(table)}
+          >
+            {table}
+          </Button>
         ))}
-      </List>
+      </Box>
     );
   };
 

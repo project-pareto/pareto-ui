@@ -151,6 +151,34 @@ class ScenarioHandler:
             return res[0]
         _log.info(f"no scenario found for id: {id}")
         return None
+
+    def _persist_scenario(self, scenario):
+        locked = self.LOCKED
+        while(locked):
+            time.sleep(0.5)
+            locked = self.LOCKED
+        self.LOCKED = True
+        query = tinydb.Query()
+        self._db.upsert(
+            {"scenario": scenario, 'id_': scenario['id'], 'version': self.VERSION},
+            ((query.id_ == scenario['id']) & (query.version == self.VERSION)),
+        )
+        self.LOCKED = False
+        self.retrieve_scenarios()
+        return scenario
+
+    def _save_validation_results(self, scenario, validation_payload):
+        scenario["validation"] = {
+            "valid": validation_payload.get("valid", False),
+            "missing_tables": validation_payload.get("missing_tables", []),
+            "tables_with_issues": validation_payload.get("tables_with_issues", []),
+            "check_for_missing_tables": validation_payload.get("check_for_missing_tables"),
+            "check_for_minimum_required_tables": validation_payload.get("check_for_minimum_required_tables"),
+            "check_for_infeasibility": validation_payload.get("check_for_infeasibility"),
+            "error": validation_payload.get("error"),
+        }
+        self._persist_scenario(scenario)
+        return validation_payload
     
     def update_scenario(self, updatedScenario):
         _log.info(f"Updating scenario list")
@@ -194,24 +222,7 @@ class ScenarioHandler:
         except:
             _log.error('unable to check and/or replace input diagram based on scenario name')
 
-        # check if db is in use. if so, wait til its done being used
-        locked = self.LOCKED
-        while(locked):
-            time.sleep(0.5)
-            locked = self.LOCKED
-        self.LOCKED = True
-        db_update = {"scenario": updatedScenario, 'id_': updatedScenario['id'], 'version': self.VERSION}
-        query = tinydb.Query()
-        self._db.upsert(
-            db_update,
-            ((query.id_ == updatedScenario['id']) & (query.version == self.VERSION)),
-        )
-
-        self.LOCKED = False
-
-        self.retrieve_scenarios()
-
-        return updatedScenario
+        return self._persist_scenario(updatedScenario)
     
     def upload_excelsheet(self, output_path, scenarioName, filename, map_data=None, scenario_id=None):
         if scenario_id is None:
@@ -274,6 +285,15 @@ class ScenarioHandler:
                     "scale_model": True
                 }, 
             "results": {"status": status, "data": {}},
+            "validation": {
+                "valid": None,
+                "missing_tables": [],
+                "tables_with_issues": [],
+                "check_for_missing_tables": None,
+                "check_for_minimum_required_tables": None,
+                "check_for_infeasibility": None,
+                "error": None,
+            },
             "override_values": 
                 {
                     "vb_y_overview_dict": {},
@@ -925,47 +945,52 @@ class ScenarioHandler:
                     missing_tables = missing_tables_split[1].split(", ")
                 else:
                     missing_tables = []
-                return {
+                return self._save_validation_results(scenario, {
                     "valid": False,
                     "error": err_message,
                     "missing_tables": missing_tables,
                     "check_for_missing_tables": False,
                     "check_for_minimum_required_tables": False,
                     "check_for_infeasibility": False,
-                }
+                    "tables_with_issues": [],
+                })
             else:
                 missing_tables = []
 
             ## step 2: use custom function to ensure minimum tables have values
             tables_with_issues = check_for_minimum_required_tables(scenario)
             if len(tables_with_issues) > 0:
-                return {
+                return self._save_validation_results(scenario, {
                     "valid": False,
                     "missing_tables": missing_tables,
                     "check_for_missing_tables": True,
                     "check_for_minimum_required_tables": False,
                     "tables_with_issues": tables_with_issues,
                     "check_for_infeasibility": False,
-                }
+                })
             
             ## step 3: create the model and check for infeasbility
             excel_path = f"{self.excelsheets_path}/{id}.xlsx"
             is_feasible = check_for_infeasibility(scenario=scenario, excel_path=excel_path)
-            return {
+            return self._save_validation_results(scenario, {
                     "valid": is_feasible,
                     "missing_tables": missing_tables,
                     "check_for_missing_tables": True,
                     "check_for_minimum_required_tables": True,
                     "tables_with_issues": tables_with_issues,
                     "check_for_infeasibility": is_feasible,
-                }
+                })
 
         except Exception as e:
             _log.exception("Error on validate_scenario")
-            return {
+            scenario = self.scenario_list.get(id)
+            payload = {
                 "valid": False,
                 "error": f"{e}"
             }
+            if scenario is not None:
+                return self._save_validation_results(scenario, payload)
+            return payload
     
     @time_it
     def validate_scenario(self, id):

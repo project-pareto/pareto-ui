@@ -212,6 +212,16 @@ export interface ScenarioResults {
   [k: string]: any;
 }
 
+export interface ScenarioValidation {
+  valid?: boolean | null;
+  missing_tables?: string[];
+  tables_with_issues?: string[];
+  check_for_missing_tables?: boolean | null;
+  check_for_minimum_required_tables?: boolean | null;
+  check_for_infeasibility?: boolean | null;
+  error?: string | null;
+}
+
 export interface OverrideEntry {
   /** Which underlying model variable/table this entry targets */
   variable: string;
@@ -254,6 +264,7 @@ export interface Scenario {
   data_input: ScenarioDataInput;
   optimization: ScenarioOptimization;
   results: ScenarioResults;
+  validation?: ScenarioValidation;
   
   override_values: ScenarioOverrides;
   optimized_override_values: ScenarioOverrides;
