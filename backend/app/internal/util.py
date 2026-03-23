@@ -496,7 +496,7 @@ def build_map_data_from_json(data_input):
     map_data = {
         **existing_map_data,
         "all_nodes": all_nodes,
-        "arcs": arcs,
+        # "arcs": arcs,
         "connections": connections,
         "defaultNode": existing_map_data.get("defaultNode", "NetworkNode"),
         "polygons": existing_map_data.get("polygons", {}),

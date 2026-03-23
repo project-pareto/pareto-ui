@@ -723,7 +723,7 @@ def WriteJSONToExcel(data, output_file_name, template_location = None):
         wb = load_workbook(excel_path, data_only=True)
 
         for table_key, updatedTable in data.items():
-            if table_key not in wb.sheetnames:
+            if table_key not in wb.sheetnames or table_key.lower() == "units":
                 _log.warning(f"unable to find sheet for {table_key}; skipping")
                 continue
 
