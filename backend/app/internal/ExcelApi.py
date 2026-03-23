@@ -128,6 +128,11 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         ws = wb[piped_arc]
         piped_arc_node1 = piped_arcs[piped_arc][0]
         piped_arc_node2 = piped_arcs[piped_arc][1]
+
+        # add header to first column
+        cellLocation = f'{get_column_letter(1)}{2}'
+        ws[cellLocation] = piped_arc_node1
+
         column = 1
         row = 3
         row_nodes = []
