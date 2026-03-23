@@ -63,7 +63,6 @@ export default function InputSummary(props: InputSummaryProps) {
             fontWeight: "bold",
             paddingTop: 0,
             marginTop: 0,
-            // paddingBottom: 20
         },
     }
 
@@ -353,8 +352,8 @@ export default function InputSummary(props: InputSummaryProps) {
                     map_data={props.scenario.data_input.map_data}
                     showMapTypeToggle={false}
                     interactive={false}
-                    width={100}  //%
-                    height={50} //vh
+                    width={100}
+                    height={50}
                 />
                     <p style={styles.viewFullMapText} onClick={() => props.handleSetCategory('Network Diagram')}>
                         View Full Network Map
@@ -393,5 +392,3 @@ export default function InputSummary(props: InputSummaryProps) {
   );
 
 }
-
-
