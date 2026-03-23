@@ -314,7 +314,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                         url: `https://{s}.google.com/vt/lyrs=${googleMapType}&hl=en&x={x}&y={y}&z={z}`,
                         subdomains: ['mt1','mt2','mt3']
                     } as any)} />
-                    {interactive && <MapClickHandler onClick={handleMapClick} />}
+                    <MapClickHandler onClick={handleMapClick} />
         
                     {nodeData.map((value, index) => {
                         const markerPosition: [number, number] = [
@@ -343,18 +343,12 @@ export default function NetworkMap(props: NetworkMapProps) {
                                 <Marker
                                     position={markerPosition}                        
                                     {...({ icon: NetworkNodeTypes[value.nodeType]?.icon } as any)}
-                                    {...(interactive ? {
-                                        eventHandlers: {
-                                            click: (e: any) => {
-                                                e.originalEvent.stopPropagation();
-                                                handleClickNode(value, index);
-                                            }
+                                    eventHandlers={{
+                                        click: (e: any) => {
+                                            e.originalEvent.stopPropagation();
+                                            handleClickNode(value, index);
                                         }
-                                    } : {
-                                        interactive: false,
-                                        bubblingMouseEvents: false,
-                                        keyboard: false,
-                                    })}
+                                    }}
                                     ref={(el) => {
                                         const markerId = `node:${index}`
                                         if (el) {
@@ -411,17 +405,14 @@ export default function NetworkMap(props: NetworkMapProps) {
                                     pathOptions={{ 
                                         color: PIPELINE_COLOR,
                                         weight: 5,
-                                        bubblingMouseEvents: !interactive ? false : undefined,
-                                        interactive,
+                                        bubblingMouseEvents: false 
                                     }}
                                     positions={linePositions}
-                                    {...(interactive ? {
-                                        eventHandlers: {
-                                            click: () => {
-                                                handleClickPipeline(value, index);
-                                            }
+                                    eventHandlers={{
+                                        click: (e) => {
+                                            handleClickPipeline(value, index);
                                         }
-                                    } : {})}
+                                    }}
                                     ref={(el) => {
                                         const markerId = `line:${index}`
                                         if (el) {
