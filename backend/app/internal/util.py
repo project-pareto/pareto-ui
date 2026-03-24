@@ -143,7 +143,7 @@ def _coerce_numeric_or_zero(value):
         return 0.0
 
 
-def _forecast_table_has_valid_rows(table_data):
+def _forecast_table_has_valid_rows(table_data, allow_zero=False):
     row_count = _get_table_row_count(table_data)
     if row_count == 0:
         return False
@@ -164,17 +164,25 @@ def _forecast_table_has_valid_rows(table_data):
         return False
 
     for row_idx in range(row_count):
-        row_total = sum(
-            _coerce_numeric_or_zero(table_data.get(column, [])[row_idx] if row_idx < len(table_data.get(column, [])) else 0)
-            for column in period_columns
-        )
-        if row_total <= 0:
-            return False
+        if allow_zero:
+            for column in period_columns:
+                column_values = table_data.get(column, [])
+                value = column_values[row_idx] if row_idx < len(column_values) else None
+                numeric_value = _to_float(value)
+                if numeric_value is None or numeric_value < 0:
+                    return False
+        else:
+            row_total = sum(
+                _coerce_numeric_or_zero(table_data.get(column, [])[row_idx] if row_idx < len(table_data.get(column, [])) else 0)
+                for column in period_columns
+            )
+            if row_total <= 0:
+                return False
 
     return True
 
 
-def _value_table_has_valid_rows(table_data):
+def _value_table_has_valid_rows(table_data, allow_zero=False):
     row_count = _get_table_row_count(table_data)
     if row_count == 0:
         return False
@@ -184,8 +192,14 @@ def _value_table_has_valid_rows(table_data):
         return False
 
     for row_idx in range(row_count):
-        value = values[row_idx] if row_idx < len(values) else 0
-        if _coerce_numeric_or_zero(value) <= 0:
+        value = values[row_idx] if row_idx < len(values) else None
+        numeric_value = _to_float(value)
+        if numeric_value is None:
+            return False
+        if allow_zero:
+            if numeric_value < 0:
+                return False
+        elif numeric_value <= 0:
             return False
 
     return True
@@ -676,43 +690,49 @@ def check_for_minimum_required_tables(scenario):
     
     ## The following lists of tables must have values > 0 for each row in each table
     forecast_tables = [
-        "CompletionsDemand",
-        "PadRates",
-        "FlowbackRates",
-        "ReuseMinimum"
+        {"table_name": "CompletionsDemand", "allow_zero": False},
+        {"table_name": "PadRates", "allow_zero": False},
+        {"table_name": "FlowbackRates", "allow_zero": False},
+        {"table_name": "ReuseMinimum", "allow_zero": True},
     ]
 
     capacity_tables = [
-        "InitialStorageCapacity",
-        "InitialDisposalCapacity",
-        "CompletionsPadStorage",
+        {"table_name": "InitialDisposalCapacity", "allow_zero": False},
         # "InitialTreatmentCapacity" TODO: this one is different
     ]
+    capacity_tables.extend([
+        {"table_name": "InitialStorageCapacity", "allow_zero": True},
+        {"table_name": "CompletionsPadStorage", "allow_zero": True},
+    ])
 
     operational_cost_tables = [
-        "DisposalOperationalCost",
-        "ReuseOperationalCost",
+        {"table_name": "DisposalOperationalCost", "allow_zero": False},
+        {"table_name": "ReuseOperationalCost", "allow_zero": True},
     ]
 
     beneficial_reuse_tables = [
-        "BeneficialReuseCost",
-        "BeneficialReuseCredit",
+        {"table_name": "BeneficialReuseCost", "allow_zero": False},
+        {"table_name": "BeneficialReuseCredit", "allow_zero": False},
     ]
 
-    for table_name in forecast_tables:
-        if not _forecast_table_has_valid_rows(df_parameters.get(table_name)):
+    for table_config in forecast_tables:
+        table_name = table_config["table_name"]
+        if not _forecast_table_has_valid_rows(df_parameters.get(table_name), allow_zero=table_config["allow_zero"]):
             missing_tables.append(table_name)
 
-    for table_name in capacity_tables:
-        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+    for table_config in capacity_tables:
+        table_name = table_config["table_name"]
+        if not _value_table_has_valid_rows(df_parameters.get(table_name), allow_zero=table_config["allow_zero"]):
             missing_tables.append(table_name)
 
-    for table_name in operational_cost_tables:
-        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+    for table_config in operational_cost_tables:
+        table_name = table_config["table_name"]
+        if not _value_table_has_valid_rows(df_parameters.get(table_name), allow_zero=table_config["allow_zero"]):
             missing_tables.append(table_name)
 
-    for table_name in beneficial_reuse_tables:
-        if not _value_table_has_valid_rows(df_parameters.get(table_name)):
+    for table_config in beneficial_reuse_tables:
+        table_name = table_config["table_name"]
+        if not _value_table_has_valid_rows(df_parameters.get(table_name), allow_zero=table_config["allow_zero"]):
             missing_tables.append(table_name)
     
     return missing_tables
