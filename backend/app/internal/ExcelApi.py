@@ -361,6 +361,48 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 column_lookup[node] = column
                 column+=1
 
+        ## After filling the initial pipeline table, old row/column headers from
+        ## prior workbook contents can remain when the current dataset shrinks.
+        ## Clear those antiquated headers and their corresponding matrix cells.
+        row = len(row_lookup) + 3
+        _print(f"initial_pipeline_tab {initial_pipeline_tab} checking for antiquated rows, columns")
+
+        starting_row_index = row
+        cellLocation = f'{get_column_letter(1)}{row}'
+        potential_antiquated_row_header = ws[cellLocation].value
+        while potential_antiquated_row_header is not None and row < 200:
+            ws[cellLocation] = None
+            row += 1
+            cellLocation = f'{get_column_letter(1)}{row}'
+            potential_antiquated_row_header = ws[cellLocation].value
+        ending_row_index = row
+
+        starting_column_index = column
+        cellLocation = f'{get_column_letter(column)}{2}'
+        potential_antiquated_column_header = ws[cellLocation].value
+        while potential_antiquated_column_header is not None and column < 200:
+            ws[cellLocation] = None
+            column += 1
+            cellLocation = f'{get_column_letter(column)}{2}'
+            potential_antiquated_column_header = ws[cellLocation].value
+        ending_column_index = column
+
+        if ending_row_index > starting_row_index:
+            _print(f"{initial_pipeline_tab} found antiquated rows from {starting_row_index} through {ending_row_index}")
+            for row_ind in range(starting_row_index, ending_row_index):
+                for column_ind in range(2, ending_column_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
+
+        if ending_column_index > starting_column_index:
+            _print(f"{initial_pipeline_tab} found antiquated columns from {starting_column_index} through {ending_column_index}")
+            for column_ind in range(starting_column_index, ending_column_index):
+                for row_ind in range(3, ending_row_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
+
         # populate matrix values from connection metadata for relevant tabs
         metadata_key = None
         if initial_pipeline_tab == "InitialPipelineCapacity":
