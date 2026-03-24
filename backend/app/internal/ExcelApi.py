@@ -122,6 +122,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "SCA": ["StorageSites", "CompletionsPads"],
         "RNA": ["TreatmentSites", "NetworkNodes"],
         "ROA": ["TreatmentSites", "ReuseOptions"],
+        "RKA": ["TreatmentSites", "SWDSites"],
     }
 
     for piped_arc in piped_arcs: ## assume all connections on map are for pipes
@@ -225,12 +226,18 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "RST": ["TreatmentSites", "StorageSites"],
         "ROT": ["TreatmentSites", "ReuseOptions"],
         "SOT": ["StorageSites", "ReuseOptions"],
+        "RKT": ["TreatmentSites", "SWDSites"],
     }
 
     for trucked_arc in trucked_arcs:
         ws = wb[trucked_arc]
         trucked_arc_node1 = trucked_arcs[trucked_arc][0]
         trucked_arc_node2 = trucked_arcs[trucked_arc][1]
+
+        # add header to first column
+        cellLocation = f'{get_column_letter(1)}{2}'
+        ws[cellLocation] = trucked_arc_node1
+
         column = 1
         row = 3
         if len(data.get(trucked_arc_node1,[])) > 0 and len(data.get(trucked_arc_node2,[])) > 0:
