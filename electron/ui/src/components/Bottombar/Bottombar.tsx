@@ -25,6 +25,7 @@ export default function Bottombar(props) {
       handleUpdateExcel,
       setInputDataEdited,
       handleSelection,
+      handleSetCategory,
       syncScenarioData,
       category,
       inputDataEdited,
@@ -201,6 +202,7 @@ export default function Bottombar(props) {
           .then((data) => {
             if (data) {
               setValidationResult(data)
+              syncScenarioData()
             }
             setValidationLoading(false)
           })
@@ -236,6 +238,11 @@ export default function Bottombar(props) {
           .finally(() => {
             setValidationAdvancing(false)
           })
+      }
+
+      const handleSelectValidationTable = (tableName: string) => {
+        handleSetCategory?.(tableName)
+        setOpenValidationDialog(false)
       }
 
       const validateScenarioButton = <Button
@@ -380,6 +387,7 @@ export default function Bottombar(props) {
         error={validationError}
         result={validationResult}
         onAdvance={handleAdvanceToOptimizationSetup}
+        onSelectTable={handleSelectValidationTable}
         onClose={handleCloseValidationDialog}
       />
     </Box>

@@ -246,7 +246,7 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters, ove
         scenario_handler.update_scenario(scenario)
         scenario_handler.check_for_diagram(id)
     except Exception as e:
-        _log.error(f"unable to run strategic model: {e}")
+        _log.exception(f"unable to run strategic model: {e}")
         time.sleep(2)
         scenario = scenario_handler.get_scenario(int(id))
         results = {"data": {}, "status": "failure", "error": str(e)}

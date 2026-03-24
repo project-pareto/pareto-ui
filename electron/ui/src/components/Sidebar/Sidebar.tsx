@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -31,7 +31,7 @@ export default function Sidebar(props: SidebarProps) {
     showNetworkPipeline,
   } = useMapValues();
 
-  const { id, data_input, optimization, results, optimized_override_values} = scenario || {};
+  const { id, data_input, optimization, results, optimized_override_values, validation } = scenario || {};
 
   const { df_parameters } = data_input || {};
   const { PipelineDiameterValues, TreatmentCapacityIncrements } = df_parameters || {};
@@ -49,6 +49,11 @@ export default function Sidebar(props: SidebarProps) {
   const [ openStatic, setOpenStatic ] = useState<boolean>(false)
   const [ openResultsTables, setOpenResultsTables ] = useState<boolean>(false)
   const [ overrideList, setOverrideList ] = useState<string[]>([])
+  const validationIssueTables = useMemo(() => {
+    const missingTables = validation?.missing_tables || [];
+    const tablesWithIssues = validation?.tables_with_issues || [];
+    return new Set<string>([...missingTables, ...tablesWithIssues]);
+  }, [validation]);
 
   useEffect(() => {
     const tempOverrideList: string[] = []
@@ -119,6 +124,31 @@ export default function Sidebar(props: SidebarProps) {
       marginTop: 1,
       marginBottom: 1
     },
+    validationIssue: {
+      backgroundColor: "rgba(211, 47, 47, 0.12)",
+      color: "#8f1d1d",
+      cursor: "pointer",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1
+    },
+    validationIssueSelected: {
+      cursor: "pointer",
+      color: "#8f1d1d",
+      backgroundColor: "rgba(211, 47, 47, 0.18)",
+      padding: 10,
+      marginLeft: "10px",
+      marginRight: "10px",
+      borderRadius: "5px",
+      textAlign: "left",
+      marginTop: 1,
+      marginBottom: 1,
+      fontWeight: "bold"
+    },
   }
 
   const handleSaveModal = () => {
@@ -147,9 +177,11 @@ export default function Sidebar(props: SidebarProps) {
 
   const getStyle = (k: string) => {
     try {
-      if(String(category) === k) return styles.selected
-      else if (overrideList.includes(k)) return styles.override
-      else return styles.unselected
+      if (String(category) === k && validationIssueTables.has(k)) return styles.validationIssueSelected
+      if (String(category) === k) return styles.selected
+      if (validationIssueTables.has(k)) return styles.validationIssue
+      if (overrideList.includes(k)) return styles.override
+      return styles.unselected
     }
     catch(e) {
       return styles.unselected

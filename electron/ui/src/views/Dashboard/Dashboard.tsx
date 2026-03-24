@@ -193,6 +193,7 @@ export default function Dashboard() {
     </Grid>
     <Bottombar 
       handleSelection={handleSetSection} 
+      handleSetCategory={handleSetCategory}
       section={section} 
       backgroundTasks={backgroundTasks} 
       scenario={scenario} 

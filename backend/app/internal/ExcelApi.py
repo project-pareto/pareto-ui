@@ -122,17 +122,23 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "SCA": ["StorageSites", "CompletionsPads"],
         "RNA": ["TreatmentSites", "NetworkNodes"],
         "ROA": ["TreatmentSites", "ReuseOptions"],
+        "RKA": ["TreatmentSites", "SWDSites"],
     }
 
     for piped_arc in piped_arcs: ## assume all connections on map are for pipes
         ws = wb[piped_arc]
         piped_arc_node1 = piped_arcs[piped_arc][0]
         piped_arc_node2 = piped_arcs[piped_arc][1]
+
+        # add header to first column
+        cellLocation = f'{get_column_letter(1)}{2}'
+        ws[cellLocation] = piped_arc_node1
+
         column = 1
         row = 3
         row_nodes = []
         if len(data.get(piped_arc_node1, [])) > 0 and len(data.get(piped_arc_node2, [])) > 0:
-            _print(f'piped_arc {piped_arc}: adding {piped_arc_node1}')
+            # _print(f'piped_arc {piped_arc}: adding {piped_arc_node1}')
             for node in data[piped_arc_node1]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -140,7 +146,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 row+=1
             column = 2
             row = 2
-            _print(f'piped_arc {piped_arc}: adding {piped_arc_node2}')
+            # _print(f'piped_arc {piped_arc}: adding {piped_arc_node2}')
             for node in data[piped_arc_node2]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -161,6 +167,55 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             cellLocation = f'{get_column_letter(1)}{2}'
             ws[cellLocation] = None
 
+        ## After filling the arcs into the Excel table, it is possible that there
+        ## are remnants from previous data that we want to remove. 
+        ## For example, if we previously had 10 network nodes, and 
+        ## we removed one, we will now fill in the first 9 columns (or rows, depending on the table)
+        ## In this case, that 10th row/column needs to be cleared out.
+        row = len(data.get(piped_arc_node1, [])) + 3
+        
+        _print(f"piped_arc {piped_arc} checking for antiquated rows, columns")
+
+        starting_row_index = row
+
+        cellLocation = f'{get_column_letter(1)}{row}'
+        potential_antiquated_row_header = ws[cellLocation].value
+        while potential_antiquated_row_header is not None and row < 50:
+            ws[cellLocation] = None
+            row += 1
+            cellLocation = f'{get_column_letter(1)}{row}'
+            potential_antiquated_row_header = ws[cellLocation].value
+        ending_row_index = row
+
+
+        starting_column_index = column
+        cellLocation = f'{get_column_letter(column)}{2}'
+        potential_antiquated_column_header = ws[cellLocation].value
+        while potential_antiquated_column_header is not None and column < 50:
+            ws[cellLocation] = None
+            column += 1
+            cellLocation = f'{get_column_letter(column)}{2}'
+            potential_antiquated_column_header = ws[cellLocation].value
+        ending_column_index = column
+        
+
+        if ending_row_index > starting_row_index:
+            _print(f"{piped_arc} found antiquated rows from {starting_row_index} through {ending_row_index}")
+            for row_ind in range(starting_row_index, ending_row_index):
+                for column_ind in range(2, ending_column_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
+
+        if ending_column_index > starting_column_index:
+            _print(f"{piped_arc} found antiquated columns from {starting_column_index} through {ending_column_index}")
+            for column_ind in range(starting_column_index, ending_column_index):
+                for row_ind in range(3, ending_row_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
+
+
     trucked_arcs = {
         "PCT": ["ProductionPads", "CompletionsPads"],
         "FCT": ["ExternalWaterSources", "CompletionsPads"],
@@ -171,12 +226,18 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         "RST": ["TreatmentSites", "StorageSites"],
         "ROT": ["TreatmentSites", "ReuseOptions"],
         "SOT": ["StorageSites", "ReuseOptions"],
+        "RKT": ["TreatmentSites", "SWDSites"],
     }
 
     for trucked_arc in trucked_arcs:
         ws = wb[trucked_arc]
         trucked_arc_node1 = trucked_arcs[trucked_arc][0]
         trucked_arc_node2 = trucked_arcs[trucked_arc][1]
+
+        # add header to first column
+        cellLocation = f'{get_column_letter(1)}{2}'
+        ws[cellLocation] = trucked_arc_node1
+
         column = 1
         row = 3
         if len(data.get(trucked_arc_node1,[])) > 0 and len(data.get(trucked_arc_node2,[])) > 0:
@@ -299,6 +360,48 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[cellLocation] = node
                 column_lookup[node] = column
                 column+=1
+
+        ## After filling the initial pipeline table, old row/column headers from
+        ## prior workbook contents can remain when the current dataset shrinks.
+        ## Clear those antiquated headers and their corresponding matrix cells.
+        row = len(row_lookup) + 3
+        _print(f"initial_pipeline_tab {initial_pipeline_tab} checking for antiquated rows, columns")
+
+        starting_row_index = row
+        cellLocation = f'{get_column_letter(1)}{row}'
+        potential_antiquated_row_header = ws[cellLocation].value
+        while potential_antiquated_row_header is not None and row < 200:
+            ws[cellLocation] = None
+            row += 1
+            cellLocation = f'{get_column_letter(1)}{row}'
+            potential_antiquated_row_header = ws[cellLocation].value
+        ending_row_index = row
+
+        starting_column_index = column
+        cellLocation = f'{get_column_letter(column)}{2}'
+        potential_antiquated_column_header = ws[cellLocation].value
+        while potential_antiquated_column_header is not None and column < 200:
+            ws[cellLocation] = None
+            column += 1
+            cellLocation = f'{get_column_letter(column)}{2}'
+            potential_antiquated_column_header = ws[cellLocation].value
+        ending_column_index = column
+
+        if ending_row_index > starting_row_index:
+            _print(f"{initial_pipeline_tab} found antiquated rows from {starting_row_index} through {ending_row_index}")
+            for row_ind in range(starting_row_index, ending_row_index):
+                for column_ind in range(2, ending_column_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
+
+        if ending_column_index > starting_column_index:
+            _print(f"{initial_pipeline_tab} found antiquated columns from {starting_column_index} through {ending_column_index}")
+            for column_ind in range(starting_column_index, ending_column_index):
+                for row_ind in range(3, ending_row_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
 
         # populate matrix values from connection metadata for relevant tabs
         metadata_key = None
@@ -723,7 +826,7 @@ def WriteJSONToExcel(data, output_file_name, template_location = None):
         wb = load_workbook(excel_path, data_only=True)
 
         for table_key, updatedTable in data.items():
-            if table_key not in wb.sheetnames:
+            if table_key not in wb.sheetnames or table_key.lower() == "units":
                 _log.warning(f"unable to find sheet for {table_key}; skipping")
                 continue
 
