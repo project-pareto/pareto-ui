@@ -137,7 +137,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         row = 3
         row_nodes = []
         if len(data.get(piped_arc_node1, [])) > 0 and len(data.get(piped_arc_node2, [])) > 0:
-            _print(f'piped_arc {piped_arc}: adding {piped_arc_node1}')
+            # _print(f'piped_arc {piped_arc}: adding {piped_arc_node1}')
             for node in data[piped_arc_node1]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -145,7 +145,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 row+=1
             column = 2
             row = 2
-            _print(f'piped_arc {piped_arc}: adding {piped_arc_node2}')
+            # _print(f'piped_arc {piped_arc}: adding {piped_arc_node2}')
             for node in data[piped_arc_node2]:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -165,6 +165,55 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             _print(f'removing header for {piped_arc}')
             cellLocation = f'{get_column_letter(1)}{2}'
             ws[cellLocation] = None
+
+        ## After filling the arcs into the Excel table, it is possible that there
+        ## are remnants from previous data that we want to remove. 
+        ## For example, if we previously had 10 network nodes, and 
+        ## we removed one, we will now fill in the first 9 columns (or rows, depending on the table)
+        ## In this case, that 10th row/column needs to be cleared out.
+        row = len(data.get(piped_arc_node1, [])) + 3
+        
+        _print(f"piped_arc {piped_arc} checking for antiquated rows, columns")
+
+        starting_row_index = row
+
+        cellLocation = f'{get_column_letter(1)}{row}'
+        potential_antiquated_row_header = ws[cellLocation].value
+        while potential_antiquated_row_header is not None and row < 50:
+            ws[cellLocation] = None
+            row += 1
+            cellLocation = f'{get_column_letter(1)}{row}'
+            potential_antiquated_row_header = ws[cellLocation].value
+        ending_row_index = row
+
+
+        starting_column_index = column
+        cellLocation = f'{get_column_letter(column)}{2}'
+        potential_antiquated_column_header = ws[cellLocation].value
+        while potential_antiquated_column_header is not None and column < 50:
+            ws[cellLocation] = None
+            column += 1
+            cellLocation = f'{get_column_letter(column)}{2}'
+            potential_antiquated_column_header = ws[cellLocation].value
+        ending_column_index = column
+        
+
+        if ending_row_index > starting_row_index:
+            _print(f"{piped_arc} found antiquated rows from {starting_row_index} through {ending_row_index}")
+            for row_ind in range(starting_row_index, ending_row_index):
+                for column_ind in range(2, ending_column_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
+
+        if ending_column_index > starting_column_index:
+            _print(f"{piped_arc} found antiquated columns from {starting_column_index} through {ending_column_index}")
+            for column_ind in range(starting_column_index, ending_column_index):
+                for row_ind in range(3, ending_row_index):
+                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
+                    _print(f"clearing ({column_ind}:{row_ind})")
+                    ws[cellLocation] = None
+
 
     trucked_arcs = {
         "PCT": ["ProductionPads", "CompletionsPads"],
