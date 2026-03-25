@@ -387,7 +387,7 @@ def build_map_data_from_json(data_input):
             node_data = {
                 **existing_node,
                 "name": node_name,
-                "node_type": node_type,
+                "node_type": existing_node.get("nodeType", node_type),
                 "nodeType": existing_node.get("nodeType", node_type),
                 "coordinates": coords,
             }
@@ -728,6 +728,10 @@ def check_for_minimum_required_tables(scenario):
         {"table_name": "BeneficialReuseCost", "allow_zero": False},
         {"table_name": "BeneficialReuseCredit", "allow_zero": False},
     ]
+
+    ## TODO: Trucking Time, Trucking Hours, External Water Sourcing
+    ## - do we need these?
+    ## FCT, CKT, also seem to be necessary
 
     for table_config in forecast_tables:
         table_name = table_config["table_name"]
