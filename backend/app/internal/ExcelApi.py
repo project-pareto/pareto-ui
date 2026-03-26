@@ -78,6 +78,35 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     ## step 2: open excel workbook
     wb = load_workbook(excel_path, data_only=True)
 
+    def _clear_cells(ws, row_start, row_end, col_start, col_end):
+        for row_ind in range(row_start, row_end + 1):
+            for column_ind in range(col_start, col_end + 1):
+                ws[f'{get_column_letter(column_ind)}{row_ind}'] = None
+
+    def _clear_antiquated_rows(ws, start_row, key_columns, max_row=200, clear_from_col=1, clear_to_col=None, label="worksheet"):
+        row = start_row
+        clear_to_col = clear_to_col or ws.max_column
+        while row <= max_row and any(ws[f'{get_column_letter(col)}{row}'].value is not None for col in key_columns):
+            row += 1
+
+        ending_row_index = row - 1
+        if ending_row_index >= start_row:
+            _print(f"{label} found antiquated rows from {start_row} through {ending_row_index}")
+            _clear_cells(ws, start_row, ending_row_index, clear_from_col, clear_to_col)
+        return row
+
+    def _clear_antiquated_columns(ws, start_column, key_row, max_column=200, clear_from_row=1, clear_to_row=None, label="worksheet"):
+        column = start_column
+        clear_to_row = clear_to_row or ws.max_row
+        while column <= max_column and ws[f'{get_column_letter(column)}{key_row}'].value is not None:
+            column += 1
+
+        ending_column_index = column - 1
+        if ending_column_index >= start_column:
+            _print(f"{label} found antiquated columns from {start_column} through {ending_column_index}")
+            _clear_cells(ws, clear_from_row, clear_to_row, start_column, ending_column_index)
+        return column
+
     ## step 2.5: add TreatmentTechnologies table
     ws = wb["TreatmentTechnologies"]
     row = 2
@@ -102,6 +131,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             cellLocation = f'{get_column_letter(column)}{row}'
             ws[cellLocation] = node
             row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=200, clear_from_col=1, clear_to_col=1, label=node_key)
 
     ## step 4: add arcs
     piped_arcs = {
@@ -259,6 +289,26 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             cellLocation = f'{get_column_letter(1)}{2}'
             ws[cellLocation] = None
 
+        row = len(data.get(trucked_arc_node1, [])) + 3
+        _clear_antiquated_rows(
+            ws,
+            row,
+            [1],
+            max_row=200,
+            clear_from_col=1,
+            clear_to_col=max(2, column - 1),
+            label=trucked_arc,
+        )
+        _clear_antiquated_columns(
+            ws,
+            column,
+            2,
+            max_column=200,
+            clear_from_row=2,
+            clear_to_row=max(3, row - 1),
+            label=trucked_arc,
+        )
+
     ## step 5: add elevations:
     elevation_nodes = [
         'ProductionPads', 'CompletionsPads', 'SWDSites', 'ExternalWaterSources', 
@@ -284,6 +334,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 _print(f'unable to convert elevation to float. adding it as is: {elevation}')
                 ws[valueCellLocation] = elevation
             row+=1
+    _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=2, label="Elevation")
 
     ## step 6: add forecasts (with empty values)
     forecast_tabs = {
@@ -307,6 +358,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
                 row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=ws.max_column, label=forecast_tab_key)
 
     ## step 7: add initial pipelines, capacities, ...
     initial_pipeline_tabs = {
@@ -368,40 +420,28 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         _print(f"initial_pipeline_tab {initial_pipeline_tab} checking for antiquated rows, columns")
 
         starting_row_index = row
-        cellLocation = f'{get_column_letter(1)}{row}'
-        potential_antiquated_row_header = ws[cellLocation].value
-        while potential_antiquated_row_header is not None and row < 200:
-            ws[cellLocation] = None
-            row += 1
-            cellLocation = f'{get_column_letter(1)}{row}'
-            potential_antiquated_row_header = ws[cellLocation].value
+        row = _clear_antiquated_rows(
+            ws,
+            row,
+            [1],
+            max_row=200,
+            clear_from_col=1,
+            clear_to_col=max(2, column - 1),
+            label=initial_pipeline_tab,
+        )
         ending_row_index = row
 
         starting_column_index = column
-        cellLocation = f'{get_column_letter(column)}{2}'
-        potential_antiquated_column_header = ws[cellLocation].value
-        while potential_antiquated_column_header is not None and column < 200:
-            ws[cellLocation] = None
-            column += 1
-            cellLocation = f'{get_column_letter(column)}{2}'
-            potential_antiquated_column_header = ws[cellLocation].value
+        column = _clear_antiquated_columns(
+            ws,
+            column,
+            2,
+            max_column=200,
+            clear_from_row=2,
+            clear_to_row=max(3, row - 1),
+            label=initial_pipeline_tab,
+        )
         ending_column_index = column
-
-        if ending_row_index > starting_row_index:
-            _print(f"{initial_pipeline_tab} found antiquated rows from {starting_row_index} through {ending_row_index}")
-            for row_ind in range(starting_row_index, ending_row_index):
-                for column_ind in range(2, ending_column_index):
-                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
-                    _print(f"clearing ({column_ind}:{row_ind})")
-                    ws[cellLocation] = None
-
-        if ending_column_index > starting_column_index:
-            _print(f"{initial_pipeline_tab} found antiquated columns from {starting_column_index} through {ending_column_index}")
-            for column_ind in range(starting_column_index, ending_column_index):
-                for row_ind in range(3, ending_row_index):
-                    cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
-                    _print(f"clearing ({column_ind}:{row_ind})")
-                    ws[cellLocation] = None
 
         # populate matrix values from connection metadata for relevant tabs
         metadata_key = None
@@ -415,6 +455,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             
 
         if metadata_key is not None:
+            _print(f"metadata_key: {metadata_key}")
             connection_metadata = data.get("connections", {}).get("connection_metadata", {})
             for connection_key, connection_values in connection_metadata.items():
                 try:
@@ -456,6 +497,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             cellValueLocation = f'{get_column_letter(column+1)}{row}'
             ws[cellValueLocation] = value
             row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=2, label=initial_capacity_tab)
 
     single_value_tabs = {
         "DisposalOperationalCost": ["SWDSites"], ## AUTOFILL 0.35?
@@ -484,6 +526,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 cellValueLocation = f'{get_column_letter(column+1)}{row}'
                 ws[cellValueLocation] = value
                 row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=2, label=single_value_tab)
 
     water_quality_tabs = { ## AUTOFILL all these to ~150,000.00?
         "PadWaterQuality": ["ProductionPads", "CompletionsPads"],
@@ -508,6 +551,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[cellValueLocation] = value
                 # _print(f"writing to {water_quality_tab} cellLocation {cellValueLocation}: {value}")
                 row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=2, label=water_quality_tab)
 
 
     ## step 8: add tabs that rely on TreatmentTechnologies, Capacities, Diameters
@@ -533,6 +577,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             cellLocation = f'{get_column_letter(1)}{row}'
             ws[cellLocation] = node
             row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=column - 1, label=expansion_tab)
     
     capacity_increments_tabs = {
         # "DisposalCapacityIncrements": {"default": "InjectionCapacities"},
@@ -554,6 +599,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[keyCellLocation] = each
                 ws[valueCellLocation] = default_values[each][capacity_increments_tab]
                 row+=1
+            _clear_antiquated_rows(ws, row, [1], max_row=200, clear_from_col=1, clear_to_col=2, label=capacity_increments_tab)
         except Exception as e:
             _print(f'unable to add {capacity_increments_tab}: {e}')
 
@@ -581,6 +627,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[valueCellLocation] = default_values[each][capacity_increments_tab]
                 column+=1
             row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=200, clear_from_col=1, clear_to_col=column - 1, label=capacity_increments_tab)
 
     disposal_capacity_tab = "DisposalCapacityIncrements"
     ws = wb[disposal_capacity_tab]
@@ -606,6 +653,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             column += 1
 
         row += 1
+    _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=column - 1, label=disposal_capacity_tab)
 
 
 
@@ -658,6 +706,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[capacityCellLocation] = capacity
 
             row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=column - 1, label=tab)
     
     tabs = {
         "TreatmentOperationalCost": "TreatmentSites",
@@ -680,6 +729,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[technologyCellLocation] = technology
                 ws[valueCellLocation] = value
                 row+=1
+        _clear_antiquated_rows(ws, row, [1, 2], max_row=1000, clear_from_col=1, clear_to_col=3, label=tab)
 
     tabs = {
         "TreatmentExpansionLeadTime": "TreatmentSites"
@@ -709,6 +759,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                     ws[cellLocation] = value
                     i+=1
                 row+=1
+        _clear_antiquated_rows(ws, row, [1, 2], max_row=1000, clear_from_col=1, clear_to_col=column - 1, label=tab)
 
     tabs = {
         "TreatmentExpansionCost": {"node": "TreatmentSites", "default": "TreatmentTechnologies"}
@@ -740,6 +791,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                     ws[valueCellLocation] = value
                     i+=1
                 row+=1
+        _clear_antiquated_rows(ws, row, [1, 2], max_row=1000, clear_from_col=1, clear_to_col=column - 1, label=tab)
 
 
     tabs = {
@@ -766,6 +818,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ws[locationCellLocation] = location
                 ws[destinationCellLocation] = destination
                 row+=1
+        _clear_antiquated_rows(ws, row, [1, 2], max_row=1000, clear_from_col=1, clear_to_col=column - 1, label=tab)
 
     disposal_tabs = {
         "SWDDeep": "SWDSites",
@@ -792,6 +845,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             cellValueLocation = f'{get_column_letter(column+1)}{row}'
             ws[cellValueLocation] = value
             row+=1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=2, label=disposal_tab)
 
     ## final step: Save and close
     wb.save(excel_path)
