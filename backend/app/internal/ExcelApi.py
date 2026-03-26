@@ -193,9 +193,9 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                     ind+=1
                 column+=1
         else:
-            _print(f'removing header for {piped_arc}')
-            cellLocation = f'{get_column_letter(1)}{2}'
-            ws[cellLocation] = None
+            _print(f'keeping header and clearing data region for {piped_arc}')
+            row = 3
+            column = 2
 
         ## After filling the arcs into the Excel table, it is possible that there
         ## are remnants from previous data that we want to remove. 
@@ -285,9 +285,9 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 ind = 3
                 column+=1
         else:
-            _print(f'removing header for {trucked_arc}')
-            cellLocation = f'{get_column_letter(1)}{2}'
-            ws[cellLocation] = None
+            _print(f'keeping header and clearing data region for {trucked_arc}')
+            row = 3
+            column = 2
 
         row = len(data.get(trucked_arc_node1, [])) + 3
         _clear_antiquated_rows(

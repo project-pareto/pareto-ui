@@ -819,7 +819,7 @@ class ScenarioHandler:
             WriteMapDataToExcel(preprocessed_map_data, output_file_name=excel_path.replace(".xlsx", ""), template_location=excel_path)
 
             ## 3) Extract Excel data into JSON, save in DB
-            self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=map_data)
+            self.update_scenario_from_excel(scenario=scenario, excel_path=excel_path, map_data=preprocessed_map_data)
 
     @time_it
     def propagate_json_data(self, scenario):
