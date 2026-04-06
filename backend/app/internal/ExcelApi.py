@@ -7,7 +7,7 @@ import logging
 _log = logging.getLogger(__name__)
 
 print_output = True
-USE_DUMMY = True
+USE_DUMMY = False
 
 def _print(output):
     if print_output:
@@ -367,7 +367,10 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             _print(f'forecast_tab_key {forecast_tab_key}: adding {node_key}')
             nodes = _get_table_nodes(
                 data.get(node_key, {}),
-                use_dummy=forecast_tab_key in {"ReuseMinimum", "ReuseCapacity"},
+                use_dummy=forecast_tab_key in {
+                    "ReuseMinimum",
+                    "ReuseCapacity",
+                },
             )
             if nodes == ["Dummy"]:
                 _print(f'forecast_tab_key {forecast_tab_key}: using Dummy header for empty nodes')
@@ -535,7 +538,13 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         for node_key in single_value_tabs[single_value_tab]:
             _print(f'single_value_tab {single_value_tab}: adding {node_key}')
             nodes = data.get(node_key, {})
-            for node in nodes:
+            node_names = _get_table_nodes(
+                nodes,
+                use_dummy=single_value_tab in {"BeneficialReuseCost", "BeneficialReuseCredit"},
+            )
+            if node_names == ["Dummy"]:
+                _print(f'single_value_tab {single_value_tab}: using Dummy header for empty nodes')
+            for node in node_names:
                 nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
