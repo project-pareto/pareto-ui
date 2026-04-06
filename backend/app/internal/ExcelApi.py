@@ -7,6 +7,8 @@ import logging
 _log = logging.getLogger(__name__)
 
 print_output = True
+USE_DUMMY = True
+
 def _print(output):
     if print_output:
         _log.info(output)
@@ -107,8 +109,13 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             _clear_cells(ws, clear_from_row, clear_to_row, start_column, ending_column_index)
         return column
 
-    def _get_table_nodes(nodes):
-        return list(nodes) if len(nodes) > 0 else ["Dummy"]
+    def _get_table_nodes(nodes, use_dummy=False):
+        node_list = list(nodes)
+        if len(node_list) > 0:
+            return node_list
+        if use_dummy and USE_DUMMY:
+            return ["Dummy"]
+        return []
 
     ## step 2.5: add TreatmentTechnologies table
     ws = wb["TreatmentTechnologies"]
@@ -164,8 +171,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         piped_arc_node2 = piped_arcs[piped_arc][1]
         source_nodes = list(data.get(piped_arc_node1, []))
         destination_nodes = list(data.get(piped_arc_node2, []))
-        row_nodes = _get_table_nodes(source_nodes)
-        column_nodes = _get_table_nodes(destination_nodes)
+        row_nodes = _get_table_nodes(source_nodes, use_dummy=True)
+        column_nodes = _get_table_nodes(destination_nodes, use_dummy=True)
 
         # add header to first column
         cellLocation = f'{get_column_letter(1)}{2}'
@@ -265,8 +272,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         ws = wb[trucked_arc]
         trucked_arc_node1 = trucked_arcs[trucked_arc][0]
         trucked_arc_node2 = trucked_arcs[trucked_arc][1]
-        row_nodes = _get_table_nodes(list(data.get(trucked_arc_node1, [])))
-        column_nodes = _get_table_nodes(list(data.get(trucked_arc_node2, [])))
+        row_nodes = _get_table_nodes(list(data.get(trucked_arc_node1, [])), use_dummy=True)
+        column_nodes = _get_table_nodes(list(data.get(trucked_arc_node2, [])), use_dummy=True)
 
         # add header to first column
         cellLocation = f'{get_column_letter(1)}{2}'
@@ -358,7 +365,13 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         row = 3
         for node_key in forecast_tabs[forecast_tab_key]:
             _print(f'forecast_tab_key {forecast_tab_key}: adding {node_key}')
-            for node in data.get(node_key, {}):
+            nodes = _get_table_nodes(
+                data.get(node_key, {}),
+                use_dummy=forecast_tab_key in {"ReuseMinimum", "ReuseCapacity"},
+            )
+            if nodes == ["Dummy"]:
+                _print(f'forecast_tab_key {forecast_tab_key}: using Dummy header for empty nodes')
+            for node in nodes:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
                 row+=1
