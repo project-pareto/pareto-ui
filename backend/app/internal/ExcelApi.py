@@ -107,6 +107,9 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             _clear_cells(ws, clear_from_row, clear_to_row, start_column, ending_column_index)
         return column
 
+    def _get_table_nodes(nodes):
+        return list(nodes) if len(nodes) > 0 else ["Dummy"]
+
     ## step 2.5: add TreatmentTechnologies table
     ws = wb["TreatmentTechnologies"]
     row = 2
@@ -159,6 +162,10 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         ws = wb[piped_arc]
         piped_arc_node1 = piped_arcs[piped_arc][0]
         piped_arc_node2 = piped_arcs[piped_arc][1]
+        source_nodes = list(data.get(piped_arc_node1, []))
+        destination_nodes = list(data.get(piped_arc_node2, []))
+        row_nodes = _get_table_nodes(source_nodes)
+        column_nodes = _get_table_nodes(destination_nodes)
 
         # add header to first column
         cellLocation = f'{get_column_letter(1)}{2}'
@@ -166,43 +173,38 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
         column = 1
         row = 3
-        row_nodes = []
-        if len(data.get(piped_arc_node1, [])) > 0 and len(data.get(piped_arc_node2, [])) > 0:
-            # _print(f'piped_arc {piped_arc}: adding {piped_arc_node1}')
-            for node in data[piped_arc_node1]:
-                cellLocation = f'{get_column_letter(column)}{row}'
-                ws[cellLocation] = node
-                row_nodes.append(node)
-                row+=1
-            column = 2
-            row = 2
-            # _print(f'piped_arc {piped_arc}: adding {piped_arc_node2}')
-            for node in data[piped_arc_node2]:
-                cellLocation = f'{get_column_letter(column)}{row}'
-                ws[cellLocation] = node
-                # _print('checking for connections')
-                ind = 3
-                for row_node in row_nodes:
+        for node in row_nodes:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row += 1
+
+        column = 2
+        row = 2
+        for node in column_nodes:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            column += 1
+
+        row = len(row_nodes) + 3
+        column = len(column_nodes) + 2
+        _clear_cells(ws, 3, row - 1, 2, column - 1)
+
+        if len(source_nodes) == 0 or len(destination_nodes) == 0:
+            _print(f'piped_arc {piped_arc}: using Dummy header for empty row/column nodes')
+        else:
+            for column_ind, node in enumerate(column_nodes, start=2):
+                for row_ind, row_node in enumerate(row_nodes, start=3):
                     if row_node in data["connections"]["all_connections"]:
                         if node in data["connections"]["all_connections"][row_node]:
-                            # _print(f'adding connection for {row_node}:{node}')
-                            cellLocation = f'{get_column_letter(column)}{ind}'
-                            # _print(f'adding to cell location: {cellLocation}')
+                            cellLocation = f'{get_column_letter(column_ind)}{row_ind}'
                             ws[cellLocation] = 1
-
-                    ind+=1
-                column+=1
-        else:
-            _print(f'keeping header and clearing data region for {piped_arc}')
-            row = 3
-            column = 2
 
         ## After filling the arcs into the Excel table, it is possible that there
         ## are remnants from previous data that we want to remove. 
         ## For example, if we previously had 10 network nodes, and 
         ## we removed one, we will now fill in the first 9 columns (or rows, depending on the table)
         ## In this case, that 10th row/column needs to be cleared out.
-        row = len(data.get(piped_arc_node1, [])) + 3
+        row = len(row_nodes) + 3
         
         _print(f"piped_arc {piped_arc} checking for antiquated rows, columns")
 
@@ -218,7 +220,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         ending_row_index = row
 
 
-        starting_column_index = column
+        starting_column_index = len(column_nodes) + 2
         cellLocation = f'{get_column_letter(column)}{2}'
         potential_antiquated_column_header = ws[cellLocation].value
         while potential_antiquated_column_header is not None and column < 50:
@@ -263,6 +265,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         ws = wb[trucked_arc]
         trucked_arc_node1 = trucked_arcs[trucked_arc][0]
         trucked_arc_node2 = trucked_arcs[trucked_arc][1]
+        row_nodes = _get_table_nodes(list(data.get(trucked_arc_node1, [])))
+        column_nodes = _get_table_nodes(list(data.get(trucked_arc_node2, [])))
 
         # add header to first column
         cellLocation = f'{get_column_letter(1)}{2}'
@@ -270,26 +274,26 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
         column = 1
         row = 3
-        if len(data.get(trucked_arc_node1,[])) > 0 and len(data.get(trucked_arc_node2,[])) > 0:
-            _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node1}')
-            for node in data[trucked_arc_node1]:
-                cellLocation = f'{get_column_letter(column)}{row}'
-                ws[cellLocation] = node
-                row+=1
-            column = 2
-            row = 2
-            _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node2}')
-            for node in data[trucked_arc_node2]:
-                cellLocation = f'{get_column_letter(column)}{row}'
-                ws[cellLocation] = node
-                ind = 3
-                column+=1
-        else:
-            _print(f'keeping header and clearing data region for {trucked_arc}')
-            row = 3
-            column = 2
+        _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node1}')
+        for node in row_nodes:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            row += 1
 
-        row = len(data.get(trucked_arc_node1, [])) + 3
+        column = 2
+        row = 2
+        _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node2}')
+        for node in column_nodes:
+            cellLocation = f'{get_column_letter(column)}{row}'
+            ws[cellLocation] = node
+            column += 1
+
+        if len(data.get(trucked_arc_node1, [])) == 0 or len(data.get(trucked_arc_node2, [])) == 0:
+            _print(f'trucked_arc {trucked_arc}: using Dummy header for empty row/column nodes')
+
+        row = len(row_nodes) + 3
+        column = len(column_nodes) + 2
+        _clear_cells(ws, 3, row - 1, 2, column - 1)
         _clear_antiquated_rows(
             ws,
             row,
