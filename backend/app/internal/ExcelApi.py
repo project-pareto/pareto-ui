@@ -145,60 +145,78 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     ## step 4: add arcs
     piped_arcs = {
-        "PNA": ["ProductionPads", "NetworkNodes"],
-        "CNA": ["CompletionsPads", "NetworkNodes"],
-        "CCA": ["CompletionsPads", "CompletionsPads"],
-        "NNA": ["NetworkNodes", "NetworkNodes"],
-        "NCA": ["NetworkNodes", "CompletionsPads"],
-        "NKA": ["NetworkNodes", "SWDSites"],
-        "NRA": ["NetworkNodes", "TreatmentSites"],
-        "NSA": ["NetworkNodes", "StorageSites"],
-        "NOA": ["NetworkNodes", "ReuseOptions"],
-        "SNA": ["StorageSites", "NetworkNodes"],
-        "SOA": ["StorageSites", "ReuseOptions"],
-        "FCA": ["ExternalWaterSources", "CompletionsPads"],
-        "RCA": ["TreatmentSites", "CompletionsPads"],
-        "RSA": ["TreatmentSites", "StorageSites"],
-        "SCA": ["StorageSites", "CompletionsPads"],
-        "RNA": ["TreatmentSites", "NetworkNodes"],
-        "ROA": ["TreatmentSites", "ReuseOptions"],
-        "RKA": ["TreatmentSites", "SWDSites"],
+        "PNA": ["ProductionPads", "NetworkNodes", "ProductionPads"],
+        "CNA": ["CompletionsPads", "NetworkNodes", "CompletionsPads"],
+        "CCA": ["CompletionsPads", "CompletionsPads", "CompletionsPads"],
+        "NNA": ["NetworkNodes", "NetworkNodes", "Network Nodes"],
+        "NCA": ["NetworkNodes", "CompletionsPads", "Network Nodes"],
+        "NKA": ["NetworkNodes", "SWDSites", "Network Nodes"],
+        "NRA": ["NetworkNodes", "TreatmentSites", "Network Nodes"],
+        "NSA": ["NetworkNodes", "StorageSites", "Network Nodes"],
+        "NOA": ["NetworkNodes", "ReuseOptions", "Network Nodes"],
+        "SNA": ["StorageSites", "NetworkNodes", "StorageSites"],
+        "SOA": ["StorageSites", "ReuseOptions", "StorageSites"],
+        "FCA": ["ExternalWaterSources", "CompletionsPads", "ExternalWaterSources"],
+        "RCA": ["TreatmentSites", "CompletionsPads", "TreatmentSites"],
+        "RSA": ["TreatmentSites", "StorageSites", "TreatmentSites"],
+        "SCA": ["StorageSites", "CompletionsPads", "StorageSites"],
+        "RNA": ["TreatmentSites", "NetworkNodes", "TreatmentSites"],
+        "ROA": ["TreatmentSites", "ReuseOptions", "TreatmentSites"],
+        "RKA": ["TreatmentSites", "SWDSites", "TreatmentSites"],
     }
 
     for piped_arc in piped_arcs: ## assume all connections on map are for pipes
         ws = wb[piped_arc]
         piped_arc_node1 = piped_arcs[piped_arc][0]
         piped_arc_node2 = piped_arcs[piped_arc][1]
+        piped_arc_header = piped_arcs[piped_arc][2]
         source_nodes = list(data.get(piped_arc_node1, []))
         destination_nodes = list(data.get(piped_arc_node2, []))
-        row_nodes = _get_table_nodes(source_nodes, use_dummy=True)
-        column_nodes = _get_table_nodes(destination_nodes, use_dummy=True)
-
-        # add header to first column
-        cellLocation = f'{get_column_letter(1)}{2}'
-        ws[cellLocation] = piped_arc_node1
-
-        column = 1
-        row = 3
-        for node in row_nodes:
-            cellLocation = f'{get_column_letter(column)}{row}'
-            ws[cellLocation] = node
-            row += 1
-
-        column = 2
-        row = 2
-        for node in column_nodes:
-            cellLocation = f'{get_column_letter(column)}{row}'
-            ws[cellLocation] = node
-            column += 1
-
-        row = len(row_nodes) + 3
-        column = len(column_nodes) + 2
-        _clear_cells(ws, 3, row - 1, 2, column - 1)
 
         if len(source_nodes) == 0 or len(destination_nodes) == 0:
-            _print(f'piped_arc {piped_arc}: using Dummy header for empty row/column nodes')
+            _print(f'piped_arc {piped_arc}: clearing table because row or column nodes are empty')
+            ws[f'{get_column_letter(1)}2'] = None
+            _clear_antiquated_rows(
+                ws,
+                3,
+                [1],
+                max_row=200,
+                clear_from_col=1,
+                clear_to_col=ws.max_column,
+                label=piped_arc,
+            )
+            _clear_antiquated_columns(
+                ws,
+                2,
+                2,
+                max_column=200,
+                clear_from_row=2,
+                clear_to_row=ws.max_row,
+                label=piped_arc,
+            )
+            continue
         else:
+            ws[f'{get_column_letter(1)}2'] = piped_arc_header
+            row_nodes = source_nodes
+            column_nodes = destination_nodes
+            column = 1
+            row = 3
+            for node in row_nodes:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                row += 1
+
+            column = 2
+            row = 2
+            for node in column_nodes:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                column += 1
+
+            row = len(row_nodes) + 3
+            column = len(column_nodes) + 2
+            _clear_cells(ws, 3, row - 1, 2, column - 1)
+
             for column_ind, node in enumerate(column_nodes, start=2):
                 for row_ind, row_node in enumerate(row_nodes, start=3):
                     if row_node in data["connections"]["all_connections"]:
@@ -256,69 +274,86 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
 
     trucked_arcs = {
-        "PCT": ["ProductionPads", "CompletionsPads"],
-        "FCT": ["ExternalWaterSources", "CompletionsPads"],
-        "PKT": ["ProductionPads", "SWDSites"],
-        "CKT": ["CompletionsPads", "SWDSites"],
-        "CCT": ["CompletionsPads", "CompletionsPads"],
-        "CST": ["CompletionsPads", "StorageSites"],
-        "RST": ["TreatmentSites", "StorageSites"],
-        "ROT": ["TreatmentSites", "ReuseOptions"],
-        "SOT": ["StorageSites", "ReuseOptions"],
-        "RKT": ["TreatmentSites", "SWDSites"],
+        "PCT": ["ProductionPads", "CompletionsPads", "ProductionPads"],
+        "FCT": ["ExternalWaterSources", "CompletionsPads", "ExternalWaterSources"],
+        "PKT": ["ProductionPads", "SWDSites", "ProductionPads"],
+        "CKT": ["CompletionsPads", "SWDSites", "CompletionsPads"],
+        "CCT": ["CompletionsPads", "CompletionsPads", "CompletionsPads"],
+        "CST": ["CompletionsPads", "StorageSites", "CompletionsPads"],
+        "RST": ["TreatmentSites", "StorageSites", "TreatmentSites"],
+        "ROT": ["TreatmentSites", "ReuseOptions", "TreatmentSites"],
+        "SOT": ["StorageSites", "ReuseOptions", "StorageSites"],
+        "RKT": ["TreatmentSites", "SWDSites", "TreatmentSites"],
     }
 
     for trucked_arc in trucked_arcs:
         ws = wb[trucked_arc]
         trucked_arc_node1 = trucked_arcs[trucked_arc][0]
         trucked_arc_node2 = trucked_arcs[trucked_arc][1]
-        row_nodes = _get_table_nodes(list(data.get(trucked_arc_node1, [])), use_dummy=True)
-        column_nodes = _get_table_nodes(list(data.get(trucked_arc_node2, [])), use_dummy=True)
+        trucked_arc_header = trucked_arcs[trucked_arc][2]
+        row_nodes = list(data.get(trucked_arc_node1, []))
+        column_nodes = list(data.get(trucked_arc_node2, []))
 
-        # add header to first column
-        cellLocation = f'{get_column_letter(1)}{2}'
-        ws[cellLocation] = trucked_arc_node1
+        if len(row_nodes) == 0 or len(column_nodes) == 0:
+            _print(f'trucked_arc {trucked_arc}: clearing table because row or column nodes are empty')
+            ws[f'{get_column_letter(1)}2'] = None
+            _clear_antiquated_rows(
+                ws,
+                3,
+                [1],
+                max_row=200,
+                clear_from_col=1,
+                clear_to_col=ws.max_column,
+                label=trucked_arc,
+            )
+            _clear_antiquated_columns(
+                ws,
+                2,
+                2,
+                max_column=200,
+                clear_from_row=2,
+                clear_to_row=ws.max_row,
+                label=trucked_arc,
+            )
+        else:
+            ws[f'{get_column_letter(1)}2'] = trucked_arc_header
+            column = 1
+            row = 3
+            _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node1}')
+            for node in row_nodes:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                row += 1
 
-        column = 1
-        row = 3
-        _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node1}')
-        for node in row_nodes:
-            cellLocation = f'{get_column_letter(column)}{row}'
-            ws[cellLocation] = node
-            row += 1
+            column = 2
+            row = 2
+            _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node2}')
+            for node in column_nodes:
+                cellLocation = f'{get_column_letter(column)}{row}'
+                ws[cellLocation] = node
+                column += 1
 
-        column = 2
-        row = 2
-        _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node2}')
-        for node in column_nodes:
-            cellLocation = f'{get_column_letter(column)}{row}'
-            ws[cellLocation] = node
-            column += 1
-
-        if len(data.get(trucked_arc_node1, [])) == 0 or len(data.get(trucked_arc_node2, [])) == 0:
-            _print(f'trucked_arc {trucked_arc}: using Dummy header for empty row/column nodes')
-
-        row = len(row_nodes) + 3
-        column = len(column_nodes) + 2
-        _clear_cells(ws, 3, row - 1, 2, column - 1)
-        _clear_antiquated_rows(
-            ws,
-            row,
-            [1],
-            max_row=200,
-            clear_from_col=1,
-            clear_to_col=max(2, column - 1),
-            label=trucked_arc,
-        )
-        _clear_antiquated_columns(
-            ws,
-            column,
-            2,
-            max_column=200,
-            clear_from_row=2,
-            clear_to_row=max(3, row - 1),
-            label=trucked_arc,
-        )
+            row = len(row_nodes) + 3
+            column = len(column_nodes) + 2
+            _clear_cells(ws, 3, row - 1, 2, column - 1)
+            _clear_antiquated_rows(
+                ws,
+                row,
+                [1],
+                max_row=200,
+                clear_from_col=1,
+                clear_to_col=max(2, column - 1),
+                label=trucked_arc,
+            )
+            _clear_antiquated_columns(
+                ws,
+                column,
+                2,
+                max_column=200,
+                clear_from_row=2,
+                clear_to_row=max(3, row - 1),
+                label=trucked_arc,
+            )
 
     ## step 5: add elevations:
     elevation_nodes = [
