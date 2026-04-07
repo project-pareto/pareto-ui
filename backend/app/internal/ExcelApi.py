@@ -1,5 +1,6 @@
 import shutil
 import os
+from functools import lru_cache
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
@@ -7,11 +8,29 @@ import logging
 _log = logging.getLogger(__name__)
 
 print_output = True
-USE_DUMMY = False
+DEFAULT_TEMPLATE_LOCATION = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
+HEADER_TEMPLATE_SKIP_SHEETS = {"Overview", "Schematic", "Units"}
 
 def _print(output):
     if print_output:
         _log.info(output)
+
+@lru_cache(maxsize=1)
+def DeriveTemplateHeaderValues(template_location=DEFAULT_TEMPLATE_LOCATION):
+    header_values = {}
+    wb = load_workbook(template_location, data_only=True, read_only=True)
+    try:
+        for ws in wb.worksheets:
+            if ws.title in HEADER_TEMPLATE_SKIP_SHEETS:
+                continue
+            header_values[ws.title] = {
+                column: ws.cell(row=2, column=column).value
+                for column in range(1, ws.max_column + 1)
+                if ws.cell(row=2, column=column).value not in (None, "")
+            }
+    finally:
+        wb.close()
+    return header_values
 
 def WriteMapDataToExcel(data, output_file_name, template_location = None):
     """
@@ -20,7 +39,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     """
     _log.info(f"WriteMapDataToExcel using {template_location}")
     if template_location is None:
-        template_location = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
+        template_location = DEFAULT_TEMPLATE_LOCATION
 
     # some defaults:
     treatment_technologies = {
@@ -79,8 +98,11 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     ## step 2: open excel workbook
     wb = load_workbook(excel_path, data_only=True)
+    template_header_values = DeriveTemplateHeaderValues(DEFAULT_TEMPLATE_LOCATION)
 
     def _clear_cells(ws, row_start, row_end, col_start, col_end):
+        if row_start > row_end or col_start > col_end:
+            return
         for row_ind in range(row_start, row_end + 1):
             for column_ind in range(col_start, col_end + 1):
                 ws[f'{get_column_letter(column_ind)}{row_ind}'] = None
@@ -109,22 +131,22 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             _clear_cells(ws, clear_from_row, clear_to_row, start_column, ending_column_index)
         return column
 
-    def _get_table_nodes(nodes, use_dummy=False):
-        node_list = list(nodes)
-        if len(node_list) > 0:
-            return node_list
-        if use_dummy and USE_DUMMY:
-            return ["Dummy"]
-        return []
+    def _sync_template_headers(ws, has_data):
+        _clear_cells(ws, 2, 2, 1, ws.max_column)
+        if has_data:
+            for column, value in template_header_values.get(ws.title, {}).items():
+                ws[f'{get_column_letter(column)}2'] = value
 
     ## step 2.5: add TreatmentTechnologies table
     ws = wb["TreatmentTechnologies"]
+    _sync_template_headers(ws, has_data=len(treatment_technologies) > 0)
     row = 2
     for technology in treatment_technologies:
         _print(f'TreatmentTechnologies: adding {technology}')
         cell_location = f'{get_column_letter(1)}{row}'
         ws[cell_location] = technology
         row += 1
+    _clear_antiquated_rows(ws, row, [1], max_row=200, clear_from_col=1, clear_to_col=1, label="TreatmentTechnologies")
 
     ## step 3: add nodes
     node_keys = [
@@ -136,6 +158,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for node_key in node_keys:
         row = 2
         ws = wb[node_key]
+        _sync_template_headers(ws, has_data=len(data.get(node_key, {})) > 0)
         for node in data.get(node_key, {}):
             _print(f'node_key {node_key}: adding {node}')
             cellLocation = f'{get_column_letter(column)}{row}'
@@ -145,37 +168,37 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     ## step 4: add arcs
     piped_arcs = {
-        "PNA": ["ProductionPads", "NetworkNodes", "ProductionPads"],
-        "CNA": ["CompletionsPads", "NetworkNodes", "CompletionsPads"],
-        "CCA": ["CompletionsPads", "CompletionsPads", "CompletionsPads"],
-        "NNA": ["NetworkNodes", "NetworkNodes", "Network Nodes"],
-        "NCA": ["NetworkNodes", "CompletionsPads", "Network Nodes"],
-        "NKA": ["NetworkNodes", "SWDSites", "Network Nodes"],
-        "NRA": ["NetworkNodes", "TreatmentSites", "Network Nodes"],
-        "NSA": ["NetworkNodes", "StorageSites", "Network Nodes"],
-        "NOA": ["NetworkNodes", "ReuseOptions", "Network Nodes"],
-        "SNA": ["StorageSites", "NetworkNodes", "StorageSites"],
-        "SOA": ["StorageSites", "ReuseOptions", "StorageSites"],
-        "FCA": ["ExternalWaterSources", "CompletionsPads", "ExternalWaterSources"],
-        "RCA": ["TreatmentSites", "CompletionsPads", "TreatmentSites"],
-        "RSA": ["TreatmentSites", "StorageSites", "TreatmentSites"],
-        "SCA": ["StorageSites", "CompletionsPads", "StorageSites"],
-        "RNA": ["TreatmentSites", "NetworkNodes", "TreatmentSites"],
-        "ROA": ["TreatmentSites", "ReuseOptions", "TreatmentSites"],
-        "RKA": ["TreatmentSites", "SWDSites", "TreatmentSites"],
+        "PNA": ["ProductionPads", "NetworkNodes"],
+        "CNA": ["CompletionsPads", "NetworkNodes"],
+        "CCA": ["CompletionsPads", "CompletionsPads"],
+        "NNA": ["NetworkNodes", "NetworkNodes"],
+        "NCA": ["NetworkNodes", "CompletionsPads"],
+        "NKA": ["NetworkNodes", "SWDSites"],
+        "NRA": ["NetworkNodes", "TreatmentSites"],
+        "NSA": ["NetworkNodes", "StorageSites"],
+        "NOA": ["NetworkNodes", "ReuseOptions"],
+        "SNA": ["StorageSites", "NetworkNodes"],
+        "SOA": ["StorageSites", "ReuseOptions"],
+        "FCA": ["ExternalWaterSources", "CompletionsPads"],
+        "RCA": ["TreatmentSites", "CompletionsPads"],
+        "RSA": ["TreatmentSites", "StorageSites"],
+        "SCA": ["StorageSites", "CompletionsPads"],
+        "RNA": ["TreatmentSites", "NetworkNodes"],
+        "ROA": ["TreatmentSites", "ReuseOptions"],
+        "RKA": ["TreatmentSites", "SWDSites"],
     }
 
     for piped_arc in piped_arcs: ## assume all connections on map are for pipes
         ws = wb[piped_arc]
         piped_arc_node1 = piped_arcs[piped_arc][0]
         piped_arc_node2 = piped_arcs[piped_arc][1]
-        piped_arc_header = piped_arcs[piped_arc][2]
         source_nodes = list(data.get(piped_arc_node1, []))
         destination_nodes = list(data.get(piped_arc_node2, []))
+        has_data = len(source_nodes) > 0 and len(destination_nodes) > 0
+        _sync_template_headers(ws, has_data=has_data)
 
-        if len(source_nodes) == 0 or len(destination_nodes) == 0:
+        if not has_data:
             _print(f'piped_arc {piped_arc}: clearing table because row or column nodes are empty')
-            ws[f'{get_column_letter(1)}2'] = None
             _clear_antiquated_rows(
                 ws,
                 3,
@@ -196,7 +219,6 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             )
             continue
         else:
-            ws[f'{get_column_letter(1)}2'] = piped_arc_header
             row_nodes = source_nodes
             column_nodes = destination_nodes
             column = 1
@@ -274,29 +296,29 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
 
     trucked_arcs = {
-        "PCT": ["ProductionPads", "CompletionsPads", "ProductionPads"],
-        "FCT": ["ExternalWaterSources", "CompletionsPads", "ExternalWaterSources"],
-        "PKT": ["ProductionPads", "SWDSites", "ProductionPads"],
-        "CKT": ["CompletionsPads", "SWDSites", "CompletionsPads"],
-        "CCT": ["CompletionsPads", "CompletionsPads", "CompletionsPads"],
-        "CST": ["CompletionsPads", "StorageSites", "CompletionsPads"],
-        "RST": ["TreatmentSites", "StorageSites", "TreatmentSites"],
-        "ROT": ["TreatmentSites", "ReuseOptions", "TreatmentSites"],
-        "SOT": ["StorageSites", "ReuseOptions", "StorageSites"],
-        "RKT": ["TreatmentSites", "SWDSites", "TreatmentSites"],
+        "PCT": ["ProductionPads", "CompletionsPads"],
+        "FCT": ["ExternalWaterSources", "CompletionsPads"],
+        "PKT": ["ProductionPads", "SWDSites"],
+        "CKT": ["CompletionsPads", "SWDSites"],
+        "CCT": ["CompletionsPads", "CompletionsPads"],
+        "CST": ["CompletionsPads", "StorageSites"],
+        "RST": ["TreatmentSites", "StorageSites"],
+        "ROT": ["TreatmentSites", "ReuseOptions"],
+        "SOT": ["StorageSites", "ReuseOptions"],
+        "RKT": ["TreatmentSites", "SWDSites"],
     }
 
     for trucked_arc in trucked_arcs:
         ws = wb[trucked_arc]
         trucked_arc_node1 = trucked_arcs[trucked_arc][0]
         trucked_arc_node2 = trucked_arcs[trucked_arc][1]
-        trucked_arc_header = trucked_arcs[trucked_arc][2]
         row_nodes = list(data.get(trucked_arc_node1, []))
         column_nodes = list(data.get(trucked_arc_node2, []))
+        has_data = len(row_nodes) > 0 and len(column_nodes) > 0
+        _sync_template_headers(ws, has_data=has_data)
 
-        if len(row_nodes) == 0 or len(column_nodes) == 0:
+        if not has_data:
             _print(f'trucked_arc {trucked_arc}: clearing table because row or column nodes are empty')
-            ws[f'{get_column_letter(1)}2'] = None
             _clear_antiquated_rows(
                 ws,
                 3,
@@ -316,7 +338,6 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
                 label=trucked_arc,
             )
         else:
-            ws[f'{get_column_letter(1)}2'] = trucked_arc_header
             column = 1
             row = 3
             _print(f'trucked_arc {trucked_arc}: adding {trucked_arc_node1}')
@@ -364,6 +385,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     column = 1
     row = 3
     ws = wb["Elevation"]
+    elevation_has_data = any(len(data.get(node_key, {})) > 0 for node_key in elevation_nodes)
+    _sync_template_headers(ws, has_data=elevation_has_data)
     for node_key in elevation_nodes:
         for node in data.get(node_key, {}):
             _print(f'node_key {node_key}: adding {node} elevation')
@@ -397,18 +420,14 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     column = 1
     for forecast_tab_key in forecast_tabs:
         ws = wb[forecast_tab_key]
+        forecast_nodes = []
+        for node_key in forecast_tabs[forecast_tab_key]:
+            forecast_nodes.extend(list(data.get(node_key, {})))
+        _sync_template_headers(ws, has_data=len(forecast_nodes) > 0)
         row = 3
         for node_key in forecast_tabs[forecast_tab_key]:
             _print(f'forecast_tab_key {forecast_tab_key}: adding {node_key}')
-            nodes = _get_table_nodes(
-                data.get(node_key, {}),
-                use_dummy=forecast_tab_key in {
-                    "ReuseMinimum",
-                    "ReuseCapacity",
-                },
-            )
-            if nodes == ["Dummy"]:
-                _print(f'forecast_tab_key {forecast_tab_key}: using Dummy header for empty nodes')
+            nodes = data.get(node_key, {})
             for node in nodes:
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -443,6 +462,30 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
         ws = wb[initial_pipeline_tab]
         row_lookup = {}
         column_lookup = {}
+        row_count = sum(len(data.get(node_key, {})) for node_key in initial_pipeline_tabs[initial_pipeline_tab][0])
+        column_count = sum(len(data.get(node_key, {})) for node_key in initial_pipeline_tabs[initial_pipeline_tab][1])
+        has_data = row_count > 0 and column_count > 0
+        _sync_template_headers(ws, has_data=has_data)
+        if not has_data:
+            _clear_antiquated_rows(
+                ws,
+                3,
+                [1],
+                max_row=200,
+                clear_from_col=1,
+                clear_to_col=ws.max_column,
+                label=initial_pipeline_tab,
+            )
+            _clear_antiquated_columns(
+                ws,
+                2,
+                2,
+                max_column=200,
+                clear_from_row=2,
+                clear_to_row=ws.max_row,
+                label=initial_pipeline_tab,
+            )
+            continue
 
         # write row indexes
         column = 1
@@ -541,6 +584,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for initial_capacity_tab in initial_capacity_tabs:
         ws = wb[initial_capacity_tab]
         node_key = initial_capacity_tabs[initial_capacity_tab]
+        _sync_template_headers(ws, has_data=len(data.get(node_key, {})) > 0)
         row = 3
         _print(f'initial_capacity_tab {initial_capacity_tab}: adding {node_key}')
         nodes = data.get(node_key, {})
@@ -569,17 +613,13 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     column = 1
     for single_value_tab in single_value_tabs:
         ws = wb[single_value_tab]
+        single_value_has_data = any(len(data.get(node_key, {})) > 0 for node_key in single_value_tabs[single_value_tab])
+        _sync_template_headers(ws, has_data=single_value_has_data)
         row = 3
         for node_key in single_value_tabs[single_value_tab]:
             _print(f'single_value_tab {single_value_tab}: adding {node_key}')
             nodes = data.get(node_key, {})
-            node_names = _get_table_nodes(
-                nodes,
-                use_dummy=single_value_tab in {"BeneficialReuseCost", "BeneficialReuseCredit"},
-            )
-            if node_names == ["Dummy"]:
-                _print(f'single_value_tab {single_value_tab}: using Dummy header for empty nodes')
-            for node in node_names:
+            for node in nodes:
                 nodevalues = nodes.get(node, {})
                 cellLocation = f'{get_column_letter(column)}{row}'
                 ws[cellLocation] = node
@@ -598,6 +638,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     column = 1
     for water_quality_tab in water_quality_tabs:
         ws = wb[water_quality_tab]
+        water_quality_has_data = any(len(data.get(node_key, {})) > 0 for node_key in water_quality_tabs[water_quality_tab])
+        _sync_template_headers(ws, has_data=water_quality_has_data)
         row = 3
         for node_key in water_quality_tabs[water_quality_tab]:
             _print(f'water_quality_tab {water_quality_tab}: adding {node_key}')
@@ -626,6 +668,11 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for expansion_tab in expansion_tabs:
         ws = wb[expansion_tab]
         node_key = expansion_tabs[expansion_tab]["node"]
+        has_data = len(data.get(node_key, {})) > 0
+        _sync_template_headers(ws, has_data=has_data)
+        if not has_data:
+            _clear_antiquated_rows(ws, 3, [1], max_row=500, clear_from_col=1, clear_to_col=ws.max_column, label=expansion_tab)
+            continue
         # add column headers
         column = 2
         for header in defaults[expansion_tabs[expansion_tab]["default"]]:
@@ -651,6 +698,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for capacity_increments_tab in capacity_increments_tabs:
         ws = wb[capacity_increments_tab]
         default_values = defaults[capacity_increments_tabs[capacity_increments_tab]["default"]]
+        _sync_template_headers(ws, has_data=len(default_values) > 0)
         row = 3
         try:
             for each in default_values:
@@ -671,6 +719,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for capacity_increments_tab in capacity_increments_tabs:
         ws = wb[capacity_increments_tab]
         node_key = capacity_increments_tabs[capacity_increments_tab]["node"]
+        _sync_template_headers(ws, has_data=len(treatment_technologies) > 0)
         row = 3
         for tech in treatment_technologies:
             techCellLocation = f'{get_column_letter(1)}{row}'
@@ -692,29 +741,34 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
 
     disposal_capacity_tab = "DisposalCapacityIncrements"
     ws = wb[disposal_capacity_tab]
+    disposal_capacity_has_data = len(data.get("SWDSites", {})) > 0
+    _sync_template_headers(ws, has_data=disposal_capacity_has_data)
+    if not disposal_capacity_has_data:
+        _clear_antiquated_rows(ws, 3, [1], max_row=500, clear_from_col=1, clear_to_col=ws.max_column, label=disposal_capacity_tab)
+    else:
 
-    # header row: SWDSites + injection capacity levels (I0, I1, ...)
-    ws[f'{get_column_letter(1)}{2}'] = "SWDSites"
-    column = 2
-    for capacity_key in injection_capacities:
-        header_cell_location = f'{get_column_letter(column)}{2}'
-        ws[header_cell_location] = capacity_key
-        column += 1
-
-    # one row per SWD site, with values copied from injection_capacities for each level
-    row = 3
-    for swd_site in data.get("SWDSites", {}):
-        swd_cell_location = f'{get_column_letter(1)}{row}'
-        ws[swd_cell_location] = swd_site
-
+        # header row: SWDSites + injection capacity levels (I0, I1, ...)
+        ws[f'{get_column_letter(1)}{2}'] = "SWDSites"
         column = 2
-        for capacity_key, capacity_values in injection_capacities.items():
-            value_cell_location = f'{get_column_letter(column)}{row}'
-            ws[value_cell_location] = capacity_values.get("DisposalCapacityIncrements", None)
+        for capacity_key in injection_capacities:
+            header_cell_location = f'{get_column_letter(column)}{2}'
+            ws[header_cell_location] = capacity_key
             column += 1
 
-        row += 1
-    _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=column - 1, label=disposal_capacity_tab)
+        # one row per SWD site, with values copied from injection_capacities for each level
+        row = 3
+        for swd_site in data.get("SWDSites", {}):
+            swd_cell_location = f'{get_column_letter(1)}{row}'
+            ws[swd_cell_location] = swd_site
+
+            column = 2
+            for capacity_key, capacity_values in injection_capacities.items():
+                value_cell_location = f'{get_column_letter(column)}{row}'
+                ws[value_cell_location] = capacity_values.get("DisposalCapacityIncrements", None)
+                column += 1
+
+            row += 1
+        _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=column - 1, label=disposal_capacity_tab)
 
 
 
@@ -741,6 +795,10 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]
+        _sync_template_headers(ws, has_data=len(data.get(node_key, {})) > 0)
+        if len(data.get(node_key, {})) == 0:
+            _clear_antiquated_rows(ws, 3, [1], max_row=500, clear_from_col=1, clear_to_col=ws.max_column, label=tab)
+            continue
         # add column header
         column = 2
         for tech in treatment_technologies:
@@ -778,6 +836,8 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]
+        has_data = len(data.get(node_key, {})) > 0 and len(treatment_technologies) > 0
+        _sync_template_headers(ws, has_data=has_data)
         row = 3
         for technology in treatment_technologies:
             value = treatment_technologies[technology][tab]
@@ -799,6 +859,11 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]
+        has_data = len(data.get(node_key, {})) > 0 and len(treatment_technologies) > 0
+        _sync_template_headers(ws, has_data=has_data)
+        if not has_data:
+            _clear_antiquated_rows(ws, 3, [1, 2], max_row=1000, clear_from_col=1, clear_to_col=ws.max_column, label=tab)
+            continue
         row = 3
         column = 3
         # add column header
@@ -829,6 +894,11 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]["node"]
+        has_data = len(data.get(node_key, {})) > 0 and len(defaults[tabs[tab]["default"]]) > 0
+        _sync_template_headers(ws, has_data=has_data)
+        if not has_data:
+            _clear_antiquated_rows(ws, 3, [1, 2], max_row=1000, clear_from_col=1, clear_to_col=ws.max_column, label=tab)
+            continue
         row = 3
         column = 3
         # add column headers
@@ -862,6 +932,11 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for tab in tabs:
         ws = wb[tab]
         node_key = tabs[tab]["node"]
+        has_data = len(data.get(node_key, {}).get('all_connections', {})) > 0
+        _sync_template_headers(ws, has_data=has_data)
+        if not has_data:
+            _clear_antiquated_rows(ws, 3, [1, 2], max_row=1000, clear_from_col=1, clear_to_col=ws.max_column, label=tab)
+            continue
         row = 2
         column = 3
         default_values = defaults[tabs[tab]["default"]]
@@ -895,6 +970,7 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for disposal_tab in disposal_tabs:
         ws = wb[disposal_tab]
         node_key = disposal_tabs[disposal_tab]
+        _sync_template_headers(ws, has_data=len(data.get(node_key, {})) > 0)
         row = 3
         _print(f'disposal_tab {disposal_tab}: adding {node_key}')
         nodes = data.get(node_key, {})
