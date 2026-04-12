@@ -27,7 +27,7 @@ from app.internal.KMZParser import ParseKMZ
 from app.internal.ExcelApi import WriteMapDataToExcel, PreprocessMapData
 from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
 from app.internal.util import time_it
-from app.internal.openapi_client_wrapper import cborg
+from app.internal.openai_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)

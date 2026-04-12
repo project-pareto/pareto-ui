@@ -37,7 +37,7 @@ from app.internal.util import (
 )
 from app.internal.util import check_for_missing_tables, check_for_minimum_required_tables, check_for_infeasibility
     
-from app.internal.openapi_client_wrapper import cborg
+from app.internal.openai_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
