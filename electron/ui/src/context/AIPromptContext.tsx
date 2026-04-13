@@ -42,7 +42,7 @@ interface AIPromptProviderProps {
 
 export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) => {
   const { port } = useApp();
-  const USE_SAMPLE_AI_RESPONSE = true;
+  const USE_SAMPLE_AI_RESPONSE = false;
   const [status, setStatus] = useState<AIPromptStatus>("idle");
   const [response, setResponse] = useState<AIPromptResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
