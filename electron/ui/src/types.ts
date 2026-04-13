@@ -300,6 +300,23 @@ export interface AIPromptResponse {
   error?: string;
 }
 
+export interface AIOptimizationDiagnosisStep {
+  title: string;
+  instruction: string;
+  reason?: string;
+  appArea?: string;
+}
+
+export interface AIOptimizationDiagnosisResponse {
+  status: "success" | "error";
+  summary?: string;
+  likelyCauses?: string[];
+  nextSteps?: AIOptimizationDiagnosisStep[];
+  cautionNotes?: string[];
+  errorMessage?: string;
+  error?: string;
+}
+
 // Map / Editor related types
 export type CoordinateTuple = [number | string, number | string];
 

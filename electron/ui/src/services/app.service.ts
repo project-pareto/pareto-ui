@@ -140,6 +140,19 @@ export const requestAIDataUpdate = (backend_port: number, id: number | string, p
     });
 }
 
+export const requestAIOptimizationDiagnosis = (
+    backend_port: number,
+    id: number | string,
+    errorMessage: string
+) => {
+    const endpoint = `${BACKEND_URL}:${backend_port}/request_ai_optimization_diagnosis/${id}`
+    return fetch(endpoint, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify({ errorMessage })
+    });
+}
+
 export const validateScenario = (backend_port: number, id: number | string) => {
     return fetch(BACKEND_URL+':'+backend_port+'/validate_scenario/'+id, {
         method: 'GET',

@@ -31,6 +31,8 @@ from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, Update
 from app.internal.util import (
     time_it, 
     FormatPrompt,
+    FormatOptimizationDiagnosisPrompt,
+    summarize_long_text,
     build_map_data_from_json,
     deriveConnections,
     checkArcValues
@@ -1110,7 +1112,7 @@ class ScenarioHandler:
             _log.info(f"hitting cborg now")
             resp = cborg.prompt(prompt)
             _log.info(f"resp: {resp}")
-            answer = json.loads(resp)
+            answer = self._parse_ai_json_response(resp)
 
             ## TODO: 
             ## 1) check if the prompt response was good (resp.status)
@@ -1132,6 +1134,93 @@ class ScenarioHandler:
             return {
                 "error": "unable to process request"
             }
+
+    def _parse_ai_json_response(self, response_text):
+        if isinstance(response_text, dict):
+            return response_text
+
+        response_text = response_text.strip()
+        if response_text.startswith("```"):
+            response_text = response_text.strip("`")
+            if response_text.startswith("json"):
+                response_text = response_text[4:]
+            response_text = response_text.strip()
+
+        return json.loads(response_text)
+
+    @time_it
+    def generate_optimization_diagnosis_with_ai(self, id, error_message):
+        _log.info(f"generate_optimization_diagnosis_with_ai for scenario {id}")
+        try:
+            scenario = self.scenario_list[id]
+        except Exception:
+            return {
+                "status": "error",
+                "errorMessage": "invalid scenario"
+            }
+
+        if not cborg.is_available():
+            return {
+                "status": "error",
+                "errorMessage": "AI client is not configured. Provide an API key to enable AI features."
+            }
+
+        failure_message = error_message or scenario.get("results", {}).get("error")
+        if not failure_message:
+            return {
+                "status": "error",
+                "errorMessage": "No optimization failure message was available to diagnose."
+            }
+
+        scenario_context = {
+            "id": scenario.get("id"),
+            "name": scenario.get("name"),
+            "optimization": scenario.get("optimization", {}),
+            "validation": scenario.get("validation", {}),
+            "override_values": scenario.get("override_values", {}),
+            "results": {
+                "status": scenario.get("results", {}).get("status"),
+                "terminationCondition": scenario.get("results", {}).get("terminationCondition"),
+                "error": scenario.get("results", {}).get("error"),
+            },
+            "data_input": scenario.get("data_input", {}),
+        }
+
+        truncated_failure_message = summarize_long_text(
+            failure_message,
+            start_chars=6000,
+            end_chars=4000,
+        )
+
+        prompt = FormatOptimizationDiagnosisPrompt(
+            error_message=truncated_failure_message,
+            scenario=scenario_context,
+        )
+        _log.info("hitting cborg for optimization diagnosis")
+
+        try:
+            resp = cborg.prompt(prompt)
+            answer = self._parse_ai_json_response(resp)
+        except Exception as e:
+            _log.error(f"unable to parse diagnosis response: {e}")
+            return {
+                "status": "error",
+                "errorMessage": f"Unable to process AI diagnosis response: {e}"
+            }
+
+        if answer.get("status") != "success":
+            return {
+                "status": "error",
+                "errorMessage": answer.get("errorMessage", "AI could not diagnose the optimization failure.")
+            }
+
+        return {
+            "status": "success",
+            "summary": answer.get("summary", ""),
+            "likelyCauses": answer.get("likelyCauses", []),
+            "nextSteps": answer.get("nextSteps", []),
+            "cautionNotes": answer.get("cautionNotes", []),
+        }
 
 
 scenario_handler = ScenarioHandler()

@@ -566,6 +566,43 @@ def FormatPrompt(user_prompt, data = None):
 
     return prompt
 
+def FormatOptimizationDiagnosisPrompt(error_message, scenario = None):
+    user_disclosure = (
+        "You are diagnosing a failed PARETO optimization run inside a desktop application. "
+        "The user can modify scenario input data and optimization settings directly in the app. "
+        "Your job is to explain the likely issue and propose realistic next steps that the user can actually attempt "
+        "without editing code. Avoid suggesting backend or source-code changes unless the failure is clearly an environment "
+        "or installation problem, and if you do mention one, mark it as admin-only. "
+        "Respond with pure JSON only. Include a top-level 'status' key with value 'success' or 'error'. "
+        "For success, include: "
+        "'summary' (string), "
+        "'likelyCauses' (array of short strings), "
+        "'nextSteps' (array of objects with keys 'title', 'instruction', optional 'reason', optional 'appArea'), "
+        "and optional 'cautionNotes' (array of short strings). "
+        "The next steps should be ordered from most practical to least practical, and should focus on edits to input data, "
+        "network assumptions, bounds, capacities, demand/supply values, treatment/disposal/reuse settings, overrides, and optimization settings like runtime, optimality gap, solver-adjacent settings already exposed in the app. "
+        "If you cannot diagnose from the provided information, return status 'error' and include 'errorMessage'.\n"
+    )
+
+    scenario_data = f"Scenario context:\n{scenario}\n\n" if scenario else ""
+    return f"{user_disclosure}{scenario_data}Optimization failure message:\n{error_message}"
+
+def summarize_long_text(text, start_chars=6000, end_chars=4000):
+    if text is None:
+        return ""
+
+    text = str(text)
+    max_length = start_chars + end_chars
+    if len(text) <= max_length:
+        return text
+
+    omitted_chars = len(text) - max_length
+    return (
+        f"{text[:start_chars]}\n\n"
+        f"... [{omitted_chars} characters omitted for brevity] ...\n\n"
+        f"{text[-end_chars:]}"
+    )
+
 def deriveConnections(input_data: dict):
     ## From Arc tables, derive a dictionary of node -> [list of nodes] connections
     # _log.info(f"deriving connections")

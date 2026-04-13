@@ -14,6 +14,10 @@ import type { ModelResultsProps, Scenario } from '../../types';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WaterResiduals from '../../components/WaterResiduals/WaterResiduals';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import TipsAndUpdatesOutlinedIcon from '@mui/icons-material/TipsAndUpdatesOutlined';
+import { useAIPrompt } from '../../context/AIPromptContext';
 
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
@@ -25,7 +29,16 @@ const OVERRIDE_CATEGORIES = [
 ]
 
 export default function ModelResults(props: ModelResultsProps): JSX.Element {
+  const ERROR_PREVIEW_START = 1600;
+  const ERROR_PREVIEW_END = 1000;
   const { port } = useApp()
+  const {
+    status: aiStatus,
+    requestKind,
+    diagnosis,
+    errorMessage: aiErrorMessage,
+    runOptimizationDiagnosis,
+  } = useAIPrompt();
   const {
     category,
     appState,
@@ -46,6 +59,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
   const [ filteredRowNodes, setFilteredRowNodes ] = useState<string[]>([])
   const [ rowFilterSet, setRowFilterSet ] = useState<Record<string, {checked: boolean; amt:number}>>({})
   const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState<boolean>(false)
+  const [ showFullError, setShowFullError ] = useState<boolean>(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const styles: any ={
@@ -73,7 +87,32 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
       minWidth:"350px", 
       color: "#0884b4", 
       backgroundColor: "white"
+    },
+    diagnosisButton: {
+      minWidth: "240px",
+      borderRadius: "999px",
+      paddingLeft: "18px",
+      paddingRight: "18px",
+      borderColor: "rgba(1, 103, 143, 0.35)",
+      color: "#01678f",
+      background: "linear-gradient(135deg, rgba(1, 103, 143, 0.04) 0%, rgba(8, 132, 180, 0.12) 100%)",
+      '&:hover': {
+        borderColor: "#01678f",
+        background: "linear-gradient(135deg, rgba(1, 103, 143, 0.08) 0%, rgba(8, 132, 180, 0.18) 100%)",
+      }
     }
+  }
+
+  const isDiagnosingError = aiStatus === "running" && requestKind === "optimization-diagnosis";
+  const hasDiagnosis = requestKind === "optimization-diagnosis" && diagnosis?.status === "success";
+  const rawFailureMessage = props.scenario.results.error || "Optimization failed without a reported error message.";
+  const shouldCondenseFailureMessage = rawFailureMessage.length > ERROR_PREVIEW_START + ERROR_PREVIEW_END;
+  const displayedFailureMessage = shouldCondenseFailureMessage && !showFullError
+    ? `${rawFailureMessage.slice(0, ERROR_PREVIEW_START)}\n\n... [${rawFailureMessage.length - (ERROR_PREVIEW_START + ERROR_PREVIEW_END)} characters omitted] ...\n\n${rawFailureMessage.slice(-ERROR_PREVIEW_END)}`
+    : rawFailureMessage;
+
+  const handleDiagnoseError = async () => {
+    await runOptimizationDiagnosis(props.scenario.id, rawFailureMessage);
   }
 
   useEffect(()=>{
@@ -498,8 +537,150 @@ const handleNewInfrastructureOverride = () => {
       <Grid item xs={6} style={{alignContent:"center", alignItems:"center", justifyContent:"center"}}>
         {props.scenario.results.status === "failure" ? 
         <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
-          <h2>Optimization Failed</h2>
-          <p>Error: <b>{props.scenario.results.error}</b></p>
+          <Box sx={{display: "flex", alignItems: "center", gap: 1, mb: 1}}>
+            <ErrorOutlineIcon sx={{color: "#b42318"}} />
+            <h2 style={{margin: 0}}>Optimization Failed</h2>
+          </Box>
+            <Box
+            sx={{
+              p: 1.5,
+              borderRadius: 2,
+              border: "1px solid rgba(180, 35, 24, 0.14)",
+              backgroundColor: "rgba(180, 35, 24, 0.04)",
+              mb: 2,
+            }}
+          >
+            <p style={{marginTop: 0, marginBottom: "10px"}}>Error:</p>
+            <Box
+              component="pre"
+              sx={{
+                margin: 0,
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                fontFamily: "Monaco, Menlo, Consolas, monospace",
+                fontSize: "0.84rem",
+                lineHeight: 1.5,
+                color: "#4b1c17",
+                maxHeight: showFullError ? 420 : 260,
+                overflow: "auto",
+              }}
+            >
+              {displayedFailureMessage}
+            </Box>
+            {shouldCondenseFailureMessage && (
+              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, mt: 1.25, flexWrap: "wrap"}}>
+                <p style={{margin: 0, color: "#7a312a"}}>
+                  Showing a condensed view of {rawFailureMessage.length.toLocaleString()} characters.
+                </p>
+                <Button
+                  size="small"
+                  onClick={() => setShowFullError((current) => !current)}
+                  sx={{textTransform: "none", minWidth: "unset", padding: 0}}
+                >
+                  {showFullError ? "Show condensed error" : "Show full error"}
+                </Button>
+              </Box>
+            )}
+          </Box>
+          <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap"}}>
+            <p style={{margin: 0, color: "#51606d"}}>
+              Ask AI to review the failure in the context of this scenario and suggest in-app changes to try next.
+            </p>
+            <Button
+              variant="outlined"
+              style={styles.diagnosisButton}
+              startIcon={<AutoAwesomeIcon />}
+              disabled={isDiagnosingError}
+              onClick={handleDiagnoseError}
+            >
+              {isDiagnosingError ? "Diagnosing..." : "Diagnose Error with AI"}
+            </Button>
+          </Box>
+          {isDiagnosingError && (
+            <Box sx={{mt: 2}}>
+              <LinearProgress />
+            </Box>
+          )}
+          {requestKind === "optimization-diagnosis" && aiStatus === "error" && aiErrorMessage && (
+            <Box
+              sx={{
+                mt: 2,
+                p: 1.5,
+                borderRadius: 2,
+                border: "1px solid rgba(180, 35, 24, 0.14)",
+                backgroundColor: "rgba(180, 35, 24, 0.04)",
+              }}
+            >
+              <p style={{margin: 0, color: "#b42318"}}><b>AI diagnosis failed:</b> {aiErrorMessage}</p>
+            </Box>
+          )}
+          {hasDiagnosis && (
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid rgba(1, 103, 143, 0.16)",
+                background: "linear-gradient(180deg, rgba(246, 249, 251, 0.9) 0%, rgba(255, 255, 255, 1) 100%)",
+                boxShadow: "0 12px 28px rgba(8, 132, 180, 0.08)",
+              }}
+            >
+              <Box sx={{display: "flex", alignItems: "center", gap: 1, mb: 1}}>
+                <TipsAndUpdatesOutlinedIcon sx={{color: "#01678f"}} />
+                <h3 style={{margin: 0}}>AI Diagnosis</h3>
+              </Box>
+              {diagnosis?.summary && (
+                <p style={{marginTop: 0, marginBottom: "16px", color: "#24323d"}}>{diagnosis.summary}</p>
+              )}
+              {diagnosis?.likelyCauses && diagnosis.likelyCauses.length > 0 && (
+                <Box sx={{mb: 2}}>
+                  <p style={{marginTop: 0, marginBottom: "8px"}}><b>Likely causes</b></p>
+                  <Box component="ul" sx={{m: 0, pl: 2.5}}>
+                    {diagnosis.likelyCauses.map((cause, index) => (
+                      <li key={`${cause}-${index}`} style={{marginBottom: "6px"}}>{cause}</li>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              {diagnosis?.nextSteps && diagnosis.nextSteps.length > 0 && (
+                <Box sx={{mb: diagnosis?.cautionNotes?.length ? 2 : 0}}>
+                  <p style={{marginTop: 0, marginBottom: "8px"}}><b>Suggested next steps</b></p>
+                  <Box sx={{display: "grid", gap: 1.25}}>
+                    {diagnosis.nextSteps.map((step, index) => (
+                      <Box
+                        key={`${step.title}-${index}`}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 2,
+                          border: "1px solid rgba(1, 103, 143, 0.12)",
+                          backgroundColor: "rgba(1, 103, 143, 0.03)",
+                        }}
+                      >
+                        <p style={{marginTop: 0, marginBottom: "6px"}}>
+                          <b>{index + 1}. {step.title}</b>
+                          {step.appArea ? <span style={{color: "#51606d"}}> · {step.appArea}</span> : null}
+                        </p>
+                        <p style={{marginTop: 0, marginBottom: step.reason ? "6px" : 0}}>{step.instruction}</p>
+                        {step.reason && (
+                          <p style={{margin: 0, color: "#51606d"}}>{step.reason}</p>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              {diagnosis?.cautionNotes && diagnosis.cautionNotes.length > 0 && (
+                <Box>
+                  <p style={{marginTop: 0, marginBottom: "8px"}}><b>Notes</b></p>
+                  <Box component="ul" sx={{m: 0, pl: 2.5}}>
+                    {diagnosis.cautionNotes.map((note, index) => (
+                      <li key={`${note}-${index}`} style={{marginBottom: "6px"}}>{note}</li>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
         </Box> 
         : 
         props.scenario.results.status.includes("Optimized") ?
@@ -536,5 +717,3 @@ const handleNewInfrastructureOverride = () => {
   );
 
 }
-
-

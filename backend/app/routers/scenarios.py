@@ -507,3 +507,10 @@ async def request_ai_data_update(request: Request, id: int) -> dict:
     else:
         raise HTTPException(400, detail=f"Please provide a prompt.")
     return updatedScenario
+
+@router.post("/request_ai_optimization_diagnosis/{id}")
+async def request_ai_optimization_diagnosis(request: Request, id: int) -> dict:
+    """Prompt AI to diagnose a failed optimization run using scenario context."""
+    req = await request.json()
+    error_message = req.get("errorMessage", None)
+    return scenario_handler.generate_optimization_diagnosis_with_ai(id, error_message)
