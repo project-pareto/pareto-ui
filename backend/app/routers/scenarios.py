@@ -319,8 +319,8 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         scenario = data['scenario']
         if scenario.get("aiDiagnosis"):
             outdated_diagnosis = scenario_handler._mark_diagnosis_outdated(scenario.get("aiDiagnosis"))
-            scenario["aiDiagnosis"] = outdated_diagnosis
             scenario["previousAIDiagnosis"] = outdated_diagnosis
+            scenario.pop("aiDiagnosis", None)
         results = {"data": {}, "status": "Initializing"}
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)

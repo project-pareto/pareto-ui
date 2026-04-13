@@ -114,7 +114,11 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
     : rawFailureMessage;
   const savedDiagnosis = (props.scenario.aiDiagnosis || null) as ScenarioAIDiagnosis | null;
   const previousDiagnosis = (props.scenario.previousAIDiagnosis || null) as ScenarioAIDiagnosis | null;
-  const displayedDiagnosis = showPreviousDiagnosis ? previousDiagnosis : savedDiagnosis;
+  const displayedDiagnosis = showPreviousDiagnosis
+    ? previousDiagnosis
+    : savedDiagnosis && !savedDiagnosis.outdated
+      ? savedDiagnosis
+      : null;
   const hasDiagnosis = Boolean(displayedDiagnosis);
 
   const handleDiagnoseError = async () => {
@@ -132,6 +136,10 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
       setDiagnosisSyncedAt(diagnosis.diagnosedAt);
     }
   }, [aiStatus, diagnosis?.diagnosedAt, diagnosisSyncedAt, requestKind, syncScenarioData]);
+
+  useEffect(() => {
+    setShowPreviousDiagnosis(false);
+  }, [props.scenario.id, props.scenario.results.status, props.scenario.aiDiagnosis, props.scenario.previousAIDiagnosis]);
 
   useEffect(()=>{
     /*
@@ -639,7 +647,11 @@ const handleNewInfrastructureOverride = () => {
                 onClick={() => setShowPreviousDiagnosis((current) => !current)}
                 sx={{textTransform: "none"}}
               >
-                {showPreviousDiagnosis ? "Show latest diagnosis" : "View previous diagnosis"}
+                {showPreviousDiagnosis
+                  ? savedDiagnosis && !savedDiagnosis.outdated
+                    ? "Show latest diagnosis"
+                    : "Hide previous diagnosis"
+                  : "View previous diagnosis"}
               </Button>
             </Box>
           )}
