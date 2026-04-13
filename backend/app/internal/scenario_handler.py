@@ -1148,6 +1148,19 @@ class ScenarioHandler:
 
         return json.loads(response_text)
 
+    def _utc_timestamp(self):
+        return datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z")
+
+    def _mark_diagnosis_outdated(self, diagnosis, reason="optimization_restarted"):
+        if not isinstance(diagnosis, dict):
+            return diagnosis
+
+        updated = dict(diagnosis)
+        updated["outdated"] = True
+        updated["outdatedAt"] = self._utc_timestamp()
+        updated["outdatedReason"] = reason
+        return updated
+
     @time_it
     def generate_optimization_diagnosis_with_ai(self, id, error_message):
         _log.info(f"generate_optimization_diagnosis_with_ai for scenario {id}")
@@ -1214,13 +1227,23 @@ class ScenarioHandler:
                 "errorMessage": answer.get("errorMessage", "AI could not diagnose the optimization failure.")
             }
 
-        return {
+        diagnosis_record = {
             "status": "success",
             "summary": answer.get("summary", ""),
             "likelyCauses": answer.get("likelyCauses", []),
             "nextSteps": answer.get("nextSteps", []),
             "cautionNotes": answer.get("cautionNotes", []),
+            "diagnosedAt": self._utc_timestamp(),
+            "sourceErrorMessage": failure_message,
+            "outdated": False,
         }
+
+        if isinstance(scenario.get("aiDiagnosis"), dict):
+            scenario["previousAIDiagnosis"] = scenario.get("aiDiagnosis")
+        scenario["aiDiagnosis"] = diagnosis_record
+        self.update_scenario(scenario)
+
+        return diagnosis_record
 
 
 scenario_handler = ScenarioHandler()

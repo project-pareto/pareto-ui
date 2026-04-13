@@ -18,6 +18,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import TipsAndUpdatesOutlinedIcon from '@mui/icons-material/TipsAndUpdatesOutlined';
 import { useAIPrompt } from '../../context/AIPromptContext';
+import type { ScenarioAIDiagnosis } from '../../types';
 
 const OVERRIDE_CATEGORIES = [
   "vb_y_overview_dict",
@@ -60,6 +61,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
   const [ rowFilterSet, setRowFilterSet ] = useState<Record<string, {checked: boolean; amt:number}>>({})
   const [ newInfrastructureOverrideRow, setNewInfrastructureOverrideRow ] = useState<boolean>(false)
   const [ showFullError, setShowFullError ] = useState<boolean>(false)
+  const [ showPreviousDiagnosis, setShowPreviousDiagnosis ] = useState<boolean>(false)
   const isAllColumnsSelected = columnNodesMapping.length > 0 && filteredColumnNodes.length === columnNodesMapping.length;
   const isAllRowsSelected = rowNodesMapping.length > 0 && filteredRowNodes.length === rowNodesMapping.length;
   const styles: any ={
@@ -104,16 +106,32 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
   }
 
   const isDiagnosingError = aiStatus === "running" && requestKind === "optimization-diagnosis";
-  const hasDiagnosis = requestKind === "optimization-diagnosis" && diagnosis?.status === "success";
+  const [ diagnosisSyncedAt, setDiagnosisSyncedAt ] = useState<string | null>(null)
   const rawFailureMessage = props.scenario.results.error || "Optimization failed without a reported error message.";
   const shouldCondenseFailureMessage = rawFailureMessage.length > ERROR_PREVIEW_START + ERROR_PREVIEW_END;
   const displayedFailureMessage = shouldCondenseFailureMessage && !showFullError
     ? `${rawFailureMessage.slice(0, ERROR_PREVIEW_START)}\n\n... [${rawFailureMessage.length - (ERROR_PREVIEW_START + ERROR_PREVIEW_END)} characters omitted] ...\n\n${rawFailureMessage.slice(-ERROR_PREVIEW_END)}`
     : rawFailureMessage;
+  const savedDiagnosis = (props.scenario.aiDiagnosis || null) as ScenarioAIDiagnosis | null;
+  const previousDiagnosis = (props.scenario.previousAIDiagnosis || null) as ScenarioAIDiagnosis | null;
+  const displayedDiagnosis = showPreviousDiagnosis ? previousDiagnosis : savedDiagnosis;
+  const hasDiagnosis = Boolean(displayedDiagnosis);
 
   const handleDiagnoseError = async () => {
     await runOptimizationDiagnosis(props.scenario.id, rawFailureMessage);
   }
+
+  useEffect(() => {
+    if (
+      requestKind === "optimization-diagnosis" &&
+      aiStatus === "success" &&
+      diagnosis?.diagnosedAt &&
+      diagnosisSyncedAt !== diagnosis.diagnosedAt
+    ) {
+      syncScenarioData();
+      setDiagnosisSyncedAt(diagnosis.diagnosedAt);
+    }
+  }, [aiStatus, diagnosis?.diagnosedAt, diagnosisSyncedAt, requestKind, syncScenarioData]);
 
   useEffect(()=>{
     /*
@@ -494,7 +512,7 @@ const handleNewInfrastructureOverride = () => {
   }
   
   return ( 
-    <>
+    <Box sx={{pb: 12}}>
     {/*
       if a scenario has been optimized, show outputs
       otherwise, display the status of the optimization
@@ -614,6 +632,17 @@ const handleNewInfrastructureOverride = () => {
               <p style={{margin: 0, color: "#b42318"}}><b>AI diagnosis failed:</b> {aiErrorMessage}</p>
             </Box>
           )}
+          {previousDiagnosis && (
+            <Box sx={{mt: 2, display: "flex", justifyContent: "flex-end"}}>
+              <Button
+                size="small"
+                onClick={() => setShowPreviousDiagnosis((current) => !current)}
+                sx={{textTransform: "none"}}
+              >
+                {showPreviousDiagnosis ? "Show latest diagnosis" : "View previous diagnosis"}
+              </Button>
+            </Box>
+          )}
           {hasDiagnosis && (
             <Box
               sx={{
@@ -627,26 +656,43 @@ const handleNewInfrastructureOverride = () => {
             >
               <Box sx={{display: "flex", alignItems: "center", gap: 1, mb: 1}}>
                 <TipsAndUpdatesOutlinedIcon sx={{color: "#01678f"}} />
-                <h3 style={{margin: 0}}>AI Diagnosis</h3>
+                <h3 style={{margin: 0}}>
+                  {showPreviousDiagnosis ? "Previous AI Diagnosis" : "AI Diagnosis"}
+                </h3>
               </Box>
-              {diagnosis?.summary && (
-                <p style={{marginTop: 0, marginBottom: "16px", color: "#24323d"}}>{diagnosis.summary}</p>
+              {displayedDiagnosis?.outdated && (
+                <Box
+                  sx={{
+                    mb: 2,
+                    p: 1.25,
+                    borderRadius: 2,
+                    border: "1px solid rgba(180, 120, 24, 0.18)",
+                    backgroundColor: "rgba(180, 120, 24, 0.06)",
+                  }}
+                >
+                  <p style={{margin: 0, color: "#7a530f"}}>
+                    <b>Outdated diagnosis.</b> This guidance came from an earlier failure and may not match the latest optimization run. You can review it or run a new AI diagnosis.
+                  </p>
+                </Box>
               )}
-              {diagnosis?.likelyCauses && diagnosis.likelyCauses.length > 0 && (
+              {displayedDiagnosis?.summary && (
+                <p style={{marginTop: 0, marginBottom: "16px", color: "#24323d"}}>{displayedDiagnosis.summary}</p>
+              )}
+              {displayedDiagnosis?.likelyCauses && displayedDiagnosis.likelyCauses.length > 0 && (
                 <Box sx={{mb: 2}}>
                   <p style={{marginTop: 0, marginBottom: "8px"}}><b>Likely causes</b></p>
                   <Box component="ul" sx={{m: 0, pl: 2.5}}>
-                    {diagnosis.likelyCauses.map((cause, index) => (
+                    {displayedDiagnosis.likelyCauses.map((cause, index) => (
                       <li key={`${cause}-${index}`} style={{marginBottom: "6px"}}>{cause}</li>
                     ))}
                   </Box>
                 </Box>
               )}
-              {diagnosis?.nextSteps && diagnosis.nextSteps.length > 0 && (
-                <Box sx={{mb: diagnosis?.cautionNotes?.length ? 2 : 0}}>
+              {displayedDiagnosis?.nextSteps && displayedDiagnosis.nextSteps.length > 0 && (
+                <Box sx={{mb: displayedDiagnosis?.cautionNotes?.length ? 2 : 0}}>
                   <p style={{marginTop: 0, marginBottom: "8px"}}><b>Suggested next steps</b></p>
                   <Box sx={{display: "grid", gap: 1.25}}>
-                    {diagnosis.nextSteps.map((step, index) => (
+                    {displayedDiagnosis.nextSteps.map((step, index) => (
                       <Box
                         key={`${step.title}-${index}`}
                         sx={{
@@ -669,11 +715,11 @@ const handleNewInfrastructureOverride = () => {
                   </Box>
                 </Box>
               )}
-              {diagnosis?.cautionNotes && diagnosis.cautionNotes.length > 0 && (
+              {displayedDiagnosis?.cautionNotes && displayedDiagnosis.cautionNotes.length > 0 && (
                 <Box>
                   <p style={{marginTop: 0, marginBottom: "8px"}}><b>Notes</b></p>
                   <Box component="ul" sx={{m: 0, pl: 2.5}}>
-                    {diagnosis.cautionNotes.map((note, index) => (
+                    {displayedDiagnosis.cautionNotes.map((note, index) => (
                       <li key={`${note}-${index}`} style={{marginBottom: "6px"}}>{note}</li>
                     ))}
                   </Box>
@@ -713,7 +759,7 @@ const handleNewInfrastructureOverride = () => {
     
       
     }
-    </>
+    </Box>
   );
 
 }

@@ -569,10 +569,13 @@ def FormatPrompt(user_prompt, data = None):
 def FormatOptimizationDiagnosisPrompt(error_message, scenario = None):
     user_disclosure = (
         "You are diagnosing a failed PARETO optimization run inside a desktop application. "
+        "The optimization model comes from the project-pareto Python package and uses the pyomo Python package underneath. "
+        "Those packages are installed in the current runtime environment, so error messages may reference PARETO, Pyomo, model construction, solver invocation, infeasibility, or related optimization internals. "
         "The user can modify scenario input data and optimization settings directly in the app. "
+        "The user cannot edit units in the app; units are controlled by the application and should be assumed fixed and internally compatible when the scenario data and optimization settings are valid. "
         "Your job is to explain the likely issue and propose realistic next steps that the user can actually attempt "
         "without editing code. Avoid suggesting backend or source-code changes unless the failure is clearly an environment "
-        "or installation problem, and if you do mention one, mark it as admin-only. "
+        "or installation problem, and if you do mention one, mark it as admin-only. Do not suggest changing units or unit systems. "
         "Respond with pure JSON only. Include a top-level 'status' key with value 'success' or 'error'. "
         "For success, include: "
         "'summary' (string), "

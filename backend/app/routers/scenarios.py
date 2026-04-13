@@ -317,6 +317,10 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         # add id to scenario handler task list to keep track of running tasks
         scenario_handler.add_background_task(data['scenario']['id'])
         scenario = data['scenario']
+        if scenario.get("aiDiagnosis"):
+            outdated_diagnosis = scenario_handler._mark_diagnosis_outdated(scenario.get("aiDiagnosis"))
+            scenario["aiDiagnosis"] = outdated_diagnosis
+            scenario["previousAIDiagnosis"] = outdated_diagnosis
         results = {"data": {}, "status": "Initializing"}
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
