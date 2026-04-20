@@ -4,7 +4,7 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { useAIPrompt } from "../../context/AIPromptContext";
 
 export default function AIPromptStatusBar(): JSX.Element | null {
-  const { status, errorMessage } = useAIPrompt();
+  const { status, errorMessage, requestKind } = useAIPrompt();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -19,9 +19,13 @@ export default function AIPromptStatusBar(): JSX.Element | null {
   const severity = status === "error" ? "warning" : "info";
   const message =
     status === "running"
-      ? "AI is filling your scenario inputs."
+      ? requestKind === "optimization-diagnosis"
+        ? "AI is diagnosing the optimization failure."
+        : "AI is filling your scenario inputs."
       : status === "success"
-      ? "AI data update completed. Review your inputs."
+      ? requestKind === "optimization-diagnosis"
+        ? "AI diagnosis completed. Review the suggested next steps."
+        : "AI data update completed. Review your inputs."
       : errorMessage || "AI request needs attention.";
 
   return (

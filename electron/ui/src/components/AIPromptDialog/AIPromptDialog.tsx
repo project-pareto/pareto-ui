@@ -63,7 +63,7 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
         ...aiDataInput,
       },
     };
-    handleScenarioUpdate(mergedScenario, false);
+    handleScenarioUpdate(mergedScenario, false, "json");
   };
 
   const handleClearPrompt = (): void => {

@@ -133,7 +133,7 @@ export default function DataTable(props: DataTableProps): JSX.Element {
       ind: row number, starting at 0, excluding header row
       index: column number, starting at 0
     */
-    if (['Optimized', 'Draft', 'failure', 'Not Optimized', 'Incomplete'].includes(scenario.results.status)) {
+    if (['Optimized', 'Draft', 'failure', 'Not Optimized', 'Incomplete', 'Infeasible'].includes(scenario.results.status)) {
       if (index === 0) {
         setShowRowValueInput(true);
         setDoubleClickIndex(ind);

@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { requestAIDataUpdate } from "../services/app.service";
+import { requestAIDataUpdate, requestAIOptimizationDiagnosis } from "../services/app.service";
 import { useApp } from "../AppContext";
-import type { AIPromptResponse, AIPromptUpdatedScenario } from "../types";
+import type {
+  AIPromptResponse,
+  AIPromptUpdatedScenario,
+  AIOptimizationDiagnosisResponse,
+} from "../types";
 const SAMPLE_RESPONSE_PATH = "../data/sample_ai_response.json";
 
 const loadSampleResponse = async (): Promise<AIPromptResponse | null> => {
@@ -15,16 +19,20 @@ const loadSampleResponse = async (): Promise<AIPromptResponse | null> => {
 };
 
 type AIPromptStatus = "idle" | "running" | "success" | "error";
+type AIPromptRequestKind = "data-update" | "optimization-diagnosis" | null;
 
 export interface AIPromptContextValue {
   status: AIPromptStatus;
+  requestKind: AIPromptRequestKind;
   isRunning: boolean;
   response: AIPromptResponse | null;
+  diagnosis: AIOptimizationDiagnosisResponse | null;
   updatedScenario: AIPromptUpdatedScenario | null;
   updateNotes: string[];
   errorMessage: string | null;
   lastPrompt: string | null;
   runPrompt: (scenarioId: string | number, prompt: string) => Promise<void>;
+  runOptimizationDiagnosis: (scenarioId: string | number, errorMessage: string) => Promise<void>;
   clearResult: () => void;
 }
 
@@ -42,9 +50,11 @@ interface AIPromptProviderProps {
 
 export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) => {
   const { port } = useApp();
-  const USE_SAMPLE_AI_RESPONSE = true;
+  const USE_SAMPLE_AI_RESPONSE = false;
   const [status, setStatus] = useState<AIPromptStatus>("idle");
+  const [requestKind, setRequestKind] = useState<AIPromptRequestKind>(null);
   const [response, setResponse] = useState<AIPromptResponse | null>(null);
+  const [diagnosis, setDiagnosis] = useState<AIOptimizationDiagnosisResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [updatedScenario, setUpdatedScenario] = useState<AIPromptUpdatedScenario | null>(null);
   const [updateNotes, setUpdateNotes] = useState<string[]>([]);
@@ -52,8 +62,10 @@ export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) 
 
   const runPrompt = async (scenarioId: string | number, prompt: string): Promise<void> => {
     setStatus("running");
+    setRequestKind("data-update");
     setErrorMessage(null);
     setResponse(null);
+    setDiagnosis(null);
     setUpdatedScenario(null);
     setUpdateNotes([]);
     setLastPrompt(prompt);
@@ -100,10 +112,53 @@ export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) 
     }
   };
 
-  const clearResult = (): void => {
-    setStatus("idle");
+  const runOptimizationDiagnosis = async (
+    scenarioId: string | number,
+    failureMessage: string
+  ): Promise<void> => {
+    setStatus("running");
+    setRequestKind("optimization-diagnosis");
     setErrorMessage(null);
     setResponse(null);
+    setDiagnosis(null);
+    setUpdatedScenario(null);
+    setUpdateNotes([]);
+    setLastPrompt(failureMessage);
+
+    try {
+      const result = await requestAIOptimizationDiagnosis(port, scenarioId, failureMessage);
+      let payload: AIOptimizationDiagnosisResponse | null = null;
+      try {
+        payload = await result.json();
+      } catch (parseError) {
+        payload = null;
+      }
+
+      if (!result.ok || !payload) {
+        throw new Error(payload?.errorMessage || result.statusText || "AI diagnosis request failed");
+      }
+
+      if (payload.status !== "success") {
+        setDiagnosis(payload);
+        setErrorMessage(payload.errorMessage || payload.error || "AI diagnosis request failed.");
+        setStatus("error");
+        return;
+      }
+
+      setDiagnosis(payload);
+      setStatus("success");
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Unable to diagnose optimization error");
+      setStatus("error");
+    }
+  };
+
+  const clearResult = (): void => {
+    setStatus("idle");
+    setRequestKind(null);
+    setErrorMessage(null);
+    setResponse(null);
+    setDiagnosis(null);
     setUpdatedScenario(null);
     setUpdateNotes([]);
     setLastPrompt(null);
@@ -112,16 +167,19 @@ export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) 
   const value = useMemo(
     () => ({
       status,
+      requestKind,
       isRunning: status === "running",
       response,
+      diagnosis,
       updatedScenario,
       updateNotes,
       errorMessage,
       lastPrompt,
       runPrompt,
+      runOptimizationDiagnosis,
       clearResult,
     }),
-    [status, response, updatedScenario, updateNotes, errorMessage, lastPrompt]
+    [status, requestKind, response, diagnosis, updatedScenario, updateNotes, errorMessage, lastPrompt]
   );
 
   return <AIPromptContext.Provider value={value}>{children}</AIPromptContext.Provider>;

@@ -27,7 +27,7 @@ from app.internal.KMZParser import ParseKMZ
 from app.internal.ExcelApi import WriteMapDataToExcel, PreprocessMapData
 from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
 from app.internal.util import time_it
-from app.internal.openapi_client_wrapper import cborg
+from app.internal.openai_client_wrapper import cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -317,6 +317,10 @@ async def run_model(request: Request, background_tasks: BackgroundTasks):
         # add id to scenario handler task list to keep track of running tasks
         scenario_handler.add_background_task(data['scenario']['id'])
         scenario = data['scenario']
+        if scenario.get("aiDiagnosis"):
+            outdated_diagnosis = scenario_handler._mark_diagnosis_outdated(scenario.get("aiDiagnosis"))
+            scenario["previousAIDiagnosis"] = outdated_diagnosis
+            scenario.pop("aiDiagnosis", None)
         results = {"data": {}, "status": "Initializing"}
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
@@ -507,3 +511,10 @@ async def request_ai_data_update(request: Request, id: int) -> dict:
     else:
         raise HTTPException(400, detail=f"Please provide a prompt.")
     return updatedScenario
+
+@router.post("/request_ai_optimization_diagnosis/{id}")
+async def request_ai_optimization_diagnosis(request: Request, id: int) -> dict:
+    """Prompt AI to diagnose a failed optimization run using scenario context."""
+    req = await request.json()
+    error_message = req.get("errorMessage", None)
+    return scenario_handler.generate_optimization_diagnosis_with_ai(id, error_message)
