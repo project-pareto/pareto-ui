@@ -1161,8 +1161,15 @@ class ScenarioHandler:
         updated["outdatedReason"] = reason
         return updated
 
+    def _serialize_prompt_context(self, data, start_chars=12000, end_chars=8000):
+        try:
+            serialized = json.dumps(data, indent=2, default=str)
+        except Exception:
+            serialized = str(data)
+        return summarize_long_text(serialized, start_chars=start_chars, end_chars=end_chars)
+
     @time_it
-    def generate_optimization_diagnosis_with_ai(self, id, error_message):
+    def generate_optimization_diagnosis_with_ai(self, id, error_message, diagnosis_context=None):
         _log.info(f"generate_optimization_diagnosis_with_ai for scenario {id}")
         try:
             scenario = self.scenario_list[id]
@@ -1199,6 +1206,15 @@ class ScenarioHandler:
             "data_input": scenario.get("data_input", {}),
         }
 
+        editable_input_tables = sorted(list((scenario.get("data_input", {}) or {}).get("df_parameters", {}).keys()))
+        stored_constraint_violations = (scenario.get("results", {}) or {}).get("constraints_violations", {})
+        prompt_diagnosis_context = diagnosis_context or {}
+        prompt_diagnosis_context.setdefault("resultsStatus", scenario.get("results", {}).get("status"))
+        prompt_diagnosis_context.setdefault("terminationCondition", scenario.get("results", {}).get("terminationCondition"))
+        prompt_diagnosis_context.setdefault("editableInputTables", editable_input_tables)
+        prompt_diagnosis_context.setdefault("constraintsViolations", stored_constraint_violations)
+        prompt_diagnosis_context.setdefault("inputData", scenario.get("data_input", {}))
+
         truncated_failure_message = summarize_long_text(
             failure_message,
             start_chars=6000,
@@ -1207,7 +1223,8 @@ class ScenarioHandler:
 
         prompt = FormatOptimizationDiagnosisPrompt(
             error_message=truncated_failure_message,
-            scenario=scenario_context,
+            scenario=self._serialize_prompt_context(scenario_context, start_chars=8000, end_chars=4000),
+            diagnosis_context=self._serialize_prompt_context(prompt_diagnosis_context, start_chars=14000, end_chars=8000),
         )
         _log.info("hitting cborg for optimization diagnosis")
 

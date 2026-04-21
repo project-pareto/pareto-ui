@@ -152,6 +152,11 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         setShowNetworkPipeline(false);
     }
 
+    const handleSave = (): void => {
+        if (!nodeData || disableSave(nodeData)) return;
+        saveNodeChanges(getNodeForSave(nodeData));
+    };
+
     const getCoordinates = (n?: MapEditorNode): CoordinateTuple => {
         if (!n?.coordinates) return [0, 0];
         const coords = n.coordinates;
@@ -504,6 +509,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         return Number(value).toFixed(3);
     };
 
+    useKeyDown("Enter", handleSave, undefined, undefined, undefined, true);
+
     return (
         <Box sx={{ padding: 2, borderTop: '1px solid #ccc' }}>
         <Box sx={{ borderBottom: '1px solid #d9dde3', pb: 0.5, mb: 1 }}>
@@ -827,7 +834,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                 </Button>
                 <Button
                     variant="contained"
-                    onClick={() => nodeData && saveNodeChanges(getNodeForSave(nodeData))}
+                    onClick={handleSave}
                     disabled={disableSave(nodeData)}
                     sx={isExpanded ? { minWidth: 96 } : undefined}
                 >

@@ -43,6 +43,62 @@ from app.internal.scenario_handler import (
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
 
+from pyomo.environ import Constraint, value, Var
+
+def scan_constraint_violations(model, tol=1e-6, max_print=100):
+    print(f"scanning constraint violations")
+    violations = []
+
+    for c in model.component_objects(Constraint, active=True):
+        for idx in c:
+            con = c[idx]
+
+            try:
+                body_val = value(con.body)
+            except:
+                continue
+
+            lb = value(con.lower) if con.has_lb() else None
+            ub = value(con.upper) if con.has_ub() else None
+
+            viol = 0.0
+            side = None
+
+            if lb is not None and body_val < lb - tol:
+                viol = lb - body_val
+                side = "lower"
+            if ub is not None and body_val > ub + tol:
+                ub_viol = body_val - ub
+                if ub_viol > viol:
+                    viol = ub_viol
+                    side = "upper"
+
+            if viol > 0:
+                violations.append({
+                    "violation": viol,
+                    "side": side,
+                    "constraint": con.name,
+                    "lower_bound": lb,
+                    "body_value": body_val,
+                    "upper_bound": ub,
+                })
+
+    violations.sort(reverse=True, key=lambda x: x["violation"])
+
+    for violation in violations[:max_print]:
+        print(
+            f"{violation['constraint']}: violated {violation['side']} bound by {violation['violation']:.6g}; "
+            f"lb={violation['lower_bound']}, body={violation['body_value']}, ub={violation['upper_bound']}"
+        )
+
+    print(f"Total violated constraints found: {len(violations)}")
+    return {
+        "count": len(violations),
+        "tolerance": tol,
+        "logged_count": min(len(violations), max_print),
+        "violations": violations,
+    }
+
 
 def run_strategic_model(input_file, output_file, id, modelParameters, overrideValues={}):
     start_time = datetime.datetime.now()
@@ -163,7 +219,12 @@ def run_strategic_model(input_file, output_file, id, modelParameters, overrideVa
     total_time = datetime.datetime.now() - start_time
     _log.info(f"total process took {total_time.seconds} seconds")
 
-    return results_dict
+    constraint_violations = scan_constraint_violations(model)
+
+    return {
+        "results_data": results_dict,
+        "constraints_violations": constraint_violations,
+    }
 
 OVERRIDE_PRESET_VALUES = {
   "vb_y_Pipeline_dict": {
@@ -196,11 +257,17 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters, ove
 
     # need to incorporate the override values back into the infrastructure table
     try:
-        results_dict = run_strategic_model(input_file, output_file, id, modelParameters, overrideValues)
+        model_run_output = run_strategic_model(input_file, output_file, id, modelParameters, overrideValues)
         _log.info(f'successfully ran model for id #{id}, updating scenarios')
         scenario = scenario_handler.get_scenario(int(id))
         results = scenario["results"]
-        results['data'] = results_dict
+        results['data'] = model_run_output.get("results_data", {})
+        results['constraints_violations'] = model_run_output.get("constraints_violations", {
+            "count": 0,
+            "tolerance": 1e-6,
+            "logged_count": 0,
+            "violations": [],
+        })
         # _log.info('optimized_override_values')
         # _log.info(scenario['optimized_override_values'])
 
@@ -249,7 +316,17 @@ def handle_run_strategic_model(input_file, output_file, id, modelParameters, ove
         _log.exception(f"unable to run strategic model: {e}")
         time.sleep(2)
         scenario = scenario_handler.get_scenario(int(id))
-        results = {"data": {}, "status": "failure", "error": str(e)}
+        results = {
+            "data": {},
+            "status": "failure",
+            "error": str(e),
+            "constraints_violations": {
+                "count": 0,
+                "tolerance": 1e-6,
+                "logged_count": 0,
+                "violations": [],
+            },
+        }
         scenario["results"] = results
         scenario_handler.update_scenario(scenario)
     try:

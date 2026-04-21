@@ -566,7 +566,7 @@ def FormatPrompt(user_prompt, data = None):
 
     return prompt
 
-def FormatOptimizationDiagnosisPrompt(error_message, scenario = None):
+def FormatOptimizationDiagnosisPrompt(error_message, scenario = None, diagnosis_context = None):
     user_disclosure = (
         "You are diagnosing a failed PARETO optimization run inside a desktop application. "
         "The optimization model comes from the project-pareto Python package and uses the pyomo Python package underneath. "
@@ -584,11 +584,13 @@ def FormatOptimizationDiagnosisPrompt(error_message, scenario = None):
         "and optional 'cautionNotes' (array of short strings). "
         "The next steps should be ordered from most practical to least practical, and should focus on edits to input data, "
         "network assumptions, bounds, capacities, demand/supply values, treatment/disposal/reuse settings, overrides, and optimization settings like runtime, optimality gap, solver-adjacent settings already exposed in the app. "
+        "When infeasibility details are provided, use the reported violated constraints, editable input tables, and current scenario input data to recommend specific table-level changes the user can try in the app. "
         "If you cannot diagnose from the provided information, return status 'error' and include 'errorMessage'.\n"
     )
 
     scenario_data = f"Scenario context:\n{scenario}\n\n" if scenario else ""
-    return f"{user_disclosure}{scenario_data}Optimization failure message:\n{error_message}"
+    diagnosis_data = f"Diagnosis context:\n{diagnosis_context}\n\n" if diagnosis_context else ""
+    return f"{user_disclosure}{scenario_data}{diagnosis_data}Optimization failure message:\n{error_message}"
 
 def summarize_long_text(text, start_chars=6000, end_chars=4000):
     if text is None:

@@ -32,7 +32,7 @@ export interface AIPromptContextValue {
   errorMessage: string | null;
   lastPrompt: string | null;
   runPrompt: (scenarioId: string | number, prompt: string) => Promise<void>;
-  runOptimizationDiagnosis: (scenarioId: string | number, errorMessage: string) => Promise<void>;
+  runOptimizationDiagnosis: (scenarioId: string | number, errorMessage: string, diagnosisContext?: any) => Promise<void>;
   clearResult: () => void;
 }
 
@@ -114,7 +114,8 @@ export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) 
 
   const runOptimizationDiagnosis = async (
     scenarioId: string | number,
-    failureMessage: string
+    failureMessage: string,
+    diagnosisContext?: any
   ): Promise<void> => {
     setStatus("running");
     setRequestKind("optimization-diagnosis");
@@ -126,7 +127,7 @@ export const AIPromptProvider: React.FC<AIPromptProviderProps> = ({ children }) 
     setLastPrompt(failureMessage);
 
     try {
-      const result = await requestAIOptimizationDiagnosis(port, scenarioId, failureMessage);
+      const result = await requestAIOptimizationDiagnosis(port, scenarioId, failureMessage, diagnosisContext);
       let payload: AIOptimizationDiagnosisResponse | null = null;
       try {
         payload = await result.json();
