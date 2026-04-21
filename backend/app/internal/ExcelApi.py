@@ -137,6 +137,17 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
             for column, value in template_header_values.get(ws.title, {}).items():
                 ws[f'{get_column_letter(column)}2'] = value
 
+    def _resolve_default_tab_value(default_entry, tab_name):
+        if not isinstance(default_entry, dict):
+            return None
+        if tab_name in default_entry:
+            return default_entry.get(tab_name)
+
+        nested_table = default_entry.get(tab_name)
+        if isinstance(nested_table, dict):
+            return nested_table.get(tab_name)
+        return None
+
     ## step 2.5: add TreatmentTechnologies table
     ws = wb["TreatmentTechnologies"]
     _sync_template_headers(ws, has_data=len(treatment_technologies) > 0)
@@ -668,24 +679,39 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     for expansion_tab in expansion_tabs:
         ws = wb[expansion_tab]
         node_key = expansion_tabs[expansion_tab]["node"]
-        has_data = len(data.get(node_key, {})) > 0
+        default_key = expansion_tabs[expansion_tab]["default"]
+        default_values = defaults.get(default_key, {})
+        nodes = data.get(node_key, {})
+        has_data = len(nodes) > 0 and len(default_values) > 0
         _sync_template_headers(ws, has_data=has_data)
         if not has_data:
             _clear_antiquated_rows(ws, 3, [1], max_row=500, clear_from_col=1, clear_to_col=ws.max_column, label=expansion_tab)
+            _clear_antiquated_columns(ws, 2, 2, max_column=ws.max_column, clear_from_row=2, clear_to_row=ws.max_row, label=expansion_tab)
             continue
-        # add column headers
+
+        ws[f'{get_column_letter(1)}2'] = node_key
+
+        # add column headers from the referenced defaults table
         column = 2
-        for header in defaults[expansion_tabs[expansion_tab]["default"]]:
+        for header in default_values:
             columnHeaderCellLocation = f'{get_column_letter(column)}{2}'
             ws[columnHeaderCellLocation] = header
-            column+=1
+            column += 1
+
         row = 3
         _print(f'{expansion_tab}: adding {node_key}')
-        for node in data.get(node_key, {}):
+        for node in nodes:
             cellLocation = f'{get_column_letter(1)}{row}'
             ws[cellLocation] = node
-            row+=1
+            value_column = 2
+            for _, default_entry in default_values.items():
+                valueCellLocation = f'{get_column_letter(value_column)}{row}'
+                ws[valueCellLocation] = _resolve_default_tab_value(default_entry, expansion_tab)
+                value_column += 1
+            row += 1
+
         _clear_antiquated_rows(ws, row, [1], max_row=500, clear_from_col=1, clear_to_col=column - 1, label=expansion_tab)
+        _clear_antiquated_columns(ws, column, 2, max_column=ws.max_column, clear_from_row=2, clear_to_row=row - 1, label=expansion_tab)
     
     capacity_increments_tabs = {
         # "DisposalCapacityIncrements": {"default": "InjectionCapacities"},
