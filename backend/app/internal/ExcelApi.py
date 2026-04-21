@@ -66,17 +66,17 @@ def WriteMapDataToExcel(data, output_file_name, template_location = None):
     }
 
     storage_capacities = {
-        "C0": {"StorageCapacityIncrements": 0, "StorageExpansionLeadTime": 0},
-        "C1": {"StorageCapacityIncrements": 50000, "StorageExpansionLeadTime": 88},
-        "C2": {"StorageCapacityIncrements": 100000, "StorageExpansionLeadTime": 89},
-        "C3": {"StorageCapacityIncrements": 350000, "StorageExpansionLeadTime": 90},
+        "C0": {"StorageCapacityIncrements": 0, "StorageExpansionLeadTime": 0, "StorageExpansionCost": 2},
+        "C1": {"StorageCapacityIncrements": 50000, "StorageExpansionLeadTime": 88, "StorageExpansionCost": 2},
+        "C2": {"StorageCapacityIncrements": 100000, "StorageExpansionLeadTime": 89, "StorageExpansionCost": 2},
+        "C3": {"StorageCapacityIncrements": 350000, "StorageExpansionLeadTime": 90, "StorageExpansionCost": 2},
     }
 
     injection_capacities = {
-        "I0": {"DisposalCapacityIncrements": 0, "DisposalExpansionLeadTime": 0},
-        "I1": {"DisposalCapacityIncrements": 7143, "DisposalExpansionLeadTime": 45},
-        "I2": {"DisposalCapacityIncrements": 14286, "DisposalExpansionLeadTime": None},
-        "I3": {"DisposalCapacityIncrements": 50000, "DisposalExpansionLeadTime": None},
+        "I0": {"DisposalCapacityIncrements": 0, "DisposalExpansionLeadTime": 0, "DisposalExpansionCost": 0},
+        "I1": {"DisposalCapacityIncrements": 7143, "DisposalExpansionLeadTime": 45, "DisposalExpansionCost": 1000},
+        "I2": {"DisposalCapacityIncrements": 14286, "DisposalExpansionLeadTime": None, "DisposalExpansionCost": 1000},
+        "I3": {"DisposalCapacityIncrements": 50000, "DisposalExpansionLeadTime": None, "DisposalExpansionCost": 1000},
     }
 
     defaults = {
