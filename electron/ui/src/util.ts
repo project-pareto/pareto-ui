@@ -80,6 +80,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         units: "foot"
       },
+      {
+        key: "TruckingHourlyCost",
+        displayName: "Trucking Hourly Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl"
+      }
     ]
   },
   CompletionsPad: {
@@ -138,6 +145,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         units: "foot"
       },
+      {
+        key: "TruckingHourlyCost",
+        displayName: "Trucking Hourly Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl"
+      }
     ]
   },
   DisposalSite: {
@@ -301,6 +315,13 @@ export const NetworkNodeTypes = {
         defaultValue: 0,
         units: "USD/bbl"
       },
+      {
+        key: "TruckingHourlyCost",
+        displayName: "Trucking Hourly Cost",
+        type: "number",
+        defaultValue: 0,
+        units: "USD/bbl"
+      }
     ]
   },
   ReuseOption: {

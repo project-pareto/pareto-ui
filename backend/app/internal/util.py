@@ -727,7 +727,7 @@ def check_for_minimum_required_tables(scenario):
         "StorageSites",
         "SWDSites",
         "ExternalWaterSources",
-        "ReuseOptions"
+        # "ReuseOptions"
     ]
 
     data_input = scenario.get("data_input", {})
@@ -747,7 +747,7 @@ def check_for_minimum_required_tables(scenario):
         {"table_name": "CompletionsDemand", "allow_zero": False},
         {"table_name": "PadRates", "allow_zero": False},
         {"table_name": "FlowbackRates", "allow_zero": False},
-        {"table_name": "ReuseMinimum", "allow_zero": True, "require_all_cells_numeric": True},
+        # {"table_name": "ReuseMinimum", "allow_zero": True, "require_all_cells_numeric": True},
     ]
 
     capacity_tables = [
@@ -761,12 +761,12 @@ def check_for_minimum_required_tables(scenario):
 
     operational_cost_tables = [
         {"table_name": "DisposalOperationalCost", "allow_zero": False},
-        {"table_name": "ReuseOperationalCost", "allow_zero": True},
+        # {"table_name": "ReuseOperationalCost", "allow_zero": True},
     ]
 
     beneficial_reuse_tables = [
-        {"table_name": "BeneficialReuseCost", "allow_zero": False},
-        {"table_name": "BeneficialReuseCredit", "allow_zero": False},
+        # {"table_name": "BeneficialReuseCost", "allow_zero": False},
+        # {"table_name": "BeneficialReuseCredit", "allow_zero": False},
     ]
 
     ## TODO: Trucking Time, Trucking Hours, External Water Sourcing
