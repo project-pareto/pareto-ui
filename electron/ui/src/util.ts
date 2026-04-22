@@ -16,6 +16,7 @@ import {
   DimensionIndexedTable,
   SeriesByKey,
   Cell,
+  MapEditorNode,
 } from 'types';
 
 export const NetworkNodeTypes = {
@@ -840,6 +841,36 @@ export const useKeyDown = (
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [onKeyDown]);
+};
+
+export const reconcilePipelineOutgoingNodes = (
+  nextNodes: MapEditorNode["nodes"] = [],
+  prevNodes: MapEditorNode["nodes"] = []
+): MapEditorNode["nodes"] => {
+  if (!Array.isArray(nextNodes)) return [];
+
+  return nextNodes.map((node, idx) => {
+    const previousName = nextNodes[idx - 1]?.name;
+    const nextName = nextNodes[idx + 1]?.name;
+    const outgoingNodes = new Set<string>();
+
+    const previousPairExisted = Boolean(prevNodes?.[idx - 1]?.name && prevNodes?.[idx]?.name);
+    const nextPairExisted = Boolean(prevNodes?.[idx]?.name && prevNodes?.[idx + 1]?.name);
+    const hadBackwardFlow = previousPairExisted
+      ? Array.isArray(prevNodes?.[idx]?.outgoing_nodes) && prevNodes[idx].outgoing_nodes.includes(prevNodes[idx - 1].name)
+      : Array.isArray(node?.outgoing_nodes) && Boolean(previousName) && node.outgoing_nodes.includes(previousName);
+    const hadForwardFlow = nextPairExisted
+      ? Array.isArray(prevNodes?.[idx]?.outgoing_nodes) && prevNodes[idx].outgoing_nodes.includes(prevNodes[idx + 1].name)
+      : Boolean(nextName);
+
+    if (previousName && hadBackwardFlow) outgoingNodes.add(previousName);
+    if (nextName && hadForwardFlow) outgoingNodes.add(nextName);
+
+    return {
+      ...node,
+      outgoing_nodes: Array.from(outgoingNodes),
+    };
+  });
 };
 
 export const convertMapDataToBackendFormat = (nodeData, lineData) => {

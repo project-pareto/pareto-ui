@@ -3,7 +3,7 @@ import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Toolti
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import type { CoordinateTuple, SelectedNodeState, MapEditorNode, DimensionIndexedTable, Cell } from '../../types';
-import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths, convertTreatmentCapacityIncrementsToDict } from '../../util';
+import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths, convertTreatmentCapacityIncrementsToDict, reconcilePipelineOutgoingNodes } from '../../util';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -177,9 +177,10 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
             if (!data) return data;
             const prev = { ...data.node } as MapEditorNode;
             const prevNodes = prev.nodes || [];
-            const updatedNodeList = (idx === undefined || idx === "")
+            const nextNodes = (idx === undefined || idx === "")
                 ? [...prevNodes, { name: name, incoming: true, outgoing: true }]
                 : prevNodes.map((n, i) => i === idx ? { ...n, name: name, coordinates: connectionNode?.coordinates } : n);
+            const updatedNodeList = reconcilePipelineOutgoingNodes(nextNodes, prevNodes);
             const lengths = calculatePipelineSegmentLengths(updatedNodeList);
             const node = {
                 ...prev,
@@ -199,7 +200,11 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
             const prevNode = { ...data.node } as MapEditorNode;
-            const updatedNodeList = (prevNode.nodes || []).filter((_, i) => i !== idx);
+            const prevNodes = prevNode.nodes || [];
+            const updatedNodeList = reconcilePipelineOutgoingNodes(
+                prevNodes.filter((_, i) => i !== idx),
+                prevNodes
+            );
             const lengths = calculatePipelineSegmentLengths(updatedNodeList);
             const node = {
                 ...prevNode,
@@ -232,6 +237,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         if (isNode) return n;
         return {
             ...n,
+            nodes: reconcilePipelineOutgoingNodes(n.nodes || [], n.nodes || []),
             lengths: getPipelineLengths(n),
         };
     };
