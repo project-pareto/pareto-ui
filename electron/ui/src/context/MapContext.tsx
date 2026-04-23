@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName, calculatePipelineSegmentLengths, reconcilePipelineOutgoingNodes } from "../util";
+import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName, calculatePipelineSegmentLengths, reconcilePipelineOutgoingNodes, getAllowedPipelineConnectionCandidates } from "../util";
 import { useApp } from '../AppContext';
 import { uploadAdditionalMap } from "../services/app.service";
 import type { Scenario } from "../types";
@@ -134,6 +134,13 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
 
     const clickNode = (node: MapEditorNode, idx: number): void => {
         if (selectedNode?.node?.node_type === "path" && selectingPipelineConnectionFromMap) {
+            const pipelineNodes = selectedNode.node.nodes || [];
+            // Reuse the same candidate filter as the editor dropdowns so map picks and form picks behave identically.
+            const allowedCandidates = getAllowedPipelineConnectionCandidates(nodeData, pipelineNodes, pipelineConnectionSelectionIndex);
+            const canUseSelectedNode = allowedCandidates.some((candidate) => candidate.name === node.name);
+            if (!canUseSelectedNode) {
+                return;
+            }
             if (pipelineConnectionSelectionIndex === null) {
                 addPipelineConnection(node)
             } else {

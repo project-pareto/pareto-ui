@@ -3,7 +3,7 @@ import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Toolti
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
 import type { CoordinateTuple, SelectedNodeState, MapEditorNode, DimensionIndexedTable, Cell } from '../../types';
-import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths, convertTreatmentCapacityIncrementsToDict, reconcilePipelineOutgoingNodes } from '../../util';
+import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths, convertTreatmentCapacityIncrementsToDict, reconcilePipelineOutgoingNodes, getAllowedPipelineConnectionCandidates } from '../../util';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -93,14 +93,23 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         !checkIfNameIsUnique(nodeList, nodeData?.name, nodeIdx) : 
         !checkIfNameIsUnique(lineList, nodeData?.name, nodeIdx);
         
-    // check if any pipeline nodes no longer exist (in the case they've been deleted)
-    const pipelineConnectionIssues = isNode ? null : nodeData?.nodes?.map((c) => {
-        const connectionNode = availableNodes.find((node) => node?.name === c?.name);
-        if (!connectionNode) {
-            return c.name;
+    const getPipelineConnectionOptions = (connectionIdx?: number | null): MapEditorNode[] => {
+        return getAllowedPipelineConnectionCandidates(availableNodes, nodeData?.nodes || [], connectionIdx);
+    };
+
+    // Surfaces both missing-node issues and type-rule violations on existing pipelines being edited.
+    const pipelineConnectionIssueByIndex = isNode ? {} : (nodeData?.nodes || []).reduce<Record<number, string>>((issues, connectionNode, idx) => {
+        const matchingNode = availableNodes.find((node) => node?.name === connectionNode?.name);
+        if (!matchingNode) {
+            issues[idx] = "Please select a valid node.";
+            return issues;
         }
-        return null;
-    }).filter(Boolean);
+        const allowedOptions = getPipelineConnectionOptions(idx);
+        if (!allowedOptions.some((node) => node.name === connectionNode.name)) {
+            issues[idx] = "This node type is not allowed at this position in the pipeline.";
+        }
+        return issues;
+    }, {});
     const pipelineDiameterIds = Array.isArray(PipelineDiameterValues?.PipelineDiameters) ? PipelineDiameterValues.PipelineDiameters : [];
     const pipelineDiameterDisplayValues = Array.isArray(PipelineDiameterValues?.VALUE) ? PipelineDiameterValues.VALUE : [];
     const pipelineDiameterOptions = pipelineDiameterIds.map((diameterId, idx) => ({
@@ -177,6 +186,14 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
             if (!data) return data;
             const prev = { ...data.node } as MapEditorNode;
             const prevNodes = prev.nodes || [];
+            const connectionIdx = idx === undefined || idx === "" ? prevNodes.length : idx;
+            if (name) {
+                // Guard against invalid values even if they somehow bypass the filtered UI options.
+                const allowedOptions = getAllowedPipelineConnectionCandidates(availableNodes, prevNodes, connectionIdx);
+                if (!allowedOptions.some((node) => node.name === name)) {
+                    return data;
+                }
+            }
             const nextNodes = (idx === undefined || idx === "")
                 ? [...prevNodes, { name: name, incoming: true, outgoing: true }]
                 : prevNodes.map((n, i) => i === idx ? { ...n, name: name, coordinates: connectionNode?.coordinates } : n);
@@ -322,7 +339,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
             const connectionsAmt = n.nodes?.length || 0;
             // Ensure we have at least 2 connecting nodes
             if (connectionsAmt < 2) return true;
-            if (pipelineConnectionIssues?.length) return true;
+            if (Object.keys(pipelineConnectionIssueByIndex).length > 0) return true;
 
             // Ensure each connection has a node
             n.nodes.forEach((connectingNode) => {
@@ -681,6 +698,8 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                 {nodeData?.nodes?.map((connectionNode, idx) => {
                                     const name = connectionNode.name;
                                     const nextNode = nodeData?.nodes?.[idx + 1];
+                                    const connectionOptions = getPipelineConnectionOptions(idx);
+                                    const connectionIssue = pipelineConnectionIssueByIndex[idx];
                                     const isLastNode = idx >= (nodeData?.nodes?.length || 0) - 1;
                                     const canToggleFlow = Boolean(name && nextNode?.name);
                                     const directionState = getDirectionState(nodeData?.nodes || [], idx);
@@ -689,13 +708,13 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                         <Fragment key={idx}>
                                             <TableRow hover>
                                                 <TableCell sx={{ py: 0.75 }}>
-                                                    <Tooltip title={pipelineConnectionIssues?.includes(name) ? "Please select a valid node." : ""}>
+                                                    <Tooltip title={connectionIssue || ""}>
                                                         <TextField
                                                             size='small'
                                                             fullWidth
                                                             select
-                                                            value={pipelineConnectionIssues?.includes(name) ? '' : name}
-                                                            error={pipelineConnectionIssues?.includes(name)}
+                                                            value={connectionIssue === "Please select a valid node." ? '' : name}
+                                                            error={Boolean(connectionIssue)}
                                                             onChange={(e) => handleUpdateConnection(e.target.value, idx)}
                                                             SelectProps={{
                                                                 MenuProps: {
@@ -707,7 +726,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                                                 }
                                                             }}
                                                         >
-                                                            {availableNodes?.map((node) => (
+                                                            {connectionOptions?.map((node) => (
                                                                 <MenuItem key={node.name} value={node.name}>
                                                                     {node.name}
                                                                 </MenuItem>
@@ -729,6 +748,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                                                                 setPipelineConnectionSelectionIndex(idx);
                                                             }}
                                                             size="small"
+                                                            disabled={connectionOptions.length === 0}
                                                             color={selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === idx ? "primary" : "default"}
                                                         >
                                                             <AddLocationAltIcon />
@@ -802,6 +822,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                         startIcon={<AddCircleIcon/>}
                         onClick={() => handleUpdateConnection("", "")}
                         variant='contained'
+                        disabled={getPipelineConnectionOptions(null).length === 0}
                         sx={{ marginBottom: 1, width: "100%", maxWidth: "300px", alignSelf: "center" }}
                     >
                         Add Connection
@@ -817,6 +838,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
                             setPipelineConnectionSelectionIndex(null);
                         }}
                         variant={selectingPipelineConnectionFromMap && pipelineConnectionSelectionIndex === null ? 'contained' : 'outlined'}
+                        disabled={getPipelineConnectionOptions(null).length === 0}
                         sx={{ marginBottom: 1, width: "100%", maxWidth: "300px", alignSelf: "center" }}
                     >
                         Select from map

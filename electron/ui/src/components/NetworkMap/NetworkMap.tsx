@@ -11,7 +11,10 @@ import {
     NetworkNodeTypes,
     formatCoordinatesFromNodes,
     convertMapDataToFrontendFormat,
-    convertMapDataToBackendFormat
+    convertMapDataToBackendFormat,
+    getAllowedPipelineConnectionCandidates,
+    getMapEditorNodeType,
+    isAllowedPipelineArc
 } from '../../util';
 import { useMapValues } from '../../context/MapContext';
 
@@ -139,6 +142,11 @@ const getFlowArrowsForLine = (line: any, lineIndex: number) => {
     return arrows;
 };
 
+const getNodeTypeDisplayName = (nodeType?: string | null): string => {
+    if (!nodeType) return "This node";
+    return NetworkNodeTypes[nodeType]?.displayName || nodeType;
+};
+
 
 export default function NetworkMap(props: NetworkMapProps) {
     const { map_data, interactive = false, showMapTypeToggle = false, width = 100, height = 50 } = props;
@@ -158,6 +166,8 @@ export default function NetworkMap(props: NetworkMapProps) {
         selectedNode,
         setNetworkMapData,
         selectingPipelineConnectionFromMap,
+        pipelineConnectionSelectionIndex,
+        availableNodes,
     } = useMapValues();
     const selectedNodeData = selectedNode?.node ?? (selectedNode as any);
     const selectedNodeType = selectedNodeData?.node_type;
@@ -273,6 +283,37 @@ export default function NetworkMap(props: NetworkMapProps) {
 
     }, [map_data])
 
+    const getPipelineConnectionTooltip = (candidateNode: any): string => {
+        if (!selectingPipelineConnectionFromMap || selectedNodeData?.node_type !== "path") {
+            return candidateNode?.name || "";
+        }
+
+        const pipelineNodes = selectedNodeData?.nodes || [];
+        const allowedCandidates = getAllowedPipelineConnectionCandidates(availableNodes, pipelineNodes, pipelineConnectionSelectionIndex);
+        if (allowedCandidates.some((node) => node.name === candidateNode?.name)) {
+            return `Add ${candidateNode.name} as connection`;
+        }
+
+        const insertIdx = pipelineConnectionSelectionIndex ?? pipelineNodes.length;
+        const previousConnection = insertIdx > 0 ? pipelineNodes[insertIdx - 1] : undefined;
+        const nextConnection = insertIdx < pipelineNodes.length ? pipelineNodes[insertIdx + 1] : undefined;
+        const previousNode = availableNodes.find((node) => node.name === previousConnection?.name);
+        const nextNode = availableNodes.find((node) => node.name === nextConnection?.name);
+        const fromNodeType = getMapEditorNodeType(previousNode);
+        const toNodeType = getMapEditorNodeType(candidateNode);
+        const nextNodeType = getMapEditorNodeType(nextNode);
+
+        if (fromNodeType && !isAllowedPipelineArc(fromNodeType, toNodeType)) {
+            return `${getNodeTypeDisplayName(fromNodeType)} cannot pipe water to ${getNodeTypeDisplayName(toNodeType)}`;
+        }
+
+        if (nextNodeType && !isAllowedPipelineArc(toNodeType, nextNodeType)) {
+            return `${getNodeTypeDisplayName(toNodeType)} cannot pipe water to ${getNodeTypeDisplayName(nextNodeType)}`;
+        }
+
+        return `${getNodeTypeDisplayName(fromNodeType)} cannot pipe water to ${getNodeTypeDisplayName(toNodeType)}`;
+    };
+
     return (
         <Box sx={{ px: 4, pb: 5, pt: 3 }}>
             <style>{css}</style>
@@ -356,7 +397,7 @@ export default function NetworkMap(props: NetworkMapProps) {
                                         }
                                     }}
                                 >
-                                    <Tooltip>{selectingPipelineConnectionFromMap ? `Add ${value.name} as connection` : value.name}</Tooltip>
+                                    <Tooltip>{getPipelineConnectionTooltip(value)}</Tooltip>
                                 </Marker>
                             </React.Fragment>
                         )
