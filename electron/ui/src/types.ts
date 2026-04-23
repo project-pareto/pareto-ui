@@ -206,8 +206,25 @@ export interface ScenarioResultsData {
   [tableName: string]: ResultsTable;
 }
 
+export interface ConstraintViolationRecord {
+  violation: number;
+  side: string | null;
+  constraint: string;
+  lower_bound: number | null;
+  body_value: number | null;
+  upper_bound: number | null;
+}
+
+export interface ConstraintViolationsSummary {
+  count: number;
+  tolerance: number;
+  logged_count: number;
+  violations: ConstraintViolationRecord[];
+}
+
 export interface ScenarioResults {
   data: ScenarioResultsData;
+  constraints_violations?: ConstraintViolationsSummary;
 
   [k: string]: any;
 }

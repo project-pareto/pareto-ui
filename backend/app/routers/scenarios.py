@@ -517,4 +517,5 @@ async def request_ai_optimization_diagnosis(request: Request, id: int) -> dict:
     """Prompt AI to diagnose a failed optimization run using scenario context."""
     req = await request.json()
     error_message = req.get("errorMessage", None)
-    return scenario_handler.generate_optimization_diagnosis_with_ai(id, error_message)
+    diagnosis_context = req.get("diagnosisContext", None)
+    return scenario_handler.generate_optimization_diagnosis_with_ai(id, error_message, diagnosis_context)

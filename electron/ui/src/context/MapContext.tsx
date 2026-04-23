@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName, calculatePipelineSegmentLengths } from "../util";
+import { reverseMapCoordinates, convertMapDataToBackendFormat, generateNewName, calculatePipelineSegmentLengths, reconcilePipelineOutgoingNodes, getAllowedPipelineConnectionCandidates } from "../util";
 import { useApp } from '../AppContext';
 import { uploadAdditionalMap } from "../services/app.service";
 import type { Scenario } from "../types";
@@ -91,7 +91,10 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
             if (!data) return data;
             const prev = { ...data.node } as MapEditorNode;
             const prevNodes = prev.nodes || [];
-            const updatedNodeList = [...prevNodes, { name: newConnectingNode.name, coordinates: newConnectingNode.coordinates }]
+            const updatedNodeList = reconcilePipelineOutgoingNodes(
+                [...prevNodes, { name: newConnectingNode.name, coordinates: newConnectingNode.coordinates }],
+                prevNodes
+            );
             const lengths = calculatePipelineSegmentLengths(updatedNodeList);
             const node = {
                 ...prev,
@@ -110,11 +113,12 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
             if (!data) return data;
             const prev = { ...data.node } as MapEditorNode;
             const prevNodes = prev.nodes || [];
-            const updatedNodeList = prevNodes.map((existingNode, idx) =>
+            const nextNodes = prevNodes.map((existingNode, idx) =>
                 idx === connectionIdx
                     ? { ...existingNode, name: replacementNode.name, coordinates: replacementNode.coordinates }
                     : existingNode
             );
+            const updatedNodeList = reconcilePipelineOutgoingNodes(nextNodes, prevNodes);
             const lengths = calculatePipelineSegmentLengths(updatedNodeList);
             const node = {
                 ...prev,
@@ -130,6 +134,13 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
 
     const clickNode = (node: MapEditorNode, idx: number): void => {
         if (selectedNode?.node?.node_type === "path" && selectingPipelineConnectionFromMap) {
+            const pipelineNodes = selectedNode.node.nodes || [];
+            // Reuse the same candidate filter as the editor dropdowns so map picks and form picks behave identically.
+            const allowedCandidates = getAllowedPipelineConnectionCandidates(nodeData, pipelineNodes, pipelineConnectionSelectionIndex);
+            const canUseSelectedNode = allowedCandidates.some((candidate) => candidate.name === node.name);
+            if (!canUseSelectedNode) {
+                return;
+            }
             if (pipelineConnectionSelectionIndex === null) {
                 addPipelineConnection(node)
             } else {

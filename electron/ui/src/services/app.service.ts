@@ -143,13 +143,14 @@ export const requestAIDataUpdate = (backend_port: number, id: number | string, p
 export const requestAIOptimizationDiagnosis = (
     backend_port: number,
     id: number | string,
-    errorMessage: string
+    errorMessage: string,
+    diagnosisContext?: any
 ) => {
     const endpoint = `${BACKEND_URL}:${backend_port}/request_ai_optimization_diagnosis/${id}`
     return fetch(endpoint, {
         method: 'POST',
         mode: 'cors',
-        body: JSON.stringify({ errorMessage })
+        body: JSON.stringify({ errorMessage, diagnosisContext })
     });
 }
 
