@@ -319,7 +319,7 @@ class ScenarioHandler:
             if scenario['name'].upper() == "WORKSHOP BASELINE":
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_baseline_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP SRA":
-                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_sra_{diagramType}.png'
+                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_SRA_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE":
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE OVERRIDE":

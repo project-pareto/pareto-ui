@@ -1,3 +1,4 @@
+import {getParameterTable} from '../../parameterTables';
 import './DataInput.css';
 import React from 'react';
 import {useEffect, useState} from 'react';
@@ -63,11 +64,11 @@ export default function DataInput(props: DataInputProps) {
 
         // determine unique row and column keys for row and column filter sets
         let grabbedRowList = false
-        for(let colKey of Object.keys(scenario.data_input.df_parameters[category])) {
+        for(let colKey of Object.keys(getParameterTable(scenario.data_input.df_parameters, category))) {
 
           // first key:value pair contains all the row names
           if (!grabbedRowList) {
-            let tempRowList = scenario.data_input.df_parameters[category][colKey]
+            let tempRowList = getParameterTable(scenario.data_input.df_parameters, category)[colKey]
             for (let rowKey of tempRowList) {
               if(Object.keys(tempRowFilterSet).includes(`${rowKey}`)) tempRowFilterSet[rowKey].amt = tempRowFilterSet[rowKey].amt + 1
               else tempRowFilterSet[rowKey] = {amt: 1, checked: true}
@@ -79,7 +80,7 @@ export default function DataInput(props: DataInputProps) {
         }
         
         // determing mappings between index/values and rows+columns
-        Object.entries(scenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
+        Object.entries(getParameterTable(scenario.data_input.df_parameters, category)).map( ([key, value], ind) => {
           if (ind === 0) {
             // tempRowNodesMapping = value
             value.map ((v,i) => {
@@ -91,7 +92,7 @@ export default function DataInput(props: DataInputProps) {
             tempColumnNodesMapping.push(`${ind}::${key}`)
             tempColumnNodes[`${ind}::${key}`] = true
           }
-          scenario.data_input.df_parameters[category][key].map( (value, index) => {
+          getParameterTable(scenario.data_input.df_parameters, category)[key].map( (value, index) => {
             tempEditDict[`${ind}:${index}`] = false
             return 1
           })
@@ -121,12 +122,12 @@ export default function DataInput(props: DataInputProps) {
 
   const handleSaveChanges = async () => {
     //api call to save changes on backend
-    const saved = await handleUpdateExcel(scenario.id, category, scenario.data_input.df_parameters[category]);
+    const saved = await handleUpdateExcel(scenario.id, category, getParameterTable(scenario.data_input.df_parameters, category));
     if (saved === false) return;
     handleEditInput(false)
     let tempEditDict = {}
-    Object.entries(scenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
-      scenario.data_input.df_parameters[category][key].map( (value, index) => {
+    Object.entries(getParameterTable(scenario.data_input.df_parameters, category)).map( ([key, value], ind) => {
+      getParameterTable(scenario.data_input.df_parameters, category)[key].map( (value, index) => {
         tempEditDict[`${ind}:${index}`] = false
         return 1
       })
@@ -277,7 +278,7 @@ const handleRowFilter = (row) => {
                 <CustomChart
                   input
                   category={plotCategoryDictionary[plotCategory]}
-                  data={scenario.data_input.df_parameters[plotCategory]} 
+                  data={getParameterTable(scenario.data_input.df_parameters, plotCategory)}
                   title={plotCategory}
                   xaxis={{titletext: "Planning Horizon (weeks)"}}
                   yaxis={{titletext: "Amount of Water (bbl/week)"}}
@@ -312,11 +313,11 @@ const handleRowFilter = (row) => {
           return (
             <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3, overflow: "scroll"}}>
               <InputSummary 
-                completionsDemand={scenario.data_input.df_parameters['CompletionsDemand']}
-                padRates={scenario.data_input.df_parameters['PadRates']}
-                flowbackRates={scenario.data_input.df_parameters['FlowbackRates']}
-                initialDisposalCapacity={scenario.data_input.df_parameters['InitialDisposalCapacity']}
-                initialTreatmentCapacity={scenario.data_input.df_parameters['InitialTreatmentCapacity']}
+                completionsDemand={getParameterTable(scenario.data_input.df_parameters, 'CompletionsDemand')}
+                padRates={getParameterTable(scenario.data_input.df_parameters, 'PadRates')}
+                flowbackRates={getParameterTable(scenario.data_input.df_parameters, 'FlowbackRates')}
+                initialDisposalCapacity={getParameterTable(scenario.data_input.df_parameters, 'InitialDisposalCapacity')}
+                initialTreatmentCapacity={getParameterTable(scenario.data_input.df_parameters, 'InitialTreatmentCapacity')}
                 scenario={scenario}
                 handleSetCategory={handleSetCategory} 
                 updateScenario={updateScenario}
@@ -331,7 +332,7 @@ const handleRowFilter = (row) => {
         return (
           <Box style={{backgroundColor:'white'}} sx={{m:3, padding:2, boxShadow:3}}>
         {['PadRates', 'CompletionsDemand', 'FlowbackRates', 'ExtWaterSourcingAvailability', 'ReuseMinimum', 'ReuseCapacity', 'DisposalOperatingCapacity'].includes(category) &&
-          <ForecastFill key={`${category}-${scenario.input_revision}`} name={category} table={scenario.data_input.df_parameters[category]}
+          <ForecastFill key={`${category}-${scenario.input_revision}`} name={category} table={getParameterTable(scenario.data_input.df_parameters, category)}
             periods={scenario.data_input.df_sets.TimePeriods || []} unit={category === 'DisposalOperatingCapacity' ? 'fraction, 0–1' : scenario.data_input.display_units[category] || 'bbl/day'}
             disabled={edited || isSaving} onSave={async table => (await handleUpdateExcel(scenario.id, category, table)) !== false} />}
         <Grid container>
@@ -398,4 +399,3 @@ const handleRowFilter = (row) => {
   );
 
 }
-

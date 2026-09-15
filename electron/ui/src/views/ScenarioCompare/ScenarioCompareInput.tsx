@@ -1,3 +1,4 @@
+import {getParameterTable} from '../../parameterTables';
 import React from 'react';
 import {useEffect, useState} from 'react';
 import { Grid, Box } from '@mui/material';
@@ -33,7 +34,7 @@ export default function ScenarioCompareInput(props: ScenarioCompareInputProps) {
           let tempColumnNodesMapping = []
           let tempRowNodes = {}
           let tempRowNodesMapping = []
-          Object.entries(primaryScenario.data_input.df_parameters[category]).map( ([key, value], ind) => {
+          Object.entries(getParameterTable(primaryScenario.data_input.df_parameters, category)).map( ([key, value], ind) => {
             if (ind === 0) {
               value.map ((v,i) => {
                 tempRowNodesMapping.push(`${i}::${v}`)
@@ -44,7 +45,7 @@ export default function ScenarioCompareInput(props: ScenarioCompareInputProps) {
               tempColumnNodesMapping.push(`${ind}::${key}`)
               tempColumnNodes[`${ind}::${key}`] = true
             }
-            primaryScenario.data_input.df_parameters[category][key].map( (value, index) => {
+            getParameterTable(primaryScenario.data_input.df_parameters, category)[key].map( (value, index) => {
               tempEditDict[`${ind}:${index}`] = false
               return 1
             })

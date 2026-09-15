@@ -1,3 +1,4 @@
+import {getParameterTable} from '../../parameterTables';
 import './ScenarioCompare.css';
 import React, {useEffect, useState, Fragment} from 'react';
 import Sidebar from '../../components/Sidebar/ScenarioCompareSidebar'
@@ -35,9 +36,9 @@ export default function ScenarioCompare() {
     try {
         for(let key of Subcategories.Dynamic) {
             temp_deltaDictionary[key] = []
-            let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
-            let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
-            let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
+            let tableKeys = Object.keys(getParameterTable(scenarios[primaryScenarioIndex].data_input.df_parameters, key))
+            let primaryValues = getParameterTable(scenarios[primaryScenarioIndex].data_input.df_parameters, key)
+            let referenceValues = getParameterTable(scenarios[referenceScenarioIndex].data_input.df_parameters, key)
             for (let i = 0; i < tableKeys.length; i++) {
                 let primaryValueSet = primaryValues[tableKeys[i]]
                 for (let j = 0; j < primaryValueSet.length; j++) {
@@ -57,9 +58,9 @@ export default function ScenarioCompare() {
 
         for(let key of Subcategories.Static) {
             temp_deltaDictionary[key] = []
-            let tableKeys = Object.keys(scenarios[primaryScenarioIndex].data_input.df_parameters[key])
-            let primaryValues = scenarios[primaryScenarioIndex].data_input.df_parameters[key]
-            let referenceValues = scenarios[referenceScenarioIndex].data_input.df_parameters[key]
+            let tableKeys = Object.keys(getParameterTable(scenarios[primaryScenarioIndex].data_input.df_parameters, key))
+            let primaryValues = getParameterTable(scenarios[primaryScenarioIndex].data_input.df_parameters, key)
+            let referenceValues = getParameterTable(scenarios[referenceScenarioIndex].data_input.df_parameters, key)
             for (let i = 0; i < tableKeys.length; i++) {
                 let primaryValueSet = primaryValues[tableKeys[i]]
                 for (let j = 0; j < primaryValueSet.length; j++) {

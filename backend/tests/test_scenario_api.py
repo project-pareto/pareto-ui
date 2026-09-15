@@ -3,6 +3,7 @@ from copy import deepcopy
 import asyncio
 import importlib
 import os
+import shutil
 from pathlib import Path
 import tempfile
 import threading
@@ -77,6 +78,74 @@ class ScenarioApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(ScenarioValidation.model_validate(payload).to_payload(), payload)
+
+    def create_zero_id_scenario(self):
+        scenario = deepcopy(self.example)
+        scenario['id'] = 0
+        write_inputs(scenario['data_input'], self.handler.get_excelsheet_path(0))
+        return self.handler.update_scenario(scenario)
+
+    def test_zero_id_update_rejects_stale_and_running_edits_without_writes(self):
+        current = self.create_zero_id_scenario()
+        workbook = Path(self.handler.get_excelsheet_path(0))
+        original_bytes = workbook.read_bytes()
+        stale = deepcopy(current)
+        stale['input_revision'] = 'stale-revision'
+        stale['name'] = 'Should not be saved'
+        response = self.client.post('/update', json={'updatedScenario': stale})
+        self.assertEqual(response.status_code, 409, response.text)
+        self.assertEqual(self.handler.get_scenario(0), current)
+
+        self.handler.add_background_task(0)
+        running = deepcopy(current)
+        running['data_input']['df_parameters']['PadRates']['T01'] = [42]
+        response = self.client.post('/update', json={'updatedScenario': running, 'propagateChanges': 'json'})
+        self.assertEqual(response.status_code, 409, response.text)
+        self.assertEqual(self.handler.get_scenario(0), current)
+        self.assertEqual(workbook.read_bytes(), original_bytes)
+
+    def test_zero_id_table_and_map_updates_survive_reload_and_export(self):
+        current = self.create_zero_id_scenario()
+        current['data_input']['df_parameters']['PadRates']['T01'] = [42]
+        response = self.client.post('/update', json={'updatedScenario': current})
+        self.assertEqual(response.status_code, 200, response.text)
+        current = response.json()['data']
+        self.assertEqual(read_inputs(self.handler.get_excelsheet_path(0))['df_parameters']['PadRates']['T01'], [42])
+
+        current['data_input']['map_data']['all_nodes']['K1']['DisposalOperationalCost'] = 2
+        response = self.client.post('/update', json={'updatedScenario': current, 'propagateChanges': 'map'})
+        self.assertEqual(response.status_code, 200, response.text)
+        exported = read_inputs(self.handler.get_excelsheet_path(0))
+        self.assertEqual(exported['df_parameters']['DisposalOperationalCost']['VALUE'], [2])
+        self.assertEqual(exported['df_parameters']['PadRates']['T01'], [42])
+        self.assertEqual(self.handler.get_scenario(0), response.json()['data'])
+
+    def test_workshop_sra_diagrams_use_exact_asset_filename_case(self):
+        scenario = deepcopy(self.example)
+        scenario['name'] = 'Workshop SRA'
+        self.handler.update_scenario(scenario)
+        real_copy = shutil.copyfile
+
+        def case_sensitive_copy(source, destination):
+            source = Path(source)
+            # macOS often resolves the wrong case; Linux and packaged assets do not.
+            if source.name not in {path.name for path in source.parent.iterdir()}:
+                raise FileNotFoundError(source)
+            return real_copy(source, destination)
+
+        for kind, filename, directory in (
+            ('input', 'Workshop SRA', self.handler.input_diagrams_path),
+            ('output', None, self.handler.output_diagrams_path),
+        ):
+            with self.subTest(kind=kind):
+                target = Path(directory) / '1.png'
+                target.unlink(missing_ok=True)
+                with patch.object(self.module.shutil, 'copyfile', side_effect=case_sensitive_copy):
+                    saved = self.handler.check_for_diagram(1, filename)
+                self.assertTrue(target.is_file())
+                source = Path(self.module.__file__).parent / 'assets' / f'workshop_SRA_{kind}.png'
+                self.assertEqual(target.read_bytes(), source.read_bytes())
+                self.assertEqual(saved[f'{kind}DiagramExtension'], 'png')
 
     def test_table_and_map_edits_survive_reload_and_export(self):
         table = {'ProductionPads': ['P1'], 'T01': [100], 'T02': [0]}

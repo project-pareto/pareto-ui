@@ -153,7 +153,8 @@ async def update(request: Request):
         updated_scenario = data['updatedScenario']
         propagate_changes = data.get("propagateChanges")
         scenario_id = updated_scenario.get("id")
-        if scenario_id:
+        # Zero is a valid persisted ID and needs the same edit/revision guards.
+        if scenario_id is not None:
             scenario_handler.ensure_editable(scenario_id)
             current = scenario_handler.get_scenario(int(scenario_id))
             if updated_scenario.get('input_revision') and updated_scenario['input_revision'] != current['input_revision']:

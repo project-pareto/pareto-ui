@@ -70,7 +70,8 @@ class MapArc(PayloadModel):
     coordinates: list[MapCoordinates] | None = None
     nodes: list[ArcNodeRef] | None = None
     lengths: list[int | float] | None = None
-    length: int | float | None = None
+    # Older map editors persisted the aggregate length as text.
+    length: CoordinateValue | None = None
     diameter: CoordinateValue | None = None
 
 

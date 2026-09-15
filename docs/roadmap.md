@@ -21,7 +21,11 @@ and [current validation behavior](scenario-validation.md).
 - Explain input preservation, revision ownership, fill previews, validation
   evidence, retry identity and credential boundaries in the code.
 - Record [bugs, legacy fields and removal candidates](cleanup-findings.md) for
-  review. These findings are not silently fixed or removed by the cleanup.
+  review. The approved follow-up fixes ID-0 update guards and SRA asset casing;
+  other findings and removals remain separate work.
+- Keep storage version 3 and extend contracts for actual legacy payload shapes.
+  The [compatibility audit](v3-compatibility.md) records two existing runtime
+  blockers to repair before adopting schemas on live routes or removing fields.
 
 ## Priorities and implementation plans
 

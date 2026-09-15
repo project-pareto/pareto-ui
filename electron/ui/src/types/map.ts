@@ -86,7 +86,7 @@ export interface MapArc {
   coordinates?: MapCoordinates[];
   nodes?: ArcNodeRef[];
   lengths?: number[];
-  length?: number;
+  length?: CoordinateValue;
   diameter?: CoordinateValue;
   [key: string]: unknown;
 }
@@ -144,7 +144,7 @@ export interface MapEditorNode extends MapFacilityFields {
   coordinates?: MapCoordinates;
   lengths?: number[];
   nodes?: ArcNodeRef[];
-  length?: number;
+  length?: CoordinateValue;
   diameter?: CoordinateValue;
   [key: string]: unknown;
 }

@@ -4,7 +4,7 @@ Absent optional fields stay absent through to_payload(). Dynamic PARETO tables
 retain blank cells and numeric strings; checking their physical meaning belongs
 to internal.validation, not these structural contracts.
 """
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from .base import PayloadModel
 from .map import MapData
@@ -13,16 +13,30 @@ from .validation import ConstraintViolationsSummary, ScenarioValidation
 Cell = str | int | float | None
 Scalar = str | int | float | bool | None
 ParameterTable = dict[str, list[Cell]]
+ScalarParameterData = dict[str, Cell]
+ParameterData = ParameterTable | ScalarParameterData
+SCALAR_PARAMETER_NAMES = {'Units', 'DesalinationSurrogate'}
 ResultsTable = list[list[Scalar]]
 
 
 class ScenarioDataInput(PayloadModel):
     df_sets: dict[str, list[str]]
-    df_parameters: dict[str, ParameterTable]
+    df_parameters: dict[str, ParameterData]
     display_units: dict[str, str] = Field(default_factory=dict)
     units: dict[str, str] | None = None
     map_data: MapData | None = None
     origin: str | None = None
+
+    @field_validator('df_parameters')
+    @classmethod
+    def preserve_legacy_metadata(cls, parameters: dict[str, ParameterData]) -> dict[str, ParameterData]:
+        # Older v3 readers included these scalar dictionaries alongside column
+        # tables. Keep their original representation; other tables still require
+        # arrays so malformed table data cannot pass as generic metadata.
+        for name, table in parameters.items():
+            if name not in SCALAR_PARAMETER_NAMES and any(not isinstance(column, list) for column in table.values()):
+                raise ValueError(f'{name}: parameter table columns must be arrays.')
+        return parameters
 
 
 class ScenarioOptimization(PayloadModel):

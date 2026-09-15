@@ -58,7 +58,10 @@ export type ParameterTable =
   | Record<string, never>;
  // empty object
 
-export type DfParameters = Record<string, ParameterTable>;
+/** Legacy v3 readers also saved scalar metadata under Units and DesalinationSurrogate. */
+export type ScalarParameterData = Record<string, Cell>;
+export type ParameterData = ParameterTable | ScalarParameterData;
+export type DfParameters = Record<string, ParameterData>;
 
 /** display_units is a map from variable/table name -> unit string */
 export type DisplayUnits = Record<string, string>;

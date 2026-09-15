@@ -9,6 +9,8 @@ export type {
   DfSets,
   ParameterTable,
   DfParameters,
+  ScalarParameterData,
+  ParameterData,
   DisplayUnits,
   ResultsTable,
   ScenarioResultsData,

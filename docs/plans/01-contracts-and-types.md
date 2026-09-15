@@ -39,6 +39,10 @@ use explicit mirrored types with contract tests. Decide this in the first PR.
 
 ## PR-sized steps
 
+Resolve the [existing v3 workbook/map compatibility blockers](../v3-compatibility.md)
+before enforcing the new schemas on live routes. Keep data version 3 unless a
+documented format change requires a separately tested migration.
+
 1. Inventory the endpoints used by scenario loading, saving, validation, launch,
    polling, results, and AI availability. Record success/error examples from
    existing fixtures, including legacy status and settings shapes. Agree on the

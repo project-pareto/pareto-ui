@@ -37,6 +37,23 @@ class PayloadContractTests(unittest.TestCase):
                          ['-103', '34', '0'])
         self.assertNotIn('validation', checked.to_payload())
         self.assertNotIn('optimized_override_values', checked.to_payload())
+        self.assertEqual(checked.data_input.df_parameters['Units'],
+                         payload['data_input']['df_parameters']['Units'])
+        self.assertEqual(checked.data_input.map_data.arcs['pipe'].length, '1.0')
+
+    def test_legacy_metadata_keeps_integer_and_float_values(self):
+        payload = json.loads(SHARED_FIXTURE.read_text())
+        for values in ({'inlet_salinity': 100, 'recovery': 1},
+                       {'inlet_salinity': 100.0, 'recovery': 0.5}):
+            with self.subTest(values=values):
+                payload['data_input']['df_parameters']['DesalinationSurrogate'] = values
+                self.assert_round_trip(Scenario, payload)
+
+    def test_scalar_metadata_does_not_weaken_ordinary_table_columns(self):
+        payload = json.loads(SHARED_FIXTURE.read_text())
+        payload['data_input']['df_parameters']['PadRates'] = {'T01': 100}
+        with self.assertRaises(ValidationError):
+            Scenario.model_validate(payload)
 
     def test_bundled_scenarios_keep_legacy_keys_and_missing_fields(self):
         records = json.loads((ROOT / 'backend/app/internal/assets/v1_default/scenarios.json').read_text())

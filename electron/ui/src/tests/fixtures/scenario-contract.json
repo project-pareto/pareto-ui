@@ -37,6 +37,8 @@
         ]
       },
       "RKA": {},
+      "Units": {"volume": "bbl", "decision period": "week"},
+      "DesalinationSurrogate": {"inlet_salinity": 100, "recovery": 0.5},
       "CustomInput": {
         "NODES": [
           "P1"
@@ -140,6 +142,7 @@
               34
             ]
           ],
+          "length": "1.0",
           "lengths": [
             1
           ],

@@ -1,3 +1,4 @@
+import {getParameterTable} from '../../parameterTables';
 import React from 'react';
 import {useEffect, useState} from 'react';
 import type { NewOverrideRowProps } from '../../types';
@@ -57,7 +58,7 @@ export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.El
           let connectionsDictionary = {}
           let allNodes = new Set()
           for (let tableName of pipelineTables) {
-            let table = scenario.data_input.df_parameters[tableName]
+            let table = getParameterTable(scenario.data_input.df_parameters, tableName)
             // let rowNames = table['ProductionPads']
             let rowNames = table[pipelineTypes[tableName.charAt(0)]]
             
@@ -220,11 +221,11 @@ export default function NewBinaryVariableRow(props: NewOverrideRowProps): JSX.El
   
     const generatePresetValues = (rowName) => {
       try {
-        let preset_value_table = scenario.data_input.df_parameters[INFRASTRUCTURE_CAPEX_MAPPING[rowName].input_table]
+        let preset_value_table = getParameterTable(scenario.data_input.df_parameters, INFRASTRUCTURE_CAPEX_MAPPING[rowName].input_table)
         let preset_values = {}
           if(rowName === "Treatment Facility") {
             let technologyNamesKey = "TreatmentCapacities"
-            let technologies = scenario.data_input.df_parameters[INFRASTRUCTURE_CAPEX_MAPPING[rowName].input_table][technologyNamesKey]
+            let technologies = getParameterTable(scenario.data_input.df_parameters, INFRASTRUCTURE_CAPEX_MAPPING[rowName].input_table)[technologyNamesKey]
             let len = technologies.length
             for (let i = 0; i < len; i++) {
               let each = technologies[i]
