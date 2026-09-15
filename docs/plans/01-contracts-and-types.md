@@ -55,9 +55,10 @@ documented format change requires a separately tested migration.
 3. Migrate validation, launch/retry, status, and result consumers. Narrow the
    central scenario state types and remove obsolete status spellings inside
    the app after mapping them at the boundary.
-4. Add a dedicated CI type-check command. Enforce strict checking in the migrated
-   core and expand its scope deliberately; do not enable strict mode for the
-   entire app and suppress the resulting errors with casts or `any`.
+4. Build on the dedicated `tsc --noEmit` step now included in the component CI
+   job. Enforce strict checking in the migrated core and expand its scope
+   deliberately; do not enable strict mode for the entire app and suppress the
+   resulting errors with casts or `any`.
 
 ## Acceptance checks
 

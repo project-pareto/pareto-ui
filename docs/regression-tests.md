@@ -170,11 +170,20 @@ the next full run.
 
 ## CI and remaining gaps
 
-[App Tests](../.github/workflows/main.yml) runs backend, frontend, desktop settings,
-and Cypress tests on **Linux and Windows**. Check each step and solver skips,
-not just the job name. Cypress screenshots are uploaded for troubleshooting.
-There is currently no dedicated `tsc --noEmit` CI step;
-[plan 1](plans/01-contracts-and-types.md) adds that explicitly.
+[App Tests](../.github/workflows/main.yml) runs three independent jobs on
+**Linux and Windows**:
+
+| Job | Checks and setup |
+| --- | --- |
+| Backend regression tests | `python -m unittest discover -s backend/tests`, with the Conda Python environment and IDAES solvers. |
+| Component and desktop tests | Explicit `tsc --noEmit`, Jest in non-watch mode, and Node desktop-settings tests. Uses Node 18 to match `environment.yml`; requires no backend server or solver setup and skips downloading the Cypress binary. |
+| E2E testing | Starts the backend and frontend, waits for HTTP readiness, then runs Cypress. Uses isolated scenario storage under the runner's temporary directory and uploads screenshots, videos when present, and server logs for troubleshooting. |
+
+Python tests previously ran inside the combined job named **E2E testing**.
+Separating the jobs makes each result visible and lets them run independently;
+a backend or component failure does not prevent the E2E job from running.
+Check solver skips as well as the job result. The explicit type-check step is
+implemented; broader strict checking remains in [plan 1](plans/01-contracts-and-types.md).
 
 Future coverage should include route reload/back/forward, large scenario
 collections and payload sizes, backend restart/run history, a complete map
