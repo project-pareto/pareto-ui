@@ -42,6 +42,12 @@ def _is_currency_equality(constraint):
 
 
 def scan_constraint_violations(model, tol=1e-6, max_results=25, solution_state="current_model_values", relative_tol=0):
+    """Count all residuals while retaining only the largest examples for the UI.
+
+    Evaluated/skipped counts qualify the evidence: an empty list from an
+    uninitialized model is not a clean solution. Relative tolerance is limited
+    to linear currency equalities; physical balances keep the absolute tolerance.
+    """
     summary = unavailable_constraint_scan()
     summary.update(tolerance=tol, solution_state=solution_state)
     if relative_tol:

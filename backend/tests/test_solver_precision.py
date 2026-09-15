@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 from pyomo.environ import ConcreteModel, Var, Binary, Constraint, Objective, SolverFactory, value
 from pyomo.opt import SolverResults, SolverStatus, TerminationCondition
-from app.internal.model_diagnostics import solution_is_feasible
-from app.internal.solvers import solver_name
+from app.internal.optimization.model_diagnostics import solution_is_feasible
+from app.internal.optimization.solvers import solver_name
 
 
 class SolverPrecisionTests(unittest.TestCase):
@@ -56,9 +56,9 @@ class SolverPrecisionTests(unittest.TestCase):
                     empty_result.solver.termination_condition = TerminationCondition.optimal
                     empty_result.problem.number_of_variables = 0
                     model = ConcreteModel()
-                    with patch('app.internal.solvers.CBCSHELL.solve', return_value=empty_result), \
-                         patch('app.internal.solvers.time.monotonic', side_effect=[100, 100 + elapsed]), \
-                         patch('app.internal.solvers.SolverFactory') as fallback_factory:
+                    with patch('app.internal.optimization.solvers.CBCSHELL.solve', return_value=empty_result), \
+                         patch('app.internal.optimization.solvers.time.monotonic', side_effect=[100, 100 + elapsed]), \
+                         patch('app.internal.optimization.solvers.SolverFactory') as fallback_factory:
                         result = solver.solve(model, load_solutions=False)
                         if elapsed < 20:
                             fallback_factory.return_value.solve.assert_called_once_with(

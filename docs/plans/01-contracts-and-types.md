@@ -4,10 +4,15 @@
 
 ## Problem and outcome
 
-[types.ts](../../electron/ui/src/types.ts) permits broad `any` values, including
-navigation and scenario data. [app.service.ts](../../electron/ui/src/services/app.service.ts)
-returns raw fetch responses; callers interpret status codes and differing payload
-shapes themselves. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
+PR #116 supplies [domain types and compatibility-tested Python models](../backend-organization.md)
+plus compile-time descriptions for core fetch responses. Runtime API decoding,
+request/response schema adoption, normalized errors and the new contracts below
+remain planned. Build on that foundation rather than duplicating the models.
+
+Shared scenario and navigation types now describe the core data paths; remaining
+[component props](../../electron/ui/src/types/components.ts) still permit broad `any` values. [app.service.ts](../../electron/ui/src/services/app.service.ts)
+returns native fetch responses with typed core JSON shapes; callers still interpret
+status codes and differing payload shapes themselves. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
 also recognizes several legacy status strings.
 
 Create explicit contracts at these boundaries before changing storage or UI

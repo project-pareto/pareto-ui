@@ -5,6 +5,10 @@ Service extraction can accompany plans 2–3. [Roadmap](../roadmap.md).
 
 ## Problem and outcome
 
+The [package organization](../backend-organization.md) in PR #116 groups existing
+modules and fixes filename inconsistencies. It does not extract services or
+change initialization, persistence or task lifetimes; those steps remain here.
+
 [scenario_handler.py](../../backend/app/internal/scenario_handler.py) combines
 database/filesystem setup, persistence, imports, edits, validation, task tracking,
 and AI orchestration. Constructing the module's global handler initializes storage
@@ -28,9 +32,9 @@ explain history and interruptions independently of the current editor.
 | PARETO adapter | Model configuration, compatibility adjustments, build/solve/verification/report calls. |
 | Optimization run service | Reservation, immutable input snapshot, idempotent launch, phases, completion, and cleanup. |
 
-Reuse existing `scenario_inputs`, `scenario_validation`, `scenario_fill`,
-`network_capacity`, `model_diagnostics`, `model_compatibility`, and `solvers`
-modules. AI remains a separate optional capability behind its current availability
+Reuse the existing modules under `internal/scenarios`, `internal/validation`
+and `internal/optimization`; the [move table](../backend-organization.md#module-moves)
+records their current names. AI remains a separate optional capability behind its current availability
 and credential boundaries.
 
 ## PR-sized steps

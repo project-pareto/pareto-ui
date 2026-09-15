@@ -6,9 +6,9 @@ import unittest
 from unittest.mock import patch
 
 from scenario_fixtures import simple_scenario
-from app.internal.input_schema import input_revision, with_horizon
-from app.internal.scenario_inputs import write_inputs, read_inputs
-from app.internal.scenario_validation import validate_inputs, check_model
+from app.internal.scenarios.input_schema import input_revision, with_horizon
+from app.internal.scenarios.inputs import write_inputs, read_inputs
+from app.internal.validation.scenario_validation import validate_inputs, check_model
 from pyomo.environ import SolverFactory
 
 class ScenarioValidationTests(unittest.TestCase):

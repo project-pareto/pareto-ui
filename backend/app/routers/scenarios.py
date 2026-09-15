@@ -23,18 +23,18 @@ from fastapi.responses import FileResponse
 import logging
 import idaes.logger as idaeslog
 
-from app.internal.pareto_stategic_model import handle_run_strategic_model
+from app.internal.optimization.strategic_model import handle_run_strategic_model
 from app.internal.scenario_handler import (
     scenario_handler,
 )
-from app.internal.KMZParser import ParseKMZ
-from app.internal.ExcelApi import WriteMapDataToExcel, PreprocessMapData
-from app.internal.ShapefileParser import extract_shp_paths, parseShapefiles
+from app.internal.maps.kml_parser import ParseKMZ
+from app.internal.workbooks.excel_api import WriteMapDataToExcel, PreprocessMapData
+from app.internal.maps.shapefile_parser import extract_shp_paths, parseShapefiles
 from app.internal.util import time_it
 from app.internal.util import prepare_config
-from app.internal.input_schema import input_revision
-from app.internal.scenario_validation import validate_inputs
-from app.internal.ai_configuration import ai_configuration as cborg
+from app.internal.scenarios.input_schema import input_revision
+from app.internal.validation.scenario_validation import validate_inputs
+from app.internal.ai.configuration import ai_configuration as cborg
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -106,7 +106,7 @@ def planning_horizon(scenario_id: int, payload: dict = Body(...)):
 
 @router.post('/fill_scenario_inputs/{scenario_id}')
 def fill_scenario_inputs(scenario_id: int, payload: dict = Body(...)):
-    from app.internal.scenario_fill import prepare_fill
+    from app.internal.scenarios.fill import prepare_fill
     with scenario_handler._db_lock:
         scenario_handler.ensure_editable(scenario_id)
         current = scenario_handler.get_scenario(scenario_id)

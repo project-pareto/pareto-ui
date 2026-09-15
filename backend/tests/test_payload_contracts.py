@@ -1,0 +1,82 @@
+"""Check payload compatibility without adding validation to live request paths."""
+from copy import deepcopy
+import json
+from pathlib import Path
+import tempfile
+import unittest
+
+from pydantic import ValidationError
+
+from app.schemas.map import MapData
+from app.schemas.scenario import Scenario
+from app.schemas.validation import ScenarioValidation
+from app.internal.validation.scenario_validation import validate_inputs
+from app.internal.maps.kml_parser import ParseKMZ
+from app.internal.maps.shapefile_parser import extract_shp_paths, parseShapefiles
+from scenario_fixtures import map_files
+
+ROOT = Path(__file__).resolve().parents[2]
+SHARED_FIXTURE = ROOT / 'electron/ui/src/tests/fixtures/scenario-contract.json'
+
+
+class PayloadContractTests(unittest.TestCase):
+    def assert_round_trip(self, model, payload):
+        # Comparing JSON also distinguishes false/0 and 1/1.0, which Python's
+        # dictionary equality would otherwise consider equal.
+        checked = model.model_validate(payload)
+        self.assertEqual(json.dumps(checked.to_payload(), sort_keys=True),
+                         json.dumps(payload, sort_keys=True))
+        return checked
+
+    def test_shared_payload_preserves_source_metadata_and_scalar_types(self):
+        payload = json.loads(SHARED_FIXTURE.read_text())
+        checked = self.assert_round_trip(Scenario, payload)
+        self.assertIsInstance(checked.data_input.map_data, MapData)
+        self.assertEqual(checked.id, 0)
+        self.assertEqual(checked.data_input.map_data.all_nodes['P1'].coordinates,
+                         ['-103', '34', '0'])
+        self.assertNotIn('validation', checked.to_payload())
+        self.assertNotIn('optimized_override_values', checked.to_payload())
+
+    def test_bundled_scenarios_keep_legacy_keys_and_missing_fields(self):
+        records = json.loads((ROOT / 'backend/app/internal/assets/v1_default/scenarios.json').read_text())
+        for record in records['_default'].values():
+            with self.subTest(id=record['scenario']['id']):
+                self.assert_round_trip(Scenario, record['scenario'])
+
+    def test_real_map_import_payloads_match_the_map_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            kml, archive = map_files(directory)
+            for source, parsed in (
+                ('kml', ParseKMZ(str(kml), 'NetworkNode')),
+                ('shapefile', parseShapefiles(extract_shp_paths(str(archive)), 'NetworkNode')),
+            ):
+                with self.subTest(source=source):
+                    # The contract describes JSON crossing the API. Python parser
+                    # tuples become arrays at that existing serialization boundary.
+                    self.assert_round_trip(MapData, json.loads(json.dumps(parsed)))
+
+    def test_invalid_numeric_inputs_remain_representable_for_completion(self):
+        payload = json.loads(SHARED_FIXTURE.read_text())
+        payload['data_input']['df_parameters']['PadRates']['T01'] = ['not a number']
+        self.assert_round_trip(Scenario, payload)
+        validation = validate_inputs(payload)
+        self.assert_round_trip(ScenarioValidation, validation)
+        self.assertTrue(any(issue['code'] == 'invalid_value' for issue in validation['issues']))
+
+    def test_optional_map_and_transient_rename_alias_round_trip(self):
+        payload = json.loads(SHARED_FIXTURE.read_text())
+        original = deepcopy(payload)
+        payload['data_input']['map_data']['_node_renames'] = {'P1': 'P2'}
+        self.assert_round_trip(Scenario, payload)
+        payload['data_input']['map_data'] = None
+        self.assert_round_trip(Scenario, payload)
+        del payload['data_input']['map_data']
+        self.assert_round_trip(Scenario, payload)
+        self.assertNotIn('_node_renames', original['data_input']['map_data'])
+
+    def test_contract_check_does_not_coerce_scenario_identity(self):
+        payload = json.loads(SHARED_FIXTURE.read_text())
+        for value in ('0', False):
+            with self.subTest(id=value), self.assertRaises(ValidationError):
+                Scenario.model_validate({**payload, 'id': value})

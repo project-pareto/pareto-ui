@@ -4,7 +4,7 @@ import { useApp } from '../AppContext';
 import { useScenario } from './ScenarioContext';
 import { uploadAdditionalMap } from "../services/app.service";
 import type { Scenario } from "../types";
-import type { CoordinateTuple, MapEditorNode, SelectedNodeState, MapContextValue, MapProviderProps } from "../types";
+import type { CoordinateTuple, MapData, MapContextData, MapEditorNode, SelectedNodeState, MapContextValue, MapProviderProps } from "../types";
 
 // Create the context
 const MapContext = createContext<MapContextValue | undefined>(undefined);
@@ -15,7 +15,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
     const { acceptSavedScenario } = useScenario();
     const [ lineData, setLineData ] = useState<MapEditorNode[]>([]);
     const [ nodeData, setNodeData ] = useState<MapEditorNode[]>([]);
-    const [networkMapData, setNetworkMapData] = useState<any>([]);
+    const [networkMapData, setNetworkMapData] = useState<MapContextData>([] as []);
     const [selectedNode, setSelectedNode] = useState<SelectedNodeState | null>(null);
     const [showNetworkNode, setShowNetworkNode] = useState<boolean>(false);
     const [showNetworkPipeline, setShowNetworkPipeline] = useState<boolean>(false);
@@ -200,7 +200,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
             console.error("No node selected, cannot save changes")
             return;
         }
-        let backendUpdate: any;
+        let backendUpdate: Pick<MapData, 'all_nodes' | 'arcs'>;
         if (showNetworkNode) {
             backendUpdate = convertMapDataToBackendFormat(update, undefined);
         } else {
@@ -227,7 +227,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
     const deleteSelectedNode = (): void => {
         const idx = selectedNode?.idx;
         let updateKey: "all_nodes" | "arcs" | undefined;
-        let backendUpdate: any;
+        let backendUpdate: MapData['all_nodes'] | MapData['arcs'];
         if (showNetworkNode) {
             const updatedList = [...nodeData];
             updatedList.splice(idx, 1);

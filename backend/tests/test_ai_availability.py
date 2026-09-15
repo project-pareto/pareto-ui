@@ -2,13 +2,13 @@ import os
 import unittest
 from unittest.mock import patch
 
-from app.internal.openai_client_wrapper import OpenAIClientWrapper
+from app.internal.ai.client import OpenAIClientWrapper
 
 
 class AIAvailabilityTests(unittest.TestCase):
     def test_missing_and_blank_keys_do_not_initialize_a_client(self):
         with patch.dict(os.environ, {'CBORG_API_KEY': '', 'OPENAI_API_KEY': ''}), \
-                patch('app.internal.openai_client_wrapper.openai.OpenAI') as factory:
+                patch('app.internal.ai.client.openai.OpenAI') as factory:
             for key in (None, '', '   ', '\t\n'):
                 with self.subTest(key=repr(key)):
                     client = OpenAIClientWrapper(api_key=key)
@@ -16,7 +16,7 @@ class AIAvailabilityTests(unittest.TestCase):
             factory.assert_not_called()
 
     def test_configured_key_enables_ai_and_clearing_it_disables_ai(self):
-        with patch('app.internal.openai_client_wrapper.openai.OpenAI') as factory:
+        with patch('app.internal.ai.client.openai.OpenAI') as factory:
             client = OpenAIClientWrapper(api_key=' test-key ')
             self.assertTrue(client.is_available())
             factory.assert_called_once_with(api_key='test-key')

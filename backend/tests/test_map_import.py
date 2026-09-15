@@ -5,7 +5,7 @@ from pathlib import Path
 import geopandas as gpd
 from shapely.geometry import LineString
 
-from app.internal.ShapefileParser import ParseShapefile
+from app.internal.maps.shapefile_parser import ParseShapefile
 from app.internal.util import determineArcsAndConnections, calculate_distance_from_coordinates
 
 

@@ -3,10 +3,10 @@ import tempfile
 import unittest
 
 from scenario_fixtures import simple_scenario
-from app.internal.input_schema import flat_table, with_horizon
-from app.internal.scenario_fill import prepare_fill
-from app.internal.scenario_inputs import read_inputs, write_inputs
-from app.internal.scenario_validation import validate_inputs
+from app.internal.scenarios.input_schema import flat_table, with_horizon
+from app.internal.scenarios.fill import prepare_fill
+from app.internal.scenarios.inputs import read_inputs, write_inputs
+from app.internal.validation.scenario_validation import validate_inputs
 
 
 class ScenarioFillTests(unittest.TestCase):

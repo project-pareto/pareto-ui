@@ -9,9 +9,9 @@ import re
 import threading
 
 from pareto.utilities.process_data import get_valid_piping_arc_list, get_valid_trucking_arc_list
-from .input_schema import NODE_SETS, OPTION_SETS, FORECASTS, flat_table, dimension_count, input_revision
-from .util import prepare_config
-from .validation_help import network_help
+from app.internal.scenarios.input_schema import NODE_SETS, OPTION_SETS, FORECASTS, flat_table, dimension_count, input_revision
+from app.internal.util import prepare_config
+from app.internal.validation.help import network_help
 
 CATALOG_VERSION = 3
 MODEL_LOCK = threading.Lock()
@@ -258,7 +258,7 @@ def validate_inputs(scenario, *, fill_targets=None):
             issue('residual_boundary', 'capacity', f'{site} has no residual-water route. The parent model omits that stream balance; review whether residual water should leave the modeled network.', severity='warning', row=(site,))
 
     if config['pipeline_capacity'] == 'input' and not any(counts[(section, 'error')] for section in ('forecasts', 'capacity')):
-        from .network_capacity import capacity_issues
+        from app.internal.validation.network_capacity import capacity_issues
         for finding in capacity_issues(sets, flat, edges, config['node_capacity']):
             table, row = finding['cut'][0] if finding['cut'] else ('InitialDisposalCapacity', ())
             issue('network_capacity', 'capacity',
@@ -304,21 +304,27 @@ def validate_inputs(scenario, *, fill_targets=None):
             'units': units, 'periods': periods, 'model_check': 'not_run', 'feasibility': 'not_run'}
 
 def check_model(scenario, path, result, solve=False):
-    from .get_data import get_data
+    """Attach model/solver evidence without treating input completeness as feasibility.
+
+    Construction alone cannot prove that a flow plan exists. The bounded check
+    disables slack and verifies returned values; exhausting its budget remains
+    "not determined" unless the solver actually establishes infeasibility.
+    """
+    from app.internal.workbooks.reader import get_data
     from pareto.strategic_water_management.strategic_produced_water_optimization import create_model, scale_model
     from pareto.utilities.solvers import get_solver, set_timeout
     from pareto.utilities.model_modifications import fix_vars
     from pyomo.environ import Objective, value, TransformationFactory
     from pyomo.opt import TerminationCondition
-    from .model_diagnostics import scan_constraint_violations, solution_is_feasible, SOLUTION_RELATIVE_TOLERANCE
-    from .solvers import solver_name
+    from app.internal.optimization.model_diagnostics import scan_constraint_violations, solution_is_feasible, SOLUTION_RELATIVE_TOLERANCE
+    from app.internal.optimization.solvers import solver_name
     result = deepcopy(result)
     if not MODEL_LOCK.acquire(blocking=False):
         return {**result, 'valid': False, 'state': 'not_determined', 'error': 'Another model check is running. Try again after it finishes.'}
     try:
         sets, params, _ = get_data(str(path))
         model = create_model(sets, params, default=prepare_config(scenario))
-        from .model_compatibility import prepare_model_for_ui
+        from app.internal.optimization.model_compatibility import prepare_model_for_ui
         prepare_model_for_ui(model)
         for entries in scenario.get('override_values', {}).values():
             for entry in entries.values():

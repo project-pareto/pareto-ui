@@ -10,6 +10,13 @@ This guide describes the suite at the merge of
 (11 September 2026). See the [roadmap](roadmap.md) for planned improvements and
 [validation reference](scenario-validation.md) for the behavior being protected.
 
+The cleanup in PR #116 updates backend import/patch paths and adds
+[payload contract checks](../backend/tests/test_payload_contracts.py), including
+bundled older scenarios and a [shared Python/TypeScript fixture](../electron/ui/src/tests/fixtures/scenario-contract.json).
+The [frontend contract test](../electron/ui/src/tests/payloadcontracts.test.ts)
+checks that rebased edits retain source metadata and server-owned revisions.
+The historical PR #112 counts below describe that merge, not the expanded suite.
+
 ## What the PR added
 
 | Layer | Added or updated in PR #112 | What actually runs |

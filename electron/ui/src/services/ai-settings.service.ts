@@ -1,21 +1,7 @@
 import { getAIAvailability, getAISettings, saveAISettings, resetAISettings } from './app.service';
 
-export interface AISettings {
-  available: boolean;
-  source: 'user' | 'environment' | 'none';
-  base_url: string;
-  model: string;
-  environment_available: boolean;
-  can_remember: boolean;
-  remembered: boolean;
-}
-
-export interface AISettingsInput {
-  api_key?: string;
-  base_url: string;
-  model: string;
-  remember: boolean;
-}
+import type {AISettings, AISettingsInput} from '../types/ai';
+export type {AISettings, AISettingsInput} from '../types/ai';
 
 type SettingsResult = {ok: boolean; settings?: AISettings; error?: string; retryable?: boolean};
 declare global {
@@ -35,6 +21,8 @@ async function readResponse(response: Response): Promise<AISettings> {
 }
 
 export async function updateAISettings(port: number, operation: 'get' | 'save' | 'reset', input?: AISettingsInput): Promise<AISettings> {
+  // Desktop owns remembered credentials and restores them directly to the backend.
+  // The renderer receives availability/settings only, never a remembered API key.
   if (window.paretoAISettings) {
     const result = operation === 'save' ? await window.paretoAISettings.save(input) : await window.paretoAISettings[operation]();
     if (!result.ok || !result.settings) throw new Error(result.error || 'Unable to update AI settings.');

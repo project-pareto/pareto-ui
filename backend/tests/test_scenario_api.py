@@ -14,7 +14,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from pyomo.environ import SolverFactory
 from scenario_fixtures import simple_scenario, map_files
-from app.internal.scenario_inputs import read_inputs, write_inputs
+from app.internal.scenarios.inputs import read_inputs, write_inputs
 
 
 class ScenarioApiTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class ScenarioApiTests(unittest.TestCase):
         with patch.dict(os.environ, {'PARETO_DATA_BASEDIR': cls.directory.name, 'PARETO_LOG_DIR': cls.directory.name}):
             cls.module = importlib.import_module('app.internal.scenario_handler')
             cls.routes = importlib.import_module('app.routers.scenarios')
-            cls.runner = importlib.import_module('app.internal.pareto_stategic_model')
+            cls.runner = importlib.import_module('app.internal.optimization.strategic_model')
         os.chdir(cwd)
 
     @classmethod
@@ -64,6 +64,19 @@ class ScenarioApiTests(unittest.TestCase):
         self.handler.add_background_task(1)
         self.assertEqual(self.client.post('/update_excel', json={'id': 1, 'tableKey': 'PadRates', 'updatedTable': {}, 'revision': current['input_revision']}).status_code, 409)
         self.assertEqual(self.handler.get_scenario(1)['input_revision'], current['input_revision'])
+
+    def test_payload_models_match_current_scenario_and_readiness_responses(self):
+        from app.schemas.scenario import Scenario
+        from app.schemas.validation import ScenarioValidation
+
+        response = self.client.get('/get_scenario/1')
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(Scenario.model_validate(payload).to_payload(), payload)
+        response = self.client.get('/scenario_readiness/1')
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(ScenarioValidation.model_validate(payload).to_payload(), payload)
 
     def test_table_and_map_edits_survive_reload_and_export(self):
         table = {'ProductionPads': ['P1'], 'T01': [100], 'T02': [0]}

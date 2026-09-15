@@ -3,14 +3,14 @@ import os
 from functools import lru_cache
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from .input_schema import FORECASTS, OPTION_SETS
-from .workbook_preservation import WorkbookPreservation
+from app.internal.scenarios.input_schema import FORECASTS, OPTION_SETS
+from app.internal.workbooks.preservation import WorkbookPreservation
 
 import logging
 _log = logging.getLogger(__name__)
 
 print_output = True
-DEFAULT_TEMPLATE_LOCATION = f'{os.path.dirname(os.path.abspath(__file__))}/assets/pareto_input_template.xlsx'
+DEFAULT_TEMPLATE_LOCATION = f'{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/assets/pareto_input_template.xlsx'
 HEADER_TEMPLATE_SKIP_SHEETS = {"Overview", "Schematic", "Units"}
 
 def _print(output):

@@ -62,6 +62,11 @@ def flat_table(table):
     return {keys: value for keys, value in table_cells(table)}
 
 def input_revision(scenario):
+    """Identify the model inputs, including settings and overrides, for stale checks.
+
+    Geometry and display metadata do not drive the model. Their numeric changes
+    reach this hash through the canonical tables after map synchronization.
+    """
     data = scenario.get('data_input') or {}
     payload = {k: data.get(k, {}) for k in ('df_sets', 'df_parameters', 'units')}
     payload['optimization'] = scenario.get('optimization', {})

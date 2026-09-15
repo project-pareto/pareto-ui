@@ -4,14 +4,14 @@ from copy import deepcopy
 from functools import lru_cache
 import math
 
-from .input_schema import FORECASTS, dimension_count, input_revision
-from .scenario_validation import REQUIREMENTS, SECTION_NAMES, numeric, validate_inputs
+from app.internal.scenarios.input_schema import FORECASTS, dimension_count, input_revision
+from app.internal.validation.scenario_validation import REQUIREMENTS, SECTION_NAMES, numeric, validate_inputs
 
 
 @lru_cache(maxsize=1)
 def template_headers():
     from openpyxl import load_workbook
-    from .ExcelApi import DEFAULT_TEMPLATE_LOCATION
+    from app.internal.workbooks.excel_api import DEFAULT_TEMPLATE_LOCATION
     workbook = load_workbook(DEFAULT_TEMPLATE_LOCATION, read_only=True, data_only=True)
     try:
         result = {}
@@ -69,6 +69,12 @@ def set_cell(tables, table, keys, value, periods):
 
 
 def prepare_fill(scenario, section, value):
+    """Compute preview and apply from the same complete set of eligible cells.
+
+    Validation caps visible issues at 250, but collects fill targets separately.
+    The route checks the revision before recomputing this operation, so accepting
+    a preview cannot apply a value to inputs changed since that preview.
+    """
     if section not in SECTION_NAMES:
         raise ValueError('Choose a completion section to fill.')
     number = numeric(value)

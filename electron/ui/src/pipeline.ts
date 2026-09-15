@@ -8,6 +8,9 @@ const nodeTypeCodes: Record<string, string> = {
   SWDSite: 'K', TreatmentSite: 'R', StorageSite: 'S', ExternalWaterSource: 'F', ReuseOption: 'O',
 };
 
+// PARETO names pipe tables with the source/destination facility codes plus "A".
+// Both map picks and form dropdowns use these rules so each enabled flow direction
+// has a supported input table; the geometric point order does not choose the flow.
 export const AllowedPipelineArcs = new Set([
   'PNA', 'CNA', 'CCA', 'NNA', 'NCA', 'NKA', 'NRA', 'NSA', 'FCA',
   'RCA', 'RNA', 'RSA', 'SCA', 'SNA', 'ROA', 'RKA', 'SOA', 'NOA',

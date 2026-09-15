@@ -2,12 +2,26 @@
 
 This roadmap follows [PR #112](https://github.com/project-pareto/pareto-ui/pull/112),
 merged on 11 September 2026. The map-to-optimization workflow is the working
-baseline. The work below is **planned**; this document does not mean the
-architectural changes have been implemented.
+baseline. The architectural stages below are **planned**. The bounded cleanup
+foundation described next is implemented in the PR #116 working branch; it does
+not complete those architectural stages.
 
 For application usage, start with [From map file to optimization](scenario-completion.md).
 For the safety net around future changes, see [Regression tests](regression-tests.md)
 and [current validation behavior](scenario-validation.md).
+
+## Cleanup foundation in PR #116
+
+- Group backend modules by responsibility and standardize filenames; see the
+  [organization guide and move table](backend-organization.md).
+- Split shared frontend types by domain and type the core scenario API/context
+  paths, map fields and completion data. Keep existing type import paths valid.
+- Add Pydantic scenario/map/validation contracts and representative compatibility
+  fixtures. Live request validation, response serialization and storage remain unchanged.
+- Explain input preservation, revision ownership, fill previews, validation
+  evidence, retry identity and credential boundaries in the code.
+- Record [bugs, legacy fields and removal candidates](cleanup-findings.md) for
+  review. These findings are not silently fixed or removed by the cleanup.
 
 ## Priorities and implementation plans
 
@@ -23,8 +37,19 @@ responsibilities, and broaden typing and component cleanup.
 | 4 | [Backend services and optimization runs](plans/04-backend-services-and-runs.md) | Explicit persistence and model boundaries, smaller routers, durable run records, and honest restart handling. | Planned; extraction can begin after stage 1 alongside stages 2–3. |
 | 5 | [Broader typing and component cleanup](plans/05-type-and-component-cleanup.md) | Stricter types and smaller components organized around the responsibilities established above. | Planned; incremental work can accompany every stage. |
 
-The proposed API and module names in the plans are design targets, not existing
-interfaces. Each plan includes PR-sized steps, acceptance checks, and migration
+## Future product feature
+
+| Feature | Intended result | Status / dependency |
+| --- | --- | --- |
+| [AI-assisted industry map interpretation](plans/06-ai-map-interpretation.md) | Translate unfamiliar source metadata into reviewed scenario mappings and edits, with units, uncertainty and source traceability. | Planned; uses stage 1 contracts and stable import/preservation boundaries. Optional AI. |
+
+This feature has a separate scope and acceptance plan. It does not require the
+navigation or persistent-run redesign to be completed first.
+
+## Scope of the maintenance stages
+
+Additional API and service contracts in the stages are design targets. The
+[current organization guide](backend-organization.md) identifies implemented modules. Each plan includes PR-sized steps, acceptance checks, and migration
 constraints. A new state library, database, or job queue is not a prerequisite.
 
 ## Why these areas

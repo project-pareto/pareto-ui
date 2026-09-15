@@ -1,7 +1,7 @@
 import json
 import unittest
 from pyomo.environ import Binary, ConcreteModel, Constraint, Var, units as pyunits
-from app.internal.model_diagnostics import scan_constraint_violations, build_diagnosis_context, solution_is_feasible
+from app.internal.optimization.model_diagnostics import scan_constraint_violations, build_diagnosis_context, solution_is_feasible
 
 
 class DiagnosticTests(unittest.TestCase):

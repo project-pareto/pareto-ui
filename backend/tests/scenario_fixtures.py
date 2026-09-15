@@ -1,7 +1,7 @@
 """Small positive-flow examples; no dependency on private map_testing files."""
 from pathlib import Path
-from app.internal.ExcelApi import WriteMapDataToExcel
-from app.internal.scenario_inputs import read_inputs, write_inputs
+from app.internal.workbooks.excel_api import WriteMapDataToExcel
+from app.internal.scenarios.inputs import read_inputs, write_inputs
 
 def map_files(directory):
     """Equivalent three-point maps in both supported import formats."""

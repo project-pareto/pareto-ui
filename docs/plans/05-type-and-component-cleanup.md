@@ -5,7 +5,12 @@ in [plans 1–4](../roadmap.md). Small improvements can accompany those stages.
 
 ## Problem and outcome
 
-[types.ts](../../electron/ui/src/types.ts), [util.ts](../../electron/ui/src/util.ts),
+PR #116 splits the shared type entry point into domain files, types core scenario
+requests/responses and context state, and documents the [remaining gaps](../cleanup-findings.md#typing-that-remains).
+This stage continues with presentation/chart types, node-versus-pipeline editor
+contracts and the component/strict-mode work below.
+
+[component props](../../electron/ui/src/types/components.ts), [util.ts](../../electron/ui/src/util.ts),
 [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx), and
 [ModelResults](../../electron/ui/src/views/ModelResults/ModelResults.tsx)
 mix responsibilities or rely on permissive data shapes. Strict mode is disabled
