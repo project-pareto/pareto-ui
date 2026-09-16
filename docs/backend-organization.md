@@ -113,7 +113,9 @@ responses and queued scenario/table saves using explicit frontend decoders.
 It also covers completion/validation, autofill, planning periods, advance,
 optimization launch, task responses, copy/delete/import operations, and AI
 availability/settings/fill/diagnosis. Desktop settings bridge responses are also
-checked before they reach UI state.
+checked before they reach UI state. Workbook downloads check HTTP status, media
+type and container signature; diagram reads/mutations check their existing JSON
+envelopes. Every function in the frontend API service now uses the shared client.
 Backend route dictionaries still have the behavior described above. The decoder
 tests include the shared fixture and bundled older scenarios; draft result tables
 may be absent and failure-result metadata may be null.

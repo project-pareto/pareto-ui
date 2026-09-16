@@ -10,7 +10,7 @@ increment adds checked scenario retrieval, queued scenario/table saves, normaliz
 client errors, and a strict compiler check for the decoder/helper. Subsequent
 increments migrate completion/validation, fill preview/apply, planning periods,
 advance, optimization launch/retry, task checks, copy/delete/import, and AI
-availability/settings/fill/diagnosis. These preserve existing backend routes and
+availability/settings/fill/diagnosis, workbook downloads, and diagram operations. These preserve existing backend routes and
 stored data. The
 [endpoint inventory and compatibility decisions](../api-contracts.md) describe
 what is implemented and what remains. Backend schema adoption and the new
@@ -18,8 +18,8 @@ contracts below remain planned.
 
 Shared scenario and navigation types now describe the core data paths; remaining
 [component props](../../electron/ui/src/types/components.ts) still permit broad `any` values. [app.service.ts](../../electron/ui/src/services/app.service.ts)
-returns decoded data for the migrated endpoints and native fetch responses for
-the others. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
+returns checked JSON data or workbook blobs for every endpoint. Backend schema
+adoption and the other stage 1 work remain planned. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
 also recognizes several legacy status strings.
 
 Create explicit contracts at these boundaries before changing storage or UI

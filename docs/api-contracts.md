@@ -1,7 +1,7 @@
 # Runtime API contracts
 
 Runtime decoding checks scenario retrieval, queued edits, copy/delete/import,
-completion/validation, optimization launch/tasks, and AI responses before consumers use them. Backend routes and storage
+completion/validation, optimization launch/tasks, AI, downloads, and diagrams before consumers use them. Backend routes and storage
 remain unchanged. [Plan 1](plans/01-contracts-and-types.md) tracks the remaining
 contract work.
 
@@ -27,8 +27,12 @@ contract work.
 | `getAISettings`, `saveAISettings`, `resetAISettings` / `GET`, `PUT`, `DELETE /ai_settings` | `AIBackendSettings` | Checked public metadata only; unknown fields are dropped. Browser-only settings add `can_remember: false` and `remembered: false`. |
 | `requestAIDataUpdate` / `POST /request_ai_data_update/{id}` | `AIPromptResponse` | Checked input proposal and string notes, or an explicit application error. Legacy wrappers and error bodies are normalized. |
 | `requestAIOptimizationDiagnosis` / `POST /request_ai_optimization_diagnosis/{id}` | `AIOptimizationDiagnosisResponse` | Success requires summary, cause/caution arrays, checked steps, and the backend's diagnosis timestamp. |
+| `fetchExcelTemplate`, `fetchExcelFile`, `generateExcelFromMap`, `generateReport` / `/get_template/{id}`, `/get_excel_file/{filename}`, `/generate_excel_from_map/{id}`, `/generate_report/{id}` | `Blob` | Successful HTTP status, supported workbook media type, and a nonempty ZIP container signature. IDs and filename path segments are checked before fetching. |
+| `fetchDiagram` / `GET /get_diagram/{type}/{id}` | `string \| null` | Nonempty path from `{data: string}`; the backend's specific `400: no diagram found...` means normal absence. Other failures remain errors. |
+| `uploadDiagram` / `POST /upload_diagram/{type}/{id}` | `null` | The current backend acknowledges upload with JSON null. A scenario-shaped or error object is not a valid acknowledgement. |
+| `deleteDiagram` / `GET /delete_diagram/{type}/{id}` | `{data: Scenario}` | Matching scenario ID. This legacy route returns existing metadata, so a new input revision is not required. |
 
-These functions return decoded data, not native `Response` objects. Their caller
+These functions return decoded data or checked workbook blobs, not native `Response` objects. Their caller
 does not call `.json()` or inspect `.ok`. Request IDs accept nonnegative safe
 integers or canonical decimal route text, including `0` and `"0"`; blank,
 fractional, negative, and ambiguous values are rejected before fetching.
@@ -79,6 +83,31 @@ enable advance. Model construction, solver feasibility, and “not determined”
 remain separate. Validation controls accept scenario ID zero. Responses arriving
 after a scenario/input change are ignored by the validation dialog; obsolete
 readiness errors and autofill previews likewise cannot affect the newer inputs.
+
+## Files and diagrams
+
+`requestWorkbook` shares the JSON client's network and HTTP error handling. It
+accepts the XLSX media type, `application/octet-stream`, or `application/zip`, then
+checks the ZIP local-file header before returning a blob. JSON/HTML responses,
+empty bodies, and unreadable transfers cannot become downloads. These checks
+identify the expected container; they do not validate every ZIP entry or workbook
+sheet. There is no automatic retry.
+
+Export/report controls show failures, disable duplicate clicks while pending,
+and ignore requests after navigation or unmount. A shared helper removes download
+anchors and revokes temporary URLs after the browser processes the click. Export
+does not refresh scenario state: it is a read and must not reload an editing draft.
+External sample-file links still use the browser's normal download handling.
+
+Diagram callers accept only `input` or `output` and nonnegative scenario IDs,
+including zero. Failed/malformed deletions retain the displayed image; failed
+uploads retain the file and offer a read-only reload to check whether the write
+succeeded. The UI checks the acknowledgement and subsequent path before refreshing
+scenario state. Reads are cancelled and late mutations ignored when their view
+is replaced. Switching between map and image views does not retain the old view.
+The backend still returns local filesystem paths rendered through `file://` in
+Electron; this change does not add browser-accessible image serving or change
+diagram persistence semantics.
 
 ## AI boundaries
 
@@ -151,12 +180,17 @@ desktop settings, public metadata, legacy AI errors and input/diagnosis shapes.
 client through a fake transport, including scenario zero, duplicate requests,
 navigation, cleared requests and malformed previews. Settings/availability tests
 also use the production client and cover recovery without overwriting form edits.
+[File contract tests](../electron/ui/src/tests/filecontracts.test.ts) check workbook
+media types/signatures, errors, cancellation, path parameters and diagram envelopes.
+[Download tests](../electron/ui/src/tests/downloads.test.tsx) cover visible failures,
+URL cleanup and obsolete requests; [diagram tests](../electron/ui/src/tests/networkdiagram.test.tsx)
+cover mutation failures, reload, navigation and map/image transitions.
 
-## Remaining endpoints
+## Remaining contract work
 
-| Consumers / endpoints | Current boundary / next work |
-| --- | --- |
-| Results, downloads, reports, diagrams | Results inside migrated scenario reads are checked; binary/download endpoints need their own response handling. |
+All functions in `app.service.ts` now use the shared client. Results embedded in
+scenario reads are structurally checked, and the remaining file/diagram consumers
+have migrated. This completes the frontend endpoint migration portion of stage 1.
 
 The unused legacy `ApiResponse<T>` success/error intersection has been removed.
 Backend request/response schema adoption,

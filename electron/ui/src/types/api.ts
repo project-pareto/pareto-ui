@@ -1,6 +1,8 @@
 import type {ParameterTable} from './tables';
 import type {Scenario, ScenarioId, ScenarioMap, ScenarioPropagation} from './scenario';
 
+export type DiagramType = 'input' | 'output';
+
 export interface ScenarioResponse {data: Scenario}
 export interface ScenarioListResponse {data: ScenarioMap}
 export interface TaskResponse {tasks: number[]}

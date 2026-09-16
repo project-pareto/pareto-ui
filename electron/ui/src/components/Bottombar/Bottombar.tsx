@@ -17,6 +17,8 @@ import AIPromptDialog from '../AIPromptDialog/AIPromptDialog';
 import { useAIPrompt } from '../../context/AIPromptContext';
 import ScenarioValidationDialog from '../ScenarioValidationDialog/ScenarioValidationDialog';
 import {ApiClientError} from '../../services/apiClient';
+import {useWorkbookDownload} from '../../hooks/useWorkbookDownload';
+import ErrorBar from '../ErrorBar/ErrorBar';
 import type {ScenarioValidation} from '../../types';
 
 
@@ -40,6 +42,7 @@ export default function Bottombar(props) {
     } = props;
     const { results, id, name } = scenario || {};
     const { status } = results || {};
+    const {downloading, downloadError, clearDownloadError, startDownload} = useWorkbookDownload(`${port}:${id}`);
     const [ openSaveModal, setOpenSaveModal ] = useState(false)
 
     const [ openRerunModal, setOpenRerunModal] = useState(false)
@@ -149,26 +152,8 @@ export default function Bottombar(props) {
         setNewScenarioName(event.target.value)
       }
 
-      const handleClickGenerateSpreadsheet = () => {
-        // generateExcelFromMap(port, id)
-        generateExcelFromMap(port, id).then(response => {
-          if (response.status === 200) {
-                  response.blob().then((data)=>{
-                  let excelURL = window.URL.createObjectURL(data);
-                  let tempLink = document.createElement('a');
-                  tempLink.href = excelURL;
-                  tempLink.setAttribute('download', name+'.xlsx');
-                  tempLink.click();
-                  syncScenarioData();
-              }).catch((err)=>{
-                  console.error("error generating excel: ",err)
-              })
-          }
-          else {
-              console.error("error generating excel: ",response.statusText)
-          }
-          })
-      }
+      const handleClickGenerateSpreadsheet = () =>
+        startDownload(signal => generateExcelFromMap(port, id, signal), name + '.xlsx');
 
       const handleValidateScenario = (solve = false) => {
         if (id === null || id === undefined) {
@@ -241,6 +226,7 @@ export default function Bottombar(props) {
   return ( 
     <Box sx={{ width: 500 }}>
       <CssBaseline />
+      {downloadError && <ErrorBar errorMessage={downloadError} severity="error" setOpen={clearDownloadError} duration={8000} margin/>}
       <Paper sx={{ position: 'fixed', bottom: 0, left: '0px', right: 0, height: '60px', zIndex: 2 }} elevation={3}>
           {scenario ? 
             <Grid container sx={{marginTop: '10px'}}>
@@ -280,6 +266,7 @@ export default function Bottombar(props) {
                               <Button
                                 sx={styles.filled}
                                 onClick={handleClickGenerateSpreadsheet}
+                                disabled={downloading}
                                 variant="contained"
                                 size="large"
                                 startIcon={<FileDownloadIcon />}

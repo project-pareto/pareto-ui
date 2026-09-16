@@ -43,6 +43,12 @@ fill/diagnosis payloads, scenario zero, and late or duplicate AI requests. A fai
 settings mutation retains form edits; a fill proposal cannot be saved onto a
 different scenario. These tests stub transport/provider calls and do not require
 a live AI connection.
+File/diagram tests exercise the production client through fake transport. They
+reject malformed workbook responses, preserve images after failed deletion,
+keep upload state on failure, guard late requests after navigation, and verify
+temporary download URL cleanup. Export no longer reloads scenario state. These
+checks validate HTTP handling and the workbook container signature, not every
+workbook sheet or browser/Electron file-rendering behavior.
 
 ## What the PR added
 

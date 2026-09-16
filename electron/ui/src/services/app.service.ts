@@ -3,8 +3,10 @@ import type {
     UpdateScenarioRequest, UpdateExcelRequest, RunModelRequest, FillScenarioInputsRequest,
     Scenario, ScenarioId, ScenarioValidationResult, ScenarioFillPreview,
 } from '../types';
-import {ApiClientError, requestJson, scenarioId} from './apiClient';
+import {ApiClientError, requestJson, requestWorkbook, scenarioId} from './apiClient';
 import {object} from './contracts/decode';
+import {decodeDiagram, decodeDiagramUpload} from './contracts/diagram';
+import type {DiagramType} from '../types/api';
 import {decodeSavedScenario, decodeScenarioList, scenarioFor} from './contracts/scenario';
 import {copiedScenarioFor, deletedScenarioFor} from './contracts/collection';
 import {decodeTasks, decodeValidationResult, fillPreviewFor, runFor} from './contracts/workflow';
@@ -47,34 +49,34 @@ export const checkTasks = (backend_port: number): Promise<TaskResponse> => {
     });
 }; 
 
-export const fetchDiagram = (backend_port: number, type: string, id: number | string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/get_diagram/'+type+'/'+id, {
-        method: 'GET', 
-        mode: 'cors'
-    });
-}
+const diagramType = (type: DiagramType): DiagramType => {
+    if (type !== 'input' && type !== 'output') throw new ApiClientError('invalid_request', 'Choose an input or output diagram.');
+    return type;
+};
 
-export const uploadDiagram = (backend_port: number, data: FormData, type: string, id: number | string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/upload_diagram/'+type+'/'+id, {
-        method: 'POST', 
-        mode: 'cors',
-        body: data
-    });
-}; 
+export const fetchDiagram = async (port: number, type: DiagramType, id: ScenarioId, signal?: AbortSignal): Promise<string | null> => {
+    const endpoint = `${BACKEND_URL}:${port}/get_diagram/${diagramType(type)}/${scenarioId(id)}`;
+    try {
+        return (await requestJson(endpoint, decodeDiagram, {signal})).data;
+    } catch (error) {
+        // This legacy route reports normal diagram absence as HTTP 400.
+        if (error instanceof ApiClientError && error.status === 400 && typeof error.detail === 'string' && error.detail.startsWith('no diagram found')) return null;
+        throw error;
+    }
+};
 
-export const deleteDiagram = (backend_port: number, type: string, id: number | string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/delete_diagram/'+type+'/'+id, {
-        method: 'GET', 
-        mode: 'cors'
+export const uploadDiagram = async (port: number, data: FormData, type: DiagramType, id: ScenarioId): Promise<null> =>
+    requestJson(`${BACKEND_URL}:${port}/upload_diagram/${diagramType(type)}/${scenarioId(id)}`, decodeDiagramUpload, {
+        method: 'POST', mode: 'cors', body: data,
     });
-}
 
-export const fetchExcelTemplate = (backend_port: number, id: number | string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/get_template/'+id, {
-        method: 'GET', 
-        mode: 'cors'
-    });
-}
+export const deleteDiagram = async (port: number, type: DiagramType, id: ScenarioId): Promise<ScenarioResponse> => {
+    const parsedId = scenarioId(id);
+    return requestJson(`${BACKEND_URL}:${port}/delete_diagram/${diagramType(type)}/${parsedId}`, object({data: scenarioFor(parsedId)}), {method: 'GET', mode: 'cors'});
+};
+
+export const fetchExcelTemplate = async (port: number, id: ScenarioId, signal?: AbortSignal): Promise<Blob> =>
+    requestWorkbook(`${BACKEND_URL}:${port}/get_template/${scenarioId(id)}`, {signal});
 
 export const replaceExcelSheet = async (backend_port: number, data: FormData, id: ScenarioId): Promise<Scenario> => {
     const parsedId = scenarioId(id);
@@ -85,12 +87,12 @@ export const replaceExcelSheet = async (backend_port: number, data: FormData, id
     });
 }; 
 
-export const fetchExcelFile = (backend_port: number, filename: string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/get_excel_file/'+filename, {
-        method: 'GET', 
-        mode: 'cors'
-    });
-}; 
+export const fetchExcelFile = async (port: number, filename: string, signal?: AbortSignal): Promise<Blob> => {
+    if (typeof filename !== 'string' || !filename.trim() || /[/\\]/.test(filename) || filename === '.' || filename === '..') {
+        throw new ApiClientError('invalid_request', 'An Excel filename without a directory is required.');
+    }
+    return requestWorkbook(`${BACKEND_URL}:${port}/get_excel_file/${encodeURIComponent(filename)}`, {signal});
+};
 
 export const runModel = async (backend_port: number, data: RunModelRequest): Promise<Scenario> => {
     const id = scenarioId(data.scenario.id);
@@ -147,19 +149,11 @@ export const uploadAdditionalMap = async (backend_port: number, data: FormData, 
     });
 }; 
 
-export const generateReport = (backend_port: number, id: number | string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/generate_report/'+id, {
-        method: 'GET', 
-        mode: 'cors'
-    });
-}
+export const generateReport = async (port: number, id: ScenarioId, signal?: AbortSignal): Promise<Blob> =>
+    requestWorkbook(`${BACKEND_URL}:${port}/generate_report/${scenarioId(id)}`, {signal});
 
-export const generateExcelFromMap = (backend_port: number, id: number | string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/generate_excel_from_map/'+id, {
-        method: 'GET', 
-        mode: 'cors'
-    });
-}
+export const generateExcelFromMap = async (port: number, id: ScenarioId, signal?: AbortSignal): Promise<Blob> =>
+    requestWorkbook(`${BACKEND_URL}:${port}/generate_excel_from_map/${scenarioId(id)}`, {signal});
 
 export const getScenarioReadiness = async (port: number, id: ScenarioId, signal?: AbortSignal): Promise<ScenarioValidationResult> =>
     requestJson(`${BACKEND_URL}:${port}/scenario_readiness/${scenarioId(id)}`, decodeValidationResult, {signal});

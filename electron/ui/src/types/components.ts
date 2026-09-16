@@ -55,7 +55,7 @@ export interface OptimizationProps {
 
 export interface NetworkDiagramProps {
   scenario: Scenario;
-  type?: string;
+  type?: import('./api').DiagramType;
   syncScenarioData?: (id?: string | number) => void;
   showMapTypeToggle?: boolean;
   interactive?: boolean;

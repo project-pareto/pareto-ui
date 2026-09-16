@@ -1,10 +1,8 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import Modal from '@mui/material/Modal';
 import { Grid, MenuItem, Box, TextField, IconButton, Button, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FileUploader } from "react-drag-drop-files";
-import { fetchExcelFile } from '../../services/app.service';
-import { useApp } from '../../AppContext';
 import { NetworkNodeTypes } from '../../util';
 import { NodeIcon } from '../NetworkMap/NodeIcon';
 import type { FileUploadModalProps } from '../../types';
@@ -25,14 +23,11 @@ export default function FileUploadModal(props: FileUploadModalProps) {
     const [ file, setFile ] = useState<File | null>(null)
     const [ uploading, setUploading ] = useState(false)
     const [defaultNodeType, setDefaultNodeType] = useState<string>("NetworkNode");
-    const PARETO_VERSION = "main"
     const isMapFile = file?.name.includes('zip') || file?.name.includes('kmz') || file?.name.includes('kml');
 
     const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/strategic_permian_demo.xlsx"
     const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/workshop_baseline_all_data.xlsx"
-    const workshopFileName = "workshop_baseline_all_data_"+process.env.REACT_APP_PARETO_VERSION+".xlsx"
 
-  const { port } = useApp()
 
    const styles = {
     modalStyle: {
@@ -81,25 +76,6 @@ export default function FileUploadModal(props: FileUploadModalProps) {
 
    const handleClose = () => {
     if (!uploading) setShowFileModal(false)
-   }
-
-   const handleDownloadWorkshopFile = () => {
-        fetchExcelFile(port, workshopFileName).then(response => {
-        if (response.status === 200) {
-                response.blob().then((data)=>{
-                let excelURL = window.URL.createObjectURL(data);
-                let tempLink = document.createElement('a');
-                tempLink.href = excelURL;
-                tempLink.setAttribute('download', 'workshop_baseline_all_data.xlsx');
-                tempLink.click();
-            }).catch((err)=>{
-                console.error("error fetching excel template path: ",err)
-            })
-        }
-        else {
-            console.error("error fetching excel template path: ",response.statusText)
-        }
-        })
    }
 
    const handleClickUpload = async () => {

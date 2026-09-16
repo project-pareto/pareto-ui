@@ -4,7 +4,7 @@ import type { InputSummaryProps } from '../../types';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { Box, FormControl, MenuItem, Select, Typography, Grid, Button } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
-import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.service';
+import { replaceExcelSheet } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
 import { FileUploader } from "react-drag-drop-files";
 import ErrorBar from '../ErrorBar/ErrorBar'
@@ -174,25 +174,6 @@ export default function InputSummary(props: InputSummaryProps) {
 
     const handleTableTypeChange = (event: SelectChangeEvent<string>) => {
         setTableType(event.target.value as string)
-    }
-
-    const handleDownloadExcel = () => {
-        fetchExcelTemplate(port, props.scenario.id).then(response => {
-        if (response.status === 200) {
-                response.blob().then((data)=>{
-                let excelURL = window.URL.createObjectURL(data);
-                let tempLink = document.createElement('a');
-                tempLink.href = excelURL;
-                tempLink.setAttribute('download', props.scenario.name+'.xlsx');
-                tempLink.click();
-            }).catch((err)=>{
-                console.error("error fetching excel template path: ",err)
-            })
-        }
-        else {
-            console.error("error fetching excel template path: ",response.statusText)
-        }
-        })
     }
 
     const handleReplaceExcel = async (file: File) => {
