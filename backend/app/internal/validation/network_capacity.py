@@ -1,7 +1,7 @@
 """Necessary capacity screening, with optimistic bounds for complex facilities."""
 from collections import defaultdict, deque
 import math
-from .input_schema import NODE_SETS
+from app.internal.scenarios.input_schema import NODE_SETS
 
 def number(value, default=0):
     try:

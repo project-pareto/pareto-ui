@@ -9,8 +9,8 @@ import pandas as pd
 from openpyxl import Workbook
 from pareto.utilities.get_data import DataLoadingError
 
-from app.internal.get_data import _sheets_to_dfs
-from app.internal.scenario_inputs import read_inputs, write_inputs
+from app.internal.workbooks.reader import _sheets_to_dfs
+from app.internal.scenarios.inputs import read_inputs, write_inputs
 
 
 class WorkbookHandleTests(unittest.TestCase):
@@ -23,7 +23,7 @@ class WorkbookHandleTests(unittest.TestCase):
                 super().__init__(*args, **kwargs)
                 readers.append(self)
 
-        reader_patch = patch('app.internal.get_data.pd.ExcelFile', TrackedReader)
+        reader_patch = patch('app.internal.workbooks.reader.pd.ExcelFile', TrackedReader)
         reader_patch.start()
         self.addCleanup(reader_patch.stop)
         # Keep readers reachable; normal refcounting/GC must not hide missing close().

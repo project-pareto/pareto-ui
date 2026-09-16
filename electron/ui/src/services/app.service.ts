@@ -1,6 +1,12 @@
+import type {
+    ApiResponse, ScenarioResponse, ScenarioListResponse, TaskResponse, CopyScenarioResponse,
+    UpdateScenarioRequest, UpdateExcelRequest, RunModelRequest, FillScenarioInputsRequest,
+    Scenario, ScenarioId, ScenarioValidation,
+} from '../types';
+
 let BACKEND_URL = "http://localhost"
 
-export const updateScenario = (backend_port: number, data: any) => {
+export const updateScenario = (backend_port: number, data: UpdateScenarioRequest): Promise<ApiResponse<ScenarioResponse>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/update', {
         method: 'POST', 
         mode: 'cors',
@@ -8,7 +14,7 @@ export const updateScenario = (backend_port: number, data: any) => {
     });
 }; 
 
-export const updateExcel = (backend_port: number, data: any) => {
+export const updateExcel = (backend_port: number, data: UpdateExcelRequest): Promise<ApiResponse<Scenario>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/update_excel', {
         method: 'POST', 
         mode: 'cors',
@@ -16,28 +22,28 @@ export const updateExcel = (backend_port: number, data: any) => {
     });
 }; 
 
-export const fetchScenarios = (backend_port: number) => {
+export const fetchScenarios = (backend_port: number): Promise<ApiResponse<ScenarioListResponse>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/get_scenario_list/', {
         method: 'GET', 
         mode: 'cors'
     });
 }; 
 
-export const checkTasks = (backend_port: number) => {
+export const checkTasks = (backend_port: number): Promise<ApiResponse<TaskResponse>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/check_tasks/', {
         method: 'GET', 
         mode: 'cors'
     });
 }; 
 
-export const fetchDiagram = (backend_port: number, type: any, id: number | string) => {
+export const fetchDiagram = (backend_port: number, type: string, id: number | string) => {
     return fetch(BACKEND_URL+':'+backend_port+'/get_diagram/'+type+'/'+id, {
         method: 'GET', 
         mode: 'cors'
     });
 }
 
-export const uploadDiagram = (backend_port: number, data: any, type: string, id: number | string) => {
+export const uploadDiagram = (backend_port: number, data: FormData, type: string, id: number | string) => {
     return fetch(BACKEND_URL+':'+backend_port+'/upload_diagram/'+type+'/'+id, {
         method: 'POST', 
         mode: 'cors',
@@ -59,7 +65,7 @@ export const fetchExcelTemplate = (backend_port: number, id: number | string) =>
     });
 }
 
-export const replaceExcelSheet = (backend_port: number, data: any, id: number | string) => {
+export const replaceExcelSheet = (backend_port: number, data: FormData, id: number | string) => {
     return fetch(BACKEND_URL+':'+backend_port+'/replace/'+id, {
         method: 'POST', 
         mode: 'cors',
@@ -74,7 +80,7 @@ export const fetchExcelFile = (backend_port: number, filename: string) => {
     });
 }; 
 
-export const runModel = (backend_port: number, data: any) => {
+export const runModel = (backend_port: number, data: RunModelRequest): Promise<ApiResponse<Scenario>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/run_model', {
         method: 'POST', 
         mode: 'cors',
@@ -82,7 +88,7 @@ export const runModel = (backend_port: number, data: any) => {
     });
 }; 
 
-export const deleteScenario = (backend_port: number, data: any) => {
+export const deleteScenario = (backend_port: number, data: {id: ScenarioId}): Promise<ApiResponse<ScenarioListResponse>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/delete_scenario/', {
         method: 'POST', 
         mode: 'cors',
@@ -90,17 +96,17 @@ export const deleteScenario = (backend_port: number, data: any) => {
     });
 }; 
 
-export const copyScenario = (backend_port: number, id: number | string, newScenarioName: string) => {
+export const copyScenario = (backend_port: number, id: number | string, newScenarioName: string): Promise<ApiResponse<CopyScenarioResponse>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/copy/'+id+'/'+newScenarioName, {
         method: 'GET', 
         mode: 'cors'
     });
 };
 
-export const fetchScenario = (backend_port: number, id: string | number) =>
+export const fetchScenario = (backend_port: number, id: ScenarioId): Promise<ApiResponse<Scenario>> =>
     fetch(`${BACKEND_URL}:${backend_port}/get_scenario/${id}`);
 
-export const uploadScenario = (backend_port: number, data: any, name: string, defaultNodeType: string) => {
+export const uploadScenario = (backend_port: number, data: FormData, name: string, defaultNodeType: string) => {
     let endpoint = BACKEND_URL+':'+backend_port+'/upload/'+name
     if (defaultNodeType) endpoint += `?defaultNodeType=${defaultNodeType}`
     return fetch(endpoint, {
@@ -110,7 +116,7 @@ export const uploadScenario = (backend_port: number, data: any, name: string, de
     });
 };
 
-export const uploadAdditionalMap = (backend_port: number, data: any, id: number | string, defaultNodeType: string) => {
+export const uploadAdditionalMap = (backend_port: number, data: FormData, id: number | string, defaultNodeType: string): Promise<ApiResponse<Scenario>> => {
     let endpoint = BACKEND_URL+':'+backend_port+'/upload_additional_map/'+id
     if (defaultNodeType) endpoint += `?defaultNodeType=${defaultNodeType}`
     return fetch(endpoint, {
@@ -134,19 +140,17 @@ export const generateExcelFromMap = (backend_port: number, id: number | string) 
     });
 }
 
-export const getScenarioReadiness = (port: number, id: number | string, signal?: AbortSignal) =>
+export const getScenarioReadiness = (port: number, id: number | string, signal?: AbortSignal): Promise<ApiResponse<ScenarioValidation>> =>
     fetch(`${BACKEND_URL}:${port}/scenario_readiness/${id}`, {signal});
 
-export const fillScenarioInputs = (port: number, id: number, payload: {
-    section: string; revision: string; value: number; apply: boolean;
-}) => fetch(`${BACKEND_URL}:${port}/fill_scenario_inputs/${id}`, {
+export const fillScenarioInputs = (port: number, id: number, payload: FillScenarioInputsRequest) => fetch(`${BACKEND_URL}:${port}/fill_scenario_inputs/${id}`, {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
 });
 
-export const checkScenarioFeasibility = (port: number, id: number | string) =>
+export const checkScenarioFeasibility = (port: number, id: number | string): Promise<ApiResponse<ScenarioValidation>> =>
     fetch(`${BACKEND_URL}:${port}/scenario_feasibility/${id}`, {method: 'POST'});
 
-export const savePlanningHorizon = (port: number, id: number | string, periods: string[], revision?: string) =>
+export const savePlanningHorizon = (port: number, id: number | string, periods: string[], revision?: string): Promise<ApiResponse<Scenario>> =>
     fetch(`${BACKEND_URL}:${port}/planning_horizon/${id}`, {method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({periods, revision})});
 
@@ -186,14 +190,14 @@ export const requestAIOptimizationDiagnosis = (
     });
 }
 
-export const validateScenario = (backend_port: number, id: number | string) => {
+export const validateScenario = (backend_port: number, id: number | string): Promise<ApiResponse<ScenarioValidation>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/validate_scenario/'+id, {
         method: 'GET',
         mode: 'cors'
     });
 };
 
-export const advanceToOptimizationSetup = (backend_port: number, id: number | string) => {
+export const advanceToOptimizationSetup = (backend_port: number, id: number | string): Promise<ApiResponse<ScenarioResponse>> => {
     return fetch(BACKEND_URL+':'+backend_port+'/advance_to_optimization_setup/'+id, {
         method: 'POST',
         mode: 'cors'

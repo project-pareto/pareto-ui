@@ -1,5 +1,5 @@
 """Preserve table-owned inputs when the geometry adapter rebuilds a workbook."""
-from .input_schema import NODE_SETS, OPTION_SETS, FORECASTS, NODE_FIELDS, PIPE_FIELDS, dimension_count
+from app.internal.scenarios.input_schema import NODE_SETS, OPTION_SETS, FORECASTS, NODE_FIELDS, PIPE_FIELDS, dimension_count
 
 def worksheet_cells(ws):
     headers = [cell.value for cell in ws[2]]
@@ -17,6 +17,12 @@ def worksheet_cells(ws):
     return values
 
 class WorkbookPreservation:
+    """Restore existing cells by facility/option/period identity after map export.
+
+    Map edits can reorder rows or rebuild whole sheets. Row numbers cannot tell
+    us which values survive; indexed keys can. Only explicitly changed map
+    fields override a surviving table value, including a deliberately entered zero.
+    """
     def __init__(self, wb, data, previous_map=None):
         self.wb, self.data, self.previous_map = wb, data, previous_map
         self.cells = {ws.title: worksheet_cells(ws) for ws in wb if ws.title not in (*NODE_SETS, *OPTION_SETS, 'TimePeriods')}

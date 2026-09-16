@@ -11,14 +11,28 @@ import {
   reuseOptionIcon, 
   externalWaterSourceIcon
 } from './assets/custom-icons';
-import {
+import type {
   CoordinateTuple,
-  DimensionIndexedTable,
+  MapAdditionalField,
+  MapEditorNode,
+  MapData,
+  MapCoordinates,
+  ArcNodeRef,
+  ParameterTable,
   SeriesByKey,
   Cell,
 } from 'types';
 
-export const NetworkNodeTypes = {
+interface NetworkNodeType {
+  key: string;
+  name: string;
+  displayName: string;
+  icon: typeof treatmentIcon;
+  iconUrl: string;
+  additionalFields?: MapAdditionalField[];
+}
+
+export const NetworkNodeTypes: Record<string, NetworkNodeType> = {
   TreatmentSite: {
     key: 'R',
     name: 'TreatmentSite',
@@ -369,7 +383,7 @@ export {
   getPipelineConnectionIssues, reconcilePipelineOutgoingNodes,
 } from './pipeline';
 
-export const formatCoordinatesFromNodes = (nodes) => {
+export const formatCoordinatesFromNodes = (nodes: ArcNodeRef[]): number[][] => {
   const coordinates = [];
   for (const node of nodes || []) {
     const segment = node.segment_coordinates?.length ? node.segment_coordinates : [node.coordinates];
@@ -389,7 +403,7 @@ const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 /**
  * Great-circle distance (miles) between two [lon, lat] coordinates.
  */
-export const calculateDistanceFromCoordinates = (startCoords, endCoords): number => {
+export const calculateDistanceFromCoordinates = (startCoords?: MapCoordinates, endCoords?: MapCoordinates): number => {
   const lon1 = Number(startCoords?.[0]);
   const lat1 = Number(startCoords?.[1]);
   const lon2 = Number(endCoords?.[0]);
@@ -415,7 +429,7 @@ export const calculateDistanceFromCoordinates = (startCoords, endCoords): number
  * Returns segment lengths in miles where lengths[i] is distance between
  * nodes[i] and nodes[i + 1].
  */
-export const calculatePipelineSegmentLengths = (nodes = []) => {
+export const calculatePipelineSegmentLengths = (nodes: Pick<MapEditorNode, 'name' | 'coordinates'>[] = []): number[] => {
   if (!Array.isArray(nodes) || nodes.length < 2) return [];
 
   const lengths = [];
@@ -429,7 +443,7 @@ export const calculatePipelineSegmentLengths = (nodes = []) => {
 }
 
 // Preserve measured or manually entered lengths on segments that survive an edit.
-export const reconcilePipelineSegmentLengths = (nextNodes = [], prevNodes = [], prevLengths = []) => {
+export const reconcilePipelineSegmentLengths = (nextNodes: ArcNodeRef[] = [], prevNodes: ArcNodeRef[] = [], prevLengths: number[] = []): number[] => {
   const calculated = calculatePipelineSegmentLengths(nextNodes);
   return calculated.map((length, idx) => {
     const start = nextNodes[idx], end = nextNodes[idx + 1];
@@ -866,13 +880,13 @@ export const useKeyDown = (
   }, [onKeyDown]);
 };
 
-export const convertMapDataToBackendFormat = (nodeData, lineData) => {
+export const convertMapDataToBackendFormat = (nodeData?: MapEditorNode[], lineData?): Pick<MapData, 'all_nodes' | 'arcs'> => {
  /*
   Input: map data in leaflet format
   Output: map data in db format
  */
-  const all_nodes = {};
-  const arcs = {};
+  const all_nodes: MapData['all_nodes'] = {};
+  const arcs: MapData['arcs'] = {};
   nodeData?.forEach((node) => {
     const { name, coordinates, nodeType } = node;
     const stringCoordinates = coordinates.map((c) => `${c}`);
@@ -956,7 +970,7 @@ export const convertMapDataToFrontendFormat = (map_data) => {
 }
 
 export const convertTreatmentCapacityIncrementsToDict = (
-  table?: DimensionIndexedTable<"TreatmentCapacities", string, Cell>
+  table?: ParameterTable
 ): SeriesByKey<string, Cell> => {
   /*
     Input format:

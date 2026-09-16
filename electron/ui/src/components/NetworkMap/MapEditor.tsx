@@ -1,8 +1,9 @@
 import { Fragment, useEffect, useState, type ChangeEvent } from 'react';
 import { Box, Button, TextField, IconButton, MenuItem, Typography, Stack, Tooltip, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import type {SxProps, Theme} from '@mui/material';
 import { InputAdornment, InputLabel, Select, FormControl } from '@mui/material';
 import { useMapValues } from '../../context/MapContext';
-import type { CoordinateTuple, SelectedNodeState, MapEditorNode, DimensionIndexedTable, Cell } from '../../types';
+import type { CoordinateTuple, SelectedNodeState, MapEditorNode, MapAdditionalField, ParameterTable } from '../../types';
 import { NetworkNodeTypes, checkIfNameIsUnique, useKeyDown, calculatePipelineSegmentLengths, reconcilePipelineSegmentLengths, convertTreatmentCapacityIncrementsToDict, reconcilePipelineOutgoingNodes, getAllowedPipelineConnectionCandidates, getPipelineConnectionIssues, getAllowedPipelineFlowDirections } from '../../util';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -23,9 +24,9 @@ import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 interface NameFieldProps {
     editingName: boolean;
     setEditingName: (value: boolean) => void;
-    handleChange: (key: string, val: any) => void;
+    handleChange: (key: string, val: unknown) => void;
     nodeData?: MapEditorNode;
-    styles: any;
+    styles: Record<string, SxProps<Theme>>;
     nameIsNotUnique: boolean;
 }
 
@@ -42,7 +43,7 @@ interface MapEditorProps {
         PipelineDiameters?: Array<string | number>;
         VALUE?: Array<string | number>;
     };
-    TreatmentCapacityIncrements?: DimensionIndexedTable<"TreatmentCapacities", string, Cell>
+    TreatmentCapacityIncrements?: ParameterTable
 }
 
 export default function MapEditor({ isExpanded = false, PipelineDiameterValues, TreatmentCapacityIncrements }: MapEditorProps) {
@@ -132,10 +133,10 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
         },
     }
 
-    const handleChange = (key: string, val: any) => {
+    const handleChange = (key: string, val: unknown) => {
         setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
-            const prev = { ...data.node } as Record<string, any>;
+            const prev = { ...data.node } as MapEditorNode;
             const node = {
                 ...prev,
                 [key]: val,
@@ -369,7 +370,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     }
 
     const handleUpdateAdditionalField = (
-        event: any,
+        event: {target: {value: string | number}},
         fieldKey: string,
         fieldType: string = "number"
     ): void => {
@@ -378,7 +379,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
 
         setSelectedNode((data: SelectedNodeState | null) => {
             if (!data) return data;
-            const prevNode = { ...data.node } as Record<string, any>;
+            const prevNode = { ...data.node } as MapEditorNode;
             const normalizedValue = fieldType === "number" ? Number(value) : value;
             const node = {
                 ...prevNode,
@@ -392,7 +393,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const getDynamicDropdownOptions = (
-        additionalField: any,
+        additionalField: MapAdditionalField,
         currentNode?: MapEditorNode
     ): Array<string | number> => {
         const fallbackOptions = Array.isArray(additionalField?.defaultOptions) ? additionalField.defaultOptions : [];
@@ -412,7 +413,7 @@ export default function MapEditor({ isExpanded = false, PipelineDiameterValues, 
     };
 
     const getDynamicDropdownValue = (
-        additionalField: any,
+        additionalField: MapAdditionalField,
         currentNode?: MapEditorNode
     ): string | number => {
         const options = getDynamicDropdownOptions(additionalField, currentNode);

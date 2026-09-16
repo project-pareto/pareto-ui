@@ -26,9 +26,9 @@ from functools import wraps
 
 import idaes.logger as idaeslog
 
-from app.internal.get_data import get_data, get_input_lists
+from app.internal.workbooks.reader import get_data, get_input_lists
 from app.internal.settings import AppSettings
-from app.internal.ExcelApi import PreprocessMapData, WriteMapDataToExcel, WriteJSONToExcel
+from app.internal.workbooks.excel_api import PreprocessMapData, WriteMapDataToExcel, WriteJSONToExcel
 from app.internal.util import (
     time_it, 
     FormatPrompt,
@@ -36,15 +36,20 @@ from app.internal.util import (
     summarize_long_text,
 )
     
-from app.internal.ai_configuration import ai_configuration as cborg
-from app.internal.model_diagnostics import build_diagnosis_context, DIAGNOSTIC_LIMITATION
-from app.internal.input_schema import input_revision, with_horizon
-from app.internal.scenario_inputs import read_inputs, write_inputs, sync_map_fields, changed_pipe_fields, prune_removed_map_nodes, rename_map_nodes
+from app.internal.ai.configuration import ai_configuration as cborg
+from app.internal.optimization.model_diagnostics import build_diagnosis_context, DIAGNOSTIC_LIMITATION
+from app.internal.scenarios.input_schema import input_revision, with_horizon
+from app.internal.scenarios.inputs import read_inputs, write_inputs, sync_map_fields, changed_pipe_fields, prune_removed_map_nodes, rename_map_nodes
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
 
 def serialized(method):
+    """Keep each read/modify/write operation together on this handler.
+
+    The handler uses an RLock because a persistence operation can call another
+    decorated method while refreshing its in-memory scenario list.
+    """
     @wraps(method)
     def wrapped(self, *args, **kwargs):
         with self._db_lock:
@@ -159,7 +164,7 @@ class ScenarioHandler:
         revision = input_revision(scenario)
         scenario['input_revision'] = revision
         if scenario.get('validation', {}).get('revision') != revision:
-            from .scenario_validation import validate_inputs
+            from app.internal.validation.scenario_validation import validate_inputs
             # Refresh all input issues; previous build/solver evidence is stale.
             scenario['validation'] = validate_inputs(scenario)
 
@@ -314,7 +319,7 @@ class ScenarioHandler:
             if scenario['name'].upper() == "WORKSHOP BASELINE":
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_baseline_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP SRA":
-                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_sra_{diagramType}.png'
+                diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_SRA_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE":
                 diagram_path = f'{os.path.dirname(os.path.abspath(__file__))}/assets/workshop_beneficial_reuse_{diagramType}.png'
             elif scenario['name'].upper() == "WORKSHOP BENEFICIAL REUSE OVERRIDE":
@@ -752,7 +757,7 @@ class ScenarioHandler:
         return return_object
     
     def validate__pareto_scenario(self, id, solve=False):
-        from app.internal.scenario_validation import validate_inputs, check_model
+        from app.internal.validation.scenario_validation import validate_inputs, check_model
         scenario = self.get_scenario(id)
         result = validate_inputs(scenario)
         if result['valid']:

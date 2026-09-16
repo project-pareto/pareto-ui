@@ -6,7 +6,7 @@ from geopy.point import Point
 import zipfile, tempfile, os
 import pprint
 from collections.abc import Mapping
-from .util import determineArcsAndConnections, classifyNode, DEFAULT_UNITS
+from app.internal.util import determineArcsAndConnections, classifyNode, DEFAULT_UNITS
 
 
 def parse_coord(coord):

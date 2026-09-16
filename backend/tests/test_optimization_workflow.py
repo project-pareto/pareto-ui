@@ -17,7 +17,7 @@ class OptimizationWorkflowTests(unittest.TestCase):
         cls.temp = tempfile.TemporaryDirectory()
         previous_cwd = os.getcwd()
         with patch.dict(os.environ, {'PARETO_DATA_BASEDIR': cls.temp.name, 'PARETO_LOG_DIR': cls.temp.name}):
-            cls.runner = importlib.import_module('app.internal.pareto_stategic_model')
+            cls.runner = importlib.import_module('app.internal.optimization.strategic_model')
             cls.handler_module = importlib.import_module('app.internal.scenario_handler')
         os.chdir(previous_cwd)
 

@@ -1,7 +1,7 @@
 """AI connection settings for this local app instance."""
 from fastapi import APIRouter, HTTPException, Request
 
-from app.internal.ai_configuration import AISettingsError, ai_configuration
+from app.internal.ai.configuration import AISettingsError, ai_configuration
 
 router = APIRouter(prefix="/ai_settings", tags=["settings"])
 

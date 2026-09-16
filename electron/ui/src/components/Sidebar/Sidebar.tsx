@@ -1,3 +1,4 @@
+import {getParameterTable} from '../../parameterTables';
 import React, {useState, useEffect, useMemo, useRef} from 'react';
 import { Box, Drawer, CssBaseline, Collapse, Tooltip, IconButton } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -37,7 +38,8 @@ export default function Sidebar(props: SidebarProps) {
   const { id, data_input, optimization, results, optimized_override_values, validation } = scenario || {};
 
   const { df_parameters } = data_input || {};
-  const { PipelineDiameterValues, TreatmentCapacityIncrements } = df_parameters || {};
+  const PipelineDiameterValues = getParameterTable(df_parameters, 'PipelineDiameterValues');
+  const TreatmentCapacityIncrements = getParameterTable(df_parameters, 'TreatmentCapacityIncrements');
 
   const isIncomplete = results?.status === "Incomplete";
   const hasMapData = data_input?.map_data;
@@ -164,7 +166,7 @@ export default function Sidebar(props: SidebarProps) {
   }
 
   const handleSaveModal = async () => {
-    if (await handleUpdateExcel?.(id as string | number, String(category || ''), (data_input?.df_parameters || {})[category || '']) === false) return;
+    if (await handleUpdateExcel?.(id as string | number, String(category || ''), getParameterTable(data_input?.df_parameters, category || '')) === false) return;
     handleCloseSaveModal()
     setInputDataEdited?.(false)
     handleSetCategory(String(key || ''))

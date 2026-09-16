@@ -4,12 +4,12 @@ import unittest
 from pathlib import Path
 
 from openpyxl import load_workbook
-from app.internal.ExcelApi import WriteMapDataToExcel, determineConnectionsFromArcs
+from app.internal.workbooks.excel_api import WriteMapDataToExcel, determineConnectionsFromArcs
 
 
 class MapExportTests(unittest.TestCase):
     def test_forecasts_trucking_and_treatment_streams_survive_map_reorder(self):
-        from app.internal.get_data import get_data
+        from app.internal.workbooks.reader import get_data
         data = {'ProductionPads': {'P1': {}, 'P2': {}}, 'SWDSites': {'K1': {}},
                 'TreatmentSites': {'R1': {}}, 'ReuseOptions': {'O1': {}},
                 'connections': {'all_connections': {'R1': ['O1']}}}
@@ -86,7 +86,7 @@ class MapExportTests(unittest.TestCase):
             wb.close()
 
     def test_index_only_optional_arc_sheet_is_empty_model_data(self):
-        from app.internal.get_data import get_data
+        from app.internal.workbooks.reader import get_data
         with tempfile.TemporaryDirectory() as tmp:
             target = str(Path(tmp) / 'map')
             WriteMapDataToExcel({'NetworkNodes': {'N1': {}}, 'connections': {'all_connections': {}}}, target)

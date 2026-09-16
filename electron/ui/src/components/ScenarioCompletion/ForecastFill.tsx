@@ -3,7 +3,7 @@ import {Alert, Box, Button, Checkbox, Dialog, DialogActions, DialogContent, Dial
 import type {DataFrameLike} from '../../types';
 
 export function fillForecast(table: DataFrameLike, periods: string[], row: string, start: string, end: string, value: number, blanksOnly: boolean) {
-  const updated = JSON.parse(JSON.stringify(table));
+  const updated: DataFrameLike = JSON.parse(JSON.stringify(table));
   const key = Object.keys(table)[0];
   const selected = periods.slice(periods.indexOf(start), periods.indexOf(end) + 1);
   let changed = 0;

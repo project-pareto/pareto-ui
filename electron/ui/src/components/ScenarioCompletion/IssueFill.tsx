@@ -14,6 +14,8 @@ export default function IssueFill({port, scenarioId, revision, section, title, c
   const [error, setError] = useState<string | null>(null);
   useEffect(() => { setPreview(null); }, [revision]);
   const validNumber = value.trim() !== '' && Number.isFinite(Number(value));
+  // Apply the exact value/revision that was previewed. Changing the form or
+  // receiving a newer revision clears the preview before another apply is allowed.
   const fill = async (apply: boolean) => {
     setBusy(true); setError(null);
     try {

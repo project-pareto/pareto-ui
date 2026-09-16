@@ -4,14 +4,14 @@ import unittest
 from unittest.mock import AsyncMock, Mock, patch
 
 from fastapi import HTTPException
-from app.internal.ai_configuration import AIConfiguration, AISettingsError
-from app.internal.openai_client_wrapper import OpenAIClientWrapper
+from app.internal.ai.configuration import AIConfiguration, AISettingsError
+from app.internal.ai.client import OpenAIClientWrapper
 from app.routers import ai_settings
 
 
 class AIConfigurationTests(unittest.TestCase):
     def setUp(self):
-        self.factory = patch('app.internal.openai_client_wrapper.openai.OpenAI').start()
+        self.factory = patch('app.internal.ai.client.openai.OpenAI').start()
         self.addCleanup(patch.stopall)
         self.environment = OpenAIClientWrapper(api_key='environment-secret', base_url='https://environment.example/v1', model='environment-model')
         self.config = AIConfiguration(self.environment)

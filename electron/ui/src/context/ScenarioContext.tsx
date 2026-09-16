@@ -1,6 +1,6 @@
 // src/ScenarioContext.tsx
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { AppState, Scenario, ScenarioMap, ValidationIssue } from "../types";
+import type { AppState, AppAction, Scenario, ScenarioMap, ValidationIssue, ParameterTable, ScenarioPropagation, OptimizationStart } from "../types";
 import {
   updateScenario,
   updateExcel,
@@ -16,12 +16,7 @@ import {applyScenarioEdits, copyScenario as copyInputs, scenarioEdits, ScenarioE
 
 type NavigateFn = (to: string, opts?: { replace?: boolean }) => void;
 
-export interface OptimizationStart {
-  phase: 'copying' | 'submitting' | 'uncertain' | 'rejected';
-  error?: string;
-  snapshot: Scenario;
-  runId: string;
-}
+export type {OptimizationStart} from '../types/scenario';
 
 const RUNNING_STATES = ['Initializing', 'Preparing inputs', 'Building model', 'Solving model', 'Generating output',
   'Solving Model', 'Generating Output']; // Include statuses saved by older versions.
@@ -61,15 +56,15 @@ export interface ScenarioContextValue {
   navigateToScenarioList: () => void;
   handleScenarioSelection: (scenario: string | number) => void;
   handleNewScenario: (data: Scenario) => void;
-  handleScenarioUpdate: (updatedScenario: any, keepOptimized?: boolean, propagateChanges?: string) => Promise<boolean>;
+  handleScenarioUpdate: (updatedScenario: Scenario, keepOptimized?: boolean, propagateChanges?: ScenarioPropagation) => Promise<boolean>;
   handleSetSection: (section: number) => void;
   handleSetCategory: (category: string) => void;
   handleEditScenarioName: (newName: string, id: string | number, updateScenarioData?: boolean) => void;
   handleDeleteScenario: (index: string | number) => void;
-  handleUpdateExcel: (id: string | number, tableKey: string, updatedTable: any) => Promise<boolean>;
+  handleUpdateExcel: (id: string | number, tableKey: string, updatedTable: ParameterTable) => Promise<boolean>;
   syncScenarioData: () => void;
   addTask: (id: string | number) => void;
-  updateAppState: (action: any, index?: string | number) => void;
+  updateAppState: (action: AppAction, index?: string | number) => void;
   copyAndRunOptimization: (newScenarioName: string) => void;
 
   // model completion bar
@@ -95,6 +90,8 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
   const [pendingSaves, setPendingSaves] = useState(0);
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
+  // The server baseline owns revisions. Drafts replay pending edits on that baseline
+  // so a slow save response cannot replace what the user has typed since sending it.
   const savedScenarios = useRef<Record<string, Scenario>>({});
   const drafts = useRef<Record<string, Scenario>>({});
   const pendingEdits = useRef<Record<string, Array<{edits: ScenarioEdit[]}>>>({});
@@ -195,7 +192,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
   sectionRef.current = section;
 
   // ---- helper function for updating the state of the app (category, section...) ----
-  const updateAppState = (action: any, index?: string | number): void => {
+  const updateAppState = (action: AppAction, index?: string | number): void => {
     if (action.action === "select") {
       let tempSection: number;
       let tempCategory: Record<number, string | null>;
@@ -309,7 +306,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     navigate("/scenario", { replace: true });
   };
 
-  const handleScenarioUpdate = (updatedScenario: Scenario, keepOptimized?: boolean, propagateChanges?: string): Promise<boolean> => {
+  const handleScenarioUpdate = (updatedScenario: Scenario, keepOptimized?: boolean, propagateChanges?: ScenarioPropagation): Promise<boolean> => {
     const snapshot = copyInputs(updatedScenario);
     if (snapshot.results.status === 'Optimized' && !keepOptimized) snapshot.results.status = 'Not Optimized';
     const base = drafts.current[String(snapshot.id)] || scenarios[snapshot.id] || snapshot;
@@ -339,7 +336,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
       });
   };
 
-  const handleUpdateExcel = (id: string | number, tableKey: string, updatedTable: any): Promise<boolean> => {
+  const handleUpdateExcel = (id: string | number, tableKey: string, updatedTable: ParameterTable): Promise<boolean> => {
     const table = copyInputs(updatedTable);
     const base = drafts.current[String(id)] || scenarios[id];
     const edits = [{path: ['data_input', 'df_parameters', tableKey], value: table}];
@@ -358,7 +355,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
       .then((response) => response.json())
       .then((data) => {
         setScenarios(data.data);
-        const saved = data.data[scenarioIndex as any];
+        const saved = data.data[scenarioIndex];
         if (saved) {
           const id = String(saved.id);
           pendingEdits.current[id] = [];
@@ -384,6 +381,8 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     updateStart(String(scenario.id));
   };
 
+  // Keep runId and snapshot together across uncertain acknowledgements. Retrying
+  // this identity lets the backend return the reserved run without starting another.
   const submitOptimization = async (start: OptimizationStart): Promise<void> => {
     const id = String(start.snapshot.id);
     updateStart(id, {...start, phase: 'submitting', error: undefined});
@@ -479,7 +478,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
         fetchScenarios(port)
           .then((response) => response.json())
           .then((data) => {
-            const tempScenarios: any = {};
+            const tempScenarios: ScenarioMap = {};
             for (const key in data.data) {
               const scenario = { ...data.data[key] };
               tempScenarios[key] = scenario;

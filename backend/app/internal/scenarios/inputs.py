@@ -5,8 +5,8 @@ import os
 import tempfile
 from openpyxl import load_workbook
 from pareto.utilities.get_data import get_display_units
-from .get_data import get_data, get_input_lists
-from .input_schema import DEFAULT_UNITS, FORECASTS, NODE_FIELDS, NODE_SETS, flat_table, dimension_count
+from app.internal.workbooks.reader import get_data, get_input_lists
+from app.internal.scenarios.input_schema import DEFAULT_UNITS, FORECASTS, NODE_FIELDS, NODE_SETS, flat_table, dimension_count
 
 def read_inputs(path, previous=None, map_data=None):
     sets, parameters, tables = get_data(str(path), *get_input_lists())
@@ -104,7 +104,7 @@ def rename_map_nodes(data, renames):
 def write_inputs(data, path, template=None):
     """Write exactly these tables, sets and units; replace the workbook atomically."""
     path = Path(path)
-    from .ExcelApi import DEFAULT_TEMPLATE_LOCATION
+    from app.internal.workbooks.excel_api import DEFAULT_TEMPLATE_LOCATION
     source = template or (path if path.exists() else DEFAULT_TEMPLATE_LOCATION)
     wb = load_workbook(source, data_only=True)
     try:

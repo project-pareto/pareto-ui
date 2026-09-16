@@ -2,7 +2,7 @@
 from urllib.parse import urlsplit
 import openai
 
-from app.internal.openai_client_wrapper import OpenAIClientWrapper, cborg as environment_client
+from app.internal.ai.client import OpenAIClientWrapper, cborg as environment_client
 
 
 class AISettingsError(ValueError):

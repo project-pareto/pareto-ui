@@ -14,7 +14,7 @@ from zipfile import ZipFile
 import xml.sax, xml.sax.handler
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from .util import determineArcsAndConnections, classifyNode, DEFAULT_UNITS
+from app.internal.util import determineArcsAndConnections, classifyNode, DEFAULT_UNITS
 
 # pandas: geoparse
 def ParseKMZ(filename, default_node = None, initial_map_data = None):

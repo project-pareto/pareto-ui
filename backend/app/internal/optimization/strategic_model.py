@@ -32,16 +32,16 @@ from pyomo.opt import TerminationCondition
 from pareto.utilities.results import generate_report, OutputUnits, nostdout
 from pareto.utilities.model_modifications import fix_vars
 
-from app.internal.get_data import get_input_lists, get_data
+from app.internal.workbooks.reader import get_input_lists, get_data
 from app.internal.scenario_handler import (
     scenario_handler,
 )
 
-from app.internal.model_diagnostics import (scan_constraint_violations, unavailable_constraint_scan,
+from app.internal.optimization.model_diagnostics import (scan_constraint_violations, unavailable_constraint_scan,
                                             solution_is_feasible as is_feasible, SOLUTION_RELATIVE_TOLERANCE)
-from app.internal.model_compatibility import prepare_model_for_ui
-from app.internal.solvers import solver_name
-from app.internal.scenario_inputs import write_inputs
+from app.internal.optimization.model_compatibility import prepare_model_for_ui
+from app.internal.optimization.solvers import solver_name
+from app.internal.scenarios.inputs import write_inputs
 
 _log = logging.getLogger(__name__)
 
