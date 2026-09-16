@@ -63,4 +63,3 @@ export interface AISettingsInput {
   model: string;
   remember: boolean;
 }
-
