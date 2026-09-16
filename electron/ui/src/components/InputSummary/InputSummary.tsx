@@ -195,41 +195,18 @@ export default function InputSummary(props: InputSummaryProps) {
         })
     }
 
-    const handleReplaceExcel = (file: File) => {
+    const handleReplaceExcel = async (file: File) => {
+        setDisableUpload(true)
         const formData = new FormData();
         formData.append('file', file, file.name);
-        replaceExcelSheet(port, formData, props.scenario.id)
-        .then(response => {
-        if (response.status === 200) {
-            response.json()
-            .then((data)=>{
-                console.log('fileupload successful: ',data)
-                acceptSavedScenario(data)
-            }).catch((err)=>{
-                console.error("error on file upload: ",err)
-                setErrorMessage(String(err))
-                setShowError(true)
-                setDisableUpload(false)
-            })
+        try {
+            acceptSavedScenario(await replaceExcelSheet(port, formData, props.scenario.id))
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Unable to replace input workbook.')
+            setShowError(true)
+        } finally {
+            setDisableUpload(false)
         }
-        /*
-            in the case of bad file type
-        */
-        else if (response.status === 400) {
-            response.json()
-            .then((data)=>{
-                console.error("error on file upload: ",data.detail)
-                setErrorMessage(data.detail)
-                setShowError(true)
-                setDisableUpload(false)
-            }).catch((err)=>{
-                console.error("error on file upload: ",err)
-                setErrorMessage(response.statusText)
-                setShowError(true)
-                setDisableUpload(false)
-            })
-        }
-        })
     }
 
     const fileTypeError = () => {
@@ -257,10 +234,10 @@ export default function InputSummary(props: InputSummaryProps) {
                 const handleChange = (file: File) => {
                         setUpdatedExcelFile(file);
                         handleReplaceExcel(file)
-                        setDisableUpload(true)
                 };
         return (
           <FileUploader 
+            disabled={disableUpload}
             handleChange={handleChange} 
             name="file" 
             types={fileTypes}

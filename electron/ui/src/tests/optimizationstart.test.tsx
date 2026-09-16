@@ -35,6 +35,7 @@ beforeEach(async () => {
   (fetchScenarios as jest.Mock).mockImplementation(async () => ({data: clone(database)}));
   (fetchScenario as jest.Mock).mockImplementation(service.fetchScenario);
   (runModel as jest.Mock).mockImplementation(service.runModel);
+  (copyScenario as jest.Mock).mockImplementation(service.copyScenario);
   global.fetch = jest.fn((url, options) => {
     if (String(url).endsWith('/check_tasks/')) return Promise.resolve({ok: true, status: 200, json: async () => ({tasks: []})});
     if (String(url).includes('/get_scenario/')) return Promise.resolve({ok: true, status: 200,
@@ -146,7 +147,7 @@ test('an uncertain start can be retried with the same identity and cannot start 
 
 test('copy-and-run shows preparation during copying and uses the same launch flow', async () => {
   let resolveCopy: (response: any) => void;
-  (copyScenario as jest.Mock).mockImplementation(() => new Promise(resolve => {resolveCopy = resolve;}));
+  (global.fetch as jest.Mock).mockImplementationOnce(() => new Promise(resolve => {resolveCopy = resolve;}));
   act(() => { void context.copyAndRunOptimization('Copy'); void context.copyAndRunOptimization('Copy'); });
   expect(copyScenario).toHaveBeenCalledTimes(1);
   expect(screen.getByText('Copying scenario')).toBeVisible();
@@ -163,7 +164,7 @@ test('copy-and-run shows preparation during copying and uses the same launch flo
 
 test('finishing a copy after navigation does not take the user away from the new scenario', async () => {
   let resolveCopy: (response: any) => void;
-  (copyScenario as jest.Mock).mockImplementation(() => new Promise(resolve => {resolveCopy = resolve;}));
+  (global.fetch as jest.Mock).mockImplementationOnce(() => new Promise(resolve => {resolveCopy = resolve;}));
   act(() => { void context.copyAndRunOptimization('Copy'); });
   act(() => context.handleNewScenario({...clone(database[1]), id: 3, name: 'Other'}));
   const copied = {...clone(database[1]), id: 2, name: 'Copy'};
@@ -172,6 +173,19 @@ test('finishing a copy after navigation does not take the user away from the new
   expect(context.scenarioData.id).toBe(3);
   expect(context.section).toBe(0);
   expect(context.backgroundTasks).toEqual([2]);
+});
+
+test('a copy missing its saved record cannot select or launch the new scenario', async () => {
+  const previous = clone(context.scenarioData);
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200,
+    json: async () => ({new_id: 2, scenarios: database})});
+  await act(async () => {await context.copyAndRunOptimization('Copy');});
+  expect(context.scenarioData).toEqual(previous);
+  expect(context.scenarios).toEqual(database);
+  expect(context.optimizationStart.phase).toBe('rejected');
+  expect(context.optimizationStart.error).toMatch(/invalid response/i);
+  expect(runModel).not.toHaveBeenCalled();
+  expect(requests).toHaveLength(0);
 });
 
 test('polling recovers after a transient error and publishes results without overwriting another scenario', async () => {

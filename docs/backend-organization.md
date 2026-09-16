@@ -111,7 +111,7 @@ and the relevant fixtures when a payload contract changes.
 The [runtime client migration](api-contracts.md) now checks scenario list/detail
 responses and queued scenario/table saves using explicit frontend decoders.
 It also covers completion/validation, autofill, planning periods, advance,
-optimization launch, and task responses.
+optimization launch, task responses, and copy/delete/import operations.
 Backend route dictionaries still have the behavior described above. The decoder
 tests include the shared fixture and bundled older scenarios; draft result tables
 may be absent and failure-result metadata may be null.

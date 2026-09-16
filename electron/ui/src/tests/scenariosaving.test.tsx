@@ -1,6 +1,6 @@
 import {act, render, waitFor} from '@testing-library/react';
 import {ScenarioProvider, useScenario, ScenarioContextValue} from '../context/ScenarioContext';
-import {checkTasks, fetchScenarios, updateExcel, updateScenario} from '../services/app.service';
+import {checkTasks, deleteScenario, fetchScenarios, updateExcel, updateScenario} from '../services/app.service';
 import {copyScenario} from '../scenarioEdits';
 
 jest.mock('../AppContext', () => ({useApp: () => ({port: 50011})}));
@@ -25,6 +25,7 @@ beforeEach(async () => {
   (fetchScenarios as jest.Mock).mockImplementation(service.fetchScenarios);
   (updateScenario as jest.Mock).mockImplementation(service.updateScenario);
   (updateExcel as jest.Mock).mockImplementation(service.updateExcel);
+  (deleteScenario as jest.Mock).mockImplementation(service.deleteScenario);
   global.fetch = jest.fn((url, options) => {
     if (String(url).endsWith('/get_scenario_list/')) return Promise.resolve({ok: true, status: 200,
       json: async () => ({data: {1: copyScenario(initial)}})});
@@ -46,6 +47,27 @@ function edit(field: string, value: number) {
     void context.handleScenarioUpdate(snapshot);
   });
 }
+
+test('an invalid delete response retains the selected scenario and any unsaved draft', async () => {
+  edit('runtime', 100);
+  await waitFor(() => expect(pending).toHaveLength(1));
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200,
+    json: async () => ({data: {1: copyScenario(initial)}})});
+  await act(async () => {
+    await expect(context.handleDeleteScenario(1)).rejects.toMatchObject({code: 'invalid_response'});
+  });
+  expect(context.scenarios[1]).toBeDefined();
+  expect(context.scenarioData.id).toBe(1);
+  expect(context.scenarioData.optimization.runtime).toBe(100);
+  await acknowledge(0);
+});
+
+test('a checked delete publishes the returned scenario list', async () => {
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200, json: async () => ({data: {}})});
+  await act(async () => {await context.handleDeleteScenario(1);});
+  expect(context.scenarios).toEqual({});
+  expect(deleteScenario).toHaveBeenCalledTimes(1);
+});
 
 async function acknowledge(index: number, additions = {}) {
   await act(async () => pending[index].resolve({ok: true, json: async () => ({data: {

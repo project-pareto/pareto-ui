@@ -93,6 +93,9 @@ jobs:
       - name: Check TypeScript
         run: node electron/ui/node_modules/typescript/bin/tsc --noEmit --project electron/ui/tsconfig.json
 
+      - name: Lint TypeScript
+        run: npm --prefix electron/ui run lint
+
       - name: Check API contracts with strict TypeScript
         run: node electron/ui/node_modules/typescript/bin/tsc --noEmit --project electron/ui/tsconfig.contracts.json
 

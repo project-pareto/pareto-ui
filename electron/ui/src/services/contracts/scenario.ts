@@ -128,17 +128,24 @@ export const decodeScenario: Decoder<Scenario> = object({
   inputDiagramExtension: optional(string), outputDiagramExtension: optional(string),
 });
 
-export const decodeScenarioList = object({data: (value: unknown, path: string): ScenarioMap => {
+export const decodeScenarioMap: Decoder<ScenarioMap> = (value, path) => {
   const scenarios = record(decodeScenario)(value, path);
   Object.entries(scenarios).forEach(([id, scenario]) => {
     if (String(scenario.id) !== id) throw new DecodeError(`${path}.${id}.id`, 'the scenario ID matching its list key');
   });
   return scenarios;
-}});
+};
+
+export const decodeScenarioList = object({data: decodeScenarioMap});
+
+export const decodeSavedScenario: Decoder<Scenario> = (value, path) => {
+  const scenario = decodeScenario(value, path);
+  if (!scenario.input_revision?.trim()) throw new DecodeError(`${path}.input_revision`, 'a saved input revision');
+  return scenario;
+};
 
 export const scenarioFor = (id: number, saved = false): Decoder<Scenario> => (value, path) => {
-  const scenario = decodeScenario(value, path);
+  const scenario = (saved ? decodeSavedScenario : decodeScenario)(value, path);
   if (scenario.id !== id) throw new DecodeError(`${path}.id`, 'the requested scenario ID');
-  if (saved && !scenario.input_revision) throw new DecodeError(`${path}.input_revision`, 'a saved input revision');
   return scenario;
 };

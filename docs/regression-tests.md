@@ -32,6 +32,11 @@ fill previews, scenario-zero validation/advance, malformed launch acknowledgemen
 and malformed task responses. Completion and optimization tests exercise the
 production decoder; delayed responses cannot revive an obsolete fill preview
 or apply a validation result to another selected scenario.
+Collection/import coverage checks copy and delete envelopes, saved revisions,
+multipart requests, and upload errors. UI tests retain the upload form on failure,
+prevent duplicate submissions while pending, and ensure malformed copy/delete
+responses cannot launch a run or replace scenario state. Lint runs in CI with
+nonblocking warnings; see [formatting commands](building.md#typescript-linting-and-formatting).
 
 ## What the PR added
 
@@ -126,6 +131,7 @@ npm --prefix electron/ui test -- --watchAll=false --runInBand
 node --test electron/tests/ai-settings.test.cjs
 node electron/ui/node_modules/typescript/bin/tsc --noEmit --project electron/ui/tsconfig.json
 node electron/ui/node_modules/typescript/bin/tsc --noEmit --project electron/ui/tsconfig.contracts.json
+npm --prefix electron/ui run lint
 ```
 
 For the Python command in PowerShell:

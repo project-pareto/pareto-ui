@@ -98,8 +98,6 @@ export type {
   ScenarioCompareSidebarProps,
 } from './types/components';
 export type {
-  ApiError,
-  ApiResponse,
   ScenarioResponse,
   ScenarioListResponse,
   TaskResponse,

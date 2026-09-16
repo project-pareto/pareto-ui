@@ -258,37 +258,11 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children, scenario, ha
         deselectActiveNode();
     }
 
-    const handleFileUpload = (file: File, defaultNodeType?: string): void => {
+    const handleFileUpload = async (file: File, defaultNodeType?: string): Promise<void> => {
         const formData = new FormData();
         formData.append('file', file, file.name);
 
-        uploadAdditionalMap(port, formData, scenario?.id, defaultNodeType)
-        .then(response => {
-        if (response.status === 200) {
-            response.json()
-            .then((data)=>{
-                acceptSavedScenario(data)
-            }).catch((err)=>{
-                console.error(String(err))
-                // setShowError(true)
-            })
-        }
-        /*
-            in the case of bad file type
-        */
-        else if (response.status === 400) {
-            response.json()
-            .then((data)=>{
-                console.error("error on file upload: ",data.detail)
-                // setErrorMessage(data.detail)
-                // setShowError(true)
-            }).catch((err)=>{
-                console.error("error on file upload: ",err)
-                // setErrorMessage(response.statusText)
-                // setShowError(true)
-            })
-        }
-        })
+        acceptSavedScenario(await uploadAdditionalMap(port, formData, scenario?.id, defaultNodeType));
     }
 
     const value: MapContextValue = {

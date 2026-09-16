@@ -1,7 +1,7 @@
 # Runtime API contracts
 
-Runtime decoding checks scenario retrieval, queued edits, completion/validation,
-and optimization launch/task responses before consumers use them. Backend routes and storage
+Runtime decoding checks scenario retrieval, queued edits, copy/delete/import,
+completion/validation, and optimization launch/task responses before consumers use them. Backend routes and storage
 remain unchanged. [Plan 1](plans/01-contracts-and-types.md) tracks the remaining
 contract work.
 
@@ -19,6 +19,10 @@ contract work.
 | `advanceToOptimizationSetup` / `POST /advance_to_optimization_setup/{id}` | `{data: Scenario}` | Matching ID and a nonempty saved input revision. |
 | `runModel` / `POST /run_model` | `Scenario` | Matching scenario and run IDs, saved revision, and an active or terminal run status. Completed retries are valid acknowledgements. |
 | `checkTasks` / `GET /check_tasks/` | `{tasks: number[]}` | Nonnegative integer scenario IDs, including zero. Malformed responses cannot release a running task. |
+| `copyScenario` / `GET /copy/{id}/{name}` | `{scenarios: Record<string, Scenario>, new_id: number}` | New ID differs from the source; its record exists with a saved revision; list keys match record IDs. |
+| `deleteScenario` / `POST /delete_scenario/` | `{data: Record<string, Scenario>}` | Valid list with the deleted ID absent. |
+| `uploadScenario` / `POST /upload/{name}` | `Scenario` | Valid scenario with a nonempty saved revision. |
+| `replaceExcelSheet`, `uploadAdditionalMap` / `/replace/{id}`, `/upload_additional_map/{id}` | `Scenario` | Matching requested ID and a nonempty saved revision. |
 
 These functions return decoded data, not native `Response` objects. Their caller
 does not call `.json()` or inspect `.ok`. Request IDs accept nonnegative safe
@@ -47,6 +51,16 @@ malformed save acknowledgement retains the draft and blocks later queued edits
 for that scenario. Reloading clears the failure only after a valid saved
 scenario arrives; a response delayed past a new edit or navigation is ignored.
 Initial loading and optimization polling retain their existing retry cadence.
+
+Copy/delete failures are shown in the scenario list. Upload dialogs stay open
+with their selected file and name after failure; while uploading, their controls
+are disabled. Workbook replacement always releases its busy state after failure.
+Scenario state changes only after a checked response. These operations do not
+automatically retry: a lost acknowledgement may follow a completed backend write,
+so reload the scenario list before repeating an uncertain creation or copy.
+Multipart requests preserve the original `FormData` and let the browser set its
+boundary. Names are encoded as path segments and map types as query parameters;
+the existing backend route still cannot accept a slash in a scenario name.
 
 Launch handling distinguishes explicit HTTP 4xx rejection from an uncertain
 acknowledgement. A successful HTTP response with malformed JSON, the wrong run
@@ -94,17 +108,21 @@ cover live validation, preview/apply, run identity, and task responses.
 [Workflow UI tests](../electron/ui/src/tests/scenarioworkflow.test.tsx), autofill tests,
 and optimization-start tests use the production decoder with a fake transport
 to check malformed responses and delayed-request behavior.
+[Collection/import tests](../electron/ui/src/tests/collectioncontracts.test.ts)
+cover identity, saved revisions, response envelopes, multipart bodies and errors;
+[upload dialog tests](../electron/ui/src/tests/fileupload.test.tsx) cover pending
+submissions and explicit retry. Copy-and-run and delete provider tests ensure
+invalid acknowledgements cannot launch a run or replace existing scenario state.
 
 ## Remaining endpoints
 
 | Consumers / endpoints | Current boundary / next work |
 | --- | --- |
-| Copy, delete, upload, replacement, additional map | Native responses with different envelopes; migrate their list/scenario consumers. |
 | Results, downloads, reports, diagrams | Results inside migrated scenario reads are checked; binary/download endpoints need their own response handling. |
 | AI availability, settings, editing, diagnosis | Existing feature-specific handling; migrate without exposing credentials. |
 
-The legacy `ApiResponse<T>` success/error intersection remains only for these
-unmigrated native-fetch endpoints. Backend request/response schema adoption,
+The unused legacy `ApiResponse<T>` success/error intersection has been removed.
+Backend request/response schema adoption,
 summary/detail separation, branded identities, run-status contracts, status
 normalization, and broader strict checking remain planned. Polling still retrieves
 full scenarios; decoding task lists does not introduce a smaller run-status API.

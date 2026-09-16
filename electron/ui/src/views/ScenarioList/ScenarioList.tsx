@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Paper, Grid, Box, Button, IconButton, Tooltip } from '@mui/material';
@@ -67,23 +67,27 @@ export default function ScenarioList() {
         setId(id)
     }
 
-    const handleDelete = () => {
-        deleteScenario(id)
-        setOpenDeleteModal(false)
-        setId(null)
+    const handleDelete = async () => {
+        try {
+            await deleteScenario(id)
+            setOpenDeleteModal(false)
+            setId(null)
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Unable to delete scenario.')
+            setShowError(true)
+        }
     }
 
     const handleCopyScenario = (index) => {
         copyScenario(port, index, scenarios[index].name+' copy')
-        .then(response => response.json())
         .then((data) => {
           setScenarios(data.scenarios)
           setId(data.new_id)
           setOpenEditName(true)
           setName(data.scenarios[data.new_id].name)
         }).catch(e => {
-          console.error('error on scenario copy')
-          console.error(e)
+          setErrorMessage(e instanceof Error ? e.message : 'Unable to copy scenario.')
+          setShowError(true)
         })
     }
 
@@ -104,37 +108,11 @@ export default function ScenarioList() {
         setId(null)
     }
 
-    const handleFileUpload = (file, defaultNodeType, name) => {
+    const handleFileUpload = async (file, defaultNodeType, name) => {
         const formData = new FormData();
         formData.append('file', file, file.name);
 
-        uploadScenario(port, formData, name, defaultNodeType)
-        .then(response => {
-        if (response.status === 200) {
-            response.json()
-            .then((data)=>{
-                handleNewScenario(data)
-            }).catch((err)=>{
-                setErrorMessage(String(err))
-                setShowError(true)
-            })
-        }
-        /*
-            in the case of bad file type
-        */
-        else if (response.status === 400) {
-            response.json()
-            .then((data)=>{
-                console.error("error on file upload: ",data.detail)
-                setErrorMessage(data.detail)
-                setShowError(true)
-            }).catch((err)=>{
-                console.error("error on file upload: ",err)
-                setErrorMessage(response.statusText)
-                setShowError(true)
-            })
-        }
-        })
+        handleNewScenario(await uploadScenario(port, formData, name, defaultNodeType))
   }
 
   const styles={

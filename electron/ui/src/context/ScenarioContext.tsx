@@ -59,7 +59,7 @@ export interface ScenarioContextValue {
   handleSetSection: (section: number) => void;
   handleSetCategory: (category: string) => void;
   handleEditScenarioName: (newName: string, id: string | number, updateScenarioData?: boolean) => void;
-  handleDeleteScenario: (index: string | number) => void;
+  handleDeleteScenario: (index: string | number) => Promise<void>;
   handleUpdateExcel: (id: string | number, tableKey: string, updatedTable: ParameterTable) => Promise<boolean>;
   syncScenarioData: () => void;
   addTask: (id: string | number) => void;
@@ -322,17 +322,10 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     void handleScenarioUpdate({...draft, name: newName}, true);
   };
 
-  const handleDeleteScenario = (index: string | number): void => {
-    deleteScenario(port, { id: index })
-      .then((response) => response.json())
-      .then((data) => {
-        setScenarios(data.data);
-        updateAppState({ action: "delete" }, index);
-      })
-      .catch((e) => {
-        console.error("error on scenario delete");
-        console.error(e);
-      });
+  const handleDeleteScenario = async (index: string | number): Promise<void> => {
+    const data = await deleteScenario(port, {id: index});
+    setScenarios(data.data);
+    updateAppState({action: 'delete'}, index);
   };
 
   const handleUpdateExcel = (id: string | number, tableKey: string, updatedTable: ParameterTable): Promise<boolean> => {
@@ -441,9 +434,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     updateStart(original, start);
     openOptimizationResults();
     try {
-      const response = await copyScenario(port, scenarioData.id, newScenarioName);
-      const body = await response.json();
-      if (!response.ok) throw new Error(typeof body.detail === 'string' ? body.detail : 'Unable to copy scenario.');
+      const body = await copyScenario(port, scenarioData.id, newScenarioName);
       const copied = body.scenarios[body.new_id];
       acceptSavedScenario(copied);
       updateStart(original);

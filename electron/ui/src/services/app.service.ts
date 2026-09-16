@@ -1,11 +1,12 @@
 import type {
-    ApiResponse, ScenarioResponse, ScenarioListResponse, TaskResponse, CopyScenarioResponse,
+    ScenarioResponse, ScenarioListResponse, TaskResponse, CopyScenarioResponse,
     UpdateScenarioRequest, UpdateExcelRequest, RunModelRequest, FillScenarioInputsRequest,
     Scenario, ScenarioId, ScenarioValidationResult, ScenarioFillPreview,
 } from '../types';
 import {ApiClientError, requestJson, scenarioId} from './apiClient';
 import {object} from './contracts/decode';
-import {decodeScenarioList, scenarioFor} from './contracts/scenario';
+import {decodeSavedScenario, decodeScenarioList, scenarioFor} from './contracts/scenario';
+import {copiedScenarioFor, deletedScenarioFor} from './contracts/collection';
 import {decodeTasks, decodeValidationResult, fillPreviewFor, runFor} from './contracts/workflow';
 
 let BACKEND_URL = "http://localhost"
@@ -73,8 +74,9 @@ export const fetchExcelTemplate = (backend_port: number, id: number | string) =>
     });
 }
 
-export const replaceExcelSheet = (backend_port: number, data: FormData, id: number | string) => {
-    return fetch(BACKEND_URL+':'+backend_port+'/replace/'+id, {
+export const replaceExcelSheet = async (backend_port: number, data: FormData, id: ScenarioId): Promise<Scenario> => {
+    const parsedId = scenarioId(id);
+    return requestJson(BACKEND_URL+':'+backend_port+'/replace/'+parsedId, scenarioFor(parsedId, true), {
         method: 'POST', 
         mode: 'cors',
         body: data
@@ -99,16 +101,19 @@ export const runModel = async (backend_port: number, data: RunModelRequest): Pro
     });
 }; 
 
-export const deleteScenario = (backend_port: number, data: {id: ScenarioId}): Promise<ApiResponse<ScenarioListResponse>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/delete_scenario/', {
+export const deleteScenario = async (backend_port: number, data: {id: ScenarioId}): Promise<ScenarioListResponse> => {
+    const id = scenarioId(data.id);
+    return requestJson(BACKEND_URL+':'+backend_port+'/delete_scenario/', deletedScenarioFor(id), {
         method: 'POST', 
         mode: 'cors',
-        body: JSON.stringify(data)
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({...data, id})
     });
 }; 
 
-export const copyScenario = (backend_port: number, id: number | string, newScenarioName: string): Promise<ApiResponse<CopyScenarioResponse>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/copy/'+id+'/'+newScenarioName, {
+export const copyScenario = async (backend_port: number, id: ScenarioId, newScenarioName: string): Promise<CopyScenarioResponse> => {
+    const parsedId = scenarioId(id);
+    return requestJson(`${BACKEND_URL}:${backend_port}/copy/${parsedId}/${encodeURIComponent(newScenarioName)}`, copiedScenarioFor(parsedId), {
         method: 'GET', 
         mode: 'cors'
     });
@@ -119,20 +124,21 @@ export const fetchScenario = async (backend_port: number, id: ScenarioId): Promi
     return requestJson(`${BACKEND_URL}:${backend_port}/get_scenario/${parsedId}`, scenarioFor(parsedId));
 };
 
-export const uploadScenario = (backend_port: number, data: FormData, name: string, defaultNodeType: string) => {
-    let endpoint = BACKEND_URL+':'+backend_port+'/upload/'+name
-    if (defaultNodeType) endpoint += `?defaultNodeType=${defaultNodeType}`
-    return fetch(endpoint, {
+export const uploadScenario = (backend_port: number, data: FormData, name: string, defaultNodeType = 'NetworkNode'): Promise<Scenario> => {
+    const query = new URLSearchParams({defaultNodeType});
+    const endpoint = `${BACKEND_URL}:${backend_port}/upload/${encodeURIComponent(name)}?${query}`;
+    return requestJson(endpoint, decodeSavedScenario, {
         method: 'POST', 
         mode: 'cors',
         body: data
     });
 };
 
-export const uploadAdditionalMap = (backend_port: number, data: FormData, id: number | string, defaultNodeType: string): Promise<ApiResponse<Scenario>> => {
-    let endpoint = BACKEND_URL+':'+backend_port+'/upload_additional_map/'+id
-    if (defaultNodeType) endpoint += `?defaultNodeType=${defaultNodeType}`
-    return fetch(endpoint, {
+export const uploadAdditionalMap = async (backend_port: number, data: FormData, id: ScenarioId, defaultNodeType = 'NetworkNode'): Promise<Scenario> => {
+    const parsedId = scenarioId(id);
+    const query = new URLSearchParams({defaultNodeType});
+    const endpoint = `${BACKEND_URL}:${backend_port}/upload_additional_map/${parsedId}?${query}`;
+    return requestJson(endpoint, scenarioFor(parsedId, true), {
         method: 'POST', 
         mode: 'cors',
         body: data

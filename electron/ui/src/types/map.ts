@@ -185,7 +185,7 @@ export interface MapContextValue {
   deleteSelectedNode: () => void;
   currentlyCreatingPipeline: boolean;
   currentlyCreatingNode: boolean;
-  handleFileUpload: (file: File, defaultNodeType?: string) => void;
+  handleFileUpload: (file: File, defaultNodeType?: string) => Promise<void>;
   nodeType: "node" | "pipeline" | null;
 }
 

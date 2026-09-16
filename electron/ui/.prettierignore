@@ -1,0 +1,10 @@
+node_modules/
+build/
+coverage/
+cypress/downloads/
+cypress/screenshots/
+cypress/videos/
+package-lock.json
+src/assets/
+src/tests/data/
+src/tests/fixtures/*.json
