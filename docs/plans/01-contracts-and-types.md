@@ -7,7 +7,10 @@
 PR #116 supplies [domain types and compatibility-tested Python models](../backend-organization.md)
 plus compile-time descriptions for core fetch responses. The first runtime
 increment adds checked scenario retrieval, queued scenario/table saves, normalized
-client errors, and a strict compiler check for the decoder/helper. The
+client errors, and a strict compiler check for the decoder/helper. The next
+increment migrates completion/validation, fill preview/apply, planning periods,
+advance, optimization launch/retry, and task checks. Both preserve existing
+backend routes and stored data. The
 [endpoint inventory and compatibility decisions](../api-contracts.md) describe
 what is implemented and what remains. Backend schema adoption and the new
 contracts below remain planned.

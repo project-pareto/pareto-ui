@@ -1,11 +1,12 @@
 import type {
     ApiResponse, ScenarioResponse, ScenarioListResponse, TaskResponse, CopyScenarioResponse,
     UpdateScenarioRequest, UpdateExcelRequest, RunModelRequest, FillScenarioInputsRequest,
-    Scenario, ScenarioId, ScenarioValidation,
+    Scenario, ScenarioId, ScenarioValidationResult, ScenarioFillPreview,
 } from '../types';
-import {requestJson, scenarioId} from './apiClient';
+import {ApiClientError, requestJson, scenarioId} from './apiClient';
 import {object} from './contracts/decode';
 import {decodeScenarioList, scenarioFor} from './contracts/scenario';
+import {decodeTasks, decodeValidationResult, fillPreviewFor, runFor} from './contracts/workflow';
 
 let BACKEND_URL = "http://localhost"
 
@@ -36,8 +37,8 @@ export const fetchScenarios = (backend_port: number): Promise<ScenarioListRespon
     });
 }; 
 
-export const checkTasks = (backend_port: number): Promise<ApiResponse<TaskResponse>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/check_tasks/', {
+export const checkTasks = (backend_port: number): Promise<TaskResponse> => {
+    return requestJson(BACKEND_URL+':'+backend_port+'/check_tasks/', decodeTasks, {
         method: 'GET', 
         mode: 'cors'
     });
@@ -87,10 +88,13 @@ export const fetchExcelFile = (backend_port: number, filename: string) => {
     });
 }; 
 
-export const runModel = (backend_port: number, data: RunModelRequest): Promise<ApiResponse<Scenario>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/run_model', {
+export const runModel = async (backend_port: number, data: RunModelRequest): Promise<Scenario> => {
+    const id = scenarioId(data.scenario.id);
+    if (typeof data.run_id !== 'string' || !data.run_id.trim()) throw new ApiClientError('invalid_request', 'An optimization run ID is required.');
+    return requestJson(BACKEND_URL+':'+backend_port+'/run_model', runFor(id, data.run_id), {
         method: 'POST', 
         mode: 'cors',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     });
 }; 
@@ -149,19 +153,27 @@ export const generateExcelFromMap = (backend_port: number, id: number | string) 
     });
 }
 
-export const getScenarioReadiness = (port: number, id: number | string, signal?: AbortSignal): Promise<ApiResponse<ScenarioValidation>> =>
-    fetch(`${BACKEND_URL}:${port}/scenario_readiness/${id}`, {signal});
+export const getScenarioReadiness = async (port: number, id: ScenarioId, signal?: AbortSignal): Promise<ScenarioValidationResult> =>
+    requestJson(`${BACKEND_URL}:${port}/scenario_readiness/${scenarioId(id)}`, decodeValidationResult, {signal});
 
-export const fillScenarioInputs = (port: number, id: number, payload: FillScenarioInputsRequest) => fetch(`${BACKEND_URL}:${port}/fill_scenario_inputs/${id}`, {
-    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
-});
+export function fillScenarioInputs(port: number, id: ScenarioId, payload: FillScenarioInputsRequest & {apply: true}): Promise<Scenario>;
+export function fillScenarioInputs(port: number, id: ScenarioId, payload: FillScenarioInputsRequest & {apply: false}): Promise<ScenarioFillPreview>;
+export async function fillScenarioInputs(port: number, id: ScenarioId, payload: FillScenarioInputsRequest): Promise<Scenario | ScenarioFillPreview> {
+    const parsedId = scenarioId(id);
+    const decode = payload.apply ? scenarioFor(parsedId, true) : fillPreviewFor(payload.revision, payload.value);
+    return requestJson<Scenario | ScenarioFillPreview>(`${BACKEND_URL}:${port}/fill_scenario_inputs/${parsedId}`, decode, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
+    });
+}
 
-export const checkScenarioFeasibility = (port: number, id: number | string): Promise<ApiResponse<ScenarioValidation>> =>
-    fetch(`${BACKEND_URL}:${port}/scenario_feasibility/${id}`, {method: 'POST'});
+export const checkScenarioFeasibility = async (port: number, id: ScenarioId): Promise<ScenarioValidationResult> =>
+    requestJson(`${BACKEND_URL}:${port}/scenario_feasibility/${scenarioId(id)}`, decodeValidationResult, {method: 'POST'});
 
-export const savePlanningHorizon = (port: number, id: number | string, periods: string[], revision?: string): Promise<ApiResponse<Scenario>> =>
-    fetch(`${BACKEND_URL}:${port}/planning_horizon/${id}`, {method: 'POST', headers: {'Content-Type': 'application/json'},
+export const savePlanningHorizon = async (port: number, id: ScenarioId, periods: string[], revision?: string): Promise<Scenario> => {
+    const parsedId = scenarioId(id);
+    return requestJson(`${BACKEND_URL}:${port}/planning_horizon/${parsedId}`, scenarioFor(parsedId, true), {method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({periods, revision})});
+};
 
 export const getAIAvailability = (backend_port: number, signal?: AbortSignal) =>
     fetch(`${BACKEND_URL}:${backend_port}/ai_available`, { signal });
@@ -199,15 +211,16 @@ export const requestAIOptimizationDiagnosis = (
     });
 }
 
-export const validateScenario = (backend_port: number, id: number | string): Promise<ApiResponse<ScenarioValidation>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/validate_scenario/'+id, {
+export const validateScenario = async (backend_port: number, id: ScenarioId): Promise<ScenarioValidationResult> => {
+    return requestJson(BACKEND_URL+':'+backend_port+'/validate_scenario/'+scenarioId(id), decodeValidationResult, {
         method: 'GET',
         mode: 'cors'
     });
 };
 
-export const advanceToOptimizationSetup = (backend_port: number, id: number | string): Promise<ApiResponse<ScenarioResponse>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/advance_to_optimization_setup/'+id, {
+export const advanceToOptimizationSetup = async (backend_port: number, id: ScenarioId): Promise<ScenarioResponse> => {
+    const parsedId = scenarioId(id);
+    return requestJson(BACKEND_URL+':'+backend_port+'/advance_to_optimization_setup/'+parsedId, object({data: scenarioFor(parsedId, true)}), {
         method: 'POST',
         mode: 'cors'
     });

@@ -20,7 +20,7 @@ beforeEach(async () => {
     optimization: {runtime: 900, optimalityGap: 0},
     data_input: {df_sets: {ProductionPads: ['P1']}, df_parameters: {PadRates: {ProductionPads: ['P1'], T01: [100]}}}};
   pending = [];
-  (checkTasks as jest.Mock).mockResolvedValue({json: async () => ({tasks: []})});
+  (checkTasks as jest.Mock).mockResolvedValue({tasks: []});
   // Exercise the production client/decoder as well as the provider. Only transport is faked.
   (fetchScenarios as jest.Mock).mockImplementation(service.fetchScenarios);
   (updateScenario as jest.Mock).mockImplementation(service.updateScenario);

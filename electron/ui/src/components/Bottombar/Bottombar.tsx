@@ -1,5 +1,5 @@
 import React from 'react';
-import {useEffect, useState} from 'react';   
+import {useEffect, useRef, useState} from 'react';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -16,6 +16,8 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AIPromptDialog from '../AIPromptDialog/AIPromptDialog';
 import { useAIPrompt } from '../../context/AIPromptContext';
 import ScenarioValidationDialog from '../ScenarioValidationDialog/ScenarioValidationDialog';
+import {ApiClientError} from '../../services/apiClient';
+import type {ScenarioValidation} from '../../types';
 
 
 export default function Bottombar(props) {
@@ -51,7 +53,13 @@ export default function Bottombar(props) {
     const [ validationLoading, setValidationLoading ] = useState(false)
     const [ validationAdvancing, setValidationAdvancing ] = useState(false)
     const [ validationError, setValidationError ] = useState<string | null>(null)
-    const [ validationResult, setValidationResult ] = useState<any>(null)
+    const [ validationResult, setValidationResult ] = useState<ScenarioValidation | null>(null)
+    const validationVersion = useRef(0);
+    useEffect(() => {
+      setValidationResult(null); setValidationLoading(false); setValidationAdvancing(false); setValidationError(null);
+      setOpenValidationDialog(false);
+      return () => { validationVersion.current += 1; };
+    }, [id, scenario?.input_revision, props.saving, inputDataEdited]);
     const handleOpenSaveModal = () => setOpenSaveModal(true);
     const handleCloseSaveModal = () => setOpenSaveModal(false);
     const handleCloseRerunModal = () => setOpenRerunModal(false);
@@ -163,7 +171,7 @@ export default function Bottombar(props) {
       }
 
       const handleValidateScenario = (solve = false) => {
-        if (!id) {
+        if (id === null || id === undefined) {
           setValidationError("No scenario selected.")
           setValidationResult(null)
           setOpenValidationDialog(true)
@@ -173,53 +181,44 @@ export default function Bottombar(props) {
         setValidationError(null)
         setValidationResult(null)
         setOpenValidationDialog(true);
+        const version = ++validationVersion.current;
         (solve ? checkScenarioFeasibility(port, id) : validateScenario(port, id))
-          .then((response) => {
-            if (!response.ok) {
-              setValidationError(`Validation failed (${response.status}).`)
-              setValidationLoading(false)
-              return null
-            }
-            return response.json()
-          })
           .then((data) => {
-            if (data) {
-              setValidationResult(data)
-              syncScenarioData()
-            }
+            if (validationVersion.current !== version) return;
+            setValidationResult(data)
+            syncScenarioData()
             setValidationLoading(false)
           })
           .catch((err) => {
+            if (validationVersion.current !== version) return;
             console.error("error validating scenario: ", err)
-            setValidationError("Unable to validate scenario.")
+            setValidationError(err instanceof Error ? err.message : 'Unable to validate scenario.')
             setValidationLoading(false)
           })
       }
 
       const handleAdvanceToOptimizationSetup = () => {
-        if (!id) {
+        if (id === null || id === undefined) {
           setValidationError("No scenario selected.")
           return
         }
         setValidationAdvancing(true)
+        const version = ++validationVersion.current;
         advanceToOptimizationSetup(port, id)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`Advance failed (${response.status}).`)
-            }
-            return response.json()
-          })
           .then(() => {
+            if (validationVersion.current !== version) return;
             syncScenarioData()
             handleCloseValidationDialog()
             handleSelection(1)
           })
           .catch((err) => {
+            if (validationVersion.current !== version) return;
             console.error("error advancing to optimization setup: ", err)
-            setValidationError("Unable to advance to optimization setup.")
+            setValidationError(err instanceof Error ? err.message : 'Unable to advance to optimization setup.')
+            if (err instanceof ApiClientError && err.validation) setValidationResult(err.validation);
           })
           .finally(() => {
-            setValidationAdvancing(false)
+            if (validationVersion.current === version) setValidationAdvancing(false)
           })
       }
 

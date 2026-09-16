@@ -55,6 +55,7 @@ export type {
   ConstraintViolationsSummary,
   ValidationSection,
   ScenarioValidation,
+  ScenarioValidationResult,
   ValidationIssue,
   ScenarioFillPreview,
 } from './types/validation';

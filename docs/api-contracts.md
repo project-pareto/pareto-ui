@@ -1,7 +1,7 @@
 # Runtime API contracts
 
-The first runtime migration checks scenario retrieval and the two queued edit
-operations before responses enter scenario state. Backend routes and storage
+Runtime decoding checks scenario retrieval, queued edits, completion/validation,
+and optimization launch/task responses before consumers use them. Backend routes and storage
 remain unchanged. [Plan 1](plans/01-contracts-and-types.md) tracks the remaining
 contract work.
 
@@ -13,6 +13,12 @@ contract work.
 | `fetchScenario` / `GET /get_scenario/{id}` | `Scenario` | Returned ID must match the requested ID. This also checks existing detail polling and launch-recovery reads. |
 | `updateScenario` / `POST /update` | `{data: Scenario}` | Matching ID and a nonempty saved input revision. |
 | `updateExcel` / `POST /update_excel` | `Scenario` | Matching ID and a nonempty saved input revision. |
+| `getScenarioReadiness`, `validateScenario`, `checkScenarioFeasibility` / `/scenario_readiness/{id}`, `/validate_scenario/{id}`, `/scenario_feasibility/{id}` | `ScenarioValidationResult` | Required revision, state, validity, issue/section arrays, counts, periods, and separate model/feasibility evidence. |
+| `fillScenarioInputs` / `POST /fill_scenario_inputs/{id}` | Preview: `ScenarioFillPreview`; apply: `Scenario` | Preview revision/value match the request; per-table counts match the total. Apply requires the saved scenario ID/revision. |
+| `savePlanningHorizon` / `POST /planning_horizon/{id}` | `Scenario` | Matching ID and a nonempty saved input revision. |
+| `advanceToOptimizationSetup` / `POST /advance_to_optimization_setup/{id}` | `{data: Scenario}` | Matching ID and a nonempty saved input revision. |
+| `runModel` / `POST /run_model` | `Scenario` | Matching scenario and run IDs, saved revision, and an active or terminal run status. Completed retries are valid acknowledgements. |
+| `checkTasks` / `GET /check_tasks/` | `{tasks: number[]}` | Nonnegative integer scenario IDs, including zero. Malformed responses cannot release a running task. |
 
 These functions return decoded data, not native `Response` objects. Their caller
 does not call `.json()` or inspect `.ok`. Request IDs accept nonnegative safe
@@ -42,6 +48,20 @@ for that scenario. Reloading clears the failure only after a valid saved
 scenario arrives; a response delayed past a new edit or navigation is ignored.
 Initial loading and optimization polling retain their existing retry cadence.
 
+Launch handling distinguishes explicit HTTP 4xx rejection from an uncertain
+acknowledgement. A successful HTTP response with malformed JSON, the wrong run
+ID, or an invalid run status is uncertain: recover by reading the saved scenario,
+or retain the original run ID and snapshot for an explicit retry. The client does
+not submit a second optimization automatically. Even an unreadable 4xx response
+remains a known rejection; structured validation messages remain available.
+
+Live validation requires evidence instead of accepting the partial metadata
+allowed in older saved scenarios. An empty object cannot claim completion or
+enable advance. Model construction, solver feasibility, and “not determined”
+remain separate. Validation controls accept scenario ID zero. Responses arriving
+after a scenario/input change are ignored by the validation dialog; obsolete
+readiness errors and autofill previews likewise cannot affect the newer inputs.
+
 ## Compatibility and ownership
 
 The [decoders](../electron/ui/src/services/contracts/scenario.ts) mirror the
@@ -69,16 +89,16 @@ transport so malformed responses must pass through the real decoder. Initial
 load tests cover retry and unmount behavior. The decoder/helper files have a
 dedicated strict TypeScript check in CI; the rest of the application keeps its
 existing compiler settings. These checks do not establish compatibility with
-every private saved scenario.
+every private saved scenario. [Workflow contract tests](../electron/ui/src/tests/workflowcontracts.test.ts)
+cover live validation, preview/apply, run identity, and task responses.
+[Workflow UI tests](../electron/ui/src/tests/scenarioworkflow.test.tsx), autofill tests,
+and optimization-start tests use the production decoder with a fake transport
+to check malformed responses and delayed-request behavior.
 
 ## Remaining endpoints
 
 | Consumers / endpoints | Current boundary / next work |
 | --- | --- |
-| Readiness, validation, feasibility / `/scenario_readiness`, `/validate_scenario`, `/scenario_feasibility` | Native responses; move validation consumers and their recovery messages to the shared helper. |
-| Fill, planning horizon, advance / `/fill_scenario_inputs`, `/planning_horizon`, `/advance_to_optimization_setup` | Native responses; decode preview versus saved-scenario results and preserve revision conflicts. |
-| Launch / `/run_model` | Native scenario response or structured rejection; preserve run identity and uncertain-acknowledgement behavior when migrating. |
-| Tasks / `/check_tasks/` | Native `{tasks: ScenarioId[]}` response; migrate before introducing a smaller run-status endpoint. |
 | Copy, delete, upload, replacement, additional map | Native responses with different envelopes; migrate their list/scenario consumers. |
 | Results, downloads, reports, diagrams | Results inside migrated scenario reads are checked; binary/download endpoints need their own response handling. |
 | AI availability, settings, editing, diagnosis | Existing feature-specific handling; migrate without exposing credentials. |
@@ -86,4 +106,5 @@ every private saved scenario.
 The legacy `ApiResponse<T>` success/error intersection remains only for these
 unmigrated native-fetch endpoints. Backend request/response schema adoption,
 summary/detail separation, branded identities, run-status contracts, status
-normalization, and broader strict checking remain planned.
+normalization, and broader strict checking remain planned. Polling still retrieves
+full scenarios; decoding task lists does not introduce a smaller run-status API.

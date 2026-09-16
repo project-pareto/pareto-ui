@@ -27,6 +27,11 @@ The [runtime API migration](api-contracts.md) adds client decoding/error cases,
 bundled legacy scenario decoding, initial-load retry/unmount tests, and production
 client coverage in the save-queue tests. Malformed acknowledgements cannot clear
 drafts, and a delayed reload cannot discard a newer edit.
+The workflow follow-up checks readiness/model/feasibility evidence, correlated
+fill previews, scenario-zero validation/advance, malformed launch acknowledgements,
+and malformed task responses. Completion and optimization tests exercise the
+production decoder; delayed responses cannot revive an obsolete fill preview
+or apply a validation result to another selected scenario.
 
 ## What the PR added
 

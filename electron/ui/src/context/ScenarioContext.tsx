@@ -13,14 +13,13 @@ import {
 } from "../services/app.service";
 import { useApp } from "../AppContext";
 import {applyScenarioEdits, copyScenario as copyInputs, scenarioEdits, ScenarioEdit} from '../scenarioEdits';
+import {ApiClientError} from '../services/apiClient';
+import {COMPLETED_STATES, isRunStatus, RUNNING_STATES} from '../services/contracts/workflow';
 
 type NavigateFn = (to: string, opts?: { replace?: boolean }) => void;
 
 export type {OptimizationStart} from '../types/scenario';
 
-const RUNNING_STATES = ['Initializing', 'Preparing inputs', 'Building model', 'Solving model', 'Generating output',
-  'Solving Model', 'Generating Output']; // Include statuses saved by older versions.
-const COMPLETED_STATES = ['Optimized', 'failure', 'Infeasible'];
 const newRunId = () => Array.from(crypto.getRandomValues(new Uint32Array(4)), value => value.toString(16).padStart(8, '0')).join('');
 
 export interface ScenarioContextValue {
@@ -389,33 +388,28 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     const id = String(start.snapshot.id);
     updateStart(id, {...start, phase: 'submitting', error: undefined});
     try {
-      const response = await runModel(port, {scenario: start.snapshot, run_id: start.runId});
-      const body = await response.json();
-      if (response.ok) {
-        acceptRun(body);
-      } else if (response.status >= 400 && response.status < 500) {
-        const detail = body.detail;
-        updateStart(id, {...start, phase: 'rejected', error: typeof detail === 'string' ? detail :
-          detail?.validation?.error || detail?.message || 'Unable to start optimization. Review inputs and settings.'});
+      acceptRun(await runModel(port, {scenario: start.snapshot, run_id: start.runId}));
+    } catch (error) {
+      if (error instanceof ApiClientError && (error.code === 'invalid_request' ||
+          (error.status !== undefined && error.status >= 400 && error.status < 500))) {
+        updateStart(id, {...start, phase: 'rejected', error: error.validation?.error || error.message});
         // Refresh validation without replacing prior results with a fake failure.
         try {
           const saved = await fetchScenario(port, id);
           if (saved && starts.current[id]?.runId === start.runId && starts.current[id]?.phase === 'rejected') {
-            if (response.status === 409 && RUNNING_STATES.includes(saved.results.status)) acceptRun(saved);
+            if (error.status === 409 && RUNNING_STATES.includes(saved.results.status)) acceptRun(saved);
             else acceptSavedScenario(saved);
           }
         } catch { /* The rejection is known even if refreshing its inputs fails. */ }
-      } else {
-        throw new Error('Unable to confirm the optimization request.');
+        return;
       }
-    } catch {
       if (starts.current[id]?.phase === 'rejected') return;
       try {
         const current = await fetchScenario(port, id);
-        if (current.results?.run_id === start.runId) { acceptRun(current); return; }
+        if (current.results.run_id === start.runId && isRunStatus(current.results.status)) { acceptRun(current); return; }
       } catch { /* Keep the request identity so a retry cannot start a second run. */ }
       updateStart(id, {...start, phase: 'uncertain', error:
-        'The connection was interrupted. We could not confirm whether optimization started. Retry the request to reconnect to this run.'});
+        'We could not confirm whether optimization started. Retry the request to reconnect to this run.'});
     }
   };
 
@@ -470,7 +464,6 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     let stopped = false;
     let timer: number;
     checkTasks(port)
-      .then((response) => response.json())
       .then((data) => {
         const tasks = data.tasks;
         return fetchScenarios(port)
@@ -526,8 +519,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
       if (stopped) return;
       if (completed.length) {
         try {
-          const response = await checkTasks(port);
-          const {tasks} = await response.json();
+          const {tasks} = await checkTasks(port);
           if (stopped) return;
           const released = completed.filter(id => !tasks.some(task => String(task) === String(id)));
           if (released.length) {

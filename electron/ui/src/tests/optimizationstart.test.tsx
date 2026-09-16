@@ -18,6 +18,9 @@ jest.mock('../views/ModelResults/ModelResults', () => props => <div>Saved result
 let context: ScenarioContextValue;
 let database: Record<string, any>;
 let requests: Array<{body: any; resolve: (response: any) => void; reject: (error: Error) => void}>;
+const service = jest.requireActual('../services/app.service');
+const originalFetch = global.fetch;
+afterEach(() => {global.fetch = originalFetch;});
 
 // jsdom lacks the browser crypto API; use Node's equivalent in these tests.
 beforeAll(() => Object.defineProperty(window, 'crypto', {value: require('crypto').webcrypto, configurable: true}));
@@ -26,14 +29,21 @@ beforeEach(async () => {
   jest.resetAllMocks();
   database = {1: {id: 1, name: 'Startup test', input_revision: 'r1', override_values: {},
     results: {status: 'Optimized', data: {previous: [[123]]}}, optimization: {runtime: 100},
-    data_input: {df_parameters: {}, map_data: {}}}};
+    data_input: {df_sets: {}, df_parameters: {}, map_data: null}}};
   requests = [];
-  (checkTasks as jest.Mock).mockResolvedValue({json: async () => ({tasks: []})});
+  (checkTasks as jest.Mock).mockImplementation(service.checkTasks);
   (fetchScenarios as jest.Mock).mockImplementation(async () => ({data: clone(database)}));
-  (fetchScenario as jest.Mock).mockImplementation(async (_port, id) => clone(database[id]));
-  (runModel as jest.Mock).mockImplementation((_port, body) => new Promise((resolve, reject) => {
-    requests.push({body: clone(body), resolve, reject});
-  }));
+  (fetchScenario as jest.Mock).mockImplementation(service.fetchScenario);
+  (runModel as jest.Mock).mockImplementation(service.runModel);
+  global.fetch = jest.fn((url, options) => {
+    if (String(url).endsWith('/check_tasks/')) return Promise.resolve({ok: true, status: 200, json: async () => ({tasks: []})});
+    if (String(url).includes('/get_scenario/')) return Promise.resolve({ok: true, status: 200,
+      json: async () => clone(database[String(url).split('/').pop()])});
+    if (String(url).endsWith('/run_model')) return new Promise((resolve, reject) => {
+      requests.push({body: JSON.parse(options.body), resolve, reject});
+    });
+    throw new Error(`Unexpected request: ${url}`);
+  }) as jest.Mock;
   function Probe() { context = useScenario(); return context.scenarioData ? <Dashboard/> : null; }
   render(<ScenarioProvider navigate={jest.fn()}><Probe/></ScenarioProvider>);
   await waitFor(() => expect(context.scenarios[1]).toBeDefined());
@@ -197,4 +207,52 @@ test('unchanged status polls preserve scenario identity so maps do not reload', 
     expect(context.scenarioData.results.status).toBe('Solving model');
     expect(context.scenarioData).not.toBe(previous);
   } finally { jest.useRealTimers(); }
+});
+
+test.each(['shape', 'scenario ID', 'run ID', 'status', 'unreadable body'])('an acknowledgement with invalid %s retains the run identity for retry', async defect => {
+  const previous = clone(context.scenarioData.results);
+  fireEvent.click(screen.getByText('Optimize setup'));
+  const saved = {...clone(database[1]), results: {status: 'Preparing inputs', run_id: requests[0].body.run_id}};
+  if (defect === 'shape') delete saved.data_input;
+  if (defect === 'scenario ID') saved.id = 2;
+  if (defect === 'run ID') saved.results.run_id = 'different-run';
+  if (defect === 'status') saved.results.status = 'Draft';
+  await act(async () => requests[0].resolve({ok: true, status: 200, json: async () => {
+    if (defect === 'unreadable body') throw new SyntaxError('Invalid JSON');
+    return saved;
+  }}));
+  expect(context.optimizationStart.phase).toBe('uncertain');
+  expect(context.scenarioData.results).toEqual(previous);
+  expect(context.backgroundTasks).toEqual([]);
+  fireEvent.click(screen.getByText('Retry start request'));
+  expect(requests[1].body).toEqual(requests[0].body);
+  await acknowledge(1);
+  expect(context.optimizationStart).toBeNull();
+});
+
+test('an unreadable 422 response is still an explicit rejection', async () => {
+  fireEvent.click(screen.getByText('Optimize setup'));
+  await act(async () => requests[0].resolve({ok: false, status: 422, json: async () => {throw new SyntaxError('Invalid JSON');}}));
+  expect(context.optimizationStart.phase).toBe('rejected');
+  expect(screen.queryByText('Retry start request')).not.toBeInTheDocument();
+  expect(context.scenarioData.results.status).toBe('Optimized');
+});
+
+test('malformed task responses cannot release an active optimization', async () => {
+  jest.useFakeTimers();
+  const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    fireEvent.click(screen.getByText('Optimize setup'));
+    await acknowledge();
+    database[1].results.status = 'Optimized';
+    (checkTasks as jest.Mock).mockImplementationOnce(() => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200, json: async () => ({tasks: [null]})});
+      return service.checkTasks(50011);
+    });
+    await act(async () => {jest.advanceTimersByTime(2000);});
+    expect(context.backgroundTasks).toEqual([1]);
+    expect(consoleError).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({code: 'invalid_response'}));
+    await act(async () => {jest.advanceTimersByTime(2000);});
+    expect(context.backgroundTasks).toEqual([]);
+  } finally {consoleError.mockRestore(); jest.useRealTimers();}
 });

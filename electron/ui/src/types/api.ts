@@ -19,7 +19,7 @@ export interface ApiResponse<T> extends Response {
 
 export interface ScenarioResponse {data: Scenario}
 export interface ScenarioListResponse {data: ScenarioMap}
-export interface TaskResponse {tasks: ScenarioId[]}
+export interface TaskResponse {tasks: number[]}
 export interface CopyScenarioResponse {scenarios: ScenarioMap; new_id: number}
 
 export interface UpdateScenarioRequest {

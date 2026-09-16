@@ -14,7 +14,7 @@ beforeEach(() => {
   jest.useFakeTimers();
   global.fetch = jest.fn();
   consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-  (checkTasks as jest.Mock).mockResolvedValue({json: async () => ({tasks: []})});
+  (checkTasks as jest.Mock).mockResolvedValue({tasks: []});
 });
 afterEach(() => {
   global.fetch = originalFetch;

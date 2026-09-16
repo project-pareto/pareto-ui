@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography} from '@mui/material';
 import {fillScenarioInputs} from '../../services/app.service';
 import type {Scenario, ScenarioFillPreview} from '../../types';
@@ -12,25 +12,35 @@ export default function IssueFill({port, scenarioId, revision, section, title, c
   const [preview, setPreview] = useState<ScenarioFillPreview | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { setPreview(null); }, [revision]);
+  const requestVersion = useRef(0);
+  useEffect(() => {
+    setPreview(null); setBusy(false);
+    return () => { requestVersion.current += 1; };
+  }, [scenarioId, revision, section]);
   const validNumber = value.trim() !== '' && Number.isFinite(Number(value));
   // Apply the exact value/revision that was previewed. Changing the form or
   // receiving a newer revision clears the preview before another apply is allowed.
   const fill = async (apply: boolean) => {
+    const version = ++requestVersion.current;
     setBusy(true); setError(null);
     try {
-      const response = await fillScenarioInputs(port, scenarioId, {
+      const payload = {
         section, revision: apply && preview ? preview.revision : revision,
-        value: apply && preview ? preview.value : Number(value), apply,
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Unable to fill scenario inputs.');
-      if (apply) { onSaved(data); setOpen(false); }
-      else setPreview(data);
+        value: apply && preview ? preview.value : Number(value),
+      };
+      if (apply) {
+        const data = await fillScenarioInputs(port, scenarioId, {...payload, apply: true});
+        if (requestVersion.current !== version) return;
+        onSaved(data); setOpen(false);
+      } else {
+        const data = await fillScenarioInputs(port, scenarioId, {...payload, apply: false});
+        if (requestVersion.current === version) setPreview(data);
+      }
     } catch (error) {
+      if (requestVersion.current !== version) return;
       setPreview(null);
       setError(error instanceof Error ? error.message : 'Unable to fill scenario inputs.');
-    } finally { setBusy(false); }
+    } finally { if (requestVersion.current === version) setBusy(false); }
   };
   return <>
     <Button sx={{mt: 1}} disabled={disabled || busy} onClick={() => {
