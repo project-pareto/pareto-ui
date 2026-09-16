@@ -6,13 +6,18 @@ import tempfile
 from openpyxl import load_workbook
 from pareto.utilities.get_data import get_display_units
 from app.internal.workbooks.reader import get_data, get_input_lists
-from app.internal.scenarios.input_schema import DEFAULT_UNITS, FORECASTS, NODE_FIELDS, NODE_SETS, flat_table, dimension_count
+from app.internal.scenarios.input_schema import DEFAULT_UNITS, FORECASTS, NODE_FIELDS, NODE_SETS, flat_table, dimension_count, is_scalar_parameter
 
 def read_inputs(path, previous=None, map_data=None):
     sets, parameters, tables = get_data(str(path), *get_input_lists())
     data = deepcopy(previous or {})
+    # A save/map rebuild writes these values as INDEX/VALUE rows for PARETO.
+    # Keep their saved JSON representation, including numeric strings and nulls,
+    # when reading that workbook back. A fresh import has no previous metadata.
+    metadata = {name: table for name, table in data.get('df_parameters', {}).items()
+                if is_scalar_parameter(name, table)}
     data.update(df_sets={k: list(v) for k, v in sets.items()},
-                df_parameters={k: v for k, v in tables.items() if k != 'Units'},
+                df_parameters={**{k: v for k, v in tables.items() if k != 'Units'}, **metadata},
                 units=parameters['Units'],
                 display_units=get_display_units(get_input_lists()[1], parameters['Units']))
     if map_data is not None:
@@ -55,7 +60,7 @@ def prune_removed_map_nodes(data, map_data):
         'InitialPipelineCapacity', 'InitialPipelineDiameters', 'PipelineOperationalCost', 'PipelineExpansionDistance', 'TruckingTime'}
     new_sets = {key: {name for name, node in nodes.items() if node.get('node_type') == kind} for key, kind in NODE_SETS.items()}
     for name, table in result.get('df_parameters', {}).items():
-        if not table:
+        if not table or is_scalar_parameter(name, table):
             continue
         headers = list(table)
         indices = headers[:dimension_count(headers)]
@@ -85,6 +90,8 @@ def rename_map_nodes(data, renames):
     matrices = set(get_valid_piping_arc_list() + get_valid_trucking_arc_list()) | {
         'InitialPipelineCapacity', 'InitialPipelineDiameters', 'PipelineOperationalCost', 'PipelineExpansionDistance', 'TruckingTime'}
     for name, table in result.get('df_parameters', {}).items():
+        if is_scalar_parameter(name, table):
+            continue
         headers = list(table)
         indices = headers[:dimension_count(headers)]
         result['df_parameters'][name] = {
@@ -117,6 +124,10 @@ def write_inputs(data, path, template=None):
         for name, table in entries.items():
             if name in ('Units', 'proprietary_data'):
                 continue
+            if is_scalar_parameter(name, table):
+                # Serialize metadata even for a new validation/run workbook;
+                # skipping it would silently substitute the model's defaults.
+                table = {'INDEX': list(table), 'VALUE': list(table.values())}
             ws = wb[name] if name in wb else wb.create_sheet(name)
             for row in ws.iter_rows(min_row=2):
                 for cell in row:

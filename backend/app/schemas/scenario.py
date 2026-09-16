@@ -6,6 +6,7 @@ to internal.validation, not these structural contracts.
 """
 from pydantic import Field, field_validator
 
+from app.internal.scenarios.input_schema import SCALAR_PARAMETER_NAMES
 from .base import PayloadModel
 from .map import MapData
 from .validation import ConstraintViolationsSummary, ScenarioValidation
@@ -15,7 +16,6 @@ Scalar = str | int | float | bool | None
 ParameterTable = dict[str, list[Cell]]
 ScalarParameterData = dict[str, Cell]
 ParameterData = ParameterTable | ScalarParameterData
-SCALAR_PARAMETER_NAMES = {'Units', 'DesalinationSurrogate'}
 ResultsTable = list[list[Scalar]]
 
 

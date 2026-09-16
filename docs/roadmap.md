@@ -3,7 +3,7 @@
 This roadmap follows [PR #112](https://github.com/project-pareto/pareto-ui/pull/112),
 merged on 11 September 2026. The map-to-optimization workflow is the working
 baseline. The architectural stages below are **planned**. The bounded cleanup
-foundation described next is implemented in the PR #116 working branch; it does
+foundation described next was merged in PR #116; it does
 not complete those architectural stages.
 
 For application usage, start with [From map file to optimization](scenario-completion.md).
@@ -24,8 +24,9 @@ and [current validation behavior](scenario-validation.md).
   review. The approved follow-up fixes ID-0 update guards and SRA asset casing;
   other findings and removals remain separate work.
 - Keep storage version 3 and extend contracts for actual legacy payload shapes.
-  The [compatibility audit](v3-compatibility.md) records two existing runtime
-  blockers to repair before adopting schemas on live routes or removing fields.
+  The [compatibility audit and follow-up adapters](v3-compatibility.md) record
+  repairs for legacy Units recovery and scalar metadata during workbook/map
+  edits. Keep their regressions covered before adopting schemas on live routes.
 
 ## Priorities and implementation plans
 

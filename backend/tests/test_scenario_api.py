@@ -2,6 +2,7 @@
 from copy import deepcopy
 import asyncio
 import importlib
+import json
 import os
 import shutil
 from pathlib import Path
@@ -13,9 +14,12 @@ from unittest.mock import patch
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.testclient import TestClient
+from openpyxl import load_workbook
 from pyomo.environ import SolverFactory
-from scenario_fixtures import simple_scenario, map_files
+from tinydb import Query
+from scenario_fixtures import simple_scenario, map_files, legacy_units_sheet
 from app.internal.scenarios.inputs import read_inputs, write_inputs
+from app.internal.workbooks.reader import get_data
 
 
 class ScenarioApiTests(unittest.TestCase):
@@ -161,6 +165,105 @@ class ScenarioApiTests(unittest.TestCase):
         self.assertEqual(exported['df_parameters']['PadRates'], table)
         self.assertEqual(exported['df_sets']['TimePeriods'], ['T01', 'T02'])
         self.assertEqual(exported['units'], current['data_input']['units'])
+
+    def test_legacy_units_support_detail_readiness_rename_and_table_save(self):
+        path = Path(self.handler.get_excelsheet_path(1))
+        legacy_units_sheet(path)
+        legacy = deepcopy(self.example)
+        expected_units = legacy['data_input'].pop('units')
+        legacy['data_input']['df_parameters']['Units'] = deepcopy(expected_units)
+        # Simulate persisted v3 data without running today's persistence adapter.
+        self.handler._db.update({'scenario': legacy}, Query().id_ == 1)
+        self.handler.retrieve_scenarios()
+        workbook_before = path.read_bytes()
+        database_before = self.handler.scenarios_path.read_bytes()
+
+        response = self.client.get('/get_scenario/1')
+        self.assertEqual(response.status_code, 200, response.text)
+        current = response.json()
+        self.assertEqual(current['data_input']['units'], expected_units)
+        response = self.client.get('/scenario_readiness/1')
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertTrue(response.json()['valid'], response.text)
+        self.assertFalse(any(issue['code'] == 'invalid_units' for issue in response.json()['issues']))
+        self.assertEqual(path.read_bytes(), workbook_before)
+        self.assertEqual(self.handler.scenarios_path.read_bytes(), database_before)
+
+        current['name'] = 'Renamed legacy scenario'
+        response = self.client.post('/update', json={'updatedScenario': current})
+        self.assertEqual(response.status_code, 200, response.text)
+        current = response.json()['data']
+        self.assertEqual(path.read_bytes(), workbook_before)
+        table = {'ProductionPads': ['P1'], 'T01': [42], 'T02': [0]}
+        response = self.client.post('/update_excel', json={
+            'id': 1, 'tableKey': 'PadRates', 'updatedTable': table, 'revision': current['input_revision']})
+        self.assertEqual(response.status_code, 200, response.text)
+        current = response.json()
+        self.assertEqual(current['data_input']['units'], expected_units)
+        self.assertEqual(current['data_input']['df_parameters']['Units'], expected_units)
+        self.assertEqual(current['data_input']['df_parameters']['PadRates'], table)
+        self.assertEqual(current['optimization'], legacy['optimization'])
+        self.assertEqual(self.client.get('/get_template/1').content, path.read_bytes())
+        workbook = load_workbook(path, read_only=True)
+        try:
+            self.assertEqual(workbook['Units']['B2'].value, 'Unit')
+            self.assertEqual(workbook['Units']['D3'].value, 'Keep this source explanation.')
+        finally:
+            workbook.close()
+        self.assertEqual(read_inputs(path)['units'], expected_units)
+        self.assertEqual(self.handler.get_scenario(1), current)
+
+    def test_scalar_metadata_survives_table_save_map_rename_and_model_check(self):
+        current = deepcopy(self.example)
+        metadata = {'inlet_salinity': 100.0, 'recovery': 0.5, 'source': '001', 'zero': 0}
+        current['data_input']['df_parameters']['DesalinationSurrogate'] = metadata
+        current['data_input']['df_parameters']['Units'] = deepcopy(current['data_input']['units'])
+        current = self.handler.update_scenario(current)
+        original_metadata = json.dumps(metadata, sort_keys=True)
+        table = {'ProductionPads': ['P1'], 'T01': [42], 'T02': [0]}
+        response = self.client.post('/update_excel', json={
+            'id': 1, 'tableKey': 'PadRates', 'updatedTable': table, 'revision': current['input_revision']})
+        self.assertEqual(response.status_code, 200, response.text)
+        current = response.json()
+        mapped = current['data_input']['map_data']
+        mapped['all_nodes']['Production A'] = mapped['all_nodes'].pop('P1')
+        mapped['_node_renames'] = {'P1': 'Production A'}
+        mapped['all_nodes']['K1']['DisposalOperationalCost'] = 2
+        response = self.client.post('/update', json={'updatedScenario': current, 'propagateChanges': 'map'})
+        self.assertEqual(response.status_code, 200, response.text)
+        saved = response.json()['data']
+        parameters = saved['data_input']['df_parameters']
+        self.assertEqual(json.dumps(parameters['DesalinationSurrogate'], sort_keys=True), original_metadata)
+        self.assertEqual(parameters['Units'], current['data_input']['df_parameters']['Units'])
+        self.assertEqual(parameters['PadRates'], {**table, 'ProductionPads': ['Production A']})
+        self.assertEqual(parameters['DisposalOperationalCost']['VALUE'], [2])
+        self.assertEqual(saved['optimization'], current['optimization'])
+        self.assertEqual(self.handler.get_scenario(1), saved)
+        path = Path(self.handler.get_excelsheet_path(1))
+        _, model_parameters, _ = get_data(path)
+        self.assertEqual(model_parameters['DesalinationSurrogate']['inlet_salinity'], 100)
+        self.assertEqual(model_parameters['DesalinationSurrogate']['recovery'], 0.5)
+        workbook = load_workbook(path, read_only=True)
+        try:
+            rows = dict(workbook['DesalinationSurrogate'].iter_rows(min_row=3, max_col=2, values_only=True))
+            self.assertEqual(rows, metadata)
+        finally:
+            workbook.close()
+        self.assertEqual(self.client.get('/get_template/1').content, path.read_bytes())
+        response = self.client.get('/validate_scenario/1')
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()['model_check'], 'passed', response.text)
+
+    def test_replacing_a_workbook_does_not_restore_previous_scalar_metadata(self):
+        current = deepcopy(self.example)
+        current['data_input']['df_parameters']['DesalinationSurrogate'] = {'inlet_salinity': 100, 'recovery': 0.5}
+        self.handler.update_scenario(current)
+        replacement = Path(self.temp.name) / 'replacement.xlsx'
+        write_inputs(self.example['data_input'], replacement)
+        with replacement.open('rb') as stream:
+            response = self.client.post('/replace/1', files={'file': ('replacement.xlsx', stream)})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertNotIn('DesalinationSurrogate', response.json()['data_input']['df_parameters'])
 
     def test_kml_and_shapefile_import_classification_forecasts_and_optimization(self):
         self.handler.update_next_id()

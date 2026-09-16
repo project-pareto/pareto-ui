@@ -3,6 +3,20 @@ from pathlib import Path
 from app.internal.workbooks.excel_api import WriteMapDataToExcel
 from app.internal.scenarios.inputs import read_inputs, write_inputs
 
+def legacy_units_sheet(path):
+    """Older labels keep the unit names/values in A/B, with notes to their right."""
+    from openpyxl import load_workbook
+    workbook = load_workbook(path)
+    try:
+        sheet = workbook['Units']
+        sheet['A2'] = 'Quantity'
+        sheet['B2'] = 'Unit'
+        sheet['D2'] = 'Unit Description'
+        sheet['D3'] = 'Keep this source explanation.'
+        workbook.save(path)
+    finally:
+        workbook.close()
+
 def map_files(directory):
     """Equivalent three-point maps in both supported import formats."""
     import geopandas as gpd

@@ -30,6 +30,12 @@ PIPE_FIELDS = {'InitialPipelineCapacity': 'pipeline_capacity',
 DEFAULT_UNITS = {'volume': 'bbl', 'distance': 'mile', 'diameter': 'inch', 'concentration': 'mg/liter',
                  'currency': 'USD', 'time': 'day', 'pressure': 'psi', 'elevation': 'foot',
                  'decision period': 'week', 'mass': 'g'}
+SCALAR_PARAMETER_NAMES = frozenset({'Units', 'DesalinationSurrogate'})
+
+def is_scalar_parameter(name, value):
+    """Recognize only the scalar dictionaries stored by older v3 readers."""
+    return name in SCALAR_PARAMETER_NAMES and isinstance(value, dict) and all(
+        cell is None or type(cell) in (str, int, float) for cell in value.values())
 
 def dimension_count(headers):
     """Match the reader's leading index columns, including duplicate NODES headers."""

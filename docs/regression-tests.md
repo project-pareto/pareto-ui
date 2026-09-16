@@ -18,8 +18,9 @@ checks that rebased edits retain source metadata and server-owned revisions.
 The v3 follow-up adds scalar metadata and text arc lengths to that fixture,
 plus ID-0 update and case-sensitive SRA asset regressions. See the
 [saved scenario audit](v3-compatibility.md) for private dataset coverage and its
-limits; passing the synthetic suite does not resolve the existing legacy
-workbook/map failures found there.
+limits. The subsequent compatibility adapters add synthetic workbook/API
+regressions for legacy Units recovery and scalar metadata preservation; they
+do not repeat the private dataset audit.
 The historical PR #112 counts below describe that merge, not the expanded suite.
 
 ## What the PR added
@@ -44,6 +45,7 @@ tests does not establish that every uploaded scenario is feasible.
 | [Map import](../backend/tests/test_map_import.py) / [export](../backend/tests/test_map_export.py) | Duplicate shapefile names, pipe bends/directions, and preservation of forecasts, capacities, trucking, treatment streams, and intended expansion defaults across map edits. |
 | [Scenario fill](../backend/tests/test_scenario_fill.py) | Fill all eligible cells, including beyond the displayed issue limit, while preserving valid values and rejecting invalid or structural changes. |
 | [Workbook handles](../backend/tests/test_workbook_handles.py) | Close workbook readers before replacement, rename, or deletion, including error paths. Tests retain reader references so garbage collection cannot hide Windows file-lock bugs. |
+| [Legacy inputs](../backend/tests/test_legacy_inputs.py) | Read older Units headings without rewriting the source, retain blank declarations for validation, preserve scalar metadata through workbook/map changes and fresh model snapshots, and reject malformed ordinary tables without replacing the workbook. |
 | [Model diagnostics](../backend/tests/test_model_diagnostics.py) / [solver precision](../backend/tests/test_solver_precision.py) | Do not call missing, fractional-integer, or physically inconsistent values feasible. Preserve CBC flow precision and limit any rounding allowance to the intended currency equations. |
 | [Optimization workflow](../backend/tests/test_optimization_workflow.py) | Keep diagnostic evidence when solving/reporting fails; recover from unavailable or malformed AI responses. These solver/AI outcomes are simulated. |
 | [AI availability](../backend/tests/test_ai_availability.py) / [configuration](../backend/tests/test_ai_configuration.py) | Hide unavailable features, apply user/environment fallback, retain working settings after failure, and avoid exposing keys. AI clients are mocked; no paid provider calls are needed. |
