@@ -1,44 +1,79 @@
 import { getAIAvailability, getAISettings, saveAISettings, resetAISettings } from './app.service';
+import { ApiClientError } from './apiClient';
+import { DecodeError } from './contracts/decode';
+import { decodeSettingsResult } from './contracts/ai';
 
-import type {AISettings, AISettingsInput} from '../types/ai';
-export type {AISettings, AISettingsInput} from '../types/ai';
+import type { AISettings, AISettingsInput } from '../types/ai';
+export type { AISettings, AISettingsInput } from '../types/ai';
 
-type SettingsResult = {ok: boolean; settings?: AISettings; error?: string; retryable?: boolean};
 declare global {
   interface Window {
     paretoAISettings?: {
-      get: () => Promise<SettingsResult>;
-      save: (settings: AISettingsInput) => Promise<SettingsResult>;
-      reset: () => Promise<SettingsResult>;
+      get: () => Promise<unknown>;
+      save: (settings: AISettingsInput) => Promise<unknown>;
+      reset: () => Promise<unknown>;
     };
   }
 }
 
-async function readResponse(response: Response): Promise<AISettings> {
-  const data = await response.json();
-  if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Unable to update AI settings.');
-  return {...data, can_remember: false, remembered: false};
+async function readDesktopSettings(request: Promise<unknown>) {
+  let result: unknown;
+  try {
+    result = await request;
+  } catch {
+    // Raw IPC exceptions may include main-process details; keep them out of the UI.
+    throw new ApiClientError(
+      'network_error',
+      'Unable to reach desktop AI settings. Please try again.',
+    );
+  }
+  try {
+    return decodeSettingsResult(result, '$');
+  } catch (error) {
+    if (!(error instanceof DecodeError)) throw error;
+    throw new ApiClientError(
+      'invalid_response',
+      'Desktop AI settings returned an invalid response. Reopen Settings before continuing.',
+    );
+  }
 }
 
-export async function updateAISettings(port: number, operation: 'get' | 'save' | 'reset', input?: AISettingsInput): Promise<AISettings> {
+export async function updateAISettings(
+  port: number,
+  operation: 'get' | 'save' | 'reset',
+  input?: AISettingsInput,
+): Promise<AISettings> {
   // Desktop owns remembered credentials and restores them directly to the backend.
   // The renderer receives availability/settings only, never a remembered API key.
+  if (operation === 'save' && !input)
+    throw new ApiClientError('invalid_request', 'Enter AI connection settings.');
   if (window.paretoAISettings) {
-    const result = operation === 'save' ? await window.paretoAISettings.save(input) : await window.paretoAISettings[operation]();
-    if (!result.ok || !result.settings) throw new Error(result.error || 'Unable to update AI settings.');
+    const result = await readDesktopSettings(
+      operation === 'save'
+        ? window.paretoAISettings.save(input!)
+        : window.paretoAISettings[operation](),
+    );
+    if (result.ok === false)
+      throw new ApiClientError('http_error', result.error || 'Unable to update AI settings.');
     return result.settings;
   }
-  const response = operation === 'get' ? await getAISettings(port)
-    : operation === 'save' ? await saveAISettings(port, input) : await resetAISettings(port);
-  return readResponse(response);
+  const settings =
+    operation === 'get'
+      ? await getAISettings(port)
+      : operation === 'save'
+        ? await saveAISettings(port, input!)
+        : await resetAISettings(port);
+  return { ...settings, can_remember: false, remembered: false };
 }
 
 export async function checkAIAvailability(port: number, signal: AbortSignal): Promise<boolean> {
   if (window.paretoAISettings) {
-    const result = await window.paretoAISettings.get();
-    if (!result.ok && result.retryable) throw new Error('AI settings are not ready.');
-    return result.ok && result.settings?.available === true;
+    const result = await readDesktopSettings(window.paretoAISettings.get());
+    if (result.ok === false) {
+      if (result.retryable) throw new ApiClientError('network_error', 'AI settings are not ready.');
+      return false;
+    }
+    return result.settings.available;
   }
-  const response = await getAIAvailability(port, signal);
-  return response.ok && (await response.json()).available === true;
+  return (await getAIAvailability(port, signal)).available;
 }

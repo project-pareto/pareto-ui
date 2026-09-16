@@ -13,7 +13,7 @@ const cell = nullable(coordinate);
 const table = record(array(cell));
 
 // These two v3 metadata dictionaries are scalar; other parameter columns are arrays.
-const parameters: Decoder<DfParameters> = (value, path) => {
+export const decodeParameters: Decoder<DfParameters> = (value, path) => {
   const tables = record(unknown)(value, path);
   Object.entries(tables).forEach(([name, data]) => {
     const decode = name === 'Units' || name === 'DesalinationSurrogate' ? either(table, record(cell)) : table;
@@ -46,7 +46,7 @@ const arc: Decoder<MapArc> = object({
   name: optional(string), node_type: optional(string), coordinates: optional(array(coordinates)),
   nodes: optional(array(arcNode)), lengths: optional(array(number)), length: optional(coordinate), diameter: optional(coordinate),
 });
-const map: Decoder<MapData> = object({
+export const decodeMap: Decoder<MapData> = object({
   all_nodes: nodes, arcs: record(arc),
   connections: object({all_connections: record(strings), connection_metadata: optional(record(object({
     pipeline_capacity: optional(cell), pipeline_length: optional(cell), pipeline_diameter: optional(cell),
@@ -87,7 +87,7 @@ const violations: Decoder<ConstraintViolationsSummary> = object({
   violations: array(object({violation: number, side: nullable(string), constraint: string,
     lower_bound: nullable(number), body_value: nullable(number), upper_bound: nullable(number)})),
 });
-const diagnosis: Decoder<ScenarioAIDiagnosis> = object({
+export const decodeDiagnosis: Decoder<ScenarioAIDiagnosis> = object({
   status: literal('success'), summary: string, likelyCauses: strings, cautionNotes: strings, diagnosedAt: string,
   nextSteps: array(object({title: string, instruction: string, reason: optional(nullable(string)), appArea: optional(nullable(string))})),
   sourceErrorMessage: optional(string), outdated: optional(boolean), outdatedAt: optional(string), outdatedReason: optional(string),
@@ -100,8 +100,8 @@ const overrides: Decoder<ScenarioOverrides> = object({
   vb_y_Disposal_dict: override, vb_y_Storage_dict: override, vb_y_Treatment_dict: override,
 });
 const inputs: Decoder<ScenarioDataInput> = object({
-  df_sets: record(strings), df_parameters: parameters, display_units: optional(record(string)),
-  units: optional(record(string)), map_data: optional(nullable(map)), origin: optional(string),
+  df_sets: record(strings), df_parameters: decodeParameters, display_units: optional(record(string)),
+  units: optional(record(string)), map_data: optional(nullable(decodeMap)), origin: optional(string),
 });
 const optimization: Decoder<ScenarioOptimization> = object({
   objective: optional(string), runtime: optional(coordinate), pipeline_cost: optional(string),
@@ -124,7 +124,7 @@ export const decodeScenarioId: Decoder<number> = (value, path) => {
 export const decodeScenario: Decoder<Scenario> = object({
   id: decodeScenarioId, name: string, date: optional(string), data_input: inputs, optimization, results,
   input_revision: optional(string), validation: optional(decodeValidation), override_values: optional(overrides),
-  optimized_override_values: optional(overrides), aiDiagnosis: optional(diagnosis), previousAIDiagnosis: optional(diagnosis),
+  optimized_override_values: optional(overrides), aiDiagnosis: optional(decodeDiagnosis), previousAIDiagnosis: optional(decodeDiagnosis),
   inputDiagramExtension: optional(string), outputDiagramExtension: optional(string),
 });
 

@@ -8,6 +8,8 @@ import {object} from './contracts/decode';
 import {decodeSavedScenario, decodeScenarioList, scenarioFor} from './contracts/scenario';
 import {copiedScenarioFor, deletedScenarioFor} from './contracts/collection';
 import {decodeTasks, decodeValidationResult, fillPreviewFor, runFor} from './contracts/workflow';
+import {decodeAIAvailability, decodeAIBackendSettings, decodeAIPromptResponse, decodeAIOptimizationDiagnosis} from './contracts/ai';
+import type {AIBackendSettings, AIPromptResponse, AIOptimizationDiagnosisResponse} from '../types/ai';
 
 let BACKEND_URL = "http://localhost"
 
@@ -181,38 +183,41 @@ export const savePlanningHorizon = async (port: number, id: ScenarioId, periods:
         body: JSON.stringify({periods, revision})});
 };
 
-export const getAIAvailability = (backend_port: number, signal?: AbortSignal) =>
-    fetch(`${BACKEND_URL}:${backend_port}/ai_available`, { signal });
+export const getAIAvailability = (backend_port: number, signal?: AbortSignal): Promise<{available: boolean}> =>
+    requestJson(`${BACKEND_URL}:${backend_port}/ai_available`, decodeAIAvailability, {signal});
 
-export const getAISettings = (backend_port: number) =>
-    fetch(`${BACKEND_URL}:${backend_port}/ai_settings`);
+export const getAISettings = (backend_port: number): Promise<AIBackendSettings> =>
+    requestJson(`${BACKEND_URL}:${backend_port}/ai_settings`, decodeAIBackendSettings);
 
-export const saveAISettings = (backend_port: number, settings: {api_key?: string; base_url: string; model: string}) =>
-    fetch(`${BACKEND_URL}:${backend_port}/ai_settings`, {
-        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(settings),
+export const saveAISettings = (backend_port: number, settings: {api_key?: string; base_url: string; model: string}): Promise<AIBackendSettings> =>
+    requestJson(`${BACKEND_URL}:${backend_port}/ai_settings`, decodeAIBackendSettings, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({api_key: settings.api_key, base_url: settings.base_url, model: settings.model}),
     });
 
-export const resetAISettings = (backend_port: number) =>
-    fetch(`${BACKEND_URL}:${backend_port}/ai_settings`, {method: 'DELETE'});
+export const resetAISettings = (backend_port: number): Promise<AIBackendSettings> =>
+    requestJson(`${BACKEND_URL}:${backend_port}/ai_settings`, decodeAIBackendSettings, {method: 'DELETE'});
 
-export const requestAIDataUpdate = (backend_port: number, id: number | string, prompt: string) => {
-    let endpoint = `${BACKEND_URL}:${backend_port}/request_ai_data_update/${id}`
-    return fetch(endpoint, {
+export const requestAIDataUpdate = async (backend_port: number, id: ScenarioId, prompt: string): Promise<AIPromptResponse> => {
+    const endpoint = `${BACKEND_URL}:${backend_port}/request_ai_data_update/${scenarioId(id)}`
+    return requestJson(endpoint, decodeAIPromptResponse, {
         method: 'POST', 
         mode: 'cors',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({"prompt": prompt})
     });
 }
 
-export const requestAIOptimizationDiagnosis = (
+export const requestAIOptimizationDiagnosis = async (
     backend_port: number,
-    id: number | string,
+    id: ScenarioId,
     errorMessage: string
-) => {
-    const endpoint = `${BACKEND_URL}:${backend_port}/request_ai_optimization_diagnosis/${id}`
-    return fetch(endpoint, {
+): Promise<AIOptimizationDiagnosisResponse> => {
+    const endpoint = `${BACKEND_URL}:${backend_port}/request_ai_optimization_diagnosis/${scenarioId(id)}`
+    return requestJson(endpoint, decodeAIOptimizationDiagnosis, {
         method: 'POST',
         mode: 'cors',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ errorMessage })
     });
 }

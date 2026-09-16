@@ -38,6 +38,14 @@ and the existing `openai/gpt-5.2` model. User settings allow a different endpoin
 and model without editing environment files. Restart the backend after changing
 environment variables.
 
+The browser API client and desktop settings bridge validate response metadata
+before updating the form or enabling AI. Failed or malformed saves retain your
+form edits and the last confirmed availability. Settings responses retain only
+public configuration fields. Availability checks retry transient startup failures
+quietly; fill, diagnosis, and settings changes require an explicit retry.
+See [runtime AI contracts](api-contracts.md#ai-boundaries) for the checked payloads
+and remaining concurrency limits.
+
 Regression checks:
 
 ```bash

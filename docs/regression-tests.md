@@ -37,6 +37,12 @@ multipart requests, and upload errors. UI tests retain the upload form on failur
 prevent duplicate submissions while pending, and ensure malformed copy/delete
 responses cannot launch a run or replace scenario state. Lint runs in CI with
 nonblocking warnings; see [formatting commands](building.md#typescript-linting-and-formatting).
+AI contract/UI tests cover checked browser and desktop settings, credential-field
+exclusion, malformed availability and startup retry, legacy application errors,
+fill/diagnosis payloads, scenario zero, and late or duplicate AI requests. A failed
+settings mutation retains form edits; a fill proposal cannot be saved onto a
+different scenario. These tests stub transport/provider calls and do not require
+a live AI connection.
 
 ## What the PR added
 

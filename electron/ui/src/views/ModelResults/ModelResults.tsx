@@ -40,6 +40,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
     status: aiStatus,
     requestKind,
     diagnosis,
+    requestScenarioId,
     errorMessage: aiErrorMessage,
     runOptimizationDiagnosis,
   } = useAIPrompt();
@@ -136,6 +137,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
   useEffect(() => {
     if (
       requestKind === "optimization-diagnosis" &&
+      requestScenarioId === props.scenario.id &&
       aiStatus === "success" &&
       diagnosis?.diagnosedAt &&
       diagnosisSyncedAt !== diagnosis.diagnosedAt
@@ -143,7 +145,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
       syncScenarioData();
       setDiagnosisSyncedAt(diagnosis.diagnosedAt);
     }
-  }, [aiStatus, diagnosis?.diagnosedAt, diagnosisSyncedAt, requestKind, syncScenarioData]);
+  }, [aiStatus, diagnosis?.diagnosedAt, diagnosisSyncedAt, requestKind, requestScenarioId, props.scenario.id, syncScenarioData]);
 
   useEffect(() => {
     setShowPreviousDiagnosis(false);
@@ -645,7 +647,7 @@ const handleNewInfrastructureOverride = () => {
               <LinearProgress />
             </Box>
           )}
-          {requestKind === "optimization-diagnosis" && aiStatus === "error" && aiErrorMessage && (
+          {requestKind === "optimization-diagnosis" && requestScenarioId === props.scenario.id && aiStatus === "error" && aiErrorMessage && (
             <Box
               sx={{
                 mt: 2,
