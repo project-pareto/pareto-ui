@@ -23,6 +23,11 @@ regressions for legacy Units recovery and scalar metadata preservation; they
 do not repeat the private dataset audit.
 The historical PR #112 counts below describe that merge, not the expanded suite.
 
+The [runtime API migration](api-contracts.md) adds client decoding/error cases,
+bundled legacy scenario decoding, initial-load retry/unmount tests, and production
+client coverage in the save-queue tests. Malformed acknowledgements cannot clear
+drafts, and a delayed reload cannot discard a newer edit.
+
 ## What the PR added
 
 | Layer | Added or updated in PR #112 | What actually runs |
@@ -115,6 +120,7 @@ PYTHONPATH=backend python -m unittest discover -s backend/tests
 npm --prefix electron/ui test -- --watchAll=false --runInBand
 node --test electron/tests/ai-settings.test.cjs
 node electron/ui/node_modules/typescript/bin/tsc --noEmit --project electron/ui/tsconfig.json
+node electron/ui/node_modules/typescript/bin/tsc --noEmit --project electron/ui/tsconfig.contracts.json
 ```
 
 For the Python command in PowerShell:
@@ -185,7 +191,8 @@ Python tests previously ran inside the combined job named **E2E testing**.
 Separating the jobs makes each result visible and lets them run independently;
 a backend or component failure does not prevent the E2E job from running.
 Check solver skips as well as the job result. The explicit type-check step is
-implemented; broader strict checking remains in [plan 1](plans/01-contracts-and-types.md).
+implemented, including a strict check for the migrated API helper and decoders;
+broader strict checking remains in [plan 1](plans/01-contracts-and-types.md).
 
 Future coverage should include route reload/back/forward, large scenario
 collections and payload sizes, backend restart/run history, a complete map

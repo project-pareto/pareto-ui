@@ -108,6 +108,12 @@ Python also checks bundled older scenarios. These are representative checks,
 not proof of compatibility with every private industry file. Update both sides
 and the relevant fixtures when a payload contract changes.
 
+The [runtime client migration](api-contracts.md) now checks scenario list/detail
+responses and queued scenario/table saves using explicit frontend decoders.
+Backend route dictionaries still have the behavior described above. The decoder
+tests include the shared fixture and bundled older scenarios; draft result tables
+may be absent and failure-result metadata may be null.
+
 ## Next extractions
 
 1. Move shared geometry helpers from `util.py` into `maps/geometry.py`, with

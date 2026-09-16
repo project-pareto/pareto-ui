@@ -3,27 +3,34 @@ import type {
     UpdateScenarioRequest, UpdateExcelRequest, RunModelRequest, FillScenarioInputsRequest,
     Scenario, ScenarioId, ScenarioValidation,
 } from '../types';
+import {requestJson, scenarioId} from './apiClient';
+import {object} from './contracts/decode';
+import {decodeScenarioList, scenarioFor} from './contracts/scenario';
 
 let BACKEND_URL = "http://localhost"
 
-export const updateScenario = (backend_port: number, data: UpdateScenarioRequest): Promise<ApiResponse<ScenarioResponse>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/update', {
+export const updateScenario = async (backend_port: number, data: UpdateScenarioRequest): Promise<ScenarioResponse> => {
+    const id = scenarioId(data.updatedScenario.id);
+    return requestJson(BACKEND_URL+':'+backend_port+'/update', object({data: scenarioFor(id, true)}), {
         method: 'POST', 
         mode: 'cors',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     });
 }; 
 
-export const updateExcel = (backend_port: number, data: UpdateExcelRequest): Promise<ApiResponse<Scenario>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/update_excel', {
+export const updateExcel = async (backend_port: number, data: UpdateExcelRequest): Promise<Scenario> => {
+    const id = scenarioId(data.id);
+    return requestJson(BACKEND_URL+':'+backend_port+'/update_excel', scenarioFor(id, true), {
         method: 'POST', 
         mode: 'cors',
-        body: JSON.stringify(data)
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({...data, id})
     });
 }; 
 
-export const fetchScenarios = (backend_port: number): Promise<ApiResponse<ScenarioListResponse>> => {
-    return fetch(BACKEND_URL+':'+backend_port+'/get_scenario_list/', {
+export const fetchScenarios = (backend_port: number): Promise<ScenarioListResponse> => {
+    return requestJson(BACKEND_URL+':'+backend_port+'/get_scenario_list/', decodeScenarioList, {
         method: 'GET', 
         mode: 'cors'
     });
@@ -103,8 +110,10 @@ export const copyScenario = (backend_port: number, id: number | string, newScena
     });
 };
 
-export const fetchScenario = (backend_port: number, id: ScenarioId): Promise<ApiResponse<Scenario>> =>
-    fetch(`${BACKEND_URL}:${backend_port}/get_scenario/${id}`);
+export const fetchScenario = async (backend_port: number, id: ScenarioId): Promise<Scenario> => {
+    const parsedId = scenarioId(id);
+    return requestJson(`${BACKEND_URL}:${backend_port}/get_scenario/${parsedId}`, scenarioFor(parsedId));
+};
 
 export const uploadScenario = (backend_port: number, data: FormData, name: string, defaultNodeType: string) => {
     let endpoint = BACKEND_URL+':'+backend_port+'/upload/'+name

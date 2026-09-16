@@ -29,8 +29,8 @@ beforeEach(async () => {
     data_input: {df_parameters: {}, map_data: {}}}};
   requests = [];
   (checkTasks as jest.Mock).mockResolvedValue({json: async () => ({tasks: []})});
-  (fetchScenarios as jest.Mock).mockImplementation(async () => ({json: async () => ({data: clone(database)})}));
-  (fetchScenario as jest.Mock).mockImplementation(async (_port, id) => ({ok: true, json: async () => clone(database[id])}));
+  (fetchScenarios as jest.Mock).mockImplementation(async () => ({data: clone(database)}));
+  (fetchScenario as jest.Mock).mockImplementation(async (_port, id) => clone(database[id]));
   (runModel as jest.Mock).mockImplementation((_port, body) => new Promise((resolve, reject) => {
     requests.push({body: clone(body), resolve, reject});
   }));

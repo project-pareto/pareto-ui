@@ -90,6 +90,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
   const [pendingSaves, setPendingSaves] = useState(0);
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
+  const saveRequests = useRef(0);
   // The server baseline owns revisions. Drafts replay pending edits on that baseline
   // so a slow save response cannot replace what the user has typed since sending it.
   const savedScenarios = useRef<Record<string, Scenario>>({});
@@ -150,6 +151,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     return request;
   };
   const queueScenarioEdit = (base: Scenario, edits: ScenarioEdit[], send: (current: Scenario) => Promise<Scenario>): Promise<boolean> => {
+    saveRequests.current += 1;
     const id = String(base.id);
     if (!savedScenarios.current[id]) savedScenarios.current[id] = copyInputs(base);
     const pending = {edits};
@@ -270,10 +272,10 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     setScenarioIndex(null);
 
     fetchScenarios(port)
-      .then((response) => response.json())
       .then((data) => {
         setScenarios(data.data);
-      });
+      })
+      .catch(error => console.error('Unable to refresh scenarios.', error));
 
     navigate("/scenarios", { replace: true });
   };
@@ -311,9 +313,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     if (snapshot.results.status === 'Optimized' && !keepOptimized) snapshot.results.status = 'Not Optimized';
     const base = drafts.current[String(snapshot.id)] || scenarios[snapshot.id] || snapshot;
     return queueScenarioEdit(base, scenarioEdits(base, snapshot), async current => {
-      const response = await updateScenario(port, {updatedScenario: current, propagateChanges});
-      const body = await response.json();
-      if (!response.ok) throw new Error(typeof body.detail === 'string' ? body.detail : 'Unable to save scenario.');
+      const body = await updateScenario(port, {updatedScenario: current, propagateChanges});
       return body.data;
     });
   };
@@ -340,27 +340,29 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     const table = copyInputs(updatedTable);
     const base = drafts.current[String(id)] || scenarios[id];
     const edits = [{path: ['data_input', 'df_parameters', tableKey], value: table}];
-    return queueScenarioEdit(base, edits, async current => {
-      const response = await updateExcel(port, {id, tableKey, updatedTable: table,
-        revision: current.input_revision});
-      const body = await response.json();
-      if (!response.ok) throw new Error(typeof body.detail === 'string' ? body.detail : 'Unable to save input table.');
-      return body;
-    });
+    return queueScenarioEdit(base, edits, current => updateExcel(port, {id, tableKey, updatedTable: table,
+      revision: current.input_revision}));
   };
 
   const syncScenarioData = (): void => {
     if (pendingSaves > 0) return;
+    const id = selectedId.current;
+    const navigation = navigationVersion.current;
+    const requestVersion = saveRequests.current;
+    if (id === null) return;
     fetchScenarios(port)
-      .then((response) => response.json())
       .then((data) => {
-        setScenarios(data.data);
-        const saved = data.data[scenarioIndex];
-        if (saved) {
-          const id = String(saved.id);
-          pendingEdits.current[id] = [];
-          failedSaves.current.delete(id);
-          acceptSavedScenario(saved);
+        // A reload is permission to discard this draft, not edits made while it was pending.
+        if (selectedId.current !== id || navigationVersion.current !== navigation || saveRequests.current !== requestVersion) return;
+        const saved = data.data[id];
+        if (!saved) throw new Error('The saved scenario is no longer available. Your draft has been kept.');
+        pendingEdits.current[id] = [];
+        failedSaves.current.delete(id);
+        acceptSavedScenario(saved);
+      })
+      .catch(error => {
+        if (selectedId.current === id && navigationVersion.current === navigation && saveRequests.current === requestVersion) {
+          setSaveError(error instanceof Error ? error.message : 'Unable to reload saved inputs.');
         }
       });
   };
@@ -397,8 +399,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
           detail?.validation?.error || detail?.message || 'Unable to start optimization. Review inputs and settings.'});
         // Refresh validation without replacing prior results with a fake failure.
         try {
-          const current = await fetchScenario(port, id);
-          const saved = current.ok ? await current.json() : null;
+          const saved = await fetchScenario(port, id);
           if (saved && starts.current[id]?.runId === start.runId && starts.current[id]?.phase === 'rejected') {
             if (response.status === 409 && RUNNING_STATES.includes(saved.results.status)) acceptRun(saved);
             else acceptSavedScenario(saved);
@@ -410,11 +411,8 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
     } catch {
       if (starts.current[id]?.phase === 'rejected') return;
       try {
-        const response = await fetchScenario(port, id);
-        if (response.ok) {
-          const current = await response.json();
-          if (current.results?.run_id === start.runId) { acceptRun(current); return; }
-        }
+        const current = await fetchScenario(port, id);
+        if (current.results?.run_id === start.runId) { acceptRun(current); return; }
       } catch { /* Keep the request identity so a retry cannot start a second run. */ }
       updateStart(id, {...start, phase: 'uncertain', error:
         'The connection was interrupted. We could not confirm whether optimization started. Retry the request to reconnect to this run.'});
@@ -469,15 +467,16 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
 
   // ---- effect 1: initial load ----
   useEffect(() => {
+    let stopped = false;
+    let timer: number;
     checkTasks(port)
       .then((response) => response.json())
       .then((data) => {
         const tasks = data.tasks;
-        updateTasks(tasks);
-
-        fetchScenarios(port)
-          .then((response) => response.json())
+        return fetchScenarios(port)
           .then((data) => {
+            if (stopped) return;
+            updateTasks(tasks);
             const tempScenarios: ScenarioMap = {};
             for (const key in data.data) {
               const scenario = { ...data.data[key] };
@@ -496,9 +495,11 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
           });
       })
       .catch((e) => {
-        console.error("try #" + loadLandingPage + " unable to check for tasks: ", e);
-        window.setTimeout(() => setLoadLandingPage((x) => x + 1), 1000);
+        if (stopped) return;
+        console.error("try #" + loadLandingPage + " unable to load scenarios: ", e);
+        timer = window.setTimeout(() => setLoadLandingPage((x) => x + 1), 1000);
       });
+    return () => { stopped = true; window.clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadLandingPage, port]);
 
@@ -511,9 +512,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children, na
       const completed: Array<string | number> = [];
       await Promise.all(backgroundTasks.map(async id => {
         try {
-          const response = await fetchScenario(port, id);
-          if (!response.ok) throw new Error('Unable to check optimization status.');
-          const current = await response.json();
+          const current = await fetchScenario(port, id);
           if (stopped) return;
           // An unchanged poll must not reload maps or reset their local view state.
           if (JSON.stringify(savedScenarios.current[String(id)]) !== JSON.stringify(current)) acceptSavedScenario(current);

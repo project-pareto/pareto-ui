@@ -1,18 +1,21 @@
 # Plan 1: core types and API contracts
 
-**Status:** Planned. **Dependency:** none. [Roadmap](../roadmap.md).
+**Status:** In progress. **Dependency:** none. [Roadmap](../roadmap.md).
 
 ## Problem and outcome
 
 PR #116 supplies [domain types and compatibility-tested Python models](../backend-organization.md)
-plus compile-time descriptions for core fetch responses. Runtime API decoding,
-request/response schema adoption, normalized errors and the new contracts below
-remain planned. Build on that foundation rather than duplicating the models.
+plus compile-time descriptions for core fetch responses. The first runtime
+increment adds checked scenario retrieval, queued scenario/table saves, normalized
+client errors, and a strict compiler check for the decoder/helper. The
+[endpoint inventory and compatibility decisions](../api-contracts.md) describe
+what is implemented and what remains. Backend schema adoption and the new
+contracts below remain planned.
 
 Shared scenario and navigation types now describe the core data paths; remaining
 [component props](../../electron/ui/src/types/components.ts) still permit broad `any` values. [app.service.ts](../../electron/ui/src/services/app.service.ts)
-returns native fetch responses with typed core JSON shapes; callers still interpret
-status codes and differing payload shapes themselves. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
+returns decoded data for the migrated endpoints and native fetch responses for
+the others. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
 also recognizes several legacy status strings.
 
 Create explicit contracts at these boundaries before changing storage or UI
@@ -36,6 +39,11 @@ missing versus empty versus explicit zero and legacy settings representations at
 the normalization boundary. Share authoritative backend request/response schemas
 through generated client types if a small prototype is maintainable; otherwise
 use explicit mirrored types with contract tests. Decide this in the first PR.
+
+The first increment keeps explicit frontend decoders with shared Python/TypeScript
+fixtures and bundled legacy payload checks. Python model defaults/nullability and
+frontend assumptions must converge before generation can supply the authoritative
+wire contract. This decision adds no runtime dependency or format migration.
 
 ## PR-sized steps
 

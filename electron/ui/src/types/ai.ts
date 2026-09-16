@@ -19,8 +19,8 @@ export interface AIPromptResponse {
 export interface AIOptimizationDiagnosisStep {
   title: string;
   instruction: string;
-  reason?: string;
-  appArea?: string;
+  reason?: string | null;
+  appArea?: string | null;
 }
 
 export interface AIOptimizationDiagnosisResponse {

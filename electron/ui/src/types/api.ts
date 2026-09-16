@@ -9,9 +9,9 @@ export interface ApiError {
       & {message?: never; validation?: never});
 }
 
-/** Compile-time description of native fetch responses, with no new parsing behavior.
- * Check `ok` before using the success payload. JSON is still external data; a future
- * API decoder can enforce these contracts once legacy compatibility is covered.
+/** Legacy native-fetch endpoints only; this is not runtime validation.
+ * Check `ok` before using the success payload. Migrated endpoints return decoded
+ * data through services/apiClient instead of exposing this success/error intersection.
  */
 export interface ApiResponse<T> extends Response {
   json(): Promise<T & ApiError>;

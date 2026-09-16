@@ -1,20 +1,20 @@
 import type React from 'react';
 import type {Scenario} from './scenario';
 
-/** Map units object */
+/** Missing unit names remain representable until input validation. */
 export interface MapUnits {
-  volume: string;
-  distance: string;
-  diameter: string;
-  concentration: string;
-  currency: string;
-  time: string;
-  pressure: string;
-  elevation: string;
-  decision_period: string;
-  mass: string;
+  volume?: string;
+  distance?: string;
+  diameter?: string;
+  concentration?: string;
+  currency?: string;
+  time?: string;
+  pressure?: string;
+  elevation?: string;
+  decision_period?: string;
+  mass?: string;
 
-  [k: string]: string;
+  [k: string]: string | undefined;
 }
 
 /** Coordinates stay in longitude/latitude order until converted for Leaflet.
