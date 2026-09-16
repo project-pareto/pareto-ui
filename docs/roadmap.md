@@ -36,7 +36,7 @@ responsibilities, and broaden typing and component cleanup.
 
 | Order | Work | Intended result | Status / dependency |
 | --- | --- | --- | --- |
-| 1 | [Core types and API contracts](plans/01-contracts-and-types.md) | Shared definitions for scenario IDs, input revisions, validation, errors, and optimization runs; typed API access. | In progress: frontend endpoint migration complete, including files/diagrams and AI; backend schema adoption and [remaining contract work](api-contracts.md#remaining-contract-work) are planned. |
+| 1 | [Core types and API contracts](plans/01-contracts-and-types.md) | Shared definitions for scenario IDs, input revisions, validation, errors, and optimization runs; typed API access. | In progress: frontend endpoint migration complete, including files/diagrams and AI; backend checks added to `/update_excel`. Other routes and [remaining contract work](api-contracts.md#remaining-contract-work) are planned. |
 | 2 | [Scenario data and polling](plans/02-scenario-data-and-polling.md) | Load lightweight scenario summaries, fetch details on demand, preserve editing drafts, and poll small run-status responses. | Planned; uses stage 1 contracts. |
 | 3 | [Navigation and workflow state](plans/03-navigation.md) | Scenario and view live in routes; editing and optimization have separate state models. Reload, back, and forward have predictable behavior. | Planned; uses stages 1–2. |
 | 4 | [Backend services and optimization runs](plans/04-backend-services-and-runs.md) | Explicit persistence and model boundaries, smaller routers, durable run records, and honest restart handling. | Planned; extraction can begin after stage 1 alongside stages 2–3. |

@@ -35,6 +35,7 @@ from app.internal.util import prepare_config
 from app.internal.scenarios.input_schema import input_revision
 from app.internal.validation.scenario_validation import validate_inputs
 from app.internal.ai.configuration import ai_configuration as cborg
+from app.schemas.table_save import SavedTableScenario, UpdateExcelRequest
 
 # _log = idaeslog.getLogger(__name__)
 _log = logging.getLogger(__name__)
@@ -386,32 +387,29 @@ async def copy(scenario_id: int, new_scenario_name: str):
     scenarios, new_id = scenario_handler.copy_scenario(scenario_id, new_scenario_name)
     return {"scenarios": scenarios, "new_id": new_id}
 
-@router.post("/update_excel")
-async def update_excel(request: Request):
-    """Update excel sheet for given scenario and accompanying table.
+@router.post("/update_excel", response_model=SavedTableScenario, response_model_exclude_unset=True)
+async def update_excel(data: UpdateExcelRequest):
+    """Check the table before any writes and return the saved scenario.
 
-    Args:
-        request.json()['id']: scenario id to be updated
-        request.json()['tableKey']: key for table to be updated inside scenario
-        request.json()['updatedTable']: dictionary containing updated values
-
-    Returns:
-        Given scenario with updated status
+    FastAPI validates/serializes the response once. Excluding unset defaults
+    preserves omitted legacy fields; PayloadModel also retains extra metadata.
     """
-    data = await request.json()
     with scenario_handler._db_lock:
         try:
-            current = scenario_handler.get_scenario(int(data['id']))
-            if data.get('revision') and data['revision'] != current['input_revision']:
+            current = scenario_handler.get_scenario(data.id)
+            if data.revision and data.revision != current['input_revision']:
                 raise HTTPException(409, detail='Inputs changed. Reload the saved scenario before saving this table.')
-            return scenario_handler.update_excel(data['id'], data['tableKey'], data['updatedTable'])
+            saved = scenario_handler.update_excel(data.id, data.tableKey, data.updatedTable)
+            if not isinstance(saved, dict) or saved.get('id') != data.id:
+                raise HTTPException(500, detail='Saved table response could not be verified. Reload the scenario before saving again.')
+            return saved
         except HTTPException:
             raise
         except Exception as e:
-            _log.error(f"unable to find and run given excel sheet id{data['id']}: {e}")
+            _log.exception('Unable to save input table for scenario %s', data.id)
             raise HTTPException(
-                500, f"unable to find and run given excel sheet id: {data['id']}: {e}"
-            )
+                500, detail='Unable to save the input table. Reload the scenario before saving again.'
+            ) from e
 
 
 @router.get("/get_diagram/{diagram_type}/{id}")

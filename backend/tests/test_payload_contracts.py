@@ -1,4 +1,4 @@
-"""Check payload compatibility without adding validation to live request paths."""
+"""Check wire compatibility, including the models used on live table saves."""
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from app.schemas.map import MapData
 from app.schemas.scenario import Scenario
+from app.schemas.table_save import SavedTableScenario, UpdateExcelRequest
 from app.schemas.validation import ScenarioValidation
 from app.internal.validation.scenario_validation import validate_inputs
 from app.internal.maps.kml_parser import ParseKMZ
@@ -97,3 +98,34 @@ class PayloadContractTests(unittest.TestCase):
         for value in ('0', False):
             with self.subTest(id=value), self.assertRaises(ValidationError):
                 Scenario.model_validate({**payload, 'id': value})
+
+    def test_table_request_preserves_cells_and_legacy_scalar_metadata(self):
+        for name, table in (
+            ('PadRates', {'T01': [0, 0.0, '', None, '001', 'not a number']}),
+            ('PadRates', {'T01': [], 'T02': [0]}),
+            ('PadRates', {}),
+            ('Units', {'volume': 'bbl', 'decision period': 'week'}),
+            ('DesalinationSurrogate', {'zero': 0, 'float': 1.0, 'text': '001', 'blank': '', 'null': None}),
+            ('DesalinationSurrogate', {'INDEX': ['recovery'], 'VALUE': [0.5]}),
+        ):
+            with self.subTest(table=name, values=table):
+                payload = {'id': 0, 'tableKey': name, 'updatedTable': table, 'source': {'enabled': False}}
+                self.assert_round_trip(UpdateExcelRequest, payload)
+                for revision in ('', None, 'saved-revision'):
+                    self.assert_round_trip(UpdateExcelRequest, {**payload, 'revision': revision})
+
+    def test_table_request_normalizes_only_canonical_text_ids(self):
+        payload = {'id': 0, 'tableKey': 'PadRates', 'updatedTable': {}}
+        for value in (0, '0', 1, '1', 2**53 - 1, str(2**53 - 1)):
+            with self.subTest(id=value):
+                self.assertEqual(UpdateExcelRequest.model_validate({**payload, 'id': value}).id, int(value))
+        for value in (True, False, 0.0, 1.5, -1, None, '01', '-1', '1.0', '+1', ' 1', '1\n', '١', '', 2**53, str(2**53), '1' * 5000):
+            with self.subTest(id=repr(value)[:30]), self.assertRaises(ValidationError):
+                UpdateExcelRequest.model_validate({**payload, 'id': value})
+
+    def test_saved_table_response_preserves_shared_and_bundled_scenarios(self):
+        records = json.loads((ROOT / 'backend/app/internal/assets/v1_default/scenarios.json').read_text())
+        payloads = [json.loads(SHARED_FIXTURE.read_text())] + [r['scenario'] for r in records['_default'].values()]
+        for payload in payloads:
+            with self.subTest(id=payload['id']):
+                self.assert_round_trip(SavedTableScenario, {**payload, 'input_revision': 'saved-revision'})

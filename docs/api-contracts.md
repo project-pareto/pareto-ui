@@ -1,8 +1,8 @@
 # Runtime API contracts
 
 Runtime decoding checks scenario retrieval, queued edits, copy/delete/import,
-completion/validation, optimization launch/tasks, AI, downloads, and diagrams before consumers use them. Backend routes and storage
-remain unchanged. [Plan 1](plans/01-contracts-and-types.md) tracks the remaining
+completion/validation, optimization launch/tasks, AI, downloads, and diagrams before consumers use them. The backend also checks table-save requests and responses.
+Route URLs, success shapes and storage remain unchanged. [Plan 1](plans/01-contracts-and-types.md) tracks the remaining
 contract work.
 
 ## Migrated endpoints
@@ -83,6 +83,48 @@ enable advance. Model construction, solver feasibility, and “not determined”
 remain separate. Validation controls accept scenario ID zero. Responses arriving
 after a scenario/input change are ignored by the validation dialog; obsolete
 readiness errors and autofill previews likewise cannot affect the newer inputs.
+
+## Backend table-save validation
+
+`POST /update_excel` uses the [table-save models](../backend/app/schemas/table_save.py)
+at the HTTP boundary. Malformed JSON, missing required fields and invalid basic
+types return FastAPI's `422` field errors before scenario reads or writes:
+
+- `id` is a nonnegative safe integer, including zero. Canonical decimal text
+  remains accepted for older callers; booleans, fractions and ambiguous text do not.
+- `tableKey` is nonblank text. The existing handler still checks that the table exists.
+- `updatedTable` is an object of array columns containing strings, numbers or
+  nulls. Only legacy `Units` and `DesalinationSurrogate` also accept scalar dictionaries.
+  Empty/uneven columns and invalid numeric text remain representable as drafts.
+- `revision` is optional text or null. Omitted/null/empty revisions retain the
+  existing compatibility behavior; a nonempty stale revision still returns `409`.
+
+The response uses the existing full `Scenario` schema with a required nonempty
+saved revision and matching scenario ID. Strict types, extra-field preservation
+and `response_model_exclude_unset=True` preserve source metadata, scalar
+representations and missing fields. This schema is not used to rewrite storage.
+The existing `400` unknown-table, `404` missing-scenario and `409` running/stale
+guards remain in place.
+
+Invalid backend success data becomes `500`, not a successful acknowledgement.
+Response validation runs after saving, so such an error can follow a completed
+write. The frontend retains the draft and requires reload before further saves;
+it must not automatically replay the request.
+
+These checks add no workbook reads, revision hashing, readiness checks, model
+builds or solver calls beyond the existing save workflow. Request validation
+walks the submitted table; response validation and serialization share FastAPI's
+Pydantic response path instead of adding a check before the old Python encoder.
+Schemas are compiled at startup. The [manual benchmark](../backend/benchmarks/table_contracts.py)
+compares old and checked HTTP boundaries with small and large payloads, including
+large result tables. It excludes unchanged workbook/database work and has no
+machine-dependent timing assertion in CI.
+
+One local run (16 September 2026, medians of five batches of ten requests) measured
+0.52 → 0.38 ms for the shared fixture, 115.64 → 93.75 ms for 200,000 input cells,
+and 159.21 → 58.13 ms for 200,000 result cells. The checked path was faster in
+these cases because typed serialization replaced the old generic encoder;
+these isolated measurements are not a production latency guarantee.
 
 ## Files and diagrams
 
@@ -193,7 +235,7 @@ scenario reads are structurally checked, and the remaining file/diagram consumer
 have migrated. This completes the frontend endpoint migration portion of stage 1.
 
 The unused legacy `ApiResponse<T>` success/error intersection has been removed.
-Backend request/response schema adoption,
-summary/detail separation, branded identities, run-status contracts, status
+Backend request/response schema adoption has started with `/update_excel`;
+other routes, summary/detail separation, branded identities, run-status contracts, status
 normalization, and broader strict checking remain planned. Polling still retrieves
 full scenarios; decoding task lists does not introduce a smaller run-status API.

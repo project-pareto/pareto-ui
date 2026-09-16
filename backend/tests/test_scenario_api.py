@@ -166,6 +166,122 @@ class ScenarioApiTests(unittest.TestCase):
         self.assertEqual(exported['df_sets']['TimePeriods'], ['T01', 'T02'])
         self.assertEqual(exported['units'], current['data_input']['units'])
 
+    def test_table_save_rejects_malformed_requests_before_reads_or_writes(self):
+        valid = {'id': 1, 'tableKey': 'PadRates', 'updatedTable': {'T01': [0]}}
+        cases = [(field, {key: value for key, value in valid.items() if key != field})
+                 for field in valid]
+        cases.extend((field, {**valid, field: value}) for field, values in (
+            ('id', [False, 1.0, -1, '01', ' 1', None, 2**53]),
+            ('tableKey', [False, '', '  ', None]),
+            ('revision', [False, 0, [], {}]),
+            ('updatedTable', [None, [], 'table', {'T01': 100}, {'T01': [True]},
+                              {'T01': [[0]]}, {'T01': [{'value': 0}]}, {'T01': None}]),
+        ) for value in values)
+        cases.extend(('body', body) for body in ([], 'table', None))
+        workbook = Path(self.handler.get_excelsheet_path(1))
+        original_workbook = workbook.read_bytes()
+        original_database = self.handler.scenarios_path.read_bytes()
+        with patch.object(self.handler, 'get_scenario') as read, patch.object(self.handler, 'update_excel') as save:
+            for field, payload in cases:
+                with self.subTest(field=field, payload=payload):
+                    response = self.client.post('/update_excel', json=payload)
+                    self.assertEqual(response.status_code, 422, response.text)
+                    errors = response.json()['detail']
+                    self.assertTrue(any(error['loc'][:1] == ['body'] and
+                                        (field == 'body' or field in error['loc']) for error in errors), errors)
+            response = self.client.post('/update_excel', content='{"id":', headers={'Content-Type': 'application/json'})
+            self.assertEqual(response.status_code, 422, response.text)
+            self.assertEqual(response.json()['detail'][0]['type'], 'json_invalid')
+            read.assert_not_called()
+            save.assert_not_called()
+        self.assertEqual(workbook.read_bytes(), original_workbook)
+        self.assertEqual(self.handler.scenarios_path.read_bytes(), original_database)
+
+    def test_table_save_checks_do_not_coerce_cells_or_require_a_complete_table(self):
+        for name, table in (
+            ('PadRates', {'T01': [0, 0.0, '', None, '001', 'not a number']}),
+            ('PadRates', {'T01': [], 'T02': [0]}),
+            ('PadRates', {}),
+            ('Units', {'volume': 'bbl'}),
+            ('DesalinationSurrogate', {'zero': 0, 'float': 1.0, 'text': '001', 'blank': '', 'null': None}),
+            ('DesalinationSurrogate', {'INDEX': ['recovery'], 'VALUE': [0.5]}),
+        ):
+            with self.subTest(table=name, values=table), patch.object(self.handler, 'update_excel', return_value=self.example) as save:
+                response = self.client.post('/update_excel', json={
+                    'id': 1, 'tableKey': name, 'updatedTable': table, 'revision': None,
+                    'clientMetadata': {'enabled': False},
+                })
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(save.call_args.args[:2], (1, name))
+                self.assertEqual(json.dumps(save.call_args.args[2]), json.dumps(table))
+
+    def test_table_save_zero_id_and_existing_rejections_preserve_storage(self):
+        current = self.create_zero_id_scenario()
+        table = {'ProductionPads': ['P1'], 'T01': [42], 'T02': [0]}
+        for identity, revision in ((0, current['input_revision']), ('0', None), ('0', '')):
+            response = self.client.post('/update_excel', json={
+                'id': identity, 'tableKey': 'PadRates', 'updatedTable': table, 'revision': revision})
+            self.assertEqual(response.status_code, 200, response.text)
+            self.assertEqual(response.json()['id'], 0)
+            self.assertEqual(response.json(), self.handler.get_scenario(0))
+        self.assertEqual(read_inputs(self.handler.get_excelsheet_path(0))['df_parameters']['PadRates'], table)
+        workbook = Path(self.handler.get_excelsheet_path(0))
+        original_workbook = workbook.read_bytes()
+        original_database = self.handler.scenarios_path.read_bytes()
+        payload = {'id': 0, 'tableKey': 'PadRates', 'updatedTable': {}}
+        for status, overrides in ((404, {'id': 999999}), (400, {'tableKey': 'UnknownTable'}),
+                                  (409, {'revision': 'stale-revision'})):
+            with self.subTest(status=status):
+                response = self.client.post('/update_excel', json={**payload, **overrides})
+                self.assertEqual(response.status_code, status, response.text)
+        self.handler.add_background_task(0)
+        response = self.client.post('/update_excel', json=payload)
+        self.assertEqual(response.status_code, 409, response.text)
+        self.assertEqual(workbook.read_bytes(), original_workbook)
+        self.assertEqual(self.handler.scenarios_path.read_bytes(), original_database)
+
+    def test_table_save_response_preserves_legacy_metadata_and_absent_fields(self):
+        fixture = Path(__file__).resolve().parents[2] / 'electron/ui/src/tests/fixtures/scenario-contract.json'
+        expected = json.loads(fixture.read_text())
+        expected['id'] = 1
+        with patch.object(self.handler, 'update_excel', return_value=expected):
+            response = self.client.post('/update_excel', json={'id': 1, 'tableKey': 'PadRates', 'updatedTable': {}})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(json.dumps(response.json(), sort_keys=True), json.dumps(expected, sort_keys=True))
+
+    def test_table_save_never_returns_malformed_success(self):
+        client = TestClient(self.client.app, raise_server_exceptions=False)
+        payload = {'id': 1, 'tableKey': 'PadRates', 'updatedTable': {}}
+        missing_revision = deepcopy(self.example)
+        del missing_revision['input_revision']
+        malformed_table = deepcopy(self.example)
+        malformed_table['data_input']['df_parameters']['PadRates'] = {'T01': 100}
+        invalid_results = deepcopy(self.example)
+        invalid_results['results']['data'] = {'flow': 'not rows'}
+        for saved in (None, {**self.example, 'id': 0}, {**self.example, 'id': False},
+                      missing_revision, {**self.example, 'input_revision': ''},
+                      {**self.example, 'input_revision': ' '}, malformed_table, invalid_results):
+            with self.subTest(saved=saved), patch.object(self.handler, 'update_excel', return_value=saved):
+                self.assertEqual(client.post('/update_excel', json=payload).status_code, 500)
+
+    def test_table_response_failure_can_follow_a_completed_save(self):
+        client = TestClient(self.client.app, raise_server_exceptions=False)
+        update = self.handler.update_excel
+        table = {'ProductionPads': ['P1'], 'T01': [42], 'T02': [0]}
+
+        def lose_revision(*args):
+            saved = update(*args)
+            del saved['input_revision']
+            return saved
+
+        with patch.object(self.handler, 'update_excel', side_effect=lose_revision):
+            response = client.post('/update_excel', json={'id': 1, 'tableKey': 'PadRates', 'updatedTable': table})
+        self.assertEqual(response.status_code, 500)
+        # An acknowledgement failure is not a rollback. The client must reload,
+        # retaining its draft in the meantime, rather than automatically retry.
+        self.assertEqual(self.handler.get_scenario(1)['data_input']['df_parameters']['PadRates'], table)
+        self.assertEqual(read_inputs(self.handler.get_excelsheet_path(1))['df_parameters']['PadRates'], table)
+
     def test_legacy_units_support_detail_readiness_rename_and_table_save(self):
         path = Path(self.handler.get_excelsheet_path(1))
         legacy_units_sheet(path)

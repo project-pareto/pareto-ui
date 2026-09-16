@@ -19,6 +19,13 @@ ParameterData = ParameterTable | ScalarParameterData
 ResultsTable = list[list[Scalar]]
 
 
+def check_parameter_table(name: str, table: ParameterData) -> ParameterData:
+    """Only known legacy metadata can use scalar values instead of columns."""
+    if name not in SCALAR_PARAMETER_NAMES and any(not isinstance(column, list) for column in table.values()):
+        raise ValueError(f'{name}: parameter table columns must be arrays.')
+    return table
+
+
 class ScenarioDataInput(PayloadModel):
     df_sets: dict[str, list[str]]
     df_parameters: dict[str, ParameterData]
@@ -34,8 +41,7 @@ class ScenarioDataInput(PayloadModel):
         # tables. Keep their original representation; other tables still require
         # arrays so malformed table data cannot pass as generic metadata.
         for name, table in parameters.items():
-            if name not in SCALAR_PARAMETER_NAMES and any(not isinstance(column, list) for column in table.values()):
-                raise ValueError(f'{name}: parameter table columns must be arrays.')
+            check_parameter_table(name, table)
         return parameters
 
 

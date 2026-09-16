@@ -23,6 +23,18 @@ regressions for legacy Units recovery and scalar metadata preservation; they
 do not repeat the private dataset audit.
 The historical PR #112 counts below describe that merge, not the expanded suite.
 
+Live backend table-save checks extend the payload/API suites: malformed requests
+return `422` before reads or writes; zero IDs, revision/running guards and legacy
+metadata retain their behavior. HTTP response tests verify that defaults are not
+added, extra metadata is retained, and invalid success data produces `500`,
+including when the save already completed. The existing frontend queue tests
+cover retained drafts and reload after failed acknowledgements.
+
+To compare boundary cost locally without workbook/database/solver work, run
+`PYTHONPATH=backend python backend/benchmarks/table_contracts.py`. This manual
+benchmark covers small payloads, large input tables and large result tables;
+it does not impose a machine-dependent latency threshold on CI.
+
 The [runtime API migration](api-contracts.md) adds client decoding/error cases,
 bundled legacy scenario decoding, initial-load retry/unmount tests, and production
 client coverage in the save-queue tests. Malformed acknowledgements cannot clear

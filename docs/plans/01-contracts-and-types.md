@@ -13,12 +13,14 @@ advance, optimization launch/retry, task checks, copy/delete/import, and AI
 availability/settings/fill/diagnosis, workbook downloads, and diagram operations. These preserve existing backend routes and
 stored data. The
 [endpoint inventory and compatibility decisions](../api-contracts.md) describe
-what is implemented and what remains. Backend schema adoption and the new
-contracts below remain planned.
+what is implemented and what remains. Backend schema adoption has started with
+structural request/response checks for `/update_excel`, preserving legacy
+payloads and measuring boundary overhead. Other routes and the new contracts
+below remain planned.
 
 Shared scenario and navigation types now describe the core data paths; remaining
 [component props](../../electron/ui/src/types/components.ts) still permit broad `any` values. [app.service.ts](../../electron/ui/src/services/app.service.ts)
-returns checked JSON data or workbook blobs for every endpoint. Backend schema
+returns checked JSON data or workbook blobs for every endpoint. Further backend schema
 adoption and the other stage 1 work remain planned. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
 also recognizes several legacy status strings.
 
