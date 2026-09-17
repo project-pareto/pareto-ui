@@ -36,6 +36,20 @@ test('a legacy map without arcs does not block startup for the scenario list', a
   expect(jest.getTimerCount()).toBe(0);
 });
 
+test('startup loads Excel-only scenarios with missing or null map data', async () => {
+  const missing = {...JSON.parse(JSON.stringify(fixture)), id: 1};
+  delete missing.data_input.map_data;
+  const empty = {...missing, id: 2, data_input: {...missing.data_input, map_data: null}};
+  const scenarios = {'1': missing, '2': empty};
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200, json: async () => ({data: scenarios})});
+  const navigate = jest.fn();
+  await act(async () => {render(<ScenarioProvider navigate={navigate}><Probe/></ScenarioProvider>);});
+  expect(context.scenarios).toEqual(scenarios);
+  expect(navigate).toHaveBeenCalledWith('/scenarios', {replace: true});
+  expect(consoleError).not.toHaveBeenCalled();
+  expect(jest.getTimerCount()).toBe(0);
+});
+
 test('initial malformed data is caught and the existing retry can recover', async () => {
   (global.fetch as jest.Mock)
     .mockResolvedValueOnce({ok: true, status: 200, json: async () => ({data: []})})

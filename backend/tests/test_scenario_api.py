@@ -418,6 +418,57 @@ class ScenarioApiTests(unittest.TestCase):
                     self.assertEqual(completed['results']['solution_status'], 'optimal')
                     self.assertEqual(completed['data_input']['df_parameters']['PadRates']['T02'], [0])
 
+    def test_excel_only_upload_replace_save_and_optimization_need_no_map(self):
+        from app.schemas.scenario import Scenario
+
+        self.handler.update_next_id()
+        workbook = Path(self.handler.get_excelsheet_path(1)).read_bytes()
+        response = self.client.post('/upload/Excel%20only?defaultNodeType=NetworkNode',
+                                    files={'file': ('inputs.xlsx', workbook)})
+        self.assertEqual(response.status_code, 200, response.text)
+        scenario = response.json()
+        scenario_id = scenario['id']
+
+        def assert_excel_only(payload):
+            self.assertEqual(payload['data_input']['origin'], 'excel')
+            self.assertNotIn('map_data', payload['data_input'])
+            self.assertEqual(Scenario.model_validate(payload).to_payload(), payload)
+
+        assert_excel_only(scenario)
+        self.assertEqual(scenario['results']['status'], 'Draft')
+        listed = self.client.get('/get_scenario_list').json()['data'][str(scenario_id)]
+        assert_excel_only(listed)
+        response = self.client.post(f'/replace/{scenario_id}', files={'file': ('replacement.xlsx', workbook)})
+        self.assertEqual(response.status_code, 200, response.text)
+        assert_excel_only(response.json())
+        response = self.client.post('/update_excel', json={'id': scenario_id, 'tableKey': 'PadRates',
+            'updatedTable': {'ProductionPads': ['P1'], 'T01': [100], 'T02': [0]}})
+        self.assertEqual(response.status_code, 200, response.text)
+        assert_excel_only(response.json())
+        response = self.client.get(f'/validate_scenario/{scenario_id}')
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertTrue(response.json()['valid'], response.text)
+        self.assertEqual(response.json()['model_check'], 'passed')
+
+        with patch.dict(os.environ, {'PATH': str(Path.home() / '.idaes/bin') + os.pathsep + os.environ['PATH']}):
+            if not SolverFactory('cbc').available(False):
+                self.skipTest('CBC is not installed')
+            scenario = self.handler.get_scenario(scenario_id)
+            scenario['optimization']['runtime'] = 20
+            response = self.client.post('/run_model', json={'scenario': scenario, 'run_id': 'excel-only'})
+            self.assertEqual(response.status_code, 200, response.text)
+            assert_excel_only(response.json())
+        completed = self.client.get(f'/get_scenario/{scenario_id}').json()
+        assert_excel_only(completed)
+        self.assertEqual(completed['results']['status'], 'Optimized', completed['results'].get('error'))
+        self.assertEqual(completed['results']['solution_status'], 'optimal')
+        self.assertEqual(completed['results']['run_id'], 'excel-only')
+        self.assertEqual(completed['data_input']['df_parameters']['PadRates']['T02'], [0])
+        report = self.client.get(f'/generate_report/{scenario_id}')
+        self.assertEqual(report.status_code, 200)
+        self.assertTrue(report.content.startswith(b'PK'))
+        self.assertEqual(self.handler.get_background_tasks(), [])
+
     def test_complete_optimization_produces_report_from_validated_inputs(self):
         with patch.dict(os.environ, {'PATH': str(Path.home() / '.idaes/bin') + os.pathsep + os.environ['PATH']}):
             if not SolverFactory('cbc').available(False):
