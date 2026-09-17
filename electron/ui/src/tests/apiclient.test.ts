@@ -56,6 +56,28 @@ test('missing map unit names remain incomplete without invented defaults', () =>
   expect(source.data_input.map_data.units).toEqual({volume: 'bbl', time: ''});
 });
 
+test('legacy maps without arc geometry load and save without adding the missing field', async () => {
+  const source = clone(fixture);
+  delete source.data_input.map_data.arcs;
+  const before = JSON.stringify(source);
+  response({data: {'0': source}});
+  const list = await fetchScenarios(50011);
+  expect(list.data['0']).toBe(source);
+  response(source);
+  expect(await fetchScenario(50011, 0)).toBe(source);
+  response(source);
+  expect(await updateExcel(50011, {id: 0, tableKey: 'PadRates', updatedTable: {}})).toBe(source);
+  expect(source.data_input.map_data).not.toHaveProperty('arcs');
+  expect(JSON.stringify(source)).toBe(before);
+});
+
+test.each([null, [], 'invalid', {pipe: {lengths: ['1']}}])(
+  'rejects malformed arc geometry when present: %p', arcs => {
+    const source = clone(fixture);
+    expect(() => decodeScenario({...source, data_input: {...source.data_input,
+      map_data: {...source.data_input.map_data, arcs}}}, '$')).toThrow(DecodeError);
+  });
+
 test.each([null, [], {}, {...fixture, id: '0'}, {...fixture, id: -1}, {...fixture, id: 0.5},
   {...fixture, id: false}, {...fixture, results: {data: {x: [123]}}},
   {...fixture, data_input: {...fixture.data_input, df_parameters: {PadRates: {T01: 100}}}},

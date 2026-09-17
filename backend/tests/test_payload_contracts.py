@@ -50,6 +50,14 @@ class PayloadContractTests(unittest.TestCase):
                 payload['data_input']['df_parameters']['DesalinationSurrogate'] = values
                 self.assert_round_trip(Scenario, payload)
 
+    def test_legacy_map_without_arcs_preserves_omission_on_read_and_table_save(self):
+        payload = json.loads(SHARED_FIXTURE.read_text())
+        del payload['data_input']['map_data']['arcs']
+        for model in (Scenario, SavedTableScenario):
+            with self.subTest(model=model.__name__):
+                checked = self.assert_round_trip(model, payload)
+                self.assertNotIn('arcs', checked.to_payload()['data_input']['map_data'])
+
     def test_scalar_metadata_does_not_weaken_ordinary_table_columns(self):
         payload = json.loads(SHARED_FIXTURE.read_text())
         payload['data_input']['df_parameters']['PadRates'] = {'T01': 100}

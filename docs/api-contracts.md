@@ -194,7 +194,7 @@ preserves the original object, extra source attributes, absent fields, empty
 tables, null cells, numeric strings, blanks, explicit zero, legacy optimization
 settings, and status spellings. `Units` and `DesalinationSurrogate` retain their
 legacy scalar-dictionary form; ordinary parameter tables require array columns.
-Map unit names and draft result tables may be absent. Failure-result metadata and AI step hints
+Map unit names, legacy map arc geometry, and draft result tables may be absent. Failure-result metadata and AI step hints
 can retain the nulls emitted by the backend. No storage migration or defaults
 are applied.
 

@@ -122,7 +122,8 @@ export interface MapData {
   other_nodes?: Record<string, MapNode>;
 
   connections: MapConnections;
-  arcs: Record<string, MapArc>;
+  /** Older saved maps may omit arc geometry while retaining connections. */
+  arcs?: Record<string, MapArc>;
 
   units?: MapUnits;
   defaultNode?: string;

@@ -22,6 +22,20 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
+test('a legacy map without arcs does not block startup for the scenario list', async () => {
+  const legacy = {...JSON.parse(JSON.stringify(fixture)), id: 2, results: {status: 'Draft'}};
+  delete legacy.data_input.map_data.arcs;
+  const scenarios = {'0': fixture, '2': legacy};
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200, json: async () => ({data: scenarios})});
+  const navigate = jest.fn();
+  await act(async () => {render(<ScenarioProvider navigate={navigate}><Probe/></ScenarioProvider>);});
+  expect(context.scenarios).toEqual(scenarios);
+  expect(context.scenarios['2'].data_input.map_data).not.toHaveProperty('arcs');
+  expect(navigate).toHaveBeenCalledWith('/scenarios', {replace: true});
+  expect(consoleError).not.toHaveBeenCalled();
+  expect(jest.getTimerCount()).toBe(0);
+});
+
 test('initial malformed data is caught and the existing retry can recover', async () => {
   (global.fetch as jest.Mock)
     .mockResolvedValueOnce({ok: true, status: 200, json: async () => ({data: []})})

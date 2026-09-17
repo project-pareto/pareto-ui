@@ -47,7 +47,8 @@ const arc: Decoder<MapArc> = object({
   nodes: optional(array(arcNode)), lengths: optional(array(number)), length: optional(coordinate), diameter: optional(coordinate),
 });
 export const decodeMap: Decoder<MapData> = object({
-  all_nodes: nodes, arcs: record(arc),
+  // Older saved maps may contain connections without separate arc geometry.
+  all_nodes: nodes, arcs: optional(record(arc)),
   connections: object({all_connections: record(strings), connection_metadata: optional(record(object({
     pipeline_capacity: optional(cell), pipeline_length: optional(cell), pipeline_diameter: optional(cell),
   })))}),
