@@ -917,7 +917,7 @@ export const convertMapDataToFrontendFormat = (map_data) => {
     Output: nodeData, lineData, and mapCenter for leaflet map
   */
   const points = map_data?.all_nodes;
-  const lines = map_data?.arcs;
+  const lines = map_data?.arcs ?? {};
 
   const lineData = []
   const nodeData = []

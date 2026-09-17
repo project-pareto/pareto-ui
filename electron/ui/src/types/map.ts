@@ -1,20 +1,20 @@
 import type React from 'react';
 import type {Scenario} from './scenario';
 
-/** Map units object */
+/** Missing unit names remain representable until input validation. */
 export interface MapUnits {
-  volume: string;
-  distance: string;
-  diameter: string;
-  concentration: string;
-  currency: string;
-  time: string;
-  pressure: string;
-  elevation: string;
-  decision_period: string;
-  mass: string;
+  volume?: string;
+  distance?: string;
+  diameter?: string;
+  concentration?: string;
+  currency?: string;
+  time?: string;
+  pressure?: string;
+  elevation?: string;
+  decision_period?: string;
+  mass?: string;
 
-  [k: string]: string;
+  [k: string]: string | undefined;
 }
 
 /** Coordinates stay in longitude/latitude order until converted for Leaflet.
@@ -122,7 +122,8 @@ export interface MapData {
   other_nodes?: Record<string, MapNode>;
 
   connections: MapConnections;
-  arcs: Record<string, MapArc>;
+  /** Older saved maps may omit arc geometry while retaining connections. */
+  arcs?: Record<string, MapArc>;
 
   units?: MapUnits;
   defaultNode?: string;
@@ -185,7 +186,7 @@ export interface MapContextValue {
   deleteSelectedNode: () => void;
   currentlyCreatingPipeline: boolean;
   currentlyCreatingNode: boolean;
-  handleFileUpload: (file: File, defaultNodeType?: string) => void;
+  handleFileUpload: (file: File, defaultNodeType?: string) => Promise<void>;
   nodeType: "node" | "pipeline" | null;
 }
 

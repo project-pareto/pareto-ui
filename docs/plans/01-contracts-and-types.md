@@ -1,18 +1,27 @@
 # Plan 1: core types and API contracts
 
-**Status:** Planned. **Dependency:** none. [Roadmap](../roadmap.md).
+**Status:** In progress. **Dependency:** none. [Roadmap](../roadmap.md).
 
 ## Problem and outcome
 
 PR #116 supplies [domain types and compatibility-tested Python models](../backend-organization.md)
-plus compile-time descriptions for core fetch responses. Runtime API decoding,
-request/response schema adoption, normalized errors and the new contracts below
-remain planned. Build on that foundation rather than duplicating the models.
+plus compile-time descriptions for core fetch responses. The first runtime
+increment adds checked scenario retrieval, queued scenario/table saves, normalized
+client errors, and a strict compiler check for the decoder/helper. Subsequent
+increments migrate completion/validation, fill preview/apply, planning periods,
+advance, optimization launch/retry, task checks, copy/delete/import, and AI
+availability/settings/fill/diagnosis, workbook downloads, and diagram operations. These preserve existing backend routes and
+stored data. The
+[endpoint inventory and compatibility decisions](../api-contracts.md) describe
+what is implemented and what remains. Backend schema adoption has started with
+structural request/response checks for `/update_excel`, preserving legacy
+payloads and measuring boundary overhead. Other routes and the new contracts
+below remain planned.
 
 Shared scenario and navigation types now describe the core data paths; remaining
 [component props](../../electron/ui/src/types/components.ts) still permit broad `any` values. [app.service.ts](../../electron/ui/src/services/app.service.ts)
-returns native fetch responses with typed core JSON shapes; callers still interpret
-status codes and differing payload shapes themselves. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
+returns checked JSON data or workbook blobs for every endpoint. Further backend schema
+adoption and the other stage 1 work remain planned. [ScenarioContext](../../electron/ui/src/context/ScenarioContext.tsx)
 also recognizes several legacy status strings.
 
 Create explicit contracts at these boundaries before changing storage or UI
@@ -37,11 +46,17 @@ the normalization boundary. Share authoritative backend request/response schemas
 through generated client types if a small prototype is maintainable; otherwise
 use explicit mirrored types with contract tests. Decide this in the first PR.
 
+The first increment keeps explicit frontend decoders with shared Python/TypeScript
+fixtures and bundled legacy payload checks. Python model defaults/nullability and
+frontend assumptions must converge before generation can supply the authoritative
+wire contract. This decision adds no runtime dependency or format migration.
+
 ## PR-sized steps
 
-Resolve the [existing v3 workbook/map compatibility blockers](../v3-compatibility.md)
-before enforcing the new schemas on live routes. Keep data version 3 unless a
-documented format change requires a separately tested migration.
+Preserve the [v3 workbook/map compatibility adapters](../v3-compatibility.md)
+and their regression coverage when enforcing the new schemas on live routes.
+Keep data version 3 unless a documented format change requires a separately
+tested migration.
 
 1. Inventory the endpoints used by scenario loading, saving, validation, launch,
    polling, results, and AI availability. Record success/error examples from

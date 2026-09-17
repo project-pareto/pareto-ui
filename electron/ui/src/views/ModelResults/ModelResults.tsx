@@ -10,6 +10,7 @@ import { TerminationConditions } from '../../util';
 import NetworkDiagram from '../../components/NetworkDiagram/NetworkDiagram';
 import DataTable from '../../components/DataTable/DataTable';
 import FilterDropdown from '../../components/FilterDropdown/FilterDropdown';
+import {useWorkbookDownload} from '../../hooks/useWorkbookDownload';
 import { generateReport } from '../../services/app.service';
 import { useApp } from '../../AppContext';
 import type { ModelResultsProps, Scenario } from '../../types';
@@ -35,11 +36,13 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
   const ERROR_PREVIEW_START = 1600;
   const ERROR_PREVIEW_END = 1000;
   const { port } = useApp()
+  const {downloading, downloadError, clearDownloadError, startDownload} = useWorkbookDownload(`${port}:${props.scenario.id}`);
   const {
     isAvailable: isAIAvailable,
     status: aiStatus,
     requestKind,
     diagnosis,
+    requestScenarioId,
     errorMessage: aiErrorMessage,
     runOptimizationDiagnosis,
   } = useAIPrompt();
@@ -136,6 +139,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
   useEffect(() => {
     if (
       requestKind === "optimization-diagnosis" &&
+      requestScenarioId === props.scenario.id &&
       aiStatus === "success" &&
       diagnosis?.diagnosedAt &&
       diagnosisSyncedAt !== diagnosis.diagnosedAt
@@ -143,7 +147,7 @@ export default function ModelResults(props: ModelResultsProps): JSX.Element {
       syncScenarioData();
       setDiagnosisSyncedAt(diagnosis.diagnosedAt);
     }
-  }, [aiStatus, diagnosis?.diagnosedAt, diagnosisSyncedAt, requestKind, syncScenarioData]);
+  }, [aiStatus, diagnosis?.diagnosedAt, diagnosisSyncedAt, requestKind, requestScenarioId, props.scenario.id, syncScenarioData]);
 
   useEffect(() => {
     setShowPreviousDiagnosis(false);
@@ -508,27 +512,12 @@ const handleNewInfrastructureOverride = () => {
     return <p>Please try increasing optimization runtime</p>
   }
 
-  const handleGenerateReport = () => {
-    generateReport(port, props.scenario.id).then(response => {
-      if (response.status === 200) {
-              response.blob().then((data)=>{
-              let excelURL = window.URL.createObjectURL(data);
-              let tempLink = document.createElement('a');
-              tempLink.href = excelURL;
-              tempLink.setAttribute('download', props.scenario.name+'.xlsx');
-              tempLink.click();
-          }).catch((err)=>{
-              console.error("error fetching excel template path: ",err)
-          })
-      }
-      else {
-          console.error("error fetching excel template path: ",response.statusText)
-      }
-      })
-  }
-  
+  const handleGenerateReport = () =>
+    startDownload(signal => generateReport(port, props.scenario.id, signal), props.scenario.name + '.xlsx');
+
   return ( 
     <Box sx={{pb: 12}}>
+    {downloadError && <Alert severity="error" onClose={clearDownloadError} sx={{mx: 3, mb: 2}}>{downloadError}</Alert>}
     {props.scenario.results.solution_status === 'feasible' && <Alert severity="warning" sx={{mx: 3, mb: 2}}>A feasible solution was found. The solver stopped before proving optimality.</Alert>}
     {props.scenario.results.status === 'failure' && props.scenario.results.failure_stage && <Alert severity="error" sx={{mx: 3, mb: 2}}>The run failed during {props.scenario.results.failure_stage.toLowerCase()}.</Alert>}
     {/*
@@ -541,6 +530,7 @@ const handleNewInfrastructureOverride = () => {
           <Button 
             sx={{marginLeft: 10}} 
             onClick={handleGenerateReport}
+            disabled={downloading}
             endIcon={<FileDownloadIcon/>}
           >
               Generate Excel Report
@@ -645,7 +635,7 @@ const handleNewInfrastructureOverride = () => {
               <LinearProgress />
             </Box>
           )}
-          {requestKind === "optimization-diagnosis" && aiStatus === "error" && aiErrorMessage && (
+          {requestKind === "optimization-diagnosis" && requestScenarioId === props.scenario.id && aiStatus === "error" && aiErrorMessage && (
             <Box
               sx={{
                 mt: 2,

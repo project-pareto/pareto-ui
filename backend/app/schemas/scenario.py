@@ -6,6 +6,7 @@ to internal.validation, not these structural contracts.
 """
 from pydantic import Field, field_validator
 
+from app.internal.scenarios.input_schema import SCALAR_PARAMETER_NAMES
 from .base import PayloadModel
 from .map import MapData
 from .validation import ConstraintViolationsSummary, ScenarioValidation
@@ -15,8 +16,14 @@ Scalar = str | int | float | bool | None
 ParameterTable = dict[str, list[Cell]]
 ScalarParameterData = dict[str, Cell]
 ParameterData = ParameterTable | ScalarParameterData
-SCALAR_PARAMETER_NAMES = {'Units', 'DesalinationSurrogate'}
 ResultsTable = list[list[Scalar]]
+
+
+def check_parameter_table(name: str, table: ParameterData) -> ParameterData:
+    """Only known legacy metadata can use scalar values instead of columns."""
+    if name not in SCALAR_PARAMETER_NAMES and any(not isinstance(column, list) for column in table.values()):
+        raise ValueError(f'{name}: parameter table columns must be arrays.')
+    return table
 
 
 class ScenarioDataInput(PayloadModel):
@@ -34,8 +41,7 @@ class ScenarioDataInput(PayloadModel):
         # tables. Keep their original representation; other tables still require
         # arrays so malformed table data cannot pass as generic metadata.
         for name, table in parameters.items():
-            if name not in SCALAR_PARAMETER_NAMES and any(not isinstance(column, list) for column in table.values()):
-                raise ValueError(f'{name}: parameter table columns must be arrays.')
+            check_parameter_table(name, table)
         return parameters
 
 

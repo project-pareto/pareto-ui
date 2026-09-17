@@ -27,15 +27,19 @@ interface AIPromptDialogProps {
 
 export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element {
   const { open, onClose, scenarioId, scenarioName } = props;
-  const { status, isRunning, updatedScenario, updateNotes, errorMessage, runPrompt, clearResult } = useAIPrompt();
+  const { status: requestStatus, isRunning, updatedScenario: requestUpdates, updateNotes: requestNotes,
+    errorMessage: requestError, requestKind, requestScenarioId, runPrompt, clearResult } = useAIPrompt();
   const { scenarioData, handleScenarioUpdate } = useScenario();
+  const matchesScenario = requestKind === 'data-update' && scenarioId != null &&
+    requestScenarioId === Number(scenarioId) && requestScenarioId === scenarioData?.id;
+  const status = matchesScenario ? requestStatus : 'idle';
+  const updatedScenario = matchesScenario ? requestUpdates : null;
+  const updateNotes = useMemo(() => matchesScenario ? requestNotes : [], [matchesScenario, requestNotes]);
+  const errorMessage = matchesScenario ? requestError : null;
   const [prompt, setPrompt] = useState("");
   const [promptError, setPromptError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"notes" | "diff">("notes");
-  const aiDataInput = useMemo(() => {
-    if (!updatedScenario) return null;
-    return (updatedScenario as any).data_input ? (updatedScenario as any).data_input : updatedScenario;
-  }, [updatedScenario]);
+  const aiDataInput = updatedScenario;
 
   const statusLabel = useMemo(() => {
     if (status === "running") return "Running";
@@ -46,7 +50,7 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
 
   const handleSubmit = async (): Promise<void> => {
     const trimmed = prompt.trim();
-    if (!trimmed || !scenarioId) {
+    if (!trimmed || scenarioId == null) {
       setPromptError("Please add a prompt first.");
       return;
     }
@@ -89,7 +93,7 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
   const diffTables = useMemo(() => {
     if (!scenarioData || !aiDataInput) return [];
     const currentTables = scenarioData.data_input?.df_parameters || {};
-    const nextTables = (aiDataInput as any).df_parameters || {};
+    const nextTables = aiDataInput.df_parameters || {};
     const tableKeys = new Set<string>([...Object.keys(currentTables), ...Object.keys(nextTables)]);
     const tableDiffs: Array<{
       key: string;
@@ -375,7 +379,7 @@ export default function AIPromptDialog(props: AIPromptDialogProps): JSX.Element 
           onClick={handleSubmit}
           variant="contained"
           startIcon={<AutoAwesomeIcon />}
-          disabled={isRunning || !scenarioId}
+          disabled={isRunning || scenarioId == null}
         >
           Run AI Fill
         </Button>

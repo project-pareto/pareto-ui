@@ -73,6 +73,35 @@ npm --prefix electron/ui run electron-start
 
 The frontend development server uses Create React App defaults. The backend starts with Uvicorn on port `50011`.
 
+## TypeScript linting and formatting
+
+ESLint uses the existing Create React App rules for React and TypeScript. Existing
+warnings remain nonblocking; lint errors fail CI. Two test-style rules are warnings
+instead of errors. Prettier handles formatting separately, following its
+[ESLint integration guidance](https://prettier.io/docs/integrating-with-linters).
+No strict typing or naming rules are added. ESLint stays on version 8 to match
+Create React App's supported peer dependency.
+
+From the repository root:
+
+```bash
+npm --prefix electron/ui run lint
+npm --prefix electron/ui run lint:fix
+npm --prefix electron/ui run format:file -- src/services/contracts/collection.ts
+```
+
+`format:file` accepts one or more paths relative to `electron/ui`. Use
+`npm --prefix electron/ui run format` to format all TypeScript under `src` and
+`cypress`, or `npm --prefix electron/ui run format:check` to check those files
+without editing. The existing source has mixed formatting, so the repository-wide
+format check will report files until they are formatted. It is not a CI gate.
+Format files as you work on them to keep unrelated changes out of a PR.
+
+The checked-in Prettier configuration uses two spaces, single quotes, semicolons,
+trailing commas, and a 100-column print width. VS Code recommends the ESLint and
+Prettier extensions and enables TypeScript formatting on save once Prettier is
+installed. The editor and command line use the same local formatter version.
+
 ## Local packaged builds
 
 The local packaged build scripts are defined in `electron/package.json`.

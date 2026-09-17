@@ -5,7 +5,9 @@ export interface AIPromptUpdatedScenario {
   df_sets?: DfSets;
   df_parameters?: DfParameters;
   display_units?: DisplayUnits;
+  units?: DisplayUnits;
   map_data?: MapData | null;
+  origin?: string;
 }
 
 export interface AIPromptResponse {
@@ -19,8 +21,8 @@ export interface AIPromptResponse {
 export interface AIOptimizationDiagnosisStep {
   title: string;
   instruction: string;
-  reason?: string;
-  appArea?: string;
+  reason?: string | null;
+  appArea?: string | null;
 }
 
 export interface AIOptimizationDiagnosisResponse {
@@ -47,12 +49,15 @@ export interface ScenarioAIDiagnosis {
   outdatedReason?: string;
 }
 
-export interface AISettings {
+export interface AIBackendSettings {
   available: boolean;
   source: 'user' | 'environment' | 'none';
   base_url: string;
   model: string;
   environment_available: boolean;
+}
+
+export interface AISettings extends AIBackendSettings {
   can_remember: boolean;
   remembered: boolean;
 }

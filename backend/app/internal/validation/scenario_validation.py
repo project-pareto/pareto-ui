@@ -9,7 +9,7 @@ import re
 import threading
 
 from pareto.utilities.process_data import get_valid_piping_arc_list, get_valid_trucking_arc_list
-from app.internal.scenarios.input_schema import NODE_SETS, OPTION_SETS, FORECASTS, flat_table, dimension_count, input_revision
+from app.internal.scenarios.input_schema import NODE_SETS, OPTION_SETS, FORECASTS, flat_table, dimension_count, input_revision, is_scalar_parameter
 from app.internal.util import prepare_config
 from app.internal.validation.help import network_help
 
@@ -133,6 +133,10 @@ def validate_inputs(scenario, *, fill_targets=None):
     # behind defaults. Configuration-specific domains are checked below.
     all_ids = set(locations)
     for table, columns in tables.items():
+        # Historical scalar metadata has no facility/period columns. Canonical
+        # units are checked above; model construction checks surrogate settings.
+        if is_scalar_parameter(table, columns):
+            continue
         if not isinstance(columns, dict) or any(not isinstance(v, list) for v in columns.values()):
             issue('invalid_table', 'forecasts', f'{table} must contain columns of values.', table)
             continue

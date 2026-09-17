@@ -3,7 +3,7 @@ import {Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, Dialo
 import {useApp} from '../../AppContext';
 import {useScenario} from '../../context/ScenarioContext';
 import {getScenarioReadiness, savePlanningHorizon} from '../../services/app.service';
-import type {Scenario, ScenarioValidation, ValidationIssue} from '../../types';
+import type {Scenario, ScenarioValidationResult, ValidationIssue} from '../../types';
 import ValidationIssues from '../ScenarioValidationDialog/ValidationIssues';
 import IssueFill from './IssueFill';
 
@@ -12,7 +12,7 @@ export default function ScenarioCompletion({scenario, disabled, onSelect}: {
 }) {
   const {port} = useApp();
   const {acceptSavedScenario, inputFocus} = useScenario();
-  const [readiness, setReadiness] = useState<ScenarioValidation | null>(null);
+  const [readiness, setReadiness] = useState<ScenarioValidationResult | null>(null);
   const [section, setSection] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [periodsOpen, setPeriodsOpen] = useState(false);
@@ -22,11 +22,9 @@ export default function ScenarioCompletion({scenario, disabled, onSelect}: {
     if (disabled) return;
     const controller = new AbortController();
     setReadiness(null);
-    getScenarioReadiness(port, scenario.id, controller.signal).then(async response => {
-      if (!response.ok) throw new Error('Unable to check scenario completion.');
-      const result = await response.json();
+    getScenarioReadiness(port, scenario.id, controller.signal).then(result => {
       if (!controller.signal.aborted) { setReadiness(result); setError(null); }
-    }).catch(error => { if (error.name !== 'AbortError') setError(error.message); });
+    }).catch(error => { if (!controller.signal.aborted) setError(error.message); });
     return () => controller.abort();
   }, [port, scenario.id, scenario.input_revision, scenario.data_input, scenario.optimization, disabled]);
   const openPeriods = () => {
@@ -48,9 +46,7 @@ export default function ScenarioCompletion({scenario, disabled, onSelect}: {
   const savePeriods = async () => {
     setSaving(true); setError(null);
     try {
-      const response = await savePlanningHorizon(port, scenario.id, periods, readiness?.revision);
-      const data = await response.json();
-      if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Unable to save planning periods.');
+      const data = await savePlanningHorizon(port, scenario.id, periods, readiness?.revision);
       acceptSavedScenario(data);
       setPeriodsOpen(false);
     } catch (error) { setError(error instanceof Error ? error.message : 'Unable to save planning periods.'); }

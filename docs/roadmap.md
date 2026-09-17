@@ -2,8 +2,8 @@
 
 This roadmap follows [PR #112](https://github.com/project-pareto/pareto-ui/pull/112),
 merged on 11 September 2026. The map-to-optimization workflow is the working
-baseline. The architectural stages below are **planned**. The bounded cleanup
-foundation described next is implemented in the PR #116 working branch; it does
+baseline. Stage 1 is **in progress**; the later architectural stages are planned. The bounded cleanup
+foundation described next was merged in PR #116; it does
 not complete those architectural stages.
 
 For application usage, start with [From map file to optimization](scenario-completion.md).
@@ -24,8 +24,9 @@ and [current validation behavior](scenario-validation.md).
   review. The approved follow-up fixes ID-0 update guards and SRA asset casing;
   other findings and removals remain separate work.
 - Keep storage version 3 and extend contracts for actual legacy payload shapes.
-  The [compatibility audit](v3-compatibility.md) records two existing runtime
-  blockers to repair before adopting schemas on live routes or removing fields.
+  The [compatibility audit and follow-up adapters](v3-compatibility.md) record
+  repairs for legacy Units recovery and scalar metadata during workbook/map
+  edits. Keep their regressions covered before adopting schemas on live routes.
 
 ## Priorities and implementation plans
 
@@ -35,7 +36,7 @@ responsibilities, and broaden typing and component cleanup.
 
 | Order | Work | Intended result | Status / dependency |
 | --- | --- | --- | --- |
-| 1 | [Core types and API contracts](plans/01-contracts-and-types.md) | Shared definitions for scenario IDs, input revisions, validation, errors, and optimization runs; typed API access. | Planned; start here. |
+| 1 | [Core types and API contracts](plans/01-contracts-and-types.md) | Shared definitions for scenario IDs, input revisions, validation, errors, and optimization runs; typed API access. | In progress: frontend endpoint migration complete, including files/diagrams and AI; backend checks added to `/update_excel`. Other routes and [remaining contract work](api-contracts.md#remaining-contract-work) are planned. |
 | 2 | [Scenario data and polling](plans/02-scenario-data-and-polling.md) | Load lightweight scenario summaries, fetch details on demand, preserve editing drafts, and poll small run-status responses. | Planned; uses stage 1 contracts. |
 | 3 | [Navigation and workflow state](plans/03-navigation.md) | Scenario and view live in routes; editing and optimization have separate state models. Reload, back, and forward have predictable behavior. | Planned; uses stages 1–2. |
 | 4 | [Backend services and optimization runs](plans/04-backend-services-and-runs.md) | Explicit persistence and model boundaries, smaller routers, durable run records, and honest restart handling. | Planned; extraction can begin after stage 1 alongside stages 2–3. |

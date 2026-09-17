@@ -1,10 +1,8 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import Modal from '@mui/material/Modal';
 import { Grid, MenuItem, Box, TextField, IconButton, Button, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FileUploader } from "react-drag-drop-files";
-import { fetchExcelFile } from '../../services/app.service';
-import { useApp } from '../../AppContext';
 import { NetworkNodeTypes } from '../../util';
 import { NodeIcon } from '../NetworkMap/NodeIcon';
 import type { FileUploadModalProps } from '../../types';
@@ -23,15 +21,13 @@ export default function FileUploadModal(props: FileUploadModalProps) {
     const [ showWarning, setShowWarning ] = useState<boolean>(false)
     const [ warningMessage, setWarningMessage ] = useState<string>("")
     const [ file, setFile ] = useState<File | null>(null)
+    const [ uploading, setUploading ] = useState(false)
     const [defaultNodeType, setDefaultNodeType] = useState<string>("NetworkNode");
-    const PARETO_VERSION = "main"
     const isMapFile = file?.name.includes('zip') || file?.name.includes('kmz') || file?.name.includes('kml');
 
     const sampleFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/strategic_permian_demo.xlsx"
     const workshopFileUrl = "https://github.com/project-pareto/project-pareto/raw/"+process.env.REACT_APP_PARETO_VERSION+"/pareto/case_studies/workshop_baseline_all_data.xlsx"
-    const workshopFileName = "workshop_baseline_all_data_"+process.env.REACT_APP_PARETO_VERSION+".xlsx"
 
-  const { port } = useApp()
 
    const styles = {
     modalStyle: {
@@ -79,29 +75,11 @@ export default function FileUploadModal(props: FileUploadModalProps) {
     }
 
    const handleClose = () => {
-    setShowFileModal(false)
+    if (!uploading) setShowFileModal(false)
    }
 
-   const handleDownloadWorkshopFile = () => {
-        fetchExcelFile(port, workshopFileName).then(response => {
-        if (response.status === 200) {
-                response.blob().then((data)=>{
-                let excelURL = window.URL.createObjectURL(data);
-                let tempLink = document.createElement('a');
-                tempLink.href = excelURL;
-                tempLink.setAttribute('download', 'workshop_baseline_all_data.xlsx');
-                tempLink.click();
-            }).catch((err)=>{
-                console.error("error fetching excel template path: ",err)
-            })
-        }
-        else {
-            console.error("error fetching excel template path: ",response.statusText)
-        }
-        })
-   }
-
-   const handleClickUpload = () => {
+   const handleClickUpload = async () => {
+    if (uploading) return;
     if (file === null) {
         setWarningMessage("Please upload a valid file")
         setShowWarning(true)
@@ -115,9 +93,17 @@ export default function FileUploadModal(props: FileUploadModalProps) {
             setShowWarning(false)
           }, 5000)
     }else {
-        handleFileUpload(file, defaultNodeType, scenarioName)
+        setUploading(true)
         setShowWarning(false)
-        setShowFileModal(false)
+        try {
+            await handleFileUpload(file, defaultNodeType, scenarioName)
+            setShowFileModal(false)
+        } catch (error) {
+            setWarningMessage(error instanceof Error ? error.message : 'Unable to upload file.')
+            setShowWarning(true)
+        } finally {
+            setUploading(false)
+        }
     }
    }
 
@@ -139,7 +125,7 @@ export default function FileUploadModal(props: FileUploadModalProps) {
                 <h2 style={{marginTop:0, paddingTop:0, color:"#9B9B9B"}}>or</h2>
             </Box>
             <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                <Button style={{color: '#0884b4',}} variant="outlined">Browse...</Button>
+                <Button disabled={uploading} style={{color: '#0884b4',}} variant="outlined">Browse...</Button>
             </Box>
             <Box sx={{display: 'flex', justifyContent: 'center'}}>
                 <p style={{marginBottom:0, paddingTop:0}}>{file === null ? "" : file.name}</p>
@@ -154,6 +140,7 @@ export default function FileUploadModal(props: FileUploadModalProps) {
         };
     return (
       <FileUploader 
+        disabled={uploading}
         handleChange={handleChange} 
         name="file" 
         types={fileTypes}
@@ -179,11 +166,11 @@ export default function FileUploadModal(props: FileUploadModalProps) {
         <Grid container sx={styles.modalStyle} spacing={1}>
                     
         <Grid item xs={9}>
-            <h2 style={styles.header}>{title}</h2>
+            <h2 id="modal-modal-title" style={styles.header}>{title}</h2>
         </Grid>
         <Grid item xs={3}>
             <Box sx={{display: 'flex', justifyContent: 'flex-end', marginRight:'10px'}}>
-                <IconButton onClick={handleClose}><CloseIcon/></IconButton>
+                <IconButton aria-label="Close upload" onClick={handleClose} disabled={uploading}><CloseIcon/></IconButton>
             </Box>
         </Grid>
 
@@ -191,9 +178,10 @@ export default function FileUploadModal(props: FileUploadModalProps) {
             showNameInput && (
                 <Grid item xs={12}>
                     <TextField
+                        disabled={uploading}
                         required
                         variant="outlined"
-                        id=""
+                        id="scenario-upload-name"
                         label={"Scenario Name"}
                         value={scenarioName}
                         onChange={handleEditScenarioName}
@@ -222,11 +210,12 @@ export default function FileUploadModal(props: FileUploadModalProps) {
             
         </Grid>
         <Grid item xs={6}>
-            {showWarning && <p style={{color:'red', }}>{warningMessage}</p>}
+            {showWarning && <p role="alert" style={{color:'red', }}>{warningMessage}</p>}
         </Grid>
         <Grid item xs={12}>
             {isMapFile && (
                 <TextField
+                    disabled={uploading}
                     label="Default Node Type For This Map"
                     size='small'
                     fullWidth
@@ -251,12 +240,10 @@ export default function FileUploadModal(props: FileUploadModalProps) {
             )}
         </Grid>
         <Grid item xs={12}>
-            <Button id="create-scenario-button" style={styles.button} onClick={handleClickUpload}>{buttonText}</Button>
+            <Button id="create-scenario-button" style={styles.button} onClick={handleClickUpload} disabled={uploading}>{uploading ? 'Uploading…' : buttonText}</Button>
         </Grid>
         </Grid>
     </Modal>
   );
 
 }
-
-

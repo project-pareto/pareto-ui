@@ -49,7 +49,7 @@ This verification does not rerun optimization on the eight saved scenarios,
 exercise the full browser workflow, or establish compatibility with every older
 workbook or packaged application.
 
-## Existing failures to address separately
+## Failures found by the original audit
 
 1. **Unit recovery can prevent an older scenario from loading.** One stored
    workbook produces tuple keys when `get_scenario` recovers missing units with
@@ -66,6 +66,34 @@ workbook or packaged application.
 
 These failures predate this compatibility pass. Keep their repairs separate
 from deleting legacy data or advancing the storage version.
+
+## Compatibility adapters after PR #116
+
+The follow-up repairs the two failure paths above without changing storage
+version 3 or enabling live Pydantic validation:
+
+- The workbook reader treats the first two Units columns as names and values,
+  including older `Quantity` / `Unit` headings. Explanatory columns are excluded
+  from model inputs. Reading does not rewrite the workbook or database, and a
+  missing declaration stays blank for readiness checks rather than receiving an
+  invented default. Saving preserves the worksheet headings and explanations.
+- Map pruning and facility renames leave recognized scalar `Units` and
+  `DesalinationSurrogate` dictionaries intact. Readiness accepts those metadata
+  shapes; model construction remains a separate check. Ordinary parameter tables
+  still require column arrays; mixed scalar/column data is rejected on save.
+- Workbook saves serialize scalar desalination metadata as `INDEX` / `VALUE`
+  rows, including when creating a new validation or optimization snapshot.
+  Reloading a saved scenario retains the scalar JSON representation, including
+  numeric strings, explicit nulls, blanks and zero. Fresh imports continue to
+  use column tables; explicit workbook replacement uses the replacement's data
+  rather than carrying forward old metadata.
+
+[Legacy input regressions](../backend/tests/test_legacy_inputs.py) cover the
+workbook adapters, source values, revisions, map pruning/renames and rejected
+malformed writes. [API regressions](../backend/tests/test_scenario_api.py) cover
+detail/readiness without writes, rename, table save, map edits, export, model
+checks and workbook replacement. These fixtures are synthetic and reproducible;
+the original private eight-scenario audit has not been repeated for this follow-up.
 
 ## Future format changes
 

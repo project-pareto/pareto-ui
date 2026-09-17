@@ -72,6 +72,20 @@ export interface ValidationIssue {
   help?: {rule: string; steps: string[]} | null;
 }
 
+/** Evidence required by live readiness/model/feasibility checks, unlike legacy saved metadata. */
+export interface ScenarioValidationResult extends ScenarioValidation {
+  revision: string;
+  valid: boolean;
+  state: NonNullable<ScenarioValidation['state']>;
+  model_check: NonNullable<ScenarioValidation['model_check']>;
+  feasibility: NonNullable<ScenarioValidation['feasibility']>;
+  error_count: number;
+  warning_count: number;
+  issues: ValidationIssue[];
+  sections: ValidationSection[];
+  periods: string[];
+}
+
 export interface ScenarioFillPreview {
   revision: string;
   value: number;

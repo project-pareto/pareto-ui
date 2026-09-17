@@ -55,7 +55,7 @@ export interface OptimizationProps {
 
 export interface NetworkDiagramProps {
   scenario: Scenario;
-  type?: string;
+  type?: import('./api').DiagramType;
   syncScenarioData?: (id?: string | number) => void;
   showMapTypeToggle?: boolean;
   interactive?: boolean;
@@ -240,7 +240,7 @@ export interface PopupModalProps {
 
 export interface FileUploadModalProps {
   setShowFileModal: (show: boolean) => void;
-  handleFileUpload: (file: File, defaultNodeType?: string, scenarioName?: string) => void;
+  handleFileUpload: (file: File, defaultNodeType?: string, scenarioName?: string) => void | Promise<void>;
   fileTypes?: string[];
   showNameInput?: boolean;
   showSampleFiles?: boolean;

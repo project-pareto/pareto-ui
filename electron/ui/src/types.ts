@@ -55,6 +55,7 @@ export type {
   ConstraintViolationsSummary,
   ValidationSection,
   ScenarioValidation,
+  ScenarioValidationResult,
   ValidationIssue,
   ScenarioFillPreview,
 } from './types/validation';
@@ -97,8 +98,6 @@ export type {
   ScenarioCompareSidebarProps,
 } from './types/components';
 export type {
-  ApiError,
-  ApiResponse,
   ScenarioResponse,
   ScenarioListResponse,
   TaskResponse,

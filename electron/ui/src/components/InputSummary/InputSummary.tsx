@@ -4,7 +4,7 @@ import type { InputSummaryProps } from '../../types';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { Box, FormControl, MenuItem, Select, Typography, Grid, Button } from '@mui/material'
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
-import { fetchExcelTemplate, replaceExcelSheet } from '../../services/app.service';
+import { replaceExcelSheet } from '../../services/app.service';
 import NetworkMap from '../NetworkMap/NetworkMap';
 import { FileUploader } from "react-drag-drop-files";
 import ErrorBar from '../ErrorBar/ErrorBar'
@@ -176,60 +176,18 @@ export default function InputSummary(props: InputSummaryProps) {
         setTableType(event.target.value as string)
     }
 
-    const handleDownloadExcel = () => {
-        fetchExcelTemplate(port, props.scenario.id).then(response => {
-        if (response.status === 200) {
-                response.blob().then((data)=>{
-                let excelURL = window.URL.createObjectURL(data);
-                let tempLink = document.createElement('a');
-                tempLink.href = excelURL;
-                tempLink.setAttribute('download', props.scenario.name+'.xlsx');
-                tempLink.click();
-            }).catch((err)=>{
-                console.error("error fetching excel template path: ",err)
-            })
-        }
-        else {
-            console.error("error fetching excel template path: ",response.statusText)
-        }
-        })
-    }
-
-    const handleReplaceExcel = (file: File) => {
+    const handleReplaceExcel = async (file: File) => {
+        setDisableUpload(true)
         const formData = new FormData();
         formData.append('file', file, file.name);
-        replaceExcelSheet(port, formData, props.scenario.id)
-        .then(response => {
-        if (response.status === 200) {
-            response.json()
-            .then((data)=>{
-                console.log('fileupload successful: ',data)
-                acceptSavedScenario(data)
-            }).catch((err)=>{
-                console.error("error on file upload: ",err)
-                setErrorMessage(String(err))
-                setShowError(true)
-                setDisableUpload(false)
-            })
+        try {
+            acceptSavedScenario(await replaceExcelSheet(port, formData, props.scenario.id))
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Unable to replace input workbook.')
+            setShowError(true)
+        } finally {
+            setDisableUpload(false)
         }
-        /*
-            in the case of bad file type
-        */
-        else if (response.status === 400) {
-            response.json()
-            .then((data)=>{
-                console.error("error on file upload: ",data.detail)
-                setErrorMessage(data.detail)
-                setShowError(true)
-                setDisableUpload(false)
-            }).catch((err)=>{
-                console.error("error on file upload: ",err)
-                setErrorMessage(response.statusText)
-                setShowError(true)
-                setDisableUpload(false)
-            })
-        }
-        })
     }
 
     const fileTypeError = () => {
@@ -257,10 +215,10 @@ export default function InputSummary(props: InputSummaryProps) {
                 const handleChange = (file: File) => {
                         setUpdatedExcelFile(file);
                         handleReplaceExcel(file)
-                        setDisableUpload(true)
                 };
         return (
           <FileUploader 
+            disabled={disableUpload}
             handleChange={handleChange} 
             name="file" 
             types={fileTypes}

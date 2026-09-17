@@ -67,18 +67,19 @@ does not rename API fields, persisted data or the `pareto_cbc` solver identifier
 | Nodes, pipeline references, geometry and connections | [map.py](../backend/app/schemas/map.py) | [map.ts](../electron/ui/src/types/map.ts) |
 | Validation and constraint diagnostics | [validation.py](../backend/app/schemas/validation.py) | [validation.ts](../electron/ui/src/types/validation.ts) |
 | Dynamic columns and result rows | Scalar/table aliases in `scenario.py` | [tables.ts](../electron/ui/src/types/tables.ts) |
-| Current fetch request/response shapes | Existing routers | [api.ts](../electron/ui/src/types/api.ts) |
+| Current fetch request/response shapes | Existing routers; live table-save models in [table_save.py](../backend/app/schemas/table_save.py) | [api.ts](../electron/ui/src/types/api.ts) |
 
 Frontend [types.ts](../electron/ui/src/types.ts) remains a type-only export entry
 point. AI types live in `types/ai.ts`; presentation props live in
 `types/components.ts`. Feature-local props can stay beside their component.
 
-The Python models are contract groundwork, **not live request or response
-validation**. Routes and persistence continue to use their existing dictionaries.
-Do not add `response_model=Scenario`, change route annotations to these models,
-or rewrite stored data through them as part of routine cleanup. Such changes can
-reject old inputs or add/drop/coerce fields and need the migration in
-[plan 1](plans/01-contracts-and-types.md).
+`/update_excel` now uses live request/response models, with compatibility and
+performance checks described in the [API contract guide](api-contracts.md#backend-table-save-validation).
+Other routes still use their existing dictionaries. Adopt models there through
+the migration in [plan 1](plans/01-contracts-and-types.md), with explicit legacy
+coverage and serialization settings; routine annotations can otherwise reject
+old inputs or add/drop/coerce fields. Persistence does not serialize through
+these models.
 
 For explicit contract checks, `Scenario.model_validate(payload).to_payload()`
 retains extra fields and excludes defaults for absent fields. Strict scalar
@@ -107,6 +108,18 @@ is checked by TypeScript and [Python compatibility tests](../backend/tests/test_
 Python also checks bundled older scenarios. These are representative checks,
 not proof of compatibility with every private industry file. Update both sides
 and the relevant fixtures when a payload contract changes.
+
+The [runtime client migration](api-contracts.md) now checks scenario list/detail
+responses and queued scenario/table saves using explicit frontend decoders.
+It also covers completion/validation, autofill, planning periods, advance,
+optimization launch, task responses, copy/delete/import operations, and AI
+availability/settings/fill/diagnosis. Desktop settings bridge responses are also
+checked before they reach UI state. Workbook downloads check HTTP status, media
+type and container signature; diagram reads/mutations check their existing JSON
+envelopes. Every function in the frontend API service now uses the shared client.
+Backend route dictionaries still have the behavior described above. The decoder
+tests include the shared fixture and bundled older scenarios; draft result tables
+may be absent and failure-result metadata may be null.
 
 ## Next extractions
 

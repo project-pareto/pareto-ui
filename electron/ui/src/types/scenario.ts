@@ -40,15 +40,16 @@ export type ScenarioStatus = 'Draft' | 'Incomplete' | 'Not Optimized' | 'Initial
   | 'complete' | 'none' | (string & {});
 
 export interface ScenarioResults {
-  status?: ScenarioStatus;
-  run_id?: string;
-  input_revision?: string;
-  failure_stage?: string;
-  error?: string;
-  terminationCondition?: string;
-  solution_status?: string;
-  data: ScenarioResultsData;
-  constraints_violations?: ConstraintViolationsSummary;
+  status?: ScenarioStatus | null;
+  run_id?: string | null;
+  input_revision?: string | null;
+  failure_stage?: string | null;
+  error?: string | null;
+  terminationCondition?: string | null;
+  solution_status?: string | null;
+  /** Drafts and legacy records may not have result tables yet. */
+  data?: ScenarioResultsData;
+  constraints_violations?: ConstraintViolationsSummary | null;
 
   [k: string]: unknown;
 }

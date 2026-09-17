@@ -168,6 +168,15 @@ def _read_data(_fname, _set_list, _parameter_list, _model_type="strategic", rais
         if key in valid_parameter_tab_names
     }
 
+    # Units use the fixed A/B key/value layout, even when older workbooks label
+    # B2 "Unit" instead of "VALUE". Other columns are explanatory text, not
+    # model dimensions. Normalize only the in-memory frame, not the workbook.
+    units = _df_parameters.get('Units')
+    if isinstance(units, pd.DataFrame) and len(units.columns) >= 2:
+        units = units.iloc[:, :2].copy()
+        units.columns = ['INDEX', 'VALUE']
+        _df_parameters['Units'] = units
+
     # Cleaning Parameters.
     # A parameter can be defined in column format or table format.
     # Detect if columns which will be used to reshape the dataframe by defining
@@ -362,6 +371,11 @@ def get_data(
     # The model requires an empty parameter dictionary, not nested empty values.
     for name in empty_tables:
         _df_parameters[name] = {}
+    if 'Units' in _df_parameters:
+        # Missing declarations belong in readiness errors, not a NaN that makes
+        # input_revision fail JSON serialization. Do not invent default units.
+        _df_parameters['Units'] = {key: '' if pd.isna(value) else value
+                                   for key, value in _df_parameters['Units'].items()}
     from pareto.utilities.process_data import get_valid_piping_arc_list, get_valid_trucking_arc_list
     for name in get_valid_piping_arc_list() + get_valid_trucking_arc_list():
         if name in _df_parameters:

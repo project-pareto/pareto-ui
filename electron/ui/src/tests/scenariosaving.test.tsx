@@ -1,6 +1,6 @@
 import {act, render, waitFor} from '@testing-library/react';
 import {ScenarioProvider, useScenario, ScenarioContextValue} from '../context/ScenarioContext';
-import {checkTasks, fetchScenarios, updateExcel, updateScenario} from '../services/app.service';
+import {checkTasks, deleteScenario, fetchScenarios, updateExcel, updateScenario} from '../services/app.service';
 import {copyScenario} from '../scenarioEdits';
 
 jest.mock('../AppContext', () => ({useApp: () => ({port: 50011})}));
@@ -9,18 +9,31 @@ jest.mock('../services/app.service');
 let context: ScenarioContextValue;
 let initial: any;
 let pending: Array<{sent: any; resolve: (response: any) => void}>;
+const service = jest.requireActual('../services/app.service');
+const originalFetch = global.fetch;
+
+afterEach(() => { global.fetch = originalFetch; });
 
 beforeEach(async () => {
   jest.resetAllMocks();
-  initial = {id: 1, name: 'Saving test', results: {status: 'Draft'}, input_revision: 'r0',
+  initial = {id: 1, name: 'Saving test', results: {status: 'Draft', data: {}}, input_revision: 'r0',
     optimization: {runtime: 900, optimalityGap: 0},
-    data_input: {df_parameters: {PadRates: {ProductionPads: ['P1'], T01: [100]}}}};
+    data_input: {df_sets: {ProductionPads: ['P1']}, df_parameters: {PadRates: {ProductionPads: ['P1'], T01: [100]}}}};
   pending = [];
-  (checkTasks as jest.Mock).mockResolvedValue({json: async () => ({tasks: []})});
-  (fetchScenarios as jest.Mock).mockImplementation(async () => ({json: async () => ({data: {1: copyScenario(initial)}})}));
-  (updateScenario as jest.Mock).mockImplementation((_port, body) => new Promise(resolve => {
-    pending.push({sent: copyScenario(body.updatedScenario), resolve});
-  }));
+  (checkTasks as jest.Mock).mockResolvedValue({tasks: []});
+  // Exercise the production client/decoder as well as the provider. Only transport is faked.
+  (fetchScenarios as jest.Mock).mockImplementation(service.fetchScenarios);
+  (updateScenario as jest.Mock).mockImplementation(service.updateScenario);
+  (updateExcel as jest.Mock).mockImplementation(service.updateExcel);
+  (deleteScenario as jest.Mock).mockImplementation(service.deleteScenario);
+  global.fetch = jest.fn((url, options) => {
+    if (String(url).endsWith('/get_scenario_list/')) return Promise.resolve({ok: true, status: 200,
+      json: async () => ({data: {1: copyScenario(initial)}})});
+    if (String(url).endsWith('/update')) return new Promise(resolve => {
+      pending.push({sent: JSON.parse(options.body).updatedScenario, resolve});
+    });
+    throw new Error(`Unexpected request: ${url}`);
+  }) as jest.Mock;
   function Probe() { context = useScenario(); return null; }
   render(<ScenarioProvider navigate={jest.fn()}><Probe/></ScenarioProvider>);
   await waitFor(() => expect(context.scenarios[1]).toBeDefined());
@@ -35,6 +48,27 @@ function edit(field: string, value: number) {
   });
 }
 
+test('an invalid delete response retains the selected scenario and any unsaved draft', async () => {
+  edit('runtime', 100);
+  await waitFor(() => expect(pending).toHaveLength(1));
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200,
+    json: async () => ({data: {1: copyScenario(initial)}})});
+  await act(async () => {
+    await expect(context.handleDeleteScenario(1)).rejects.toMatchObject({code: 'invalid_response'});
+  });
+  expect(context.scenarios[1]).toBeDefined();
+  expect(context.scenarioData.id).toBe(1);
+  expect(context.scenarioData.optimization.runtime).toBe(100);
+  await acknowledge(0);
+});
+
+test('a checked delete publishes the returned scenario list', async () => {
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200, json: async () => ({data: {}})});
+  await act(async () => {await context.handleDeleteScenario(1);});
+  expect(context.scenarios).toEqual({});
+  expect(deleteScenario).toHaveBeenCalledTimes(1);
+});
+
 async function acknowledge(index: number, additions = {}) {
   await act(async () => pending[index].resolve({ok: true, json: async () => ({data: {
     ...pending[index].sent, ...additions, input_revision: `r${index + 1}`,
@@ -45,7 +79,7 @@ test('three rapid settings edits survive older acknowledgements and retain serve
   edit('runtime', 100);
   await waitFor(() => expect(pending).toHaveLength(1));
   edit('optimalityGap', 1);
-  const normalized = {df_parameters: {...initial.data_input.df_parameters, NodeCapacities: {NetworkNodes: ['N1'], VALUE: [500]}}};
+  const normalized = {...initial.data_input, df_parameters: {...initial.data_input.df_parameters, NodeCapacities: {NetworkNodes: ['N1'], VALUE: [500]}}};
   await acknowledge(0, {data_input: normalized});
   await waitFor(() => expect(pending).toHaveLength(2));
   expect(context.scenarioData.optimization.optimalityGap).toBe(1);
@@ -64,13 +98,14 @@ test('three rapid settings edits survive older acknowledgements and retain serve
 
 test('queued settings retain a preceding table edit and its server-generated map data', async () => {
   let resolveTable: (response: any) => void;
-  (updateExcel as jest.Mock).mockImplementation(() => new Promise(resolve => { resolveTable = resolve; }));
+  (global.fetch as jest.Mock).mockImplementationOnce(() => new Promise(resolve => { resolveTable = resolve; }));
   const table = {ProductionPads: ['P1'], T01: [250]};
   act(() => { void context.handleUpdateExcel(1, 'PadRates', table); });
   await waitFor(() => expect(updateExcel).toHaveBeenCalledTimes(1));
   edit('runtime', 120);
   const updated = {...copyScenario(initial), input_revision: 'table-revision', data_input: {
-    df_parameters: {PadRates: table}, map_data: {all_nodes: {P1: {node_type: 'ProductionPad'}}},
+    df_sets: initial.data_input.df_sets, df_parameters: {PadRates: table},
+    map_data: {all_nodes: {P1: {node_type: 'ProductionPad'}}, arcs: {}, connections: {all_connections: {}}},
   }};
   await act(async () => resolveTable({ok: true, json: async () => updated}));
   await waitFor(() => expect(pending).toHaveLength(1));
@@ -133,5 +168,50 @@ test('saving one scenario cannot replace another selected scenario', async () =>
   expect(pending[1].sent.id).toBe(2);
   await acknowledge(1);
   act(() => context.handleScenarioSelection(1));
+  expect(context.scenarioData.optimization.runtime).toBe(100);
+});
+
+test.each([
+  ['missing data', {}],
+  ['wrong scenario', {data: {id: 2}}],
+  ['invalid table', {data: {data_input: {df_sets: {}, df_parameters: {PadRates: {T01: 100}}}}}],
+  ['missing revision', {data: {input_revision: undefined}}],
+])('a successful HTTP response with %s cannot acknowledge an edit', async (_label, payload) => {
+  edit('runtime', 100);
+  await waitFor(() => expect(pending).toHaveLength(1));
+  const body = 'data' in payload ? {data: {...pending[0].sent, ...payload.data}} : payload;
+  await act(async () => pending[0].resolve({ok: true, status: 200, json: async () => body}));
+  expect(context.isSaving).toBe(false);
+  expect(context.saveError).toMatch(/invalid response/i);
+  expect(context.scenarioData.optimization.runtime).toBe(100);
+  expect(context.scenarioData.input_revision).toBe('r0');
+  edit('optimalityGap', 2);
+  await waitFor(() => expect(context.isSaving).toBe(false));
+  expect(pending).toHaveLength(1);
+  expect(context.scenarioData.optimization.optimalityGap).toBe(2);
+});
+
+test('malformed reloads retain a failed draft until a valid reload succeeds', async () => {
+  edit('runtime', 100);
+  await waitFor(() => expect(pending).toHaveLength(1));
+  await act(async () => pending[0].resolve({ok: false, status: 409, json: async () => ({detail: 'Reload first.'})}));
+  (global.fetch as jest.Mock).mockResolvedValueOnce({ok: true, status: 200, json: async () => ({data: []})});
+  act(() => context.syncScenarioData());
+  await waitFor(() => expect(context.saveError).toMatch(/invalid response/i));
+  expect(context.scenarioData.optimization.runtime).toBe(100);
+  act(() => context.syncScenarioData());
+  await waitFor(() => expect(context.saveError).toBeNull());
+  expect(context.scenarioData.optimization.runtime).toBe(900);
+});
+
+test('a delayed reload cannot discard an edit made after the request', async () => {
+  let resolveReload: (response: unknown) => void;
+  (global.fetch as jest.Mock).mockImplementationOnce(() => new Promise(resolve => {resolveReload = resolve;}));
+  act(() => context.syncScenarioData());
+  edit('runtime', 100);
+  await waitFor(() => expect(pending).toHaveLength(1));
+  await act(async () => resolveReload({ok: true, status: 200, json: async () => ({data: {1: copyScenario(initial)}})}));
+  expect(context.scenarioData.optimization.runtime).toBe(100);
+  await acknowledge(0);
   expect(context.scenarioData.optimization.runtime).toBe(100);
 });

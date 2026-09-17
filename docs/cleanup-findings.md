@@ -1,9 +1,9 @@
 # Cleanup findings for review
 
-These findings were recorded during the PR #116 cleanup. The approved v3
-compatibility follow-up fixes the two items below. No legacy fields or runtime
-code candidates have been removed. See [saved scenario compatibility](v3-compatibility.md)
-for the audit, remaining failures, and decision to keep data version 3.
+These findings were recorded during the PR #116 cleanup. The fixes below include
+that PR and the subsequent workbook compatibility adapters. No legacy fields or
+runtime code candidates have been removed. See [saved scenario compatibility](v3-compatibility.md)
+for the original audit, regression coverage, and decision to keep data version 3.
 
 ## Resolved in the compatibility follow-up
 
@@ -13,13 +13,17 @@ for the audit, remaining failures, and decision to keep data version 3.
 - Workshop SRA diagram lookup uses `workshop_SRA_input.png` and
   `workshop_SRA_output.png`, matching the assets. The regression enforces exact
   filename case even when the host filesystem is case-insensitive.
+- Legacy Units worksheets are read as name/value metadata even when their
+  headings differ from `INDEX` / `VALUE`. Recovery no longer produces tuple
+  keys, and read-only access leaves saved files unchanged.
+- Scalar `DesalinationSurrogate` and legacy `Units` dictionaries survive table
+  saves and map edits. Desalination values are also written into fresh model
+  workbooks; their original scalar JSON representation is retained on reload.
 
 ## Suspected bugs and inconsistencies
 
 | Finding | Evidence and effect | Suggested follow-up |
 | --- | --- | --- |
-| Legacy Units worksheet recovery can block scenario loading | On one copied scenario, `get_scenario` recovers a Units dictionary with tuple keys; `input_revision` cannot serialize it. Reproduced against both baseline and proposed changes. | Add a representative old worksheet fixture and a unit-reading adapter. Preserve the original workbook and settings. |
-| Scalar `DesalinationSurrogate` metadata blocks table/map saves | `write_inputs` requires column arrays and `prune_removed_map_nodes` calls `len` on scalar values. Reproduced on two copied scenarios; rejected operations leave stored files unchanged. | Preserve scalar metadata explicitly in workbook/map adapters before considering any removal. Schema support alone does not repair these paths. |
 | Additional KML import reads different category keys | [kml_parser.py](../backend/app/internal/maps/kml_parser.py) reads `production_pads`, `completion_pads`, etc. from the old map, then returns `ProductionPads`, `CompletionsPads`, etc. The normal route subsequently rebuilds categories from `all_nodes`. | Test the additional-map route and direct parser behavior before consolidating aliases. The mismatch alone does not establish data loss on the normal route. |
 | Importing the scenario handler initializes storage and changes working directory | [ScenarioHandler](../backend/app/internal/scenario_handler.py) constructs the global instance at import time; tests isolate storage and restore the directory explicitly. | Handle through startup/dependency extraction in [plan 4](plans/04-backend-services-and-runs.md), with packaged-app checks. |
 
@@ -31,7 +35,7 @@ matter, especially for saved scenarios and workbook export.
 | Field(s) | Current role | Removal/consolidation prerequisite |
 | --- | --- | --- |
 | `optimization.pipelineCostCalculation` | Present in bundled older scenarios; current configuration reads `pipeline_cost`. | Decide how old settings should migrate and test that choice before removing the legacy spelling. |
-| `df_parameters.Units` / `DesalinationSurrogate` | Scalar metadata present in older v3 scenarios; accepted by the shared contracts. The former differs from the current canonical `data_input.units`. | Preserve these entries until workbook/map compatibility adapters can read and save them without loss. They are not safe deletion candidates in this pass. |
+| `df_parameters.Units` / `DesalinationSurrogate` | Scalar metadata present in older v3 scenarios; accepted by the shared contracts and preserved by workbook/map adapters. The former differs from the current canonical `data_input.units`. | Keep these compatibility representations until an explicit migration accounts for their consumers and saved data. Adapter support is not a reason to delete them. |
 | `map_data.ProductionPads`, `SWDSites`, other facility dictionaries | Derived from `all_nodes` by `PreprocessMapData`; workbook writing reads them. | Make category views explicit at the export boundary before removing persisted copies. |
 | `map_data.connections`, including `connection_metadata` | Derived from arc directions, lengths and diameters; used to populate workbook capacities/distances. | Ensure every consumer derives the same directed-edge values before dropping stored copies. Metadata is still needed today. |
 | `node_type` and `nodeType` | Backend facility classification and frontend editor classification overlap; editor kind also uses `node_type`. | Define separate facility and editor node/pipeline contracts, then migrate conversions and saved data. |
