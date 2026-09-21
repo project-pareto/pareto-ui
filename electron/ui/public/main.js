@@ -15,7 +15,7 @@ require('dotenv').config()
 
 const axios = require('axios').default;
 const isDev = require('electron-is-dev')
-const { spawn, execFile } = require("child_process")
+const { startBackend, stopBackendBeforeQuit } = require('./backend-process');
 
 // Python server parameters
 const PY_HOST = "127.0.0.1";
@@ -94,91 +94,6 @@ function createWindow() {
   return win
 }
 
-const installExtensions = () => {
-    try{
-    installationProcess = spawn(
-      path.join(__dirname, "../py_dist/main/main"),
-      [
-        "install"
-      ]
-    );
-
-    _log("installation started")
-
-      var scriptOutput = "";
-      installationProcess.stdout.setEncoding('utf8');
-      installationProcess.stdout.on('data', function(data) {
-          _log('stdout: ' + data);
-          data=data.toString();
-          scriptOutput+=data;
-      });
-
-      installationProcess.stderr.setEncoding('utf8');
-      installationProcess.stderr.on('data', function(data) {
-          _log('stderr: ' + data);
-          data=data.toString();
-          scriptOutput+=data;
-      });
-    } catch (error) {
-      _log("unable to get extensions: ",error);
-      console.error("unable to get extensions: ",error);
-    }
-    return installationProcess;
-  }
-  
-
-const startServer = () => {
-    if (isDev) {
-
-      backendProcess = spawn("uvicorn", 
-        [
-            "main:app",
-            "--reload",
-            "--host",
-            "127.0.0.1",
-            "--port",
-            PY_PORT,
-        ],
-        {
-            cwd: '../backend/app'
-        }
-      );
-
-    } else {
-      try {
-        backendProcess = spawn(
-          path.join(__dirname, "../py_dist/main/main"),
-          [
-            ""
-          ]
-        );
-        var scriptOutput = "";
-        backendProcess.stdout.setEncoding('utf8');
-        backendProcess.stdout.on('data', function(data) {
-            _log('stdout: ' + data);
-            data=data.toString();
-            scriptOutput+=data;
-        });
-
-        backendProcess.stderr.setEncoding('utf8');
-        backendProcess.stderr.on('data', function(data) {
-            _log('stderr: ' + data);
-            data=data.toString();
-            scriptOutput+=data;
-        });
-        _log("Python process started in built mode");
-      } catch (error) {
-        _log("unable to start python process in build mode: ");
-        _log(error)
-        console.error("unable to start python process in build mode: ");
-        console.error(error)
-      }
-      
-    }
-    return backendProcess;
-}
-
-
 app.whenReady().then(() => {
     const aiSettings = createAISettings({storage, safeStorage, request: async (method, data) => {
       try {
@@ -215,12 +130,10 @@ app.whenReady().then(() => {
       createWindow();
     } else {
       let win = createWindow();
-      let serverProcess
-      // let installationProcess = installExtensions()
-      // installationProcess.on('exit', code => {
-      //   _log('installation exit code is', code)
       _log('starting server')
-      serverProcess = startServer()
+      const backend = startBackend(path.join(__dirname, '../py_dist/main/main'), {log: _log});
+      const serverProcess = backend.child;
+      stopBackendBeforeQuit(app, backend, _log);
 
       // let uiProcess = startUI()
       let noTrials = 0
@@ -245,11 +158,6 @@ app.whenReady().then(() => {
           });
       };
       startUp(serverURL, 'FastAPI Server', serverProcess)
-      app.on('quit', () => {
-        _log('shutting down backend server')
-        serverProcess.kill()
-      })
-      // })
     }
 
     
