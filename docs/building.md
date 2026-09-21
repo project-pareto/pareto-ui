@@ -129,6 +129,10 @@ npm run dist:lin
 
 Build output is written to `electron/dist/`. The local Windows build does not use the GitHub Actions Google Cloud KMS signing flow; that signing flow runs in CI after Electron Builder creates the Windows artifact.
 
+For startup memory growth in packaged builds, see the
+[investigation and release checks](packaged-memory.md). Rebuild both the backend
+and frontend to include the Python startup guard and Electron process cleanup.
+
 ## GitHub Actions builds
 
 Use `.github/workflows/app_build_dispatch.yml` for CI builds. It calls `.github/workflows/app_build.yml`, which performs setup, backend build, frontend build, packaging, optional macOS signing/notarization, optional Windows signing, and artifact upload.

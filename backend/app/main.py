@@ -10,12 +10,18 @@
 # the Software to reproduce, distribute copies to the public, prepare derivative works, and perform
 # publicly and display publicly, and to permit others to do so.
 #####################################################################################################
+# PyInstaller's resource tracker and workers re-enter this executable. Dispatch
+# them before any third-party imports: importing IDAES/Pyomo can create a
+# multiprocessing lock, which would otherwise spawn another resource tracker.
+if __name__ == '__main__':
+    import multiprocessing
+    multiprocessing.freeze_support()
+
 import sys
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import multiprocessing
 from dotenv import load_dotenv
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -94,10 +100,8 @@ if __name__ == '__main__':
 
     elif('d' in sys.argv or 'dev' in sys.argv):
         _log.info(f"starting app in dev")
-        multiprocessing.freeze_support()
         uvicorn.run("__main__:app", host="127.0.0.1", port=port, reload=True)
 
     else:
         _log.info(f"starting app")
-        multiprocessing.freeze_support()
         uvicorn.run(app, host="127.0.0.1", port=port, reload=False)
