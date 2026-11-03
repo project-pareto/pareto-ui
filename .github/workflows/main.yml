@@ -120,7 +120,9 @@ jobs:
           - os: linux
             os-version: ubuntu-22.04
           - os: win64
-            os-version: windows-latest
+            # windows-latest images since 20261021 crash-loop the GPU process
+            # of every Chromium browser at startup; windows-2022 is unaffected.
+            os-version: windows-2022
     env:
       CI: "true"
       BROWSER: none
@@ -159,6 +161,14 @@ jobs:
           node electron/ui/node_modules/wait-on/bin/wait-on --timeout 180000 --log \
             http-get://127.0.0.1:50011/get_project_name \
             http-get://127.0.0.1:3000
+
+      - name: Print backend and frontend logs on startup failure
+        if: failure()
+        run: |
+          echo "=== pareto-backend.log ==="
+          cat "$RUNNER_TEMP/pareto-backend.log" || true
+          echo "=== pareto-frontend.log ==="
+          cat "$RUNNER_TEMP/pareto-frontend.log" || true
 
       - name: Cypress e2e tests
         working-directory: electron/ui
